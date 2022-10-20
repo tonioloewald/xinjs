@@ -1,0 +1,346 @@
+import { getByPath, setByPath, deleteByPath } from './by-path.ts'
+import { matchType } from './type-by-example.js'
+
+const componentTypes = {}
+export const observerShouldBeRemoved = Symbol('observer should be removed')
+
+const registry = {}
+const registeredTypes = {}
+const listeners = [] // { path_string_or_test, callback }
+const debugPaths = true
+const splitPaths = paths => paths.match(/(([^,([]+\.?)|(\[[^\]]+\]\.?)|\([^)]+\))+/g)
+const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
+
+const isValidPath = path => validPath.test(path)
+
+class Listener {
+  constructor (test, callback) {
+    this._orig_test = test // keep it around for unobserve
+    if (typeof test === 'string') {
+      this.test = t => typeof t === 'string' && t.startsWith(test)
+    } else if (test instanceof RegExp) {
+      this.test = test.test.bind(test)
+    } else if (test instanceof Function) {
+      this.test = test
+    } else {
+      throw new Error(
+        'expect listener test to be a string, RegExp, or test function'
+      )
+    }
+    if (typeof callback === 'string') {
+      this.callback = (...args) => {
+        if (get(callback)) {
+          call(callback, ...args)
+        } else {
+          unobserve(this)
+        }
+      }
+    } else if (typeof callback === 'function') {
+      this.callback = callback
+    } else {
+      throw new Error('expect callback to be a path or function')
+    }
+    listeners.push(this)
+  }
+}
+
+const _compute = (expressionPath, element) => {
+  const [, methodPath, valuePaths] = expressionPath.match(/([^(]+)\(([^)]+)\)/)
+  return valuePaths.indexOf(',') === -1
+    ? call(methodPath, get(valuePaths, element))
+    : call(methodPath, ...get(valuePaths, element))
+}
+
+const _get = (path, element) => {
+  if (path.substr(-1) === ')') {
+    return _compute(path, element)
+  } else if (path.startsWith('.')) {
+    const elt = element && element.closest('[data-list-instance]')
+    if (!elt && element.closest('body')) {
+      console.debug('xin-error',
+        `relative data-path ${path} used without list instance`,
+        element
+      )
+    }
+    return elt
+      ? getByPath(registry, `${elt.dataset.listInstance}${path}`)
+      : undefined
+  } else {
+    if (debugPaths && !isValidPath(path)) {
+      console.debug('xin-error', `getting invalid path ${path}`)
+    } else {
+      return getByPath(registry, path)
+    }
+  }
+}
+
+const get = (path, element) => {
+  const paths = splitPaths(path)
+  return paths.length === 1
+    ? _get(paths[0], element)
+    : paths.map(path => _get(path, element))
+}
+
+const touch = (path) => {
+  listeners
+    .filter(listener => {
+      let heard
+      try {
+        heard = listener.test(path)
+      } catch (e) {
+        console.debug('xin-error', listener, 'test threw exception', e)
+      }
+      if (heard === observerShouldBeRemoved) {
+        unobserve(listener)
+        return false
+      }
+      return !!heard
+    })
+    .forEach(listener => {
+      try {
+        if (
+          listener.callback(path) === observerShouldBeRemoved
+        ) {
+          unobserve(listener)
+        }
+      } catch (e) {
+        console.debug('xin-error', listener, 'callback threw exception', e)
+      }
+    })
+}
+
+const _defaultTypeErrorHandler = (errors, action) => {
+  console.debug('xin-error', `registry type check(s) failed after ${action}`, errors)
+}
+
+let typeErrorHandlers = [_defaultTypeErrorHandler]
+
+export const onTypeError = callback => {
+  offTypeError(_defaultTypeErrorHandler)
+  if (typeErrorHandlers.indexOf(callback) === -1) {
+    typeErrorHandlers.push(callback)
+    return true
+  }
+  return false
+}
+
+export const offTypeError = (callback, restoreDefault = false) => {
+  const handlerCount = typeErrorHandlers.length
+  typeErrorHandlers = typeErrorHandlers.filter(f => f !== callback)
+  if (restoreDefault) onTypeError(_defaultTypeErrorHandler)
+  return typeErrorHandlers.length !== handlerCount - 1
+}
+
+const checkType = (action, name) => {
+  const referenceType = name.startsWith('c#')
+    ? componentTypes[name.split('#')[1]]
+    : registeredTypes[name]
+  if (!referenceType || !registry[name]) return
+  const errors = matchType(referenceType, registry[name], [], name, true)
+  if (errors.length) {
+    typeErrorHandlers.forEach(f => f(errors, action))
+  }
+}
+
+const set = (path, value) => {
+  if (value && value._xinPath) {
+    throw new Error('You cannot put xin proxies into xin')
+  }
+  if (debugPaths && !isValidPath(path)) {
+    console.debug('xin-error', `setting invalid path ${path}`)
+  }
+  const pathParts = path.split(/\.|\[/)
+  const [name] = pathParts
+  const model = pathParts[0]
+  const existing = getByPath(registry, path)
+  if (pathParts.length > 1 && !registry[model]) {
+    console.debug('xin-error', `cannot set ${path} to ${value}, ${model} does not exist`)
+  } else if (pathParts.length === 1 && typeof value !== 'object') {
+    throw new Error(
+      `cannot set ${path}; you can only register objects at root-level`
+    )
+  } else if (value === existing) {
+    // if it's an array then it might have gained or lost elements
+    if (Array.isArray(value) || Array.isArray(existing)) {
+      touch(path)
+    }
+  } else if (value && value.constructor) {
+    if (pathParts.length === 1 && !registry[path]) {
+      registry[path] = value
+    } else {
+      // we only overlay vanilla objects, not custom classes or arrays
+      if (
+        value.constructor === Object &&
+        existing &&
+        existing.constructor === Object
+      ) {
+        setByPath(
+          registry,
+          path,
+          Object.assign(value, Object.assign(existing, value))
+        )
+      } else {
+        setByPath(registry, path, value)
+      }
+      touch(path)
+    }
+  } else {
+    setByPath(registry, path, value)
+    touch(path)
+  }
+  checkType(`set('${path}',...)`, name)
+  return value // convenient for push (see below) but maybe an anti-feature?!
+}
+
+const types = () =>
+  JSON.parse(
+    JSON.stringify({
+      registeredTypes,
+      componentTypes
+    })
+  )
+
+const registerType = (name, example) => {
+  registeredTypes[name] = example
+  checkType(`registerType('${name}')`, name)
+}
+
+const observe = (test, callback) => {
+  return new Listener(test, callback)
+}
+
+const unobserve = test => {
+  let index
+  let found = false
+  if (test instanceof Listener) {
+    index = listeners.indexOf(test)
+    if (index > -1) {
+      listeners.splice(index, 1)
+    } else {
+      console.debug('xin-error', 'unobserve failed, listener not found')
+    }
+  } else if (test) {
+    for (let i = listeners.length - 1; i >= 0; i--) {
+      if (listeners[i]._orig_test === test) {
+        listeners.splice(i, 1)
+        found = true
+      }
+    }
+  }
+
+  return found
+}
+
+const remove = (path, update = true) => {
+  const [, listPath] = path.match(/^(.*)\[[^[]*\]$/) || []
+  if (listPath) {
+    const list = getByPath(registry, listPath)
+    const item = getByPath(registry, path)
+    const index = list.indexOf(item)
+    if (index !== -1) {
+      list.splice(index, 1)
+      if (update) touch(listPath)
+    }
+  } else {
+    deleteByPath(registry, path)
+    if (update) touch(path)
+  }
+}
+
+const extendPath = (path, prop) => {
+  if (path === '') {
+    return prop
+  } else {
+    if (prop.match(/^\d+$/) || prop.includes('=')) {
+      return `${path}[${prop}]`
+    } else {
+      return `${path}.${prop}`
+    }
+  }
+}
+
+const regHandler = (path = '') => ({
+  get (target, prop) {
+    const compoundProp = typeof prop !== 'symbol'
+      ? prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
+                        prop.match(/^([^\]]+)(\[.+)/) || // basePath[subPath
+                        prop.match(/^(\[[^\]]+\])\.(.+)$/) || // [basePath].subPath (omit '.')
+                        prop.match(/^(\[[^\]]+\])\[(.+)$/) // [basePath][subPath
+      : false
+    if (compoundProp) {
+      const [, basePath, subPath] = compoundProp
+      const currentPath = extendPath(path, basePath)
+      const value = getByPath(target, basePath)
+      return value && typeof value === 'object' ? new Proxy(value, regHandler(currentPath))[subPath] : value
+    }
+    if (prop === '_xinPath') {
+      return path
+    }
+    if (prop === '_xinValue') {
+      return target
+    }
+    if (prop.startsWith('[') && prop.endsWith(']')) {
+      prop = prop.substr(1, prop.length - 2)
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(target, prop) ||
+      (Array.isArray(target) && typeof prop === 'string' && prop.includes('='))
+    ) {
+      let value
+      if (typeof prop === 'symbol') {
+        value = target[prop]
+      } if (prop.includes('=')) {
+        const [idPath, needle] = prop.split('=')
+        value = target.find(
+          candidate => `${getByPath(candidate, idPath)}` === needle
+        )
+      } else {
+        value = target[prop]
+      }
+      if (
+        value &&
+        typeof value === 'object' &&
+        (value.constructor === Object || value.constructor === Array)
+      ) {
+        const currentPath = extendPath(path, prop)
+        const proxy = new Proxy(value, regHandler(currentPath))
+        return proxy
+      } else if (typeof value === 'function') {
+        return value.bind(target)
+      } else {
+        return value
+      }
+    } else if (Array.isArray(target)) {
+      return typeof target[prop] === 'function'
+        ? (...items) => {
+          const result = Array.prototype[prop].apply(target, items)
+          touch(path)
+          return result
+        }
+        : target[prop]
+    } else {
+      return undefined
+    }
+  },
+  set (target, prop, value) {
+    if (value && value._xinPath) {
+      throw new Error('You cannot put xin proxies into the registry')
+    }
+    set(extendPath(path, prop), value)
+    return true // success (throws error in strict mode otherwise)
+  }
+})
+
+const xin = new Proxy(registry, regHandler())
+
+export {
+  touch,
+  observe,
+  unobserve,
+  checkType,
+  xin,
+  registerType,
+  types,
+  remove,
+  isValidPath
+}

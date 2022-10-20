@@ -1,0 +1,12 @@
+{
+  "name": "xinjs",
+  "version": "0.0.0",
+  "description": "path-based state management for javascript",
+  "main": "index.js",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tonio Loewald",
+  "license": "ISC"
+}
