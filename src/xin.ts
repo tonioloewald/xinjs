@@ -1,21 +1,28 @@
-import { getByPath, setByPath, deleteByPath } from './by-path.ts'
-import { matchType } from './type-by-example.js'
+import { getByPath, setByPath, deleteByPath } from './by-path'
+import { matchType } from './type-by-example'
 
-const componentTypes = {}
 export const observerShouldBeRemoved = Symbol('observer should be removed')
 
-const registry = {}
-const registeredTypes = {}
-const listeners = [] // { path_string_or_test, callback }
+type PathTestFunction = (path: string) => boolean | Symbol
+type CallbackFunction = (path: string) => void | Symbol
+type RegistryObject = {
+  [key: string] : any
+}
+type TypeErrorHandler = (errors: string[], action: string) => void
+
+const registry: RegistryObject = {}
+const registeredTypes: RegistryObject = {}
+const listeners: Listener[] = [] // { path_string_or_test, callback }
 const debugPaths = true
-const splitPaths = paths => paths.match(/(([^,([]+\.?)|(\[[^\]]+\]\.?)|\([^)]+\))+/g)
 const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
 
-const isValidPath = path => validPath.test(path)
+const isValidPath = (path: string) => validPath.test(path)
 
 class Listener {
-  constructor (test, callback) {
-    this._orig_test = test // keep it around for unobserve
+  test: PathTestFunction
+  callback: CallbackFunction
+
+  constructor (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) {
     if (typeof test === 'string') {
       this.test = t => typeof t === 'string' && t.startsWith(test)
     } else if (test instanceof RegExp) {
@@ -30,9 +37,9 @@ class Listener {
     if (typeof callback === 'string') {
       this.callback = (...args) => {
         if (get(callback)) {
-          call(callback, ...args)
+          get(callback)(...args)
         } else {
-          unobserve(this)
+          throw new Error(`callback path ${callback} does not exist`)
         }
       }
     } else if (typeof callback === 'function') {
@@ -44,51 +51,18 @@ class Listener {
   }
 }
 
-const _compute = (expressionPath, element) => {
-  const [, methodPath, valuePaths] = expressionPath.match(/([^(]+)\(([^)]+)\)/)
-  return valuePaths.indexOf(',') === -1
-    ? call(methodPath, get(valuePaths, element))
-    : call(methodPath, ...get(valuePaths, element))
+const get = (path: string): any => {
+  getByPath(registry, path)
 }
 
-const _get = (path, element) => {
-  if (path.substr(-1) === ')') {
-    return _compute(path, element)
-  } else if (path.startsWith('.')) {
-    const elt = element && element.closest('[data-list-instance]')
-    if (!elt && element.closest('body')) {
-      console.debug('xin-error',
-        `relative data-path ${path} used without list instance`,
-        element
-      )
-    }
-    return elt
-      ? getByPath(registry, `${elt.dataset.listInstance}${path}`)
-      : undefined
-  } else {
-    if (debugPaths && !isValidPath(path)) {
-      console.debug('xin-error', `getting invalid path ${path}`)
-    } else {
-      return getByPath(registry, path)
-    }
-  }
-}
-
-const get = (path, element) => {
-  const paths = splitPaths(path)
-  return paths.length === 1
-    ? _get(paths[0], element)
-    : paths.map(path => _get(path, element))
-}
-
-const touch = (path) => {
+const touch = (path: string) => {
   listeners
     .filter(listener => {
       let heard
       try {
         heard = listener.test(path)
       } catch (e) {
-        console.debug('xin-error', listener, 'test threw exception', e)
+        throw new Error(`listener test (${path}) threw exception`)
       }
       if (heard === observerShouldBeRemoved) {
         unobserve(listener)
@@ -97,25 +71,26 @@ const touch = (path) => {
       return !!heard
     })
     .forEach(listener => {
+      const func = typeof listener.callback === 'function' ? listener.callback : get(listener.callback)
       try {
         if (
-          listener.callback(path) === observerShouldBeRemoved
+          func(path) === observerShouldBeRemoved
         ) {
           unobserve(listener)
         }
       } catch (e) {
-        console.debug('xin-error', listener, 'callback threw exception', e)
+        throw new Error(`listener callback (${path}) threw exception`)
       }
     })
 }
 
-const _defaultTypeErrorHandler = (errors, action) => {
-  console.debug('xin-error', `registry type check(s) failed after ${action}`, errors)
+const _defaultTypeErrorHandler = (errors: string[], action: string) => {
+  throw new Error(`registry type check(s) failed after ${action}:\n${errors.join('\n')}`)
 }
 
-let typeErrorHandlers = [_defaultTypeErrorHandler]
+let typeErrorHandlers: TypeErrorHandler[] = [_defaultTypeErrorHandler]
 
-export const onTypeError = callback => {
+export const onTypeError = (callback: TypeErrorHandler) => {
   offTypeError(_defaultTypeErrorHandler)
   if (typeErrorHandlers.indexOf(callback) === -1) {
     typeErrorHandlers.push(callback)
@@ -124,41 +99,38 @@ export const onTypeError = callback => {
   return false
 }
 
-export const offTypeError = (callback, restoreDefault = false) => {
+export const offTypeError = (callback: TypeErrorHandler, restoreDefault = false) => {
   const handlerCount = typeErrorHandlers.length
   typeErrorHandlers = typeErrorHandlers.filter(f => f !== callback)
   if (restoreDefault) onTypeError(_defaultTypeErrorHandler)
   return typeErrorHandlers.length !== handlerCount - 1
 }
 
-const checkType = (action, name) => {
-  const referenceType = name.startsWith('c#')
-    ? componentTypes[name.split('#')[1]]
-    : registeredTypes[name]
+const checkType = (action: string, name: string) => {
+  const referenceType = registeredTypes[name]
   if (!referenceType || !registry[name]) return
-  const errors = matchType(referenceType, registry[name], [], name, true)
+  const errors = matchType(referenceType, registry[name], [], name)
   if (errors.length) {
     typeErrorHandlers.forEach(f => f(errors, action))
   }
 }
 
-const set = (path, value) => {
+const set = (path: string, value: any) => {
   if (value && value._xinPath) {
     throw new Error('You cannot put xin proxies into xin')
   }
   if (debugPaths && !isValidPath(path)) {
-    console.debug('xin-error', `setting invalid path ${path}`)
+    throw new Error(`setting invalid path ${path}`)
   }
   const pathParts = path.split(/\.|\[/)
   const [name] = pathParts
   const model = pathParts[0]
   const existing = getByPath(registry, path)
+  // @
   if (pathParts.length > 1 && !registry[model]) {
-    console.debug('xin-error', `cannot set ${path} to ${value}, ${model} does not exist`)
+    throw new Error(`cannot set ${path} to ${value}, ${model} does not exist`)
   } else if (pathParts.length === 1 && typeof value !== 'object') {
-    throw new Error(
-      `cannot set ${path}; you can only register objects at root-level`
-    )
+    throw new Error(`cannot set ${path}; you can only register objects at root-level`)
   } else if (value === existing) {
     // if it's an array then it might have gained or lost elements
     if (Array.isArray(value) || Array.isArray(existing)) {
@@ -194,44 +166,33 @@ const set = (path, value) => {
 
 const types = () =>
   JSON.parse(
-    JSON.stringify({
-      registeredTypes,
-      componentTypes
-    })
+    JSON.stringify(registeredTypes)
   )
 
-const registerType = (name, example) => {
+const registerType = (name: string, example: any) => {
   registeredTypes[name] = example
   checkType(`registerType('${name}')`, name)
 }
 
-const observe = (test, callback) => {
+const observe = (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) => {
   return new Listener(test, callback)
 }
 
-const unobserve = test => {
+const unobserve = (listener: Listener) => {
   let index
   let found = false
-  if (test instanceof Listener) {
-    index = listeners.indexOf(test)
-    if (index > -1) {
-      listeners.splice(index, 1)
-    } else {
-      console.debug('xin-error', 'unobserve failed, listener not found')
-    }
-  } else if (test) {
-    for (let i = listeners.length - 1; i >= 0; i--) {
-      if (listeners[i]._orig_test === test) {
-        listeners.splice(i, 1)
-        found = true
-      }
-    }
+
+  index = listeners.indexOf(listener)
+  if (index > -1) {
+    listeners.splice(index, 1)
+  } else {
+    throw new Error('unobserve failed, listener not found')
   }
 
   return found
 }
 
-const remove = (path, update = true) => {
+const remove = (path: string, update = true) => {
   const [, listPath] = path.match(/^(.*)\[[^[]*\]$/) || []
   if (listPath) {
     const list = getByPath(registry, listPath)
@@ -247,7 +208,7 @@ const remove = (path, update = true) => {
   }
 }
 
-const extendPath = (path, prop) => {
+const extendPath = (path = '', prop = '') => {
   if (path === '') {
     return prop
   } else {
@@ -260,13 +221,11 @@ const extendPath = (path, prop) => {
 }
 
 const regHandler = (path = '') => ({
-  get (target, prop) {
-    const compoundProp = typeof prop !== 'symbol'
-      ? prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
+  get (target: RegistryObject, prop: string): any {
+    const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
                         prop.match(/^([^\]]+)(\[.+)/) || // basePath[subPath
                         prop.match(/^(\[[^\]]+\])\.(.+)$/) || // [basePath].subPath (omit '.')
                         prop.match(/^(\[[^\]]+\])\[(.+)$/) // [basePath][subPath
-      : false
     if (compoundProp) {
       const [, basePath, subPath] = compoundProp
       const currentPath = extendPath(path, basePath)
@@ -287,15 +246,13 @@ const regHandler = (path = '') => ({
       (Array.isArray(target) && typeof prop === 'string' && prop.includes('='))
     ) {
       let value
-      if (typeof prop === 'symbol') {
-        value = target[prop]
-      } if (prop.includes('=')) {
+      if (prop.includes('=')) {
         const [idPath, needle] = prop.split('=')
-        value = target.find(
-          candidate => `${getByPath(candidate, idPath)}` === needle
+        value = (target as any[]).find(
+          (candidate: Object) => `${getByPath(candidate, idPath)}` === needle
         )
       } else {
-        value = target[prop]
+        value = (target)[prop]
       }
       if (
         value &&
@@ -303,7 +260,7 @@ const regHandler = (path = '') => ({
         (value.constructor === Object || value.constructor === Array)
       ) {
         const currentPath = extendPath(path, prop)
-        const proxy = new Proxy(value, regHandler(currentPath))
+        const proxy: Object = new Proxy(value, regHandler(currentPath))
         return proxy
       } else if (typeof value === 'function') {
         return value.bind(target)
@@ -311,18 +268,20 @@ const regHandler = (path = '') => ({
         return value
       }
     } else if (Array.isArray(target)) {
+      // @ts-ignore -- tsc doesn't like the fact we're looking at array functions
       return typeof target[prop] === 'function'
-        ? (...items) => {
-          const result = Array.prototype[prop].apply(target, items)
+        ? (...items: any[]) => {
+          // @ts-ignore
+          const result = (Array.prototype[prop]).apply(target, items)
           touch(path)
           return result
         }
-        : target[prop]
+        : target[Number(prop)]
     } else {
       return undefined
     }
   },
-  set (target, prop, value) {
+  set (target: Object, prop: string, value: any) {
     if (value && value._xinPath) {
       throw new Error('You cannot put xin proxies into the registry')
     }

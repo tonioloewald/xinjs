@@ -191,12 +191,12 @@ const id = () => now36() + seq()
 const _delete_ = {}
 const _newObject_ = {}
 
-function pathSplit (fullPath) {
+function pathSplit (fullPath: string) {
   const [, model,, start, path] = fullPath.match(/^(.*?)(([.[])(.*))?$/)
   return [model, start === '[' ? '[' + path : path]
 }
 
-function pathParts (path) {
+function pathParts (path: string) {
   if (!path || path === '/') {
     return []
   }

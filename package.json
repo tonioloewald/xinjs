@@ -8,5 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tonio Loewald",
-  "license": "BSD-3-CLAUSE"
+  "license": "BSD-3-CLAUSE",
+  "devDependencies": {
+    "typescript": "^4.8.4"
+  }
 }
