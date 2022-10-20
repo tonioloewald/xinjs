@@ -8,7 +8,10 @@ xin.test = {
     {id: 1701, name: 'Enterprise'},
     {id: 666, name: 'The Beast'},
     {id: 1, name: 'The Best'}
-  ]
+  ],
+  cb(path) {
+    console.log(path, 'observed by path-based listener changing to', xin[path])
+  }
 }
 
 console.log(xin.test.message)
@@ -37,3 +40,8 @@ xin.test.people.splice(2,1)
 unobserve(listener)
 xin.test.value = 0
 console.log(xin.test['value'], 'was not reported by the listener')
+
+
+observe('test', 'test.cb')
+console.log(xin['test.cb'])
+xin.test.value = 17

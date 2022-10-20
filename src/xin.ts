@@ -36,8 +36,9 @@ class Listener {
     }
     if (typeof callback === 'string') {
       this.callback = (...args) => {
-        if (get(callback)) {
-          get(callback)(...args)
+        const func = xin[callback]
+        if (func) {
+          func(...args)
         } else {
           throw new Error(`callback path ${callback} does not exist`)
         }
@@ -51,10 +52,6 @@ class Listener {
   }
 }
 
-const get = (path: string): any => {
-  getByPath(registry, path)
-}
-
 const touch = (path: string) => {
   listeners
     .filter(listener => {
@@ -62,7 +59,7 @@ const touch = (path: string) => {
       try {
         heard = listener.test(path)
       } catch (e) {
-        throw new Error(`listener test (${path}) threw exception`)
+        throw new Error(`listener test (${path}) threw ${e}`)
       }
       if (heard === observerShouldBeRemoved) {
         unobserve(listener)
@@ -71,15 +68,14 @@ const touch = (path: string) => {
       return !!heard
     })
     .forEach(listener => {
-      const func = typeof listener.callback === 'function' ? listener.callback : get(listener.callback)
       try {
         if (
-          func(path) === observerShouldBeRemoved
+          listener.callback(path) === observerShouldBeRemoved
         ) {
           unobserve(listener)
         }
       } catch (e) {
-        throw new Error(`listener callback (${path}) threw exception`)
+        throw new Error(`listener callback threw ${e} handling ${path}`)
       }
     })
 }
@@ -290,7 +286,7 @@ const regHandler = (path = '') => ({
   }
 })
 
-const xin = new Proxy(registry, regHandler())
+const xin = new Proxy(registry, regHandler()) as RegistryObject
 
 export {
   touch,
