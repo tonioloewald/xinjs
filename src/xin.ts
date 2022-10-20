@@ -1,4 +1,4 @@
-import { getByPath, setByPath, deleteByPath } from './by-path'
+import { getByPath, setByPath } from './by-path'
 import { matchType } from './type-by-example'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -11,7 +11,6 @@ type RegistryObject = {
 type TypeErrorHandler = (errors: string[], action: string) => void
 
 const registry: RegistryObject = {}
-const registeredTypes: RegistryObject = {}
 const listeners: Listener[] = [] // { path_string_or_test, callback }
 const debugPaths = true
 const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
@@ -80,96 +79,6 @@ const touch = (path: string) => {
     })
 }
 
-const _defaultTypeErrorHandler = (errors: string[], action: string) => {
-  throw new Error(`registry type check(s) failed after ${action}:\n${errors.join('\n')}`)
-}
-
-let typeErrorHandlers: TypeErrorHandler[] = [_defaultTypeErrorHandler]
-
-export const onTypeError = (callback: TypeErrorHandler) => {
-  offTypeError(_defaultTypeErrorHandler)
-  if (typeErrorHandlers.indexOf(callback) === -1) {
-    typeErrorHandlers.push(callback)
-    return true
-  }
-  return false
-}
-
-export const offTypeError = (callback: TypeErrorHandler, restoreDefault = false) => {
-  const handlerCount = typeErrorHandlers.length
-  typeErrorHandlers = typeErrorHandlers.filter(f => f !== callback)
-  if (restoreDefault) onTypeError(_defaultTypeErrorHandler)
-  return typeErrorHandlers.length !== handlerCount - 1
-}
-
-const checkType = (action: string, name: string) => {
-  const referenceType = registeredTypes[name]
-  if (!referenceType || !registry[name]) return
-  const errors = matchType(referenceType, registry[name], [], name)
-  if (errors.length) {
-    typeErrorHandlers.forEach(f => f(errors, action))
-  }
-}
-
-const set = (path: string, value: any) => {
-  if (value && value._xinPath) {
-    throw new Error('You cannot put xin proxies into xin')
-  }
-  if (debugPaths && !isValidPath(path)) {
-    throw new Error(`setting invalid path ${path}`)
-  }
-  const pathParts = path.split(/\.|\[/)
-  const [name] = pathParts
-  const model = pathParts[0]
-  const existing = getByPath(registry, path)
-  // @
-  if (pathParts.length > 1 && !registry[model]) {
-    throw new Error(`cannot set ${path} to ${value}, ${model} does not exist`)
-  } else if (pathParts.length === 1 && typeof value !== 'object') {
-    throw new Error(`cannot set ${path}; you can only register objects at root-level`)
-  } else if (value === existing) {
-    // if it's an array then it might have gained or lost elements
-    if (Array.isArray(value) || Array.isArray(existing)) {
-      touch(path)
-    }
-  } else if (value && value.constructor) {
-    if (pathParts.length === 1 && !registry[path]) {
-      registry[path] = value
-    } else {
-      // we only overlay vanilla objects, not custom classes or arrays
-      if (
-        value.constructor === Object &&
-        existing &&
-        existing.constructor === Object
-      ) {
-        setByPath(
-          registry,
-          path,
-          Object.assign(value, Object.assign(existing, value))
-        )
-      } else {
-        setByPath(registry, path, value)
-      }
-      touch(path)
-    }
-  } else {
-    setByPath(registry, path, value)
-    touch(path)
-  }
-  checkType(`set('${path}',...)`, name)
-  return value // convenient for push (see below) but maybe an anti-feature?!
-}
-
-const types = () =>
-  JSON.parse(
-    JSON.stringify(registeredTypes)
-  )
-
-const registerType = (name: string, example: any) => {
-  registeredTypes[name] = example
-  checkType(`registerType('${name}')`, name)
-}
-
 const observe = (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) => {
   return new Listener(test, callback)
 }
@@ -186,22 +95,6 @@ const unobserve = (listener: Listener) => {
   }
 
   return found
-}
-
-const remove = (path: string, update = true) => {
-  const [, listPath] = path.match(/^(.*)\[[^[]*\]$/) || []
-  if (listPath) {
-    const list = getByPath(registry, listPath)
-    const item = getByPath(registry, path)
-    const index = list.indexOf(item)
-    if (index !== -1) {
-      list.splice(index, 1)
-      if (update) touch(listPath)
-    }
-  } else {
-    deleteByPath(registry, path)
-    if (update) touch(path)
-  }
 }
 
 const extendPath = (path = '', prop = '') => {
@@ -281,7 +174,12 @@ const regHandler = (path = '') => ({
     if (value && value._xinPath) {
       throw new Error('You cannot put xin proxies into the registry')
     }
-    set(extendPath(path, prop), value)
+    const fullPath = extendPath(path, prop)
+    if (debugPaths && !isValidPath(fullPath)) {
+      throw new Error(`setting invalid path ${fullPath}`)
+    }
+    setByPath(registry, fullPath, value)
+    touch(fullPath)
     return true // success (throws error in strict mode otherwise)
   }
 })
@@ -292,10 +190,6 @@ export {
   touch,
   observe,
   unobserve,
-  checkType,
   xin,
-  registerType,
-  types,
-  remove,
   isValidPath
 }

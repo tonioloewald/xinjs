@@ -861,7 +861,7 @@ export class TypeError {
   }
 }
 
-const assignReadOnly = (obj, propMap) => {
+export const assignReadOnly = (obj, propMap) => {
   propMap = { ...propMap }
   for (const key of Object.keys(propMap)) {
     const value = propMap[key]

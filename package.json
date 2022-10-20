@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "bun src/main.ts",
+    "build": "bun tsc",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",
   "devDependencies": {
-    "standard": "^17.0.0",
     "typescript": "^4.8.4"
   }
 }

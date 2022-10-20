@@ -17,6 +17,9 @@ const obj = {
   cb(path: string) {
     if(path !== 'test.changes')
     changes.push({path, value: xin[path]})
+  },
+  sub: {
+    foo: 'bar'
   }
 }
 
@@ -106,6 +109,15 @@ test('handles array changes', () => {
   expect(changes.length).toBe(2)
   expect(changes[1].path).toBe('test.people')
   unobserve(listener)
+})
+
+test('objects are replaced', () => {
+  expect(xin.test.sub.foo).toBe('bar')
+  xin.test.sub = {
+    bar: 'baz'
+  }
+  expect(xin.test.sub.foo).toBe(undefined)
+  expect(xin.test.sub.bar).toBe('baz')
 })
 
 test('unobserve works', () => {
