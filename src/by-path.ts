@@ -1,92 +1,3 @@
-/**
-
-~~~~
-// title: getByPath, setByPath, and pathParts tests
-
-const {getByPath, setByPath, pathParts} = await import('../source/b8r.byPath.js');
-const obj = {
-  foo: 17,
-  bar: {baz: 'hello'},
-  list: [
-    {id: 17, name: 'fred'},
-    {id: 100, name: 'boris'}
-  ],
-  bool: false,
-  obj: null,
-};
-
-const list = [
-  {id: 17, name: 'fred'},
-  {id: 100, name: 'boris'},
-  obj
-]
-
-const debug = console.debug; // prevent errors from leaking to console
-errors = []
-console.debug = (...args) => errors.push(args[1])
-
-Test(() => getByPath(obj, '')).shouldBe(obj);
-Test(() => getByPath(obj, '/')).shouldBe(obj);
-Test(() => getByPath(obj, 'foo')).shouldBe(17);
-Test(() => getByPath(obj, '[=foo]')).shouldBe(17);
-Test(() => getByPath(obj, 'bar.baz')).shouldBe('hello');
-Test(() => getByPath(obj, '[=bar][=baz]')).shouldBe('hello');
-Test(() => getByPath(list, '[0].id')).shouldBe(17);
-Test(() => getByPath(list, '[id=100].name')).shouldBe('boris');
-Test(() => getByPath(list, '[bar.baz=hello].foo')).shouldBe(17);
-Test(() => getByPath(list, '[bar.baz=hello].list[id=17].name')).shouldBe('fred');
-Test(() => {
-  setByPath(obj, 'obj', {bar: 17});
-  return obj.obj.bar;
-}).shouldBe(17);
-Test(() => {
-  setByPath(obj, 'obj', null);
-  return obj.obj;
-}).shouldBe(null);
-Test(() => {
-  setByPath(obj, '[=obj]', {hello: 'world'});
-  return obj.obj.hello;
-}).shouldBe('world');
-Test(() => {
-  setByPath(obj, '[=obj][=hello]', 'mars');
-  return obj.obj.hello;
-}).shouldBe('mars');
-Test(() => {
-  setByPath(obj, 'list[id=17]', {id: 17, name: 'vlad'});
-  return getByPath(obj, 'list[id=17].name');
-}).shouldBe('vlad');
-Test(() => {
-  setByPath(obj, 'list[id=17]', {id: 17, name: 'vlad'});
-  return getByPath(obj, 'list[id=17].name');
-}).shouldBe('vlad');
-Test(() => {
-  setByPath(obj, 'list[id=13]', {id:13, name:'success'});
-  return getByPath(obj, 'list[id=13].name');
-}, 'insert-by-id works for new elements').shouldBe('success');
-Test(() => {
-  setByPath(obj, 'list[id=13].name', 'replaced');
-  return getByPath(obj, 'list[id=13].name');
-}, 'id-path in middle of path works').shouldBe('replaced');
-Test(() => {
-  setByPath(obj, 'list[id=13]', {id:13, name:'overwrite'});
-  return getByPath(obj, 'list').length;
-}, 'insert-by-id works does not create duplicates').shouldBe(3);
-Test(() => {
-  let caught = 0;
-  try {
-    setByPath(obj, 'list[id=20]', {name: 'failure'});
-  } catch(e) {
-    caught++;
-  }
-  return caught;
-}, 'item inserted at idPath must satisfy it').shouldBe(1);
-Test(() => errors, 'bad list bindings reported').shouldBeJSON(["inconsistent id-path 'bar.baz' used for array, expected 'id'"]);
-
-console.debug = debug
-~~~~
-*/
-/* global console */
-
 // unique tokens passed to set by path to delete or create properties
 
 import {XinObject} from './xin-types'
@@ -101,7 +12,7 @@ const _delete_ = {}
 const _newObject_ = {}
 
 function pathParts (path: string) {
-  if (!path || path === '/') {
+  if (!path) {
     return []
   }
 
@@ -188,12 +99,9 @@ function byKey (obj: XinObject, key: string, valueToInsert?: any) {
 function byIdPath (array: any[], idPath: string, idValue: string, valueToInsert?: any) {
   let idx = idPath ? keyToIndex(array, idPath, idValue) : idValue
   if (valueToInsert === _delete_) {
-    if (!idPath) {
-      delete array[idx]
-    } else {
-      array.splice(idx, 1)
-    }
-    return null
+    array.splice(idx, 1)
+    idPathMaps.delete(array)
+    return Symbol('deleted')
   } else if (valueToInsert === _newObject_) {
     if (!idPath && !array[idx]) {
       array[idx] = {}
@@ -239,7 +147,7 @@ function getByPath (obj: XinObject, path: string) {
         if (part[0] === '=') {
           found = found[part.substr(1)]
         } else {
-          return null
+          return undefined
         }
       } else if (part.indexOf('=') > -1) {
         const [idPath, ...tail] = part.split('=')
@@ -250,7 +158,7 @@ function getByPath (obj: XinObject, path: string) {
       }
     }
   }
-  return found === undefined ? null : found
+  return found
 }
 
 function setByPath (orig: XinObject, path: string, val: any) {
@@ -280,6 +188,9 @@ function setByPath (orig: XinObject, path: string, val: any) {
           obj = obj[idx]
         } else {
           if (val !== _delete_) {
+            if (obj[idx] === val) {
+              return false
+            }
             obj[idx] = val
           } else {
             obj.splice(idx, 1)
@@ -296,8 +207,14 @@ function setByPath (orig: XinObject, path: string, val: any) {
           obj = byKey(obj, key, part.length ? {} : [])
         } else {
           if (val !== _delete_) {
+            if (obj[key] === val) {
+              return false
+            }
             obj[key] = val
           } else {
+            if (!obj.hasOwnProperty(key)) {
+              return false
+            }
             delete obj[key]
           }
           return true
