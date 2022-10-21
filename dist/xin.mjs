@@ -8,93 +8,7 @@ const stringify = (x) => {
 };
 const makeError = (...messages) => new Error(messages.map(stringify).join(' '));
 
-/**
-
-~~~~
-// title: getByPath, setByPath, and pathParts tests
-
-const {getByPath, setByPath, pathParts} = await import('../source/b8r.byPath.js');
-const obj = {
-  foo: 17,
-  bar: {baz: 'hello'},
-  list: [
-    {id: 17, name: 'fred'},
-    {id: 100, name: 'boris'}
-  ],
-  bool: false,
-  obj: null,
-};
-
-const list = [
-  {id: 17, name: 'fred'},
-  {id: 100, name: 'boris'},
-  obj
-]
-
-const debug = console.debug; // prevent errors from leaking to console
-errors = []
-console.debug = (...args) => errors.push(args[1])
-
-Test(() => getByPath(obj, '')).shouldBe(obj);
-Test(() => getByPath(obj, '/')).shouldBe(obj);
-Test(() => getByPath(obj, 'foo')).shouldBe(17);
-Test(() => getByPath(obj, '[=foo]')).shouldBe(17);
-Test(() => getByPath(obj, 'bar.baz')).shouldBe('hello');
-Test(() => getByPath(obj, '[=bar][=baz]')).shouldBe('hello');
-Test(() => getByPath(list, '[0].id')).shouldBe(17);
-Test(() => getByPath(list, '[id=100].name')).shouldBe('boris');
-Test(() => getByPath(list, '[bar.baz=hello].foo')).shouldBe(17);
-Test(() => getByPath(list, '[bar.baz=hello].list[id=17].name')).shouldBe('fred');
-Test(() => {
-  setByPath(obj, 'obj', {bar: 17});
-  return obj.obj.bar;
-}).shouldBe(17);
-Test(() => {
-  setByPath(obj, 'obj', null);
-  return obj.obj;
-}).shouldBe(null);
-Test(() => {
-  setByPath(obj, '[=obj]', {hello: 'world'});
-  return obj.obj.hello;
-}).shouldBe('world');
-Test(() => {
-  setByPath(obj, '[=obj][=hello]', 'mars');
-  return obj.obj.hello;
-}).shouldBe('mars');
-Test(() => {
-  setByPath(obj, 'list[id=17]', {id: 17, name: 'vlad'});
-  return getByPath(obj, 'list[id=17].name');
-}).shouldBe('vlad');
-Test(() => {
-  setByPath(obj, 'list[id=17]', {id: 17, name: 'vlad'});
-  return getByPath(obj, 'list[id=17].name');
-}).shouldBe('vlad');
-Test(() => {
-  setByPath(obj, 'list[id=13]', {id:13, name:'success'});
-  return getByPath(obj, 'list[id=13].name');
-}, 'insert-by-id works for new elements').shouldBe('success');
-Test(() => {
-  setByPath(obj, 'list[id=13].name', 'replaced');
-  return getByPath(obj, 'list[id=13].name');
-}, 'id-path in middle of path works').shouldBe('replaced');
-Test(() => {
-  setByPath(obj, 'list[id=13]', {id:13, name:'overwrite'});
-  return getByPath(obj, 'list').length;
-}, 'insert-by-id works does not create duplicates').shouldBe(3);
-Test(() => {
-  let caught = 0;
-  try {
-    setByPath(obj, 'list[id=20]', {name: 'failure'});
-  } catch(e) {
-    caught++;
-  }
-  return caught;
-}, 'item inserted at idPath must satisfy it').shouldBe(1);
-Test(() => errors, 'bad list bindings reported').shouldBeJSON(["inconsistent id-path 'bar.baz' used for array, expected 'id'"]);
-
-console.debug = debug
-~~~~
-*/
+// unique tokens passed to set by path to delete or create properties
 const now36 = () => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1);
 let _seq = 0;
 const seq = () => (parseInt('10000', 36) + (++_seq)).toString(36).substr(-5);
@@ -102,7 +16,7 @@ const id = () => now36() + seq();
 const _delete_ = {};
 const _newObject_ = {};
 function pathParts(path) {
-    if (!path || path === '/') {
+    if (!path) {
         return [];
     }
     if (Array.isArray(path)) {
@@ -186,13 +100,9 @@ function byKey(obj, key, valueToInsert) {
 function byIdPath(array, idPath, idValue, valueToInsert) {
     let idx = idPath ? keyToIndex(array, idPath, idValue) : idValue;
     if (valueToInsert === _delete_) {
-        if (!idPath) {
-            delete array[idx];
-        }
-        else {
-            array.splice(idx, 1);
-        }
-        return null;
+        array.splice(idx, 1);
+        idPathMaps.delete(array);
+        return Symbol('deleted');
     }
     else if (valueToInsert === _newObject_) {
         if (!idPath && !array[idx]) {
@@ -241,7 +151,7 @@ function getByPath(obj, path) {
                     found = found[part.substr(1)];
                 }
                 else {
-                    return null;
+                    return undefined;
                 }
             }
             else if (part.indexOf('=') > -1) {
@@ -254,7 +164,7 @@ function getByPath(obj, path) {
             }
         }
     }
-    return found === undefined ? null : found;
+    return found;
 }
 function setByPath(orig, path, val) {
     let obj = orig;
@@ -285,6 +195,9 @@ function setByPath(orig, path, val) {
                 }
                 else {
                     if (val !== _delete_) {
+                        if (obj[idx] === val) {
+                            return false;
+                        }
                         obj[idx] = val;
                     }
                     else {
@@ -304,9 +217,15 @@ function setByPath(orig, path, val) {
                 }
                 else {
                     if (val !== _delete_) {
+                        if (obj[key] === val) {
+                            return false;
+                        }
                         obj[key] = val;
                     }
                     else {
+                        if (!obj.hasOwnProperty(key)) {
+                            return false;
+                        }
                         delete obj[key];
                     }
                     return true;
@@ -483,11 +402,355 @@ const regHandler = (path = '') => ({
         if (!isValidPath(fullPath)) {
             throw new Error(`setting invalid path ${fullPath}`);
         }
-        setByPath(registry, fullPath, value);
-        touch(fullPath);
-        return true; // success (throws error in strict mode otherwise)
+        if (setByPath(registry, fullPath, value)) {
+            touch(fullPath);
+        }
+        return true;
     }
 });
 const xin = new Proxy(registry, regHandler());
 
-export { observe, observerShouldBeRemoved, unobserve, xin };
+const isAsync = (func) => func && func.constructor === (async () => { }).constructor;
+const describe = (x) => {
+    if (x === null)
+        return 'null';
+    if (Array.isArray(x))
+        return 'array';
+    if (typeof x === 'number') {
+        if (isNaN(x))
+            return 'NaN';
+    }
+    if (typeof x === 'string' && x.startsWith('#'))
+        return x;
+    if (x instanceof Promise)
+        return 'promise';
+    if (typeof x === 'function') {
+        return x.constructor === (async () => { }).constructor
+            ? 'async'
+            : 'function';
+    }
+    if (typeof x === 'object' && x.constructor.name !== 'Object') {
+        return x.constructor.name;
+    }
+    return typeof x;
+};
+// FIXME: bun doesn't handle unicode characters in code correctly
+// should be able to replace \u221E with ∞
+const parseFloatOrInfinity = (x) => {
+    if (x === '-\u221E') {
+        return -Infinity;
+    }
+    else if (x[0] === '\u221E') {
+        return Infinity;
+    }
+    else {
+        return parseFloat(x);
+    }
+};
+const inRange = (spec, x) => {
+    let lower, upper;
+    if (spec === undefined)
+        return true;
+    try {
+        // @ts-expect-error
+        [, lower, upper] = (spec || '').match(/^([[(]-?[\d.\u221E]+)?,?(-?[\d.\u221E]+[\])])?$/);
+    }
+    catch (e) {
+        throw new Error(`bad range ${spec}`);
+    }
+    if (lower) {
+        const min = parseFloatOrInfinity(lower.substr(1));
+        if (lower[0] === '(') {
+            if (x <= min)
+                return false;
+        }
+        else {
+            if (x < min)
+                return false;
+        }
+    }
+    if (upper) {
+        const max = parseFloatOrInfinity(upper);
+        if (upper.endsWith(')')) {
+            if (x >= max)
+                return false;
+        }
+        else {
+            if (x > max)
+                return false;
+        }
+    }
+    return true;
+};
+const regExps = {};
+const regexpTest = (spec, subject) => {
+    const regexp = regExps[spec] ? regExps[spec] : regExps[spec] = new RegExp(spec);
+    return regexp.test(subject);
+};
+const isInstanceOf = (obj, constructor) => {
+    if (typeof constructor === 'function') {
+        return obj instanceof Function;
+    }
+    else {
+        let proto = Object.getPrototypeOf(obj);
+        while (proto.constructor && proto.constructor !== Object) {
+            if (proto.constructor.name === constructor) {
+                return true;
+            }
+            proto = Object.getPrototypeOf(proto);
+        }
+        return false;
+    }
+};
+const specificTypeMatch = (type, subject) => {
+    const [, optional, baseType, , spec] = type.match(/^#([?]?)([^\s]+)(\s(.*))?$/) || [];
+    if (optional && (subject === null || subject === undefined))
+        return true;
+    const subjectType = describe(subject);
+    switch (baseType) {
+        case 'forbidden':
+            return false;
+        case 'any':
+            return subject !== null && subject !== undefined;
+        case 'native':
+            if (typeof subject !== 'function' || subject.toString() !== 'function () { [native code] }') {
+                return false;
+            }
+            if (!type) {
+                return true;
+            }
+            return isAsync(subject) ? type.match(/^async\b/) : type.match(/^function\b/);
+        case 'function':
+            if (subjectType !== 'function')
+                return false;
+            // todo allow for typeSafe functions with param/result specified by name
+            return true;
+        case 'number':
+            if (subjectType !== 'number')
+                return false;
+            return inRange(spec, subject);
+        case 'int':
+            if (subjectType !== 'number' || subject !== Math.floor(subject))
+                return false;
+            return inRange(spec, subject);
+        case 'union':
+            return !!spec.split('||').find((type) => specificTypeMatch(`#${type}`, subject));
+        case 'enum':
+            try {
+                return spec.split('|').map(JSON.parse).includes(subject);
+            }
+            catch (e) {
+                throw new Error(`bad enum specification (${spec}), expect JSON strings`);
+            }
+        case 'void':
+            return subjectType === 'undefined' || subjectType === 'null';
+        case 'nothing':
+            return subjectType === 'undefined';
+        case 'string':
+            return subjectType === 'string';
+        case 'regexp':
+            return subjectType === 'string' && regexpTest(spec, subject);
+        case 'array':
+            return Array.isArray(subject);
+        case 'instance':
+            // @ts-ignore
+            return isInstanceOf(subject, spec);
+        case 'promise':
+            return subject instanceof Promise;
+        case 'object':
+            return !!subject && typeof subject === 'object' && !Array.isArray(subject);
+        default:
+            if (subjectType !== baseType) {
+                throw makeError('got', subject, `expected "${type}", "${subjectType}" does not match "${baseType}"`);
+            }
+            else {
+                return true;
+            }
+    }
+};
+const quoteIfString = (x) => typeof x === 'string' ? `"${x}"` : (typeof x === 'object' ? describe(x) : x);
+// when checking large arrays, only check a maximum of 111 elements
+function* arraySampler(a) {
+    let i = 0;
+    // 101 is a prime number so hopefully we'll avoid sampling fixed patterns
+    const increment = Math.ceil(a.length / 101);
+    while (i < a.length) {
+        // first five
+        if (i < 5) {
+            yield { sample: a[i], i };
+            i++;
+            // last five
+        }
+        else if (i > a.length - 5) {
+            yield { sample: a[i], i };
+            i++;
+        }
+        else {
+            // ~1% of the ones in the middle
+            yield { sample: a[i], i };
+            i = Math.min(i + increment, a.length - 4);
+        }
+    }
+}
+const matchType = (example, subject, errors = [], path = '') => {
+    const exampleType = describe(example);
+    const subjectType = describe(subject);
+    const typesMatch = exampleType.startsWith('#')
+        ? specificTypeMatch(exampleType, subject)
+        : exampleType === subjectType;
+    if (!typesMatch) {
+        errors.push(`${path ? path + ' ' : ''}was ${quoteIfString(subject)}, expected ${exampleType}`);
+    }
+    else if (exampleType === 'array') {
+        // only checking first element of subject for now
+        const sampler = subject.length ? arraySampler(subject) : false;
+        if (example.length === 1 && sampler) {
+            // assume homogenous array
+            for (const { sample, i } of sampler)
+                matchType(example[0], sample, errors, `${path}[${i}]`);
+        }
+        else if (example.length > 1 && sampler) {
+            // assume heterogeneous array
+            for (const { sample, i } of sampler) {
+                let foundMatch = false;
+                for (const specificExample of example) {
+                    if (matchType(specificExample, sample, [], '').length === 0) {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+                if (!foundMatch)
+                    errors.push(`${path}[${i}] had no matching type`);
+            }
+        }
+    }
+    else if (exampleType === 'object') {
+        matchKeys(example, subject, errors, path);
+    }
+    return errors;
+};
+const legalVarName = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/;
+const matchKeys = (example, subject, errors = [], path = '') => {
+    const testedKeys = new Set();
+    for (const key of Object.keys(example)) {
+        if (key.startsWith('#')) {
+            let keyTest = legalVarName;
+            try {
+                if (key !== '#') {
+                    keyTest = new RegExp(`^${key.substr(1)}$`);
+                }
+            }
+            catch (e) {
+                const badKeyError = `illegal regular expression in example key '${key}'`;
+                errors.push(badKeyError);
+                throw makeError(badKeyError);
+            }
+            const matchingKeys = Object.keys(subject).filter(key => keyTest.test(key));
+            for (const k of matchingKeys) {
+                if (!testedKeys.has(k)) {
+                    matchType(example[key], subject[k], errors, `${path}./^${key.substr(1)}$/:${k}`);
+                    testedKeys.add(k);
+                }
+            }
+        }
+        else if (key.endsWith('?')) {
+            const k = key.substr(0, key.length - 1);
+            if (Object.hasOwnProperty.call(subject, k)) {
+                if (!testedKeys.has(k)) {
+                    matchType(example[key], subject[k], errors, path + '.' + k);
+                    testedKeys.add(k);
+                }
+            }
+        }
+        else {
+            if (!testedKeys.has(key)) {
+                matchType(example[key], subject[key], errors, path + '.' + key);
+                testedKeys.add(key);
+            }
+        }
+    }
+    return errors;
+};
+class TypeError {
+    constructor(config) {
+        // initializers are unnecessary but TypeScript is too stupid
+        this.functionName = undefined;
+        this.isParamFailure = false;
+        this.errors = [];
+        Object.assign(this, config);
+    }
+    toString() {
+        const { functionName, isParamFailure, errors } = this;
+        return `${functionName} failed: bad ${isParamFailure ? 'parameter' : 'result'}, ${JSON.stringify(errors)}`;
+    }
+}
+const assignReadOnly = (obj, propMap) => {
+    propMap = { ...propMap };
+    for (const key of Object.keys(propMap)) {
+        const value = propMap[key];
+        Object.defineProperty(obj, key, {
+            enumerable: true,
+            get() {
+                return value;
+            },
+            set(value) {
+                throw new Error(`${key} is read-only`);
+            }
+        });
+    }
+    return obj;
+};
+const matchParamTypes = (types, params) => {
+    for (let i = 0; i < params.length; i++) {
+        if (params[i] instanceof TypeError) {
+            return params[i];
+        }
+    }
+    const errors = types.map((type, i) => matchType(type, params[i]));
+    return errors.flat().length ? errors : [];
+};
+const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = undefined) => {
+    const paramErrors = matchParamTypes(['#function', '#?array', '#?any', '#?string'], [func, paramTypes, resultType, functionName]);
+    if (paramErrors instanceof TypeError) {
+        throw new Error(`typeSafe was passed bad paramters`);
+    }
+    if (!functionName)
+        functionName = func.name || 'anonymous';
+    let callCount = 0;
+    return assignReadOnly(function (...params) {
+        callCount += 1;
+        const paramErrors = matchParamTypes(paramTypes, params);
+        // short circuit failures
+        if (paramErrors instanceof TypeError)
+            return paramErrors;
+        if (paramErrors.length === 0) {
+            const result = func(...params);
+            const resultErrors = matchType(resultType, result);
+            if (resultErrors.length === 0) {
+                return result;
+            }
+            else {
+                return new TypeError({
+                    functionName,
+                    isParamFailure: false,
+                    expected: resultType,
+                    found: result,
+                    errors: resultErrors
+                });
+            }
+        }
+        return new TypeError({
+            functionName,
+            isParamFailure: true,
+            expected: paramTypes,
+            found: params,
+            errors: paramErrors
+        });
+    }, {
+        paramTypes,
+        resultType,
+        getCallCount: () => callCount
+    });
+};
+
+export { matchType, observe, observerShouldBeRemoved, typeSafe, unobserve, xin };
