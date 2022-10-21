@@ -17,4 +17,6 @@ sending mutations to complex state to the server.
 ## Development
 
 I'm using [bun](https://bun.sh/) to develop xinjs. It's insanely fast but
-also kind of bleeding edge. It runs typescript directly.
+also kind of bleeding edge. It runs typescript directly. If you want to work
+on xinjs you'll probably want to install the latest version of bun (in addition
+to [nodejs](https://nodejs.org)).
