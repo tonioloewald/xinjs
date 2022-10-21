@@ -1,3 +1,4 @@
+import { XinObject } from './xin-types'
 import { getByPath, setByPath } from './by-path'
 import { matchType } from './type-by-example'
 
@@ -5,12 +6,9 @@ export const observerShouldBeRemoved = Symbol('observer should be removed')
 
 type PathTestFunction = (path: string) => boolean | Symbol
 type CallbackFunction = (path: string) => void | Symbol
-type RegistryObject = {
-  [key: string] : any
-}
 type TypeErrorHandler = (errors: string[], action: string) => void
 
-const registry: RegistryObject = {}
+const registry: XinObject = {}
 const listeners: Listener[] = [] // { path_string_or_test, callback }
 const debugPaths = true
 const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
@@ -110,7 +108,7 @@ const extendPath = (path = '', prop = '') => {
 }
 
 const regHandler = (path = '') => ({
-  get (target: RegistryObject, prop: string): any {
+  get (target: XinObject, prop: string): any {
     const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
                         prop.match(/^([^\]]+)(\[.+)/) || // basePath[subPath
                         prop.match(/^(\[[^\]]+\])\.(.+)$/) || // [basePath].subPath (omit '.')
@@ -184,7 +182,7 @@ const regHandler = (path = '') => ({
   }
 })
 
-const xin = new Proxy(registry, regHandler()) as RegistryObject
+const xin = new Proxy(registry, regHandler()) as XinObject
 
 export {
   touch,

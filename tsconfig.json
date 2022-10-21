@@ -9,6 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "ts-build"
   },
+  "allowJs": true,
+  "types": ["bun-types"],
   "include": ["src/**/*"],
   "exclude": ["node_nodules", "**.*.spec.ts"]
 }
