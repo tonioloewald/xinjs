@@ -36,3 +36,9 @@ test('arrays', () => {
   expect(filterText([0], data.list)).toBe('[17,-2.33]')
   expect(filterText(['', 0], data.list)).toBe('["hello",17,-2.33]')
 })
+
+test('rejecting partial objects', () => {
+  expect(filterText({x: 0, y: 0}, {x: 1, y: 2, z: 3})).toBe('{"x":1,"y":2}')
+  expect(filter({x: 0, y: 0, z: 0}, {x: 1, y: 1})).toBe(undefined)
+  expect(filterText({x: 0, y: 0, '#z?': 0}, {x: 1, y: 2})).toBe('{"x":1,"y":2}')
+})

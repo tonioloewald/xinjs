@@ -24,14 +24,10 @@ export const filterObject = (template: XinObject, obj: XinObject) => {
   }
   const output: XinObject = {}
   for(const key of Object.keys(template)) {
-    if (obj[key] === undefined) {
-      return undefined
-    }
     const value = filter(template[key], obj[key])
-    if (value === undefined) {
-      return undefined
+    if (value !== undefined) {
+      output[key] = value
     }
-    output[key] = value
   }
   return output
 }
