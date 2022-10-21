@@ -1,98 +1,4 @@
 /**
-# Object Path Methods
-Copyright ©2016-2022 Tonio Loewald
-
-> Note that these are low-level methods that `b8r` does not expose.
-> `b8r.getByPath` and `b8r.setByPath` are deprecated (use `b8r.set` and `b8r.get` instead).
-> See the [Data Registry](?source=source/b8r.registry.js) documentation for more useful information.
-
-    getByPath(obj, 'path.to.value')
-
-Obtains a value inside an object by a path, e.g.
-getByPath(obj, "foo.bar") is the equivalent of obj.foo.bar
-if path is not set or is set to '/' then obj is returned.
-
-    setByPath(obj, 'path.to.value', new_value)
-
-sets a value inside an object by a path,
-e.g. setByPath(obj, "foo.bar", 17) is the equivalent of obj.foo.bar = 17.
-
-    deleteByPath(obj, 'path.to.value');
-
-if a value exists at the stipulated path it will be deleted. If not, nothing will happen.
-
-## Examples
-
-Given:
-
-    const obj = {
-      foo: 17,
-      bar: [1,2,3],
-      baz: [
-        {id: 17, name: "fred"},
-        {id: 42, name: "bloggs"},
-        {id: 99, name: "feldon", deeper: {and_deeper: 4}}
-      ]
-    }
-
-The following paths work:
-
-    foo → 17
-    [=foo] → 17
-    bar[1] → 2
-    baz[1].id → 42
-    [=baz][1][=id] → 42
-    baz[id=17].name → "fred"
-    baz[deeper.and_deeper=4].name → "fred"
-
-The last two examples are examples of **id paths**…
-
-## id paths
-
-Arrays of objects, including heterogenous objects, are a common pattern
-in web applications. E.g. you might have an array of messages and the messages
-may have different types.
-
-Using id paths, it is possible to reference elements by an id path and
-corresponding value rather than simple indices. This allows efficient updating
-of lists, e.g.
-
-```
-<p>Inspect the DOM to see what's going on!</p>
-<ul>
-  <li
-    data-list="_component_.list:id"
-    data-bind="text=.name"
-  ></li>
-</ul>
-<input data-bind="value=_component_.list[id=12].name">
-<script>
-  list = [
-    {id: 5, name: "Tom"},
-    {id: 75, name: 'Dick'},
-    {id: 12, name: 'Harry'}
-  ];
-  set({list});
-</script>
-```
-
-## Type Matching
-
-setByPath tries to match the type of values that are replaced, e.g.
-
-    const obj = {foo: 17};
-    setByPath(obj, 'foo', '2'); // '2' will be converted to a Number
-
-This can be tricky when dealing with nullable objects, in particular:
-
-    const obj = {foo: false};
-    setByPath(obj, {bar: 17}); // {bar: 17} will be converted to Boolean true
-
-In this case, you want the absence of an object to be either undefined
-(or a missing value) or `null`:
-
-    const obj = {foo: null};
-    setByPath(obj, {bar: 17}); // {bar: 17} will not be converted
 
 ~~~~
 // title: getByPath, setByPath, and pathParts tests
@@ -183,6 +89,9 @@ console.debug = debug
 
 // unique tokens passed to set by path to delete or create properties
 
+import {XinObject} from './xin-types'
+import {makeError} from './make-error'
+
 const now36 = () => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1)
 let _seq = 0
 const seq = () => (parseInt('10000', 36) + (++_seq)).toString(36).substr(-5)
@@ -190,11 +99,6 @@ const id = () => now36() + seq()
 
 const _delete_ = {}
 const _newObject_ = {}
-
-function pathSplit (fullPath: string) {
-  const [, model,, start, path] = fullPath.match(/^(.*?)(([.[])(.*))?$/)
-  return [model, start === '[' ? '[' + path : path]
-}
 
 function pathParts (path: string) {
   if (!path || path === '/') {
@@ -229,19 +133,17 @@ function pathParts (path: string) {
   }
 }
 
-function buildIdPathValueMap (array, idPath) {
-  if (array && !array._b8r_id_path) {
-    array._b8r_id_path = idPath
-  } else if (array._b8r_id_path !== idPath) {
-    console.debug('b8r-error', `inconsistent id-path '${idPath}' used for array, expected '${array._b8r_id_path}'`)
+const idPathMaps = new WeakMap()
+
+function buildIdPathValueMap (array: XinObject[], idPath: string) {
+  if (array && !idPathMaps.get(array)) {
+    idPathMaps.set(array, {})
   }
-  if (!array._b8r_value_maps) {
-    // hide the map of maps in a closure that is returned by a computed property so that
-    // the source objects are not "polluted" upon serialization
-    const maps = {}
-    Object.defineProperty(array, '_b8r_value_maps', { get: () => maps })
+  if (!idPathMaps.get(array)[idPath]) {
+    idPathMaps.get(array)[idPath] = {}
   }
-  const map = {}
+  const map = idPathMaps.get(array)[idPath]
+
   if (idPath === '_auto_') {
     array.forEach((item, idx) => {
       if (item._auto_ === undefined) item._auto_ = id()
@@ -252,19 +154,18 @@ function buildIdPathValueMap (array, idPath) {
       map[getByPath(item, idPath) + ''] = idx
     })
   }
-  array._b8r_value_maps[idPath] = map
   return map
 }
 
-function getIdPathMap (array, idPath) {
-  if (!array._b8r_value_maps || !array._b8r_value_maps[idPath]) {
+function getIdPathMap (array: XinObject[], idPath: string) {
+  if (!idPathMaps.get(array) || !idPathMaps.get(array)[idPath]) {
     return buildIdPathValueMap(array, idPath)
   } else {
-    return array._b8r_value_maps[idPath]
+    return idPathMaps.get(array)[idPath]
   }
 }
 
-function keyToIndex (array, idPath, idValue) {
+function keyToIndex (array: XinObject[], idPath: string, idValue: any) {
   idValue = idValue + ''
   /*
   if (array.length > 200) {
@@ -277,14 +178,14 @@ function keyToIndex (array, idPath, idValue) {
   return idx
 }
 
-function byKey (obj, key, valueToInsert) {
+function byKey (obj: XinObject, key: string, valueToInsert?: any) {
   if (!obj[key]) {
     obj[key] = valueToInsert
   }
   return obj[key]
 }
 
-function byIdPath (array, idPath, idValue, valueToInsert) {
+function byIdPath (array: any[], idPath: string, idValue: string, valueToInsert?: any) {
   let idx = idPath ? keyToIndex(array, idPath, idValue) : idValue
   if (valueToInsert === _delete_) {
     if (!idPath) {
@@ -310,21 +211,19 @@ function byIdPath (array, idPath, idValue, valueToInsert) {
   return array[idx]
 }
 
-function expectArray (obj) {
+function expectArray (obj: any) {
   if (!Array.isArray(obj)) {
-    console.debug('b8r-error', 'setByPath failed: expected array, found', obj)
-    throw new Error('setByPath failed: expected array')
+    throw makeError('setByPath failed: expected array, found', obj)
   }
 }
 
-function expectObject (obj) {
+function expectObject (obj: any) {
   if (!obj || obj.constructor !== Object) {
-    console.debug('b8r-error', 'setByPath failed: expected Object, found', obj)
-    throw new Error('setByPath failed: expected object')
+    throw makeError('setByPath failed: expected Object, found', obj)
   }
 }
 
-function getByPath (obj, path) {
+function getByPath (obj: XinObject, path: string) {
   const parts = pathParts(path)
   var found = obj
   var i, iMax, j, jMax
@@ -340,11 +239,11 @@ function getByPath (obj, path) {
         if (part[0] === '=') {
           found = found[part.substr(1)]
         } else {
-          found = undefined
+          return null
         }
       } else if (part.indexOf('=') > -1) {
         const [idPath, ...tail] = part.split('=')
-        found = byIdPath(found, idPath, tail.join('='))
+        found = byIdPath(found as any[], idPath, tail.join('='))
       } else {
         j = parseInt(part, 10)
         found = found[j]
@@ -354,7 +253,7 @@ function getByPath (obj, path) {
   return found === undefined ? null : found
 }
 
-function setByPath (orig, path, val) {
+function setByPath (orig: XinObject, path: string, val: any) {
   let obj = orig
   const parts = pathParts(path)
 
@@ -370,7 +269,7 @@ function setByPath (orig, path, val) {
         }
         const idPath = part.substr(0, equalsOffset)
         const idValue = part.substr(equalsOffset + 1)
-        obj = byIdPath(obj, idPath, idValue, parts.length ? _newObject_ : val)
+        obj = byIdPath(obj as any[], idPath, idValue, parts.length ? _newObject_ : val)
         if (!parts.length) {
           return true
         }
@@ -405,18 +304,16 @@ function setByPath (orig, path, val) {
         }
       }
     } else {
-      console.debug('b8r-error', 'setByPath failed: bad path', path)
-      throw new Error('setByPath failed')
+      throw new Error(`setByPath failed, bad path ${path}`)
     }
   }
-  console.debug('b8r-error', `setByPath failed: "${path}" not found in`, orig)
   throw new Error(`setByPath(${orig}, ${path}, ${val}) failed`)
 }
 
-function deleteByPath (orig, path) {
+function deleteByPath (orig: XinObject, path: string) {
   if (getByPath(orig, path) !== null) {
     setByPath(orig, path, _delete_)
   }
 }
 
-export { getByPath, setByPath, deleteByPath, pathParts, pathSplit }
+export { getByPath, setByPath, deleteByPath, pathParts }

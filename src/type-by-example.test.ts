@@ -3,7 +3,7 @@ import { test, expect } from "bun:test"
 import { matchType, describe, exampleAtPath } from './type-by-example'
 
 const join = (errors: string[]) => errors.join(';')
-const matchTypeString = (...args: any[]) => join(matchType(...args))
+const matchTypeString = (example: any, subject?: any) => join(matchType(example, subject))
 
 test('simple tests', () => {
   expect(matchTypeString(0, 17)).toBe('')

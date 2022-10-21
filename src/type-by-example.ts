@@ -1,6 +1,5 @@
 import { XinObject } from './xin-types'
-
-const makeError = (...args: string[]) => new Error(args.join(' '))
+import { makeError } from './make-error'
 
 export const isAsync = (func: Function) => func && func.constructor === (async () => {}).constructor
 
@@ -39,6 +38,7 @@ const inRange = (spec: string, x: number) => {
   let lower, upper
   if (spec === undefined) return true
   try {
+    // @ts-expect-error
     [, lower, upper] = (spec || '').match(/^([[(]-?[\d.\u221E]+)?,?(-?[\d.\u221E]+[\])])?$/)
   } catch (e) {
     throw new Error(`bad range ${spec}`)

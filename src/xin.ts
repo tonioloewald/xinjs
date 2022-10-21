@@ -117,6 +117,7 @@ const regHandler = (path = '') => ({
       const [, basePath, subPath] = compoundProp
       const currentPath = extendPath(path, basePath)
       const value = getByPath(target, basePath)
+      // @ts-expect-error
       return value && typeof value === 'object' ? new Proxy(value, regHandler(currentPath))[subPath] : value
     }
     if (prop === '_xinPath') {
