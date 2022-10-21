@@ -156,20 +156,22 @@ export const describeType = (x: any) => {
     case 'array':
       return x.map(describeType)
     case 'object':
-    {
+    if (x.constructor === Object) {
       const _type: XinObject = {}
       Object.keys(x as XinObject).forEach((key) => { _type[key] = describeType(x[key]) })
       return _type
+    } else {
+      return `#instance x.constructor.name`
     }
     case 'function':
     case 'async':
     {
-      const source = x.toString()
-      if (source.startsWith('class ')) {
-        return 'class'
+      if (x.protoype) {
+        return `#class x.name`
       }
+      const source = x.toString()
       if (source.endsWith('() { [native code] }')) {
-        return `native ${scalarType}`
+        return `#native ${scalarType}`
       }
       const functionSource = source.match(functionDeclaration)
       const arrowSource = source.match(arrowDeclaration)
@@ -183,7 +185,7 @@ export const describeType = (x: any) => {
       return `${scalarType} ( ${params.join(', ')} ) => ${hasReturnValue ? '#any' : '#nothing'}`
     }
     default:
-      return scalarType
+      return `#${scalarType}`
   }
 }
 
@@ -310,87 +312,8 @@ const matchKeys = (example: any, subject: any, errors: string[] = [], path = '')
   return errors
 }
 
-/**
-## Strongly Typed Functions
-
-`typeSafe` adds run-time type-checking to functions, verifying the type of both
-their inputs and outputs:
-
-    import {typeSafe} from 'path/to/b8r.js'
-    const safeFunc = typeSafe(func, paramTypes, resultType, name)
-
-- `func` is the function you're trying to type-check.
-- `paramTypes` is an array of types.
-- `resultType` is the type the function is expected to return (it's optional).
-- `name` is optional (defaults to func.name || 'anonymous')
-
-For example:
-
-    const safeAdd = typeSafe((a, b) => a + b, [1, 2], 3, 'add')
-
-A typeSafe function that is passed an incorrect set of parameters, whose original
-function returns an incorrect set of paramters will return an instance of `TypeError`.
-
-`TypeError` is a simple class to wrap the information associated with a type-check failure.
-Its instances five properties and one method:
-- `functionName` is the name of the function (or 'anonymous' if none was provided)
-- `isParamFailure` is true if the failure was in the inputs to a function,
-- `expected` is what was expected,
-- `found` is what was found,
-- `errors` is the array of type errors.
-- `toString()` renders the `TypeError` as a string
-
-A typeSafe function that is passed or more `TypeError` instances in its parameters will return
-the first error it sees without calling the wrapped function.
-
-typeSafe functions are self-documenting. They have two read-only properties `paramTypes` and
-`resultType`.
-
-typeSafe functions are intended to operate like
-[monads](https://en.wikipedia.org/wiki/Monad_(functional_programming)),
-so if you call `safe_f(safe_g(...))` and `safe_g` fails, `safe_f` will _short-circuit_ execution and
-return the error directly -- which should help with debugging and prevent code executing
-on data known to be bad.
-
-~~~~
-const {
-  matchParamTypes,
-  typeSafe,
-  TypeError,
-} = await import('./b8r.byExample.js');
-
-Test(() => matchParamTypes([1,2,3], [1,2,3])).shouldBeJSON([])
-Test(() => matchParamTypes([1,'a',{}], [0,'b',{}])).shouldBeJSON([])
-Test(() => matchParamTypes([1,'a'], [0,'b',{}]), 'extra parameters are ok').shouldBeJSON([])
-
-const safeAdd = typeSafe((a, b) => a + b, [1, 2], 3, 'add')
-Test(() => safeAdd(1,2), 'typesafe function works when used correctly').shouldBe(3)
-Test(() => safeAdd(1).toString()).shouldBeJSON('add failed: bad parameter, [[],["was undefined, expected number"]]')
-
-const badAdd = typeSafe((a, b) => `${a + b}`, [1, 2], 3, 'badAdd')
-Test(() => badAdd(1,2).toString(), 'typesafe function fails with wrong return type')
-  .shouldBeJSON('badAdd failed: bad result, ["was \\"3\\", expected number"]')
-
-const labeller = typeSafe((label, number) => `${label}: ${number}`, ['label', 0], 'label: 17', 'labeller')
-Test(() => labeller.paramTypes, 'typeSafe function has paramTypes').shouldBeJSON(['label',0])
-Test(() => labeller.resultType, 'typeSafe function has resultType').shouldBe('label: 17')
-Test(() => labeller.resultType = 'foo', 'typeSafe function props are read-only').shouldThrow()
-
-const safeVectorAdd = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'vectorAdd')
-Test(() => safeVectorAdd([1,2],[3,4])).shouldBeJSON([4,6])
-Test(() => safeVectorAdd([1,2],[3,'x']).toString()).shouldBeJSON('vectorAdd failed: bad parameter, [[],["[1] was \\"x\\", expected number"]]')
-Test(() => safeVectorAdd([1,2],[3]).toString()).shouldBeJSON('vectorAdd failed: bad result, ["[1] was NaN, expected number"]')
-Test(() => safeVectorAdd([1,2], safeVectorAdd([1,2],[1,1])), 'chaining works').shouldBeJSON([3,5])
-Test(() => safeVectorAdd([1,2],[1]) instanceof TypeError, 'failed function returns TypeError').shouldBe(true)
-const inner = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'inner')
-Test(() => inner([1,2],[1]) instanceof TypeError, 'failed function returns TypeError').shouldBe(true)
-Test(() => inner([1,2],[1]).functionName, 'failed function returns name').shouldBe('inner')
-Test(() => safeVectorAdd([1,2], inner([1,2],[1])).toString(), 'short circuit works').shouldBeJSON('inner failed: bad result, ["[1] was NaN, expected number"]')
-~~~~
- */
-
 type TypeErrorConfig = {
-  functionName: string,
+  functionName?: string,
   isParamFailure: boolean,
   expected: any,
   found: any,
@@ -399,7 +322,7 @@ type TypeErrorConfig = {
 
 export class TypeError {
   // initializers are unnecessary but TypeScript is too stupid
-  functionName: string = ''
+  functionName?: string = undefined
   isParamFailure: boolean = false
   expected: any
   found: any
@@ -419,7 +342,7 @@ export class TypeError {
   }
 }
 
-export const assignReadOnly = (obj: XinObject, propMap: XinObject) => {
+export const assignReadOnly = (obj: any, propMap: XinObject) => {
   propMap = { ...propMap }
   for (const key of Object.keys(propMap)) {
     const value = propMap[key]
@@ -444,4 +367,56 @@ export const matchParamTypes = (types: any[], params: any[]) => {
   }
   const errors = types.map((type, i) => matchType(type, params[i]))
   return errors.flat().length ? errors : []
+}
+
+type TypeSafeFunction = {
+  (...args: any[]) : any,
+  paramTypes: any[],
+  resultType: any
+}
+
+export const typeSafe = (func: Function, paramTypes: any[] = [], resultType:any = undefined, functionName:string|undefined = undefined): TypeSafeFunction => {
+  const paramErrors = matchParamTypes(
+    ['#function', '#?array', '#?any', '#?string'],
+    [func, paramTypes, resultType, functionName]
+  )
+  if (paramErrors instanceof TypeError) {
+    throw new Error(`typeSafe was passed bad paramters`)
+  }
+
+  if (!functionName) functionName = func.name || 'anonymous'
+  let callCount = 0
+  return assignReadOnly(function (...params: any[]) {
+    callCount += 1
+    const paramErrors = matchParamTypes(paramTypes, params)
+    // short circuit failures
+    if (paramErrors instanceof TypeError) return paramErrors
+
+    if (paramErrors.length === 0) {
+      const result = func(...params)
+      const resultErrors = matchType(resultType, result)
+      if (resultErrors.length === 0) {
+        return result
+      } else {
+        return new TypeError({
+          functionName,
+          isParamFailure: false,
+          expected: resultType,
+          found: result,
+          errors: resultErrors
+        })
+      }
+    }
+    return new TypeError({
+      functionName,
+      isParamFailure: true,
+      expected: paramTypes,
+      found: params,
+      errors: paramErrors
+    })
+  }, {
+    paramTypes,
+    resultType,
+    getCallCount: () => callCount
+  })
 }

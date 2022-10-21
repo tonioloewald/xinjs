@@ -1,9 +1,17 @@
 // @ts-ignore
-import { test, expect } from "bun:test"
-import { matchType, describe, exampleAtPath } from './type-by-example'
+import { test, expect } from 'bun:test'
+import {
+  matchType,
+  describe,
+  exampleAtPath, 
+  matchParamTypes,
+  typeSafe,
+  TypeError
+} from './type-by-example'
 
 const join = (errors: string[]) => errors.join(';')
 const matchTypeString = (example: any, subject?: any) => join(matchType(example, subject))
+const matchParamsString = (types: any[], params: any[]) => join(matchParamTypes(types, params))
 
 test('simple tests', () => {
   expect(matchTypeString(0, 17)).toBe('')
@@ -177,4 +185,69 @@ test('object keys', () => {
   expect(matchTypeString({
     'foo?': 17
   },{})).toBe('')
+})
+
+test('type safe functions', () => {
+  expect(matchParamsString([1,2,3], [1,2,3])).toBe('')
+  expect(matchParamsString([1,'a',{}], [0,'b',{}])).toBe('')
+
+  // extra parameters are ok
+  expect(matchParamsString([1,'a'], [0,'b',{}])).toBe('')
+
+  const safeAdd = typeSafe((a: number, b: number) => a + b, [1, 2], 3, 'add')
+
+  // typesafe function works when used correctly
+  expect(safeAdd(1,2)).toBe(3)
+  expect(safeAdd(1).toString()).toBe('add failed: bad parameter, [[],["was undefined, expected number"]]')
+
+  const badAdd = typeSafe((a: number, b: number) => `${a + b}`, [1, 2], 3, 'badAdd')
+
+  // typesafe function fails with wrong return type
+  expect(badAdd(1,2).toString())
+    .toBe('badAdd failed: bad result, ["was \\"3\\", expected number"]')
+
+  const labeller = typeSafe((label: string, number: number) => `${label}: ${number}`, ['label', 0], 'label: 17', 'labeller')
+
+  // typeSafe function has paramTypes
+  expect(typeof labeller.paramTypes).toBe('object')
+
+  // typeSafe function has resultType
+  expect(typeof labeller.resultType).toBe('string')
+
+  // typeSafe function props are read-only
+  try {
+    labeller.resultType = 'foo'
+  } catch(e) {
+    expect(!!e).toBe(true)
+  }
+
+  // paramTypes function props are read-only
+  try {
+    labeller.paramTypes = ['foo', 17]
+  } catch(e) {
+    expect(!!e).toBe(true)
+  }
+
+  // @ts-ignore
+  const safeVectorAdd = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'vectorAdd')
+  expect(safeVectorAdd([1,2],[3,4]).toString()).toBe('4,6')
+  expect(safeVectorAdd([1,2],[3,'x']).toString()).toBe('vectorAdd failed: bad parameter, [[],["[1] was \\"x\\", expected number"]]')
+  expect(safeVectorAdd([1,2],[3]).toString()).toBe('vectorAdd failed: bad result, ["[1] was NaN, expected number"]')
+
+  // chaining works
+  expect(safeVectorAdd([1,2], safeVectorAdd([1,2],[1,1])).toString()).toBe('3,5')
+
+  // failed function returns TypeError
+  expect(safeVectorAdd([1,2],[1]) instanceof TypeError).toBe(true)
+  // @ts-ignore
+  const inner = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'inner')
+
+  // failed function returns TypeError
+  expect(inner([1,2],[1]) instanceof TypeError).toBe(true)
+
+  // failed function returns name
+  expect(inner([1,2],[1]).functionName).toBe('inner')
+
+  // short circuit works
+  expect(safeVectorAdd([1,2], inner([1,2],[1])).toString()).toBe('inner failed: bad result, ["[1] was NaN, expected number"]')
 })
