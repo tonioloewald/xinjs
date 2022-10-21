@@ -1,8 +1,8 @@
 // @ts-ignore
-import { test, expect } from "bun:test"
-import {xin, observe, unobserve, observerShouldBeRemoved} from './xin'
+import { test, expect } from 'bun:test'
+import { xin, observe, unobserve, observerShouldBeRemoved } from './xin'
 
-type Change = {path: string, value: any}
+type Change = { path: string, value: any }
 const changes: Change[] = []
 
 const obj = {
@@ -10,13 +10,13 @@ const obj = {
   value: 17,
   people: ['tomasina', 'juanita', 'harriet'],
   things: [
-    {id: 1701, name: 'Enterprise'},
-    {id: 666, name: 'The Beast'},
-    {id: 1, name: 'The Best'}
+    { id: 1701, name: 'Enterprise'},
+    { id: 666, name: 'The Beast'},
+    { id: 1, name: 'The Best'}
   ],
   cb(path: string) {
     if(path !== 'test.changes')
-    changes.push({path, value: xin[path]})
+    changes.push({ path, value: xin[path]})
   },
   sub: {
     foo: 'bar'
@@ -45,7 +45,7 @@ test('updates simple values', () => {
 test('triggers listeners', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    changes.push({path, value: xin[path]})
+    changes.push({ path, value: xin[path]})
   })
   xin.test.value = Math.PI
   expect(changes.length).toBe(1)
@@ -65,7 +65,7 @@ test('triggers listeners', () => {
 test('listener paths are selective', () => {
   changes.splice(0)
   const listener = observe('test.value', (path) => {
-    changes.push({path, value: xin[path]})
+    changes.push({ path, value: xin[path]})
   })
   xin.test.message = 'ignore this'
   xin.test.value = Math.random()
@@ -76,7 +76,7 @@ test('listener paths are selective', () => {
 test('listener tests are selective', () => {
   changes.splice(0)
   const listener = observe(/message/, (path) => {
-    changes.push({path, value: xin[path]})
+    changes.push({ path, value: xin[path]})
   })
   xin.test.message = 'hello'
   xin.test.value = Math.random()
@@ -100,7 +100,7 @@ test('listener callback paths work', () => {
 test('handles array changes', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    changes.push({path, value: xin[path]})
+    changes.push({ path, value: xin[path]})
   })
   xin.test.people.push('stanton')
   expect(changes.length).toBe(1)
@@ -123,7 +123,7 @@ test('objects are replaced', () => {
 test('unobserve works', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    changes.push({path, value: xin[path]})
+    changes.push({ path, value: xin[path]})
   })
   xin.test.value = Math.random()
   expect(changes.length).toBe(1)

@@ -177,9 +177,10 @@ const regHandler = (path = '') => ({
     if (debugPaths && !isValidPath(fullPath)) {
       throw new Error(`setting invalid path ${fullPath}`)
     }
-    setByPath(registry, fullPath, value)
-    touch(fullPath)
-    return true // success (throws error in strict mode otherwise)
+    if (setByPath(registry, fullPath, value)){
+      touch(fullPath) 
+    }
+    return true
   }
 })
 
