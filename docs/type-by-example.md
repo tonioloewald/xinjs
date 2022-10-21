@@ -273,3 +273,44 @@ Or hell, enforce some variant of *Hungarian Notation*:
       '#float[A-Z]\\w+': 3.14,
       ...
     }
+
+## Strongly Typed Functions
+
+`typeSafe` adds run-time type-checking to functions, verifying the type of both
+their inputs and outputs:
+
+    import {typeSafe} from 'path/to/b8r.js'
+    const safeFunc = typeSafe(func, paramTypes, resultType, name)
+
+- `func` is the function you're trying to type-check.
+- `paramTypes` is an array of types.
+- `resultType` is the type the function is expected to return (it's optional).
+- `name` is optional (defaults to func.name || 'anonymous')
+
+For example:
+
+    const safeAdd = typeSafe((a, b) => a + b, [1, 2], 3, 'add')
+
+A typeSafe function that is passed an incorrect set of parameters, whose original
+function returns an incorrect set of paramters will return an instance of `TypeError`.
+
+`TypeError` is a simple class to wrap the information associated with a type-check failure.
+Its instances five properties and one method:
+- `functionName` is the name of the function (or 'anonymous' if none was provided)
+- `isParamFailure` is true if the failure was in the inputs to a function,
+- `expected` is what was expected,
+- `found` is what was found,
+- `errors` is the array of type errors.
+- `toString()` renders the `TypeError` as a string
+
+A typeSafe function that is passed or more `TypeError` instances in its parameters will return
+the first error it sees without calling the wrapped function.
+
+typeSafe functions are self-documenting. They have two read-only properties `paramTypes` and
+`resultType`.
+
+typeSafe functions are intended to operate like
+[monads](https://en.wikipedia.org/wiki/Monad_(functional_programming)),
+so if you call `safe_f(safe_g(...))` and `safe_g` fails, `safe_f` will _short-circuit_ execution and
+return the error directly -- which should help with debugging and prevent code executing
+on data known to be bad.
