@@ -203,3 +203,73 @@ does not check every element of a large array.)
 
 The obvious place to use typeSafe functions is when communicating with services,
 and here any overhead is insignificant compared with network or I/O.
+
+## Object Keys
+
+**Important Note**: key properties are evaluated in the order they
+appear in the object. This is very important for regex keys.
+
+It's frequently necessary to declare objects which might have any
+number of properties. You can declare an object as `{}` and it
+will be allowed to have any number of crazy properties, or you
+can use strings prefixed by `#` as the key to denote restrictions
+on possible keys.
+
+(And, of course, you can declare a property name that *actually* starts
+with a '#' symbol by putting it in the regex, so '##foo' defines a
+property named '#foo'. You can even require a property named '#//'
+if you want to.)
+
+As a bonus, we can use the same method for embedding comments in
+serialized types! A property named '#//' is ignored by matchType
+(and can be treated as a comment -- you could even put an array of
+string in it for a long comment)
+
+E.g.
+
+    const mapType = {
+      '#//': 'This is an example (and this is a comment)',
+      '#': 'whatevs'
+    }
+
+This declares an object which can have any properties that would be
+allowed as javascript variable names, as long as the values are strings.
+
+If you want to allow absolutely anything to be used as a key you could
+declare:
+
+    const mapType = {
+      '#.*': '#?any'
+    }
+
+(This is pretty much the same as just declaring `mapType = {}`.)
+
+If the type has anything after the '#' besides '//' (which denotes a comment)
+then that will be treated as the body of a `RegExp` with `^` at the start and
+`$` at the end, so '#.*' allows any key that matches `/^.*$/` (which is anything,
+including an empty string).
+
+(Yeah, it doesn't allow for pathological cases, like `undefined` and `null` as keys,
+but our goal isn't to support programmers who want to declare types that appear as WTF
+examples of bad Javascript.)
+
+It follows that the key '#' is equivalent to:
+
+    '#[a-zA-Z_$][a-zA-Z_$0-9]*'
+
+So you could declare an object like this:
+
+    const namingConventionType = {
+      '#is\w+': true,
+      '#_': '#forbidden'
+    }
+
+Or hell, enforce some variant of *Hungarian Notation*:
+
+    const hungarianObject = {
+      '#bool[A-Z]\\w+': true,
+      '#txt[A-Z]\\w+': 'whatevs',
+      '#int[A-Z]\\w+': '#int',
+      '#float[A-Z]\\w+': 3.14,
+      ...
+    }

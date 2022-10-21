@@ -125,3 +125,56 @@ test('exampleAtPath finds sub-types', () => {
   expect(exampleAtPath({foo: [{bar: 'hello'}, {baz: 17}]}, 'foo[].baz')).toBe(17)
   expect(exampleAtPath({foo: [{bar: 'hello'}, {baz: 17}]}, 'foo[].hello')).toBe(undefined)
 })
+
+test('object keys', () => {
+  expect(matchTypeString({
+    '#is[A-Z]\\w*': true
+  }, {})).toBe('')
+  expect(matchTypeString({
+    '#is[A-Z]\\w*': true,
+  }, {
+    isGood: false,
+    ignored: 'because it does not start with "is"',
+  })).toBe('')
+  expect(matchTypeString({
+    '#is[A-Z]\\w*': true
+  }, {
+    isBad: 'true',
+  })).toBe("./^is[A-Z]\\w*$/:isBad was \"true\", expected boolean")
+  expect(matchTypeString({
+    '#is[A-Z]\\w+': true
+  },{
+    isThis: true,
+    isThat: false,
+    ignored: 'hello',
+    isTheOther: true
+  })).toBe('')
+  expect(matchTypeString({
+    '#': '#forbidden',
+    '#is[A-Z]\\w+': true
+  },{
+    isThis: true,
+  })).toBe("./^$/:isThis was true, expected #forbidden")
+  expect(matchTypeString({
+    '#is[A-Z]\\w+': true,
+    '#': '#forbidden'
+  },{
+    isThis: true,
+  })).toBe('')
+  expect(matchTypeString({
+    '#is[A-Z]\\w+': true,
+    '#': '#forbidden'
+  },{
+    ignored: 'hello',
+    isThat: true
+  })).toBe("./^$/:ignored was \"hello\", expected #forbidden")
+  expect(matchTypeString({
+    foo: 17
+  },{})).toBe(".foo was undefined, expected number")
+  expect(matchTypeString({
+    foo: '#?number'
+  },{})).toBe('')
+  expect(matchTypeString({
+    'foo?': 17
+  },{})).toBe('')
+})
