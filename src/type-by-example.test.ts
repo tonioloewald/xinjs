@@ -18,6 +18,24 @@ test('simple tests', () => {
   expect(matchTypeString(0, 'hello')).toBe('was "hello", expected number')
   expect(matchTypeString(false, true)).toBe('')
   expect(matchTypeString(false, null)).toBe('was null, expected boolean')
+  const userType = {
+    name: 'name',
+    age: 17,
+    address: {
+      street: 'somewhere',
+      city: 'city',
+      zipcode: '12345'
+    }
+  }
+
+  expect(matchTypeString(userType, {
+    name: 'Juanita Citizen',
+    age: '17',
+    address: {
+      street: '123 Sesame',
+      zipcode: 10001
+    }
+  })).toBe('.age was "17", expected number;.address.city was undefined, expected string;.address.zipcode was 10001, expected string')
 })
 
 test('number types and ranges', () => {
