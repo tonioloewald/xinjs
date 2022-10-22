@@ -5,7 +5,7 @@
 - incredibly lightweight
 - works anywhere (browsers, node, bun, electron etc.)
 
-`xinjs` takes the most valuable part of `b8r`, i.e. the `registry`,
+`xinjs` takes the most valuable part of [b8r](https://b8rjs.com), i.e. the `registry`,
 ports it to Typescript (mostly for autocomplete), and implements it 
 with no browser dependencies so it can work just as well on the server as the client.
 
