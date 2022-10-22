@@ -31,7 +31,7 @@ const obj = {
   ]
 }
 
-test('simple get', () => {
+test('getByPath works', () => {
   expect(getByPath(obj, '')).toBe(obj)
   expect(getByPath(obj, 'foo')).toBe(17)
   expect(getByPath(obj, '[=foo]')).toBe(17)
@@ -39,9 +39,11 @@ test('simple get', () => {
   expect(getByPath(obj, 'movies')).toBe(obj.movies)
   expect(getByPath(obj, 'movies[0]')).toBe(obj.movies[0])
   expect(getByPath(obj, 'movieObjs[0]')).toBe(obj.movieObjs[0])
+  expect(getByPath(obj, 'movieObjs[id=123]')).toBe(obj.movieObjs[1])
+  expect(getByPath(obj, 'movieObjs[reviews.metaCritic=72]')).toBe(obj.movieObjs[0])
 })
 
-test('simple set', () => {
+test('setByPath works', () => {
   setByPath(obj, 'foo', -11)
   expect(obj.foo).toBe(-11)
   setByPath(obj, 'bar.baz', 'luhrman')
@@ -65,7 +67,7 @@ test('simple set', () => {
 
 
 
-test('set does not change what does not need changing', () => {
+test('setByPath does not change values that do not need changing', () => {
   expect(setByPath(obj, 'foo', 1000)).toBe(true)
   expect(setByPath(obj, 'foo', 1000)).toBe(false)
   expect(setByPath(obj, 'foo', '1000')).toBe(true)
@@ -75,7 +77,7 @@ test('set does not change what does not need changing', () => {
   expect(setByPath(obj, 'newObj', newObj)).toBe(false)
 })
 
-test('object overlay', () => {
+test('setByPath adds properties to objects if needed', () => {
   setByPath(obj, 'pi', Math.PI)
   // @ts-expect-error
   expect(obj.pi).toBe(Math.PI)
@@ -90,7 +92,7 @@ test('object overlay', () => {
   expect(obj.deep.space).toBe(undefined)
 })
 
-test('id-paths', () => {
+test('id-path edge cases, including deleteByPath', () => {
   const romeoPlusJuliet = getByPath(obj, 'movieObjs[id=17]')
   expect(romeoPlusJuliet).toBe(obj.movieObjs[0])
   expect(getByPath(obj, 'movieObjs[reviews.rottenTomatoes=73]')).toBe(obj.movieObjs[1])
