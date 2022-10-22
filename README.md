@@ -18,7 +18,7 @@ sending mutations to complex state to the server.
 
 ### Observe application state
 
-`xinjs` tracks the state of objects you tell it using `paths` allowing economical 
+`xinjs` tracks the state of objects you assign to it using `paths` allowing economical 
 and direct updates to application state.
 
     import {xin, observe} from 'xinjs'
