@@ -1,8 +1,10 @@
 import { XinObject } from './xin-types'
 import { getByPath, setByPath } from './by-path'
-import { matchType } from './type-by-example'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
+
+// list of Array functions that change the array  
+const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift']
 
 type PathTestFunction = (path: string) => boolean | Symbol
 type CallbackFunction = (path: string) => void | Symbol
@@ -11,7 +13,7 @@ type TypeErrorHandler = (errors: string[], action: string) => void
 const registry: XinObject = {}
 const listeners: Listener[] = [] // { path_string_or_test, callback }
 const debugPaths = true
-const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
+const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\mad+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
 
 const isValidPath = (path: string) => validPath.test(path)
 
@@ -154,14 +156,16 @@ const regHandler = (path = '') => ({
         return value.bind(target)
       } else {
         return value
-      }
+      } 
     } else if (Array.isArray(target)) {
       // @ts-ignore -- tsc doesn't like the fact we're looking at array functions
       return typeof target[prop] === 'function'
         ? (...items: any[]) => {
           // @ts-ignore
           const result = (Array.prototype[prop]).apply(target, items)
-          touch(path)
+          if(ARRAY_MUTATIONS.includes(prop)) {
+            touch(path)
+          }
           return result
         }
         : target[Number(prop)]

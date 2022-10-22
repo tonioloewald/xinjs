@@ -242,9 +242,11 @@ function setByPath(orig, path, val) {
 }
 
 const observerShouldBeRemoved = Symbol('observer should be removed');
+// list of Array functions that change the array  
+const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift'];
 const registry = {};
 const listeners = []; // { path_string_or_test, callback }
-const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/;
+const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\mad+\]|\[[^=[\](),]*=[^[\]()]+\])*$/;
 const isValidPath = (path) => validPath.test(path);
 class Listener {
     constructor(test, callback) {
@@ -387,7 +389,9 @@ const regHandler = (path = '') => ({
                 ? (...items) => {
                     // @ts-ignore
                     const result = (Array.prototype[prop]).apply(target, items);
-                    touch(path);
+                    if (ARRAY_MUTATIONS.includes(prop)) {
+                        touch(path);
+                    }
                     return result;
                 }
                 : target[Number(prop)];
