@@ -7,11 +7,8 @@ Certain specialized types — enumerations in particular — are supported in a 
 to be encoded as JSON. These types are specified using a string starting with a '#'. (It follows that
 you shouldn't use strings starting with '#' as examples of strings.)
 
-## Work in Progress
-
-Ultimately, this module is intended to afford both static analysis of `b8r` code and components and efficient
-run-time checking of application state -- see [The Registry](?source=source/b8r.registry.js)
-documentation for more information.
+> Ultimately, the goal of this module is to provide a single source of truth for types
+> during static analysis, runtime, for mocks, and for filters.
 
 As a side-benefit, it is also capable of driving mock-data and optimistic rendering.
 Annotations in example data can provide hints as to how to generate mock data for
@@ -279,7 +276,7 @@ Or hell, enforce some variant of *Hungarian Notation*:
 `typeSafe` adds run-time type-checking to functions, verifying the type of both
 their inputs and outputs:
 
-    import {typeSafe} from 'path/to/b8r.js'
+    import {typeSafe} from 'xinjs'
     const safeFunc = typeSafe(func, paramTypes, resultType, name)
 
 - `func` is the function you're trying to type-check.
