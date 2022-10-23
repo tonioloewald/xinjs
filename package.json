@@ -1,7 +1,7 @@
 {
   "name": "xinjs",
   "version": "0.0.3",
-  "description": "path-based state management for javascript projects",
+  "description": "path-based state management for javascript",
   "main": "index.js",
   "homepage": "https://xinjs.net",
   "keywords": ["javascript", "typescript", "bun", "front-end", "back-end", "electronjs"],

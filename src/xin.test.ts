@@ -59,6 +59,13 @@ test('triggers listeners', () => {
   expect(changes.length).toBe(3)
   expect(changes[2].path).toBe('test.things[id=1701].name')
   expect(changes[2].value).toBe('formerly known as Enterprise')
+  xin.test.people.sort()
+  // expect sort to trigger change
+  expect(changes.length).toBe(4)
+  expect(changes[3].path).toBe('test.people')
+  // expect map to NOT trigger change
+  const ignore = xin.test.people.map((person: string) => `hello ${person}`)
+  expect(changes.length).toBe(4)
   unobserve(listener)
 })
 
