@@ -26,7 +26,7 @@ sending mutations to complex state to the server.
 
 ## What it does
 
-### Observe object state
+### Observe Object State
 
 `xinjs` tracks the state of objects you assign to it using `paths` allowing economical 
 and direct updates to application state.
@@ -56,9 +56,9 @@ and direct updates to application state.
 
 ### No Tax, No Packaging
 
-`xinjs` does not modify the stuff you hand over to it! It just wraps an
-ordinary `Object` with a `Proxy` and then if you use `xin` to make changes
-to that `Object` it will notify any interested observers.
+`xinjs` does not modify the stuff you hand over to it! It just wraps objects 
+with a `Proxy` and then if you use `xin` to make changes to those objects made
+via `xinjs` will notify any interested observers.
 
 	import {xin, observe} from 'xinjs'
 	xin.foo = {bar: 17}
