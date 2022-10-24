@@ -13,7 +13,8 @@
         <mask id="mask-2" fill="white">
             <use xlink:href="#path-1"></use>
         </mask>
-        <circle stroke="#979797" cx="256" cy="256" r="255.5"></circle>
+        <use id="Oval" fill="#088358" xlink:href="#path-1"></use>
+        <rect id="Rectangle" fill="#088358" mask="url(#mask-2)" x="-5" y="-5" width="522" height="522"></rect>
         <g id="Group" mask="url(#mask-2)">
             <g transform="translate(0.000000, 16.000000)" id="xinjs-logo">
                 <rect id="Rectangle-Copy" fill="#088358" x="0" y="0" width="512" height="512"></rect>
