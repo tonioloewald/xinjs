@@ -1,8 +1,10 @@
 {
   "name": "xinjs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "path-based state management for javascript",
   "main": "index.js",
+  "homepage": "https://xinjs.net",
+  "keywords": ["javascript", "typescript", "bun", "front-end", "back-end", "electronjs"],
   "scripts": {
     "start": "bun src/main.ts",
     "build": "bun tsc && bun test && ./build.command",
@@ -13,9 +15,7 @@
   "devDependencies": {
     "bun-types": "^0.2.0",
     "rollup": "^3.2.3",
-    "typescript": "^4.8.4"
-  },
-  "dependencies": {
-    "uglify-es": "^3.3.9"
+    "typescript": "^4.8.4",
+    "uglify-js": "^3.1.7"
   }
 }
