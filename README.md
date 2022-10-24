@@ -1,6 +1,7 @@
 # xinjs
+### path-based state management for javascript projects
 
-- state management for modern web and node applications
+- simple, efficient observer pattern
 - written in TypeScript
 - incredibly lightweight
 - works anywhere (browsers, node, bun, electron etc.)
