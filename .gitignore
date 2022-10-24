@@ -121,5 +121,3 @@ web_modules/
 # macos
 .DS_Store
 
-# tsc
-ts-build

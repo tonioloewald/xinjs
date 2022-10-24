@@ -6,7 +6,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "ts-build"
+    "outDir": "build",
+    "declaration": true,
+    "declarationMap": true
   },
   "allowJs": true,
   "types": ["bun-types"],
