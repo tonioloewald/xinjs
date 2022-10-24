@@ -121,3 +121,5 @@ web_modules/
 # macos
 .DS_Store
 
+# bun
+bun.lockb
