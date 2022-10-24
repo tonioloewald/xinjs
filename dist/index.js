@@ -1,5 +1,7 @@
 'use strict';
 
+var react = require('react');
+
 const stringify = (x) => {
     try {
         return JSON.stringify(x);
@@ -416,6 +418,25 @@ const regHandler = (path = '') => ({
 });
 const xin = new Proxy(registry, regHandler());
 
+// TODO declare type the way it's declated for useState so that TypeScript
+// passes through type of initialValue to the right thing
+const useXin = (path, initialValue = '') => {
+    const [value, update] = react.useState(xin[path] || initialValue);
+    react.useEffect(() => {
+        const observer = (path) => {
+            update(xin[path]);
+        };
+        const listener = observe(path, observer);
+        return () => {
+            unobserve(listener);
+        };
+    });
+    const setValue = (value) => {
+        xin[path] = value;
+    };
+    return [value, setValue];
+};
+
 const isAsync = (func) => func && func.constructor === (async () => { }).constructor;
 const describe = (x) => {
     if (x === null)
@@ -812,4 +833,5 @@ exports.observe = observe;
 exports.observerShouldBeRemoved = observerShouldBeRemoved;
 exports.typeSafe = typeSafe;
 exports.unobserve = unobserve;
+exports.useXin = useXin;
 exports.xin = xin;
