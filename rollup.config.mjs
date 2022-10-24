@@ -1,23 +1,23 @@
 export default [
   {
-    input: 'ts-build/index.js',
+    input: 'build/index.js',
     output: {
-      file: 'dist/xin.js',
+      file: 'dist/index.js',
       format: 'cjs'
     }
   },
   {
-    input: 'ts-build/index.js',
+    input: 'build/index.js',
     output: {
-      file: 'dist/xin.mjs',
+      file: 'dist/index.mjs',
       format: 'esm'
     }
   },
   {
-    input: 'ts-build/index.js',
+    input: 'build/index.js',
     output: {
       name: 'xi',
-      file: 'dist/xin.iife.js',
+      file: 'dist/index.iife.js',
       format: 'iife'
     }
   }
