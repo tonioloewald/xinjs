@@ -1,5 +1,12 @@
 # xinjs
-### path-based state management for javascript projects
+
+<div style="text-align: center">
+	<a href="https://xinjs.net">
+		<img style="width: 256px; max-width: 80%" alt="xinjs logo" src="./xinjs-logo.svg">
+	</a>
+</div>
+
+### path-based state for javascript projects
 
 - simple, efficient observer pattern
 - written in TypeScript
