@@ -2,12 +2,13 @@
   "name": "xinjs",
   "version": "0.0.3",
   "description": "path-based state management for javascript",
-  "main": "index.js",
+  "main": "build/index.js",
   "homepage": "https://xinjs.net",
   "keywords": ["javascript", "typescript", "bun", "front-end", "back-end", "electronjs"],
   "scripts": {
     "start": "bun src/main.ts",
     "build": "bun tsc && bun test && ./build.command",
+    "pack": "bun run build && npm pack --pack-destination ~",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",
