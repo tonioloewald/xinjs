@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "path-based state management for javascript",
   "main": "build/index.js",
   "homepage": "https://xinjs.net",
@@ -27,5 +27,9 @@
     "rollup": "^3.2.3",
     "typescript": "^4.8.4",
     "uglify-js": "^3.1.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonioloewald/xinjs.git"
   }
 }
