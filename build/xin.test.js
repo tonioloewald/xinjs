@@ -135,3 +135,40 @@ test('_xinValue works, xin does not corrupt content', () => {
     expect(xin.test.people._xinValue).toBe(obj.people);
     expect(xin.test.things['id=666']._xinValue).toBe(obj.things[1]);
 });
+test('instance properties, computed properties', () => {
+    class Foo {
+        constructor(x) {
+            this.x = '';
+            this.x = x;
+        }
+        get computedX() {
+            return this.x;
+        }
+    }
+    xin.foo = new Foo('test');
+    expect(xin.foo.x).toBe('test');
+    expect(xin.foo.computedX).toBe('test');
+});
+test('parents and children', () => {
+    xin.grandparent = {
+        name: 'Bobby',
+        parent: { child: 17 }
+    };
+    changes.splice(0);
+    observe('grandparent.parent', path => {
+        changes.push({ path, value: xin[path], observed: 'parent' });
+    });
+    observe('grandparent.parent.child', path => {
+        changes.push({ path, value: xin[path], observed: 'parent.child' });
+    });
+    xin.grandparent.parent = { child: 20 };
+    expect(changes.length).toBe(2);
+    xin.grandparent.parent.child = 20;
+    expect(changes.length).toBe(2);
+    xin.grandparent.parent.child = 17;
+    expect(changes.length).toBe(4);
+    xin.grandparent.parent = { child: 11 };
+    expect(changes.length).toBe(6);
+    xin.grandparent.name = 'Drop Tables';
+    expect(changes.length).toBe(6);
+});
