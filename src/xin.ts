@@ -1,4 +1,4 @@
-import { XinObject } from './xin-types'
+import { XinObject, PathTestFunction } from './xin-types'
 import { getByPath, setByPath } from './by-path'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -6,7 +6,6 @@ export const observerShouldBeRemoved = Symbol('observer should be removed')
 // list of Array functions that change the array  
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift']
 
-type PathTestFunction = (path: string) => boolean | Symbol
 type CallbackFunction = (path: string) => void | Symbol
 type TypeErrorHandler = (errors: string[], action: string) => void
 

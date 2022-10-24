@@ -1,6 +1,5 @@
-import { XinObject } from './xin-types';
+import { XinObject, PathTestFunction } from './xin-types';
 export declare const observerShouldBeRemoved: unique symbol;
-declare type PathTestFunction = (path: string) => boolean | Symbol;
 declare type CallbackFunction = (path: string) => void | Symbol;
 declare const isValidPath: (path: string) => boolean;
 declare class Listener {
