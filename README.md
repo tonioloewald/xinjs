@@ -2,9 +2,11 @@
 
 <div style="text-align: center">
 	<a href="https://xinjs.net">
-		<img style="width: 256px; max-width: 80%" alt="xinjs logo" src="./xinjs-logo.svg">
+		<img style="width: 256px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
 	</a>
 </div>
+
+[home page](https://xinjs.net) [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs)
 
 ### Path-based State for JS Apps
 
