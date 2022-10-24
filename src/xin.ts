@@ -22,7 +22,7 @@ class Listener {
 
   constructor (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) {
     if (typeof test === 'string') {
-      this.test = t => typeof t === 'string' && t.startsWith(test)
+      this.test = t => typeof t === 'string' && !!t && (t.startsWith(test) || test.startsWith(t))
     } else if (test instanceof RegExp) {
       this.test = test.test.bind(test)
     } else if (test instanceof Function) {
@@ -131,7 +131,7 @@ const regHandler = (path = '') => ({
       prop = prop.substr(1, prop.length - 2)
     }
     if (
-      Object.prototype.hasOwnProperty.call(target, prop) ||
+      (!Array.isArray(target) && target[prop] !== undefined) ||
       (Array.isArray(target) && typeof prop === 'string' && prop.includes('='))
     ) {
       let value
@@ -155,7 +155,7 @@ const regHandler = (path = '') => ({
         return value.bind(target)
       } else {
         return value
-      } 
+      }
     } else if (Array.isArray(target)) {
       // @ts-ignore -- tsc doesn't like the fact we're looking at array functions
       return typeof target[prop] === 'function'

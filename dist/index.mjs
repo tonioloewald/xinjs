@@ -251,7 +251,7 @@ const isValidPath = (path) => validPath.test(path);
 class Listener {
     constructor(test, callback) {
         if (typeof test === 'string') {
-            this.test = t => typeof t === 'string' && t.startsWith(test);
+            this.test = t => typeof t === 'string' && !!t && (t.startsWith(test) || test.startsWith(t));
         }
         else if (test instanceof RegExp) {
             this.test = test.test.bind(test);
@@ -359,7 +359,7 @@ const regHandler = (path = '') => ({
         if (prop.startsWith('[') && prop.endsWith(']')) {
             prop = prop.substr(1, prop.length - 2);
         }
-        if (Object.prototype.hasOwnProperty.call(target, prop) ||
+        if ((!Array.isArray(target) && target[prop] !== undefined) ||
             (Array.isArray(target) && typeof prop === 'string' && prop.includes('='))) {
             let value;
             if (prop.includes('=')) {
