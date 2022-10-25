@@ -104,9 +104,56 @@ test('listener callback paths work', () => {
   unobserve(listener)
 })
 
+test('instance changes trigger observers', () => {
+  changes.splice(0)
+  
+  class Baz {
+    x: number = 0
+
+    constructor(x: number = 0) {
+      this.x = x
+    }
+
+    get y () {
+      return this.x
+    }
+
+    set y (newValue: number) {
+      this.x = newValue
+    }
+  }
+
+  const baz = new Baz(17)
+  xin.test.baz = baz
+
+  const listener = observe(() => true, (path) => {
+    console.log(path, xin[path])
+    changes.push({ path, value: xin[path]})
+  })
+
+  expect(xin.test.baz._xinValue).toBe(baz)
+  expect(xin.test.baz.x).toBe(17)
+  expect(xin.test.baz.y).toBe(17)
+  expect(changes.length).toBe(0)
+  xin.test.baz.x = 100
+  expect(changes.length).toBe(1)
+  expect(changes[0].path).toBe('test.baz.x')
+  xin.test.baz.x = 100
+  expect(changes.length).toBe(1)
+  xin.test.baz.y = 100
+  expect(changes.length).toBe(1)
+  expect(changes[0].path).toBe('test.baz.x')
+  xin.test.baz.y = Math.PI
+  expect(changes.length).toBe(2)
+  expect(changes[1].path).toBe('test.baz.y')
+
+  unobserve(listener)
+})
+
 test('handles array changes', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
+    console.log(path, xin[path])
     changes.push({ path, value: xin[path]})
   })
   xin.test.people.push('stanton')
@@ -130,6 +177,7 @@ test('objects are replaced', () => {
 test('unobserve works', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
+    console.log(path, xin[path])
     changes.push({ path, value: xin[path]})
   })
   xin.test.value = Math.random()

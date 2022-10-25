@@ -6,7 +6,11 @@ export const hotReload = (test: PathTestFunction = () => true) => {
   if(savedState) {
     const state = JSON.parse(savedState)
     for(const key of Object.keys(state).filter(test)) {
-      Object.assign(xin[key], state[key])
+      if (xin[key]) {
+        Object.assign(xin[key], state[key])
+      } else {
+        xin[key] = state[key]
+      }
     }
   }
 

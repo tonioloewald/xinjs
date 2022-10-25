@@ -369,9 +369,7 @@ const regHandler = (path = '') => ({
             else {
                 value = (target)[prop];
             }
-            if (value &&
-                typeof value === 'object' &&
-                (value.constructor === Object || value.constructor === Array)) {
+            if (value && typeof value === 'object') {
                 const currentPath = extendPath(path, prop);
                 const proxy = new Proxy(value, regHandler(currentPath));
                 return proxy;
@@ -397,7 +395,7 @@ const regHandler = (path = '') => ({
                 : target[Number(prop)];
         }
         else {
-            return undefined;
+            return target ? target[prop] : undefined;
         }
     },
     set(target, prop, value) {
@@ -830,7 +828,12 @@ const hotReload = (test = () => true) => {
     if (savedState) {
         const state = JSON.parse(savedState);
         for (const key of Object.keys(state).filter(test)) {
-            Object.assign(xin[key], state[key]);
+            if (xin[key]) {
+                Object.assign(xin[key], state[key]);
+            }
+            else {
+                xin[key] = state[key];
+            }
         }
     }
     let deferredSave = 0;
