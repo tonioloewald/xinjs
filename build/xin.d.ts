@@ -7,7 +7,9 @@ declare class Listener {
     callback: CallbackFunction;
     constructor(test: string | RegExp | PathTestFunction, callback: string | CallbackFunction);
 }
-declare const touch: (path: string) => void;
+declare const touch: (what: string | {
+    _xinPath: string;
+}) => void;
 declare const observe: (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) => Listener;
 declare const unobserve: (listener: Listener) => boolean;
 declare const xin: XinObject;

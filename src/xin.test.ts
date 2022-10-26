@@ -1,6 +1,6 @@
 // @ts-ignore
 import { test, expect } from 'bun:test'
-import { xin, observe, unobserve, observerShouldBeRemoved } from './xin'
+import { xin, observe, unobserve, observerShouldBeRemoved, touch } from './xin'
 
 type Change = { path: string, value: any }
 const changes: Change[] = []
@@ -104,6 +104,26 @@ test('listener callback paths work', () => {
   unobserve(listener)
 })
 
+test('you can touch objects', () => {
+  changes.splice(0)
+  const listener = observe('test', path => {
+    changes.push({ path, value: xin[path] })
+  })
+  xin.test._xinValue.message = 'wham-o'
+  expect(xin.test.message).toBe('wham-o')
+  expect(changes.length).toBe(0)
+  touch(xin.test)
+  expect(changes.length).toBe(1)
+  xin.test.message = 'because'
+  expect(changes.length).toBe(2)
+  xin.test._xinValue.message = 'i said so'
+  expect(changes.length).toBe(2)
+  touch('test.message')
+  expect(changes.length).toBe(3)
+  expect(changes[2].value).toBe('i said so')
+  unobserve(listener)
+})
+
 test('instance changes trigger observers', () => {
   changes.splice(0)
   
@@ -127,7 +147,6 @@ test('instance changes trigger observers', () => {
   xin.test.baz = baz
 
   const listener = observe(() => true, (path) => {
-    console.log(path, xin[path])
     changes.push({ path, value: xin[path]})
   })
 
@@ -153,7 +172,6 @@ test('instance changes trigger observers', () => {
 test('handles array changes', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    console.log(path, xin[path])
     changes.push({ path, value: xin[path]})
   })
   xin.test.people.push('stanton')
@@ -177,7 +195,6 @@ test('objects are replaced', () => {
 test('unobserve works', () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    console.log(path, xin[path])
     changes.push({ path, value: xin[path]})
   })
   xin.test.value = Math.random()

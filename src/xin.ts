@@ -50,14 +50,19 @@ class Listener {
   }
 }
 
-const touch = (path: string) => {
+const getPath = (what: string | {_xinPath: string}): string => {
+  return typeof what === 'object' ? what._xinPath : what
+}
+
+const touch = (what: string | {_xinPath: string}) => {
+  const path = getPath(what)
   listeners
     .filter(listener => {
       let heard
       try {
         heard = listener.test(path)
       } catch (e) {
-        throw new Error(`listener test (${path}) threw ${e}`)
+        throw new Error(`${listener.test} threw "${e}" at "${path}"`)
       }
       if (heard === observerShouldBeRemoved) {
         unobserve(listener)
@@ -66,14 +71,14 @@ const touch = (path: string) => {
       return !!heard
     })
     .forEach(listener => {
+      let heard
       try {
-        if (
-          listener.callback(path) === observerShouldBeRemoved
-        ) {
-          unobserve(listener)
-        }
+        heard = listener.callback(path)
       } catch (e) {
-        throw new Error(`listener callback threw ${e} handling ${path}`)
+        throw new Error(`${listener.callback} threw "${e}" handling "${path}"`)
+      }
+      if (heard === observerShouldBeRemoved) {
+        unobserve(listener)
       }
     })
 }
