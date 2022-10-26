@@ -6,7 +6,7 @@
 	</a>
 </div>
 
-[xinjs.net](https://xinjs.net) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs)
+[xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/about.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs)
 
 ### Path-based State for JS Apps
 

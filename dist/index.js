@@ -284,7 +284,11 @@ class Listener {
         listeners.push(this);
     }
 }
-const touch = (path) => {
+const getPath = (what) => {
+    return typeof what === 'object' ? what._xinPath : what;
+};
+const touch = (what) => {
+    const path = getPath(what);
     listeners
         .filter(listener => {
         let heard;
@@ -292,7 +296,7 @@ const touch = (path) => {
             heard = listener.test(path);
         }
         catch (e) {
-            throw new Error(`listener test (${path}) threw ${e}`);
+            throw new Error(`${listener.test} threw "${e}" at "${path}"`);
         }
         if (heard === observerShouldBeRemoved) {
             unobserve(listener);
@@ -301,13 +305,15 @@ const touch = (path) => {
         return !!heard;
     })
         .forEach(listener => {
+        let heard;
         try {
-            if (listener.callback(path) === observerShouldBeRemoved) {
-                unobserve(listener);
-            }
+            heard = listener.callback(path);
         }
         catch (e) {
-            throw new Error(`listener callback threw ${e} handling ${path}`);
+            throw new Error(`${listener.callback} threw "${e}" handling "${path}"`);
+        }
+        if (heard === observerShouldBeRemoved) {
+            unobserve(listener);
         }
     });
 };
@@ -371,9 +377,7 @@ const regHandler = (path = '') => ({
             else {
                 value = (target)[prop];
             }
-            if (value &&
-                typeof value === 'object' &&
-                (value.constructor === Object || value.constructor === Array)) {
+            if (value && typeof value === 'object') {
                 const currentPath = extendPath(path, prop);
                 const proxy = new Proxy(value, regHandler(currentPath));
                 return proxy;
@@ -399,7 +403,7 @@ const regHandler = (path = '') => ({
                 : target[Number(prop)];
         }
         else {
-            return undefined;
+            return target ? target[prop] : undefined;
         }
     },
     set(target, prop, value) {
@@ -832,7 +836,12 @@ const hotReload = (test = () => true) => {
     if (savedState) {
         const state = JSON.parse(savedState);
         for (const key of Object.keys(state).filter(test)) {
-            Object.assign(xin[key], state[key]);
+            if (xin[key]) {
+                Object.assign(xin[key], state[key]);
+            }
+            else {
+                xin[key] = state[key];
+            }
         }
     }
     let deferredSave = 0;

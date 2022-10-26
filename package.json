@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.0.8",
+  "version": "0.0.14",
   "description": "path-based state management for javascript",
   "main": "build/index.js",
   "homepage": "https://xinjs.net",
@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "start": "bun src/main.ts",
-    "build": "rm -r build && bun tsc && bun test && ./build.command",
+    "build": "rm -rf build && bun test && bun tsc && ./build.command",
     "pack": "bun run build && npm pack --pack-destination ~",
     "test": "bun wiptest"
   },

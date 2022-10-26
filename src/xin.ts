@@ -50,14 +50,19 @@ class Listener {
   }
 }
 
-const touch = (path: string) => {
+const getPath = (what: string | {_xinPath: string}): string => {
+  return typeof what === 'object' ? what._xinPath : what
+}
+
+const touch = (what: string | {_xinPath: string}) => {
+  const path = getPath(what)
   listeners
     .filter(listener => {
       let heard
       try {
         heard = listener.test(path)
       } catch (e) {
-        throw new Error(`listener test (${path}) threw ${e}`)
+        throw new Error(`${listener.test} threw "${e}" at "${path}"`)
       }
       if (heard === observerShouldBeRemoved) {
         unobserve(listener)
@@ -66,14 +71,14 @@ const touch = (path: string) => {
       return !!heard
     })
     .forEach(listener => {
+      let heard
       try {
-        if (
-          listener.callback(path) === observerShouldBeRemoved
-        ) {
-          unobserve(listener)
-        }
+        heard = listener.callback(path)
       } catch (e) {
-        throw new Error(`listener callback threw ${e} handling ${path}`)
+        throw new Error(`${listener.callback} threw "${e}" handling "${path}"`)
+      }
+      if (heard === observerShouldBeRemoved) {
+        unobserve(listener)
       }
     })
 }
@@ -143,11 +148,7 @@ const regHandler = (path = '') => ({
       } else {
         value = (target)[prop]
       }
-      if (
-        value &&
-        typeof value === 'object' &&
-        (value.constructor === Object || value.constructor === Array)
-      ) {
+      if (value && typeof value === 'object') {
         const currentPath = extendPath(path, prop)
         const proxy: Object = new Proxy(value, regHandler(currentPath))
         return proxy
@@ -169,7 +170,7 @@ const regHandler = (path = '') => ({
         }
         : target[Number(prop)]
     } else {
-      return undefined
+      return target ? target[prop] : undefined
     }
   },
   set (target: Object, prop: string, value: any) {
