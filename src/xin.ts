@@ -1,4 +1,4 @@
-import { XinObject, PathTestFunction } from './xin-types'
+import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { getByPath, setByPath } from './by-path'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -6,7 +6,6 @@ export const observerShouldBeRemoved = Symbol('observer should be removed')
 // list of Array functions that change the array  
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift']
 
-type CallbackFunction = (path: string) => void | Symbol
 type TypeErrorHandler = (errors: string[], action: string) => void
 
 const registry: XinObject = {}
@@ -18,9 +17,9 @@ const isValidPath = (path: string) => validPath.test(path)
 
 class Listener {
   test: PathTestFunction
-  callback: CallbackFunction
+  callback: ObserverCallbackFunction
 
-  constructor (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) {
+  constructor (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) {
     if (typeof test === 'string') {
       this.test = t => typeof t === 'string' && !!t && (t.startsWith(test) || test.startsWith(t))
     } else if (test instanceof RegExp) {
@@ -33,7 +32,7 @@ class Listener {
       )
     }
     if (typeof callback === 'string') {
-      this.callback = (...args) => {
+      this.callback = (...args: any[]) => {
         const func = xin[callback]
         if (func) {
           func(...args)
@@ -83,7 +82,7 @@ const touch = (what: string | {_xinPath: string}) => {
     })
 }
 
-const observe = (test: string | RegExp | PathTestFunction, callback: string | CallbackFunction) => {
+const observe = (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => {
   return new Listener(test, callback)
 }
 

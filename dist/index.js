@@ -427,7 +427,7 @@ const xin = new Proxy(registry, regHandler());
 const useXin = (path, initialValue = '') => {
     const [value, update] = react.useState(xin[path] || initialValue);
     react.useEffect(() => {
-        const observer = (path) => {
+        const observer = () => {
             update(xin[path]);
         };
         const listener = observe(path, observer);

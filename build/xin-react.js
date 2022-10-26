@@ -5,7 +5,7 @@ import { xin, observe, unobserve } from './xin';
 export const useXin = (path, initialValue = '') => {
     const [value, update] = useState(xin[path] || initialValue);
     useEffect(() => {
-        const observer = (path) => {
+        const observer = () => {
             update(xin[path]);
         };
         const listener = observe(path, observer);
