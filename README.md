@@ -57,8 +57,8 @@ and direct updates to application state.
 ### No Tax, No Packaging
 
 `xinjs` does not modify the stuff you hand over to it! It just wraps objects 
-with a `Proxy` and then if you use `xin` to make changes to those objects made
-via `xinjs` will notify any interested observers.
+with a `Proxy` and then if you use `xin` to make changes to those objects,
+`xinjs` will notify any interested observers.
 
 	import {xin, observe} from 'xinjs'
 	xin.foo = {bar: 17}

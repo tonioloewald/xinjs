@@ -38,10 +38,10 @@ export const filter = (template, obj) => {
     else if (Array.isArray(template)) {
         return filterArray(template, obj);
     }
-    else if (typeof template === 'object') {
+    else if (typeof obj === 'object') {
         return filterObject(template, obj);
     }
     else {
-        return matchType(obj, template).length ? undefined : obj;
+        return matchType(template, obj).length ? undefined : obj;
     }
 };

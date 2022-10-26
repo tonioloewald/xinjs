@@ -14,8 +14,8 @@
   ],
   "scripts": {
     "start": "bun src/main.ts",
-    "build": "rm -rf build && bun test && bun tsc && ./build.command",
-    "pack": "bun run build && npm pack --pack-destination ~",
+    "make": "rm -rf build && bun test && bun tsc && ./build.command",
+    "pack": "bun run make && npm pack --pack-destination ~",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",
