@@ -127,11 +127,25 @@ test('you can touch objects', () => {
 test('instance changes trigger observers', () => {
   changes.splice(0)
   
+  class Bar {
+    parent: Baz
+
+    constructor(parent: Baz) {
+      this.parent = parent
+    }
+
+    inc() {
+      this.parent.inc()
+    }
+  }
+
   class Baz {
     x: number = 0
+    child: Bar
 
     constructor(x: number = 0) {
       this.x = x
+      this.child = new Bar(this)
     }
 
     get y () {
@@ -140,6 +154,10 @@ test('instance changes trigger observers', () => {
 
     set y (newValue: number) {
       this.x = newValue
+    }
+
+    inc () {
+        this.x++
     }
   }
 
@@ -162,9 +180,16 @@ test('instance changes trigger observers', () => {
   xin.test.baz.y = 100
   expect(changes.length).toBe(1)
   expect(changes[0].path).toBe('test.baz.x')
-  xin.test.baz.y = Math.PI
+  xin.test.baz.y = -10
   expect(changes.length).toBe(2)
   expect(changes[1].path).toBe('test.baz.y')
+  xin.test.baz.inc()
+  expect(changes.length).toBe(2)
+  expect(xin.test.baz.x).toBe(-9)
+  xin.test.baz.child.inc()
+  expect(changes.length).toBe(2)
+  expect(xin.test.baz.x).toBe(-8)
+  expect(xin.test.baz.x).toBe(xin.test.baz.child.parent.x)
 
   unobserve(listener)
 })

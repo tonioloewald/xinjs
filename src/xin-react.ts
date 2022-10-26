@@ -12,7 +12,7 @@ type HookType = [
 export const useXin = (path: string, initialValue: any = ''): HookType => {
   const [value, update] = useState(xin[path] || initialValue);
   useEffect(() => {
-    const observer = (path: string) => {
+    const observer = () => {
       update(xin[path])
     }
     const listener = observe(path, observer)
