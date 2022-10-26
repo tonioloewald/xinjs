@@ -1,6 +1,6 @@
 // @ts-ignore
 import { test, expect } from 'bun:test'
-import { xin, observe, unobserve, observerShouldBeRemoved } from './xin'
+import { xin, observe, unobserve, observerShouldBeRemoved, touch } from './xin'
 
 type Change = { path: string, value: any, observed?: any }
 const changes: Change[] = []
@@ -101,6 +101,71 @@ test('listener callback paths work', () => {
   xin.test.message = 'good-bye'
   xin.test.value = Math.random()
   expect(changes.length).toBe(4)
+  unobserve(listener)
+})
+
+test('you can touch objects', () => {
+  changes.splice(0)
+  const listener = observe('test', path => {
+    changes.push({ path, value: xin[path] })
+  })
+  xin.test._xinValue.message = 'wham-o'
+  expect(xin.test.message).toBe('wham-o')
+  expect(changes.length).toBe(0)
+  touch(xin.test)
+  expect(changes.length).toBe(1)
+  xin.test.message = 'because'
+  expect(changes.length).toBe(2)
+  xin.test._xinValue.message = 'i said so'
+  expect(changes.length).toBe(2)
+  touch('test.message')
+  expect(changes.length).toBe(3)
+  expect(changes[2].value).toBe('i said so')
+  unobserve(listener)
+})
+
+test('instance changes trigger observers', () => {
+  changes.splice(0)
+  
+  class Baz {
+    x: number = 0
+
+    constructor(x: number = 0) {
+      this.x = x
+    }
+
+    get y () {
+      return this.x
+    }
+
+    set y (newValue: number) {
+      this.x = newValue
+    }
+  }
+
+  const baz = new Baz(17)
+  xin.test.baz = baz
+
+  const listener = observe(() => true, (path) => {
+    changes.push({ path, value: xin[path]})
+  })
+
+  expect(xin.test.baz._xinValue).toBe(baz)
+  expect(xin.test.baz.x).toBe(17)
+  expect(xin.test.baz.y).toBe(17)
+  expect(changes.length).toBe(0)
+  xin.test.baz.x = 100
+  expect(changes.length).toBe(1)
+  expect(changes[0].path).toBe('test.baz.x')
+  xin.test.baz.x = 100
+  expect(changes.length).toBe(1)
+  xin.test.baz.y = 100
+  expect(changes.length).toBe(1)
+  expect(changes[0].path).toBe('test.baz.x')
+  xin.test.baz.y = Math.PI
+  expect(changes.length).toBe(2)
+  expect(changes[1].path).toBe('test.baz.y')
+
   unobserve(listener)
 })
 

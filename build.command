@@ -1,4 +1,4 @@
-rm -r ./dist
+rm -rf ./dist
 
 echo rolling up
 npx rollup -c
