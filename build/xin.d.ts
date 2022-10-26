@@ -1,4 +1,4 @@
-import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types';
+import { XinObject, XinTouchableType, PathTestFunction, ObserverCallbackFunction } from './xin-types';
 export declare const observerShouldBeRemoved: unique symbol;
 declare const isValidPath: (path: string) => boolean;
 declare class Listener {
@@ -6,9 +6,7 @@ declare class Listener {
     callback: ObserverCallbackFunction;
     constructor(test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction);
 }
-declare const touch: (what: string | {
-    _xinPath: string;
-}) => void;
+declare const touch: (what: XinTouchableType) => void;
 declare const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 declare const unobserve: (listener: Listener) => boolean;
 declare const xin: XinObject;
