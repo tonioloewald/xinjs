@@ -1,12 +1,10 @@
-import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { XinObject, XinTouchableType, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { getByPath, setByPath } from './by-path'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
 
 // list of Array functions that change the array  
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift']
-
-type TypeErrorHandler = (errors: string[], action: string) => void
 
 const registry: XinObject = {}
 const listeners: Listener[] = [] // { path_string_or_test, callback }
@@ -53,7 +51,7 @@ const getPath = (what: string | {_xinPath: string}): string => {
   return typeof what === 'object' ? what._xinPath : what
 }
 
-const touch = (what: string | {_xinPath: string}) => {
+const touch = (what: XinTouchableType) => {
   const path = getPath(what)
   listeners
     .filter(listener => {
