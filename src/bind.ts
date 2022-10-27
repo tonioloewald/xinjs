@@ -1,27 +1,10 @@
 import { xin, touch, observe, observerShouldBeRemoved } from './xin'
+import { getListBinding } from './list-binding'
 import { XinObject, XinTouchableType } from './xin-types'
 
 export type XinBinding = {
   toDOM: (element: HTMLElement, value: any, options?: XinObject) => void,
   fromDOM?: (element: HTMLElement) => any
-}
-
-const getListTemplate = (element: HTMLElement) => {
-  if (element instanceof HTMLTemplateElement) {
-    if (element.content.children.length !== 1) {
-      throw new Error ('list template must have exactly one top-level element')
-    }
-    return element.content.children[0]
-  }
-  return element
-}
-
-const templateInstances = new WeakMap() // template -> WeakMap array elements -> instance
-const getInstances = (template: Element) => {
-  if(!templateInstances.get(template)) {
-    templateInstances.set(template, {elements: [], elementToItem: new WeakMap(), itemToElement: new WeakMap()}) // array element -> instance
-  }
-  return templateInstances.get(template)
 }
 
 export const bindings: {[key: string | symbol] : XinBinding} = {
@@ -51,45 +34,10 @@ export const bindings: {[key: string | symbol] : XinBinding} = {
   list: {
     toDOM(element: HTMLElement, value: any[], options?: XinObject) {
       console.log({options})
-      const template = getListTemplate(element)
-      const {elements, elementToItem, itemToElement} = getInstances(template)
       const {bindInstance} = options || {}
+      const listBinding = getListBinding(element, bindInstance)
       // @ts-expect-error
-      const {includes} = value._xinValue ? value : value.includes.bind(value)
-      for(let i = elements.length - 1; i >= 0; i--) {
-        const instance = elements[i]
-        const item = elementToItem.get(instance)
-        if(!item || !includes(item)) {
-          instance.remove()
-          elements.splice(i, 1)
-        }
-      }
-      if(Array.isArray(value) && element.parentElement) {
-        // @ts-expect-error
-        for(const item of (value._xinValue || value)) {
-          if (!item) {
-            continue
-          }
-
-          let instance
-          if (typeof item === 'object') {
-            instance = itemToElement.get(item)
-            if (!instance) {
-              instance = template.cloneNode(true)
-              itemToElement.set(item, instance)
-              elementToItem.set(instance, item)
-              elements.push(instance)
-            }
-          } else {
-            instance = template.cloneNode(true)
-            elements.push(instance)
-          }
-          if (bindInstance) {
-            bindInstance(instance, item)
-          }
-          element.parentElement.insertBefore(instance, element)
-        }
-      }
+      listBinding.update(value._xinValue || value)
     }
   }
 }

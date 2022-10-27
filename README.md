@@ -233,6 +233,7 @@ Note that you can filter heterogeneous arrays to only include the specified elem
     filter(['', 0], ['this', true, 17])         // ['this', 17]
     filter([{x: 0, y: 0}], [{x: 1, y: 2}, {lat: 10, long: -30}])
                                                 // [{x: 1, y: 2}]
+
 ### Hot Reload
 
 One of the nice things about working with the React toolchain is hot reloading.
@@ -253,6 +254,8 @@ simply call `hotReload` after initializing your app state and you're good to go.
 
 `hotReload` accepts a test function (path => boolean) as a parameter. 
 Only top-level properties in  `xin` that pass the test will be persisted.
+
+To completely reset the app, run `localStorage.clear()` in the console.
 
 ## Development Notes
 
