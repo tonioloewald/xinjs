@@ -18,36 +18,51 @@ class ListBinding {
         this.bindInstance = bindInstance;
     }
     update(array) {
+        if (!array) {
+            array = [];
+        }
+        // remove elements whose items no longer live in the array
         for (const element of this.elements) {
             const item = elementToItem.get(element);
-            if (!array.includes(item)) {
+            // @ts-ignore-error
+            if (!item || !array._xinValue.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
                 elementToItem.delete(element);
             }
         }
+        // build a complete new set of elements in the right order
         this.elements = [];
-        for (const item of array) {
+        for (let i = 0; i < array.length; i++) {
+            const item = array[i];
             if (!item) {
                 continue;
             }
-            let element = itemToElement.get(item);
+            let element = itemToElement.get(item._xinValue);
             if (!element) {
                 element = this.template.cloneNode(true);
-                itemToElement.set(item, element);
-                elementToItem.set(element, item);
+                if (typeof item === 'object') {
+                    itemToElement.set(item._xinValue, element);
+                    elementToItem.set(element, item._xinValue);
+                }
             }
             if (this.bindInstance) {
                 this.bindInstance(element, item);
             }
             this.elements.push(element);
         }
+        // make sure all the elements are in the DOM and in the correct location
         let insertionPoint = this.boundElement;
         const parent = insertionPoint.parentElement;
         if (parent) {
-            for (const element of this.elements.reverse()) {
-                if (insertionPoint.previousElementSibling !== element) {
-                    parent.insertBefore(element, insertionPoint);
+            for (const element of this.elements) {
+                if (element.previousElementSibling !== insertionPoint) {
+                    if (insertionPoint.nextElementSibling) {
+                        parent.insertBefore(element, insertionPoint.nextElementSibling);
+                    }
+                    else {
+                        parent.append(element);
+                    }
                 }
                 insertionPoint = element;
             }

@@ -4,7 +4,7 @@ declare class ListBinding {
     elements: HTMLElement[];
     bindInstance?: (element: HTMLElement, obj: any) => void;
     constructor(boundElement: HTMLElement, bindInstance?: (element: HTMLElement, obj: any) => void);
-    update(array: any[]): void;
+    update(array?: any[]): void;
 }
 export declare const getListBinding: (boundElement: HTMLElement, bindInstance?: ((element: HTMLElement, obj: any) => void) | undefined) => ListBinding;
 export {};

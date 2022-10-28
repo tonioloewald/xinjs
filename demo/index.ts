@@ -1,5 +1,6 @@
 import {xin, touch} from '../src/index'
-import {bind, bindings} from '../src/bind'
+import {bind} from '../src/bind'
+import {bindings} from '../src/bindings'
 import {hotReload} from '../src/hot-reload'
 
 /* global window, document */
@@ -7,6 +8,17 @@ import {hotReload} from '../src/hot-reload'
 console.time('total')
 
 const randomColor = () => `hsl(${Math.floor(Math.random() * 360)} ${Math.floor(Math.random() * 4 + 1) * 25}% 50%)`
+/*
+async function getWords () {
+  const {words} = await import('https://cdn.jsdelivr.net/npm/popular-english-words@1.0.2/words.js')
+  xin.words = words
+  console.log(xin.words)
+}
+
+getWords()
+*/
+
+const INITIAL_ITEMS = 25
 
 const makeItems = (howMany) => {
   const items = []
@@ -19,12 +31,14 @@ const makeItems = (howMany) => {
   return items
 }
 
-const INITIAL_ITEMS = 1000
-
 xin.app = {
   title: 'hello, world -- it works',
   itemsToCreate: INITIAL_ITEMS,
-  items: makeItems(INITIAL_ITEMS)
+  items: makeItems(INITIAL_ITEMS),
+  titleStyle: {
+    fontFamily: 'sans-serif',
+    fontSize: '24px'
+  }
 }
 
 hotReload()
@@ -34,9 +48,12 @@ Object.assign(window, {
 })
 
 const div = document.createElement('div')
-const input = document.createElement('input')
+const titleInput = document.createElement('input')
 const template = document.createElement('template')
 const span = document.createElement('span')
+
+titleInput.title = 'title'
+titleInput.placeholder = 'enter title'
 
 span.style.display = 'inline-block'
 span.style.padding = '10px'
@@ -49,7 +66,12 @@ const counter = document.createElement('div')
 const scramble = document.createElement('button')
 const modify = document.createElement('button')
 const scrambleAndModify = document.createElement('button')
+const swap = document.createElement('button')
 const reset = document.createElement('button')
+const itemsInput = document.createElement('input')
+
+const wordTemplate = document.createElement('template')
+wordTemplate.content.append(span.cloneNode(true))
 
 reset.textContent = 'reset'
 reset.addEventListener('click', () => {
@@ -57,6 +79,19 @@ reset.addEventListener('click', () => {
   console.time('reset')
   xin.app.items = items
   console.timeEnd('reset')
+})
+
+itemsInput.title = 'number of items to create'
+itemsInput.placeholder = 'items to create'
+
+swap.textContent = 'swap [4] with [7]'
+swap.addEventListener('click', () => {
+  console.time('swap')
+  let item4 = xin.app.items._xinValue[4]
+  xin.app.items._xinValue[4] = xin.app.items._xinValue[7]
+  xin.app.items._xinValue[7] = item4
+  touch(xin.app.items)
+  console.timeEnd('swap')
 })
 
 scramble.textContent = 'scramble'
@@ -90,27 +125,40 @@ scrambleAndModify.addEventListener('click', () => {
   console.timeEnd('scramble and modify')
 })
 
-document.body.append(input)
 document.body.append(div)
+document.body.append(titleInput)
 document.body.append(counter)
 document.body.append(reset)
+document.body.append(itemsInput)
+document.body.append(swap)
 document.body.append(scramble)
 document.body.append(modify)
 document.body.append(scrambleAndModify)
 document.body.append(template)
+document.body.append(wordTemplate)
 
 console.time('binding')
 
 bind(div, 'app.title', bindings.text)
-bind(input, 'app.title', bindings.value)
+bind(div, 'app.titleStyle', bindings.style)
+bind(titleInput, 'app.title', bindings.value)
+bind(itemsInput, 'app.itemsToCreate', bindings.value)
 bind(counter, 'app.items.length', bindings.text)
-bind(template, 'app.items', bindings.list, {bindInstance(element, obj){
-  if (element.style.color !== obj.color) {
-    element.style.border = `1px solid ${obj.color}`
-    element.style.color = obj.color
-    element.textContent = `${obj.id} ${obj.color}`
+bind(template, xin.app.items, bindings.list, {
+  bindInstance(element, obj){
+    if (element.style.color !== obj.color) {
+      element.style.border = `1px solid ${obj.color}`
+      element.style.color = obj.color
+      element.textContent = `${obj.id} ${obj.color}`
+    }
   }
-}})
+})
+
+bind(wordTemplate, 'words', bindings.list, {
+  bindInstance(element, word) {
+    element.textContent = word
+  }
+})
 
 console.timeEnd('binding')
 

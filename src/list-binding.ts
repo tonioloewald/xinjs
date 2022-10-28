@@ -25,37 +25,54 @@ class ListBinding {
     this.bindInstance = bindInstance
   }
 
-  update(array: any[]) {
+  update(array?: any[]) {
+    if (!array) {
+      array = []
+    }
+
+    // remove elements whose items no longer live in the array
     for(const element of this.elements) {
       const item = elementToItem.get(element)
-      if (!array.includes(item)) {
+      // @ts-ignore-error
+      if (!item || !array._xinValue.includes(item)) {
         element.remove()
         itemToElement.delete(item as object)
         elementToItem.delete(element)
       }
     }
+
+    // build a complete new set of elements in the right order
     this.elements = []
-    for(const item of array) {
+    for(let i = 0; i < array.length; i++) {
+      const item = array[i]
       if(!item) {
         continue
       }
-      let element = itemToElement.get(item)
+      let element = itemToElement.get(item._xinValue)
       if (! element) {
         element = this.template.cloneNode(true) as HTMLElement
-        itemToElement.set(item, element as HTMLElement)
-        elementToItem.set(element as HTMLElement, item)
+        if (typeof item === 'object') {
+          itemToElement.set(item._xinValue, element as HTMLElement)
+          elementToItem.set(element as HTMLElement, item._xinValue) 
+        }
       }
       if (this.bindInstance) {
         this.bindInstance(element as HTMLElement, item)
       }
       this.elements.push(element as HTMLElement)
     }
+
+    // make sure all the elements are in the DOM and in the correct location
     let insertionPoint = this.boundElement
     const parent = insertionPoint.parentElement
     if (parent) {
-      for(const element of this.elements.reverse()) {
-        if (insertionPoint.previousElementSibling !== element) {
-          parent.insertBefore(element, insertionPoint)
+      for(const element of this.elements) {
+        if (element.previousElementSibling !== insertionPoint) {
+          if(insertionPoint.nextElementSibling) {
+            parent.insertBefore(element, insertionPoint.nextElementSibling)
+          } else {
+            parent.append(element) 
+          }
         }
         insertionPoint = element
       }
