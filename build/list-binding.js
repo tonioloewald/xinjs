@@ -34,16 +34,12 @@ class ListBinding {
             let element = itemToElement.get(item);
             if (!element) {
                 element = this.template.cloneNode(true);
-                // @ts-ignore-error -- too stupid to realize it's not undefined
                 itemToElement.set(item, element);
-                // @ts-ignore-error -- too stupid to realize it's not undefined
                 elementToItem.set(element, item);
             }
             if (this.bindInstance) {
-                // @ts-ignore-error -- too stupid to realize it's not undefined
                 this.bindInstance(element, item);
             }
-            // @ts-ignore-error -- too stupid to realize it's not undefined
             this.elements.push(element);
         }
         let insertionPoint = this.boundElement;

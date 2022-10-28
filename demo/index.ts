@@ -45,7 +45,6 @@ span.style.fontFamily = 'monospace'
 span.style.width = '200px'
 template.content.append(span)
 
-
 const counter = document.createElement('div')
 const scramble = document.createElement('button')
 const modify = document.createElement('button')

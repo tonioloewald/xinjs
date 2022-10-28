@@ -42,17 +42,13 @@ class ListBinding {
       let element = itemToElement.get(item)
       if (! element) {
         element = this.template.cloneNode(true) as HTMLElement
-        // @ts-ignore-error -- too stupid to realize it's not undefined
-        itemToElement.set(item, element)
-        // @ts-ignore-error -- too stupid to realize it's not undefined
-        elementToItem.set(element, item)
+        itemToElement.set(item, element as HTMLElement)
+        elementToItem.set(element as HTMLElement, item)
       }
       if (this.bindInstance) {
-        // @ts-ignore-error -- too stupid to realize it's not undefined
-        this.bindInstance(element, item)
+        this.bindInstance(element as HTMLElement, item)
       }
-      // @ts-ignore-error -- too stupid to realize it's not undefined
-      this.elements.push(element)
+      this.elements.push(element as HTMLElement)
     }
     let insertionPoint = this.boundElement
     const parent = insertionPoint.parentElement
