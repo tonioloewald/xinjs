@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "path-based state management for javascript",
   "main": "build/index.js",
   "homepage": "https://xinjs.net",
@@ -14,8 +14,8 @@
   ],
   "scripts": {
     "start": "bun src/main.ts",
-    "build": "rm -rf build && bun test && bun tsc && ./build.command",
-    "pack": "bun run build && npm pack --pack-destination ~",
+    "make": "rm -rf build && bun test && bun tsc && ./build.command",
+    "pack": "bun run make && npm pack --pack-destination ~",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",

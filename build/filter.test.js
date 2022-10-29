@@ -21,6 +21,20 @@ test('scalars', () => {
     expect(filter('foo', 'bar')).toBe('bar');
     expect(filter('foo', 17)).toBe(undefined);
     expect(filter('#int', Math.PI)).toBe(undefined);
+    expect(filter('#int', -1)).toBe(-1);
+    expect(filter('#int [1', -1)).toBe(undefined);
+    expect(filter('#int (-∞,0]', -1)).toBe(-1);
+    expect(filter('#int ,0]', -1)).toBe(-1);
+    expect(filter('#int 0]', -1)).toBe(-1);
+    expect(filter('#int [0,∞)', 1)).toBe(1);
+    expect(filter('#int [0,', 1)).toBe(1);
+    expect(filter('#int [0', 1)).toBe(1);
+    expect(filter({ x: 0, y: 0 }, { x: 17 })).toBe(undefined);
+    expect(filter({ x: 0, y: '#?number' }, { x: 17 }).x).toBe(17);
+    expect(filter({ x: 0, y: '#?number' }, { x: 17 }).y).toBe(undefined);
+    expect(filter({ x: 0, y: '#?number' }, { x: 17, y: -2 }).y).toBe(-2);
+    expect(filter('#int', 1)).toBe(1);
+    expect(filter(1, '#int')).toBe(undefined);
 });
 test('objects', () => {
     expect(filterText({ name: '' }, data)).toBe('{"name":"Juanita Citizen"}');

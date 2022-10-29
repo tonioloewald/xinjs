@@ -15,7 +15,7 @@ test('simple tests', () => {
         address: {
             street: 'somewhere',
             city: 'city',
-            zipcode: '12345'
+            zipcode: '#regexp ^\\d{5,5}(-\\d{4,4})?$'
         }
     };
     expect(matchTypeString(userType, {
@@ -25,7 +25,16 @@ test('simple tests', () => {
             street: '123 Sesame',
             zipcode: 10001
         }
-    })).toBe('.age was "17", expected number;.address.city was undefined, expected string;.address.zipcode was 10001, expected string');
+    })).toBe('.age was "17", expected number;.address.city was undefined, expected string;.address.zipcode was 10001, expected #regexp ^\\d{5,5}(-\\d{4,4})?$');
+    expect(matchTypeString(userType, {
+        name: 'Juanita Citizen',
+        age: 22,
+        address: {
+            street: '666 Melrose Ave',
+            city: 'West Hollywood',
+            zipcode: '90069'
+        }
+    })).toBe('');
 });
 test('number types and ranges', () => {
     expect(matchTypeString('#int', 17)).toBe('');
@@ -56,6 +65,8 @@ test('any and ?', () => {
     expect(matchTypeString('#?any', null)).toBe('');
     expect(matchTypeString('#any', null)).toBe('was null, expected #any');
     expect(matchTypeString('#any')).toBe('was undefined, expected #any');
+    expect(matchTypeString({ x: 0, y: 0 }, { x: 17 })).toBe('.y was undefined, expected number');
+    expect(matchTypeString({ x: 0, y: '#?number' }, { x: 17 })).toBe('');
 });
 test('enum', () => {
     expect(matchTypeString('#enum false|null|17|"hello"', null)).toBe('');
