@@ -21,6 +21,9 @@ class ListBinding {
         if (!array) {
             array = [];
         }
+        let removed = 0;
+        let moved = 0;
+        let created = 0;
         // remove elements whose items no longer live in the array
         for (const element of this.elements) {
             const item = elementToItem.get(element);
@@ -29,6 +32,7 @@ class ListBinding {
                 element.remove();
                 itemToElement.delete(item);
                 elementToItem.delete(element);
+                removed++;
             }
         }
         // build a complete new set of elements in the right order
@@ -40,6 +44,7 @@ class ListBinding {
             }
             let element = itemToElement.get(item._xinValue);
             if (!element) {
+                created++;
                 element = this.template.cloneNode(true);
                 if (typeof item === 'object') {
                     itemToElement.set(item._xinValue, element);
@@ -57,6 +62,7 @@ class ListBinding {
         if (parent) {
             for (const element of this.elements) {
                 if (element.previousElementSibling !== insertionPoint) {
+                    moved++;
                     if (insertionPoint.nextElementSibling) {
                         parent.insertBefore(element, insertionPoint.nextElementSibling);
                     }
@@ -67,6 +73,8 @@ class ListBinding {
                 insertionPoint = element;
             }
         }
+        // @ts-expect-error
+        console.log(array._xinPath, 'updated', { removed, created, moved });
     }
 }
 export const getListBinding = (boundElement, bindInstance) => {
