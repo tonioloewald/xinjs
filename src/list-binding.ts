@@ -30,6 +30,10 @@ class ListBinding {
       array = []
     }
 
+    let removed = 0
+    let moved = 0
+    let created = 0
+
     // remove elements whose items no longer live in the array
     for(const element of this.elements) {
       const item = elementToItem.get(element)
@@ -38,6 +42,7 @@ class ListBinding {
         element.remove()
         itemToElement.delete(item as object)
         elementToItem.delete(element)
+        removed++
       }
     }
 
@@ -50,6 +55,7 @@ class ListBinding {
       }
       let element = itemToElement.get(item._xinValue)
       if (! element) {
+        created++
         element = this.template.cloneNode(true) as HTMLElement
         if (typeof item === 'object') {
           itemToElement.set(item._xinValue, element as HTMLElement)
@@ -68,6 +74,7 @@ class ListBinding {
     if (parent) {
       for(const element of this.elements) {
         if (element.previousElementSibling !== insertionPoint) {
+          moved++
           if(insertionPoint.nextElementSibling) {
             parent.insertBefore(element, insertionPoint.nextElementSibling)
           } else {
@@ -77,6 +84,9 @@ class ListBinding {
         insertionPoint = element
       }
     }
+
+    // @ts-expect-error
+    console.log(array._xinPath, 'updated', {removed, created, moved})
   }
 }
 

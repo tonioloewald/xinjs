@@ -8,15 +8,14 @@ import {hotReload} from '../src/hot-reload'
 console.time('total')
 
 const randomColor = () => `hsl(${Math.floor(Math.random() * 360)} ${Math.floor(Math.random() * 4 + 1) * 25}% 50%)`
-/*
+
 async function getWords () {
   const {words} = await import('https://cdn.jsdelivr.net/npm/popular-english-words@1.0.2/words.js')
-  xin.words = words
-  console.log(xin.words)
+  window.words = words
+  console.log(window.words.length, 'words loaded')
 }
 
 getWords()
-*/
 
 const INITIAL_ITEMS = 25
 
@@ -139,16 +138,20 @@ document.body.append(wordTemplate)
 
 console.time('binding')
 
+const colorConversionSpan = document.createElement('span')
+
 bind(div, 'app.title', bindings.text)
 bind(div, 'app.titleStyle', bindings.style)
 bind(titleInput, 'app.title', bindings.value)
 bind(itemsInput, 'app.itemsToCreate', bindings.value)
 bind(counter, 'app.items.length', bindings.text)
 bind(template, xin.app.items, bindings.list, {
-  bindInstance(element, obj){
-    if (element.style.color !== obj.color) {
-      element.style.border = `1px solid ${obj.color}`
-      element.style.color = obj.color
+  bindInstance(element, obj) {
+    colorConversionSpan.style.color = obj.color
+    const color = colorConversionSpan.style.color
+    if (element.style.color !== color) {
+      element.style.border = `1px solid ${color}`
+      element.style.color = color
       element.textContent = `${obj.id} ${obj.color}`
     }
   }
