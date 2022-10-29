@@ -1,6 +1,6 @@
 // @ts-ignore
 import { test, expect } from 'bun:test'
-import { xin, observe, unobserve, observerShouldBeRemoved, touch } from './xin'
+import { xin, observe, unobserve, observerShouldBeRemoved, touch, isValidPath } from './xin'
 
 type Change = { path: string, value: any, observed?: any }
 const changes: Change[] = []
@@ -40,6 +40,43 @@ test('updates simple values', () => {
   xin.test.value++
   expect(xin.test.message).toBe('xin rules')
   expect(xin.test.value).toBe(18)
+})
+
+/*
+// TODO make this work (see TODO in xin.ts)
+test('array iterators', () => {
+  let count = 0
+  for(const item of xin.test.people) {
+    count++
+  }
+  expect(count).toBe(3)
+})
+*/
+
+test('isValidPath', () => {
+  expect(isValidPath('')).toBe(false)
+  expect(isValidPath('.')).toBe(false)
+  expect(isValidPath('.foo')).toBe(true)
+  expect(isValidPath('airtime-rooms[id=1234].')).toBe(false)
+  expect(isValidPath('foo')).toBe(true)
+  expect(isValidPath('_foo')).toBe(true)
+  expect(isValidPath('foo_17')).toBe(true)
+  expect(isValidPath('foo.bar')).toBe(true)
+  expect(isValidPath('path.to.value,another.path')).toBe(false)
+  expect(isValidPath('foo()')).toBe(false)
+  expect(isValidPath('foo(path.to.value,another.path)')).toBe(false)
+  expect(isValidPath('/')).toBe(true)
+  expect(isValidPath('airtime-rooms[1234]')).toBe(true)
+  expect(isValidPath('airtime-rooms[=abcd]')).toBe(true)
+  expect(isValidPath('airtime-rooms[/=abcd]')).toBe(true)
+  expect(isValidPath('airtime-rooms[id=1234]')).toBe(true)
+  expect(isValidPath('airtime-rooms[url=https://foo.bar/baz?x=y]')).toBe(true)
+  expect(isValidPath('airtime-rooms[url=https://foo.bar/baz?x=y&foo=this, that, and the other.jpg]')).toBe(true)
+  expect(isValidPath('airtime-rooms]')).toBe(false)
+  expect(isValidPath('airtime-rooms[id=1234')).toBe(false)
+  expect(isValidPath('airtime-rooms[id]')).toBe(false)
+  expect(isValidPath('airtime-rooms[id=1234]]')).toBe(false)
+  expect(isValidPath('airtime-rooms[]]')).toBe(false)
 })
 
 test('triggers listeners', () => {

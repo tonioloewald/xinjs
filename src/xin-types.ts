@@ -2,6 +2,8 @@ export type XinObject = {
   [key: string] : any
 }
 
+export type XinTouchableType = string | {_xinPath: string}
+
 type _BooleanFunction = () => boolean
 type _PathTestFunction = (path: string) => boolean | Symbol
 export type PathTestFunction = _BooleanFunction | _PathTestFunction

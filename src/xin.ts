@@ -1,4 +1,4 @@
-import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { XinObject, XinTouchableType, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { getByPath, setByPath } from './by-path'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -6,12 +6,10 @@ export const observerShouldBeRemoved = Symbol('observer should be removed')
 // list of Array functions that change the array  
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift']
 
-type TypeErrorHandler = (errors: string[], action: string) => void
-
 const registry: XinObject = {}
 const listeners: Listener[] = [] // { path_string_or_test, callback }
 const debugPaths = true
-const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\mad+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
+const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/
 
 const isValidPath = (path: string) => validPath.test(path)
 
@@ -53,7 +51,7 @@ const getPath = (what: string | {_xinPath: string}): string => {
   return typeof what === 'object' ? what._xinPath : what
 }
 
-const touch = (what: string | {_xinPath: string}) => {
+const touch = (what: XinTouchableType) => {
   const path = getPath(what)
   listeners
     .filter(listener => {
@@ -113,7 +111,13 @@ const extendPath = (path = '', prop = '') => {
 }
 
 const regHandler = (path = '') => ({
-  get (target: XinObject, prop: string): any {
+  // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
+  // as you'd expect
+  get (target: XinObject, _prop: string | symbol): any {
+    if (typeof _prop === 'symbol') {
+      throw new Error('iterators not implemented yet, use for(const item of xin.path.to.array._xinValue) ...')
+    }
+    let prop = _prop
     const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
                         prop.match(/^([^\]]+)(\[.+)/) || // basePath[subPath
                         prop.match(/^(\[[^\]]+\])\.(.+)$/) || // [basePath].subPath (omit '.')
@@ -136,7 +140,7 @@ const regHandler = (path = '') => ({
     }
     if (
       (!Array.isArray(target) && target[prop] !== undefined) ||
-      (Array.isArray(target) && typeof prop === 'string' && prop.includes('='))
+      (Array.isArray(target) && prop.includes('='))
     ) {
       let value
       if (prop.includes('=')) {
@@ -157,8 +161,9 @@ const regHandler = (path = '') => ({
         return value
       }
     } else if (Array.isArray(target)) {
-      // @ts-ignore -- tsc doesn't like the fact we're looking at array functions
-      return typeof target[prop] === 'function'
+      // @ts-ignore -- we could be looking for an index, a property, or a method
+      const value = target[prop]
+      return typeof value === 'function'
         ? (...items: any[]) => {
           // @ts-ignore
           const result = (Array.prototype[prop]).apply(target, items)
@@ -167,7 +172,9 @@ const regHandler = (path = '') => ({
           }
           return result
         }
-        : target[Number(prop)]
+        : typeof value === 'object' 
+        ? new Proxy(value, regHandler(extendPath(path, prop)))
+        : value
     } else {
       return target ? target[prop] : undefined
     }
