@@ -2,26 +2,26 @@ const itemToElement: WeakMap<object, HTMLElement> = new WeakMap()
 const elementToItem: WeakMap<HTMLElement, object> = new WeakMap()
 const listBindings: WeakMap<HTMLElement, ListBinding> = new WeakMap()
 
-const getListTemplate = (element: HTMLElement) => {
-  if (element instanceof HTMLTemplateElement) {
-    if (element.content.children.length !== 1) {
-      throw new Error ('list template must have exactly one top-level element')
-    }
-    return element.content.children[0]
-  }
-  return element
-}
-
 class ListBinding {
   boundElement: HTMLElement
   template: HTMLElement
-  elements: HTMLElement[]
   bindInstance?: (element: HTMLElement, obj: any) => void
 
   constructor(boundElement: HTMLElement, bindInstance?: (element: HTMLElement, obj: any) => void) {
     this.boundElement = boundElement
-    this.template = getListTemplate(boundElement) as HTMLElement
-    this.elements = []
+    if (boundElement.children.length !== 1) {
+      throw new Error('ListBinding expects an element with exactly one child element')
+    }
+    if (boundElement.children[0] instanceof HTMLTemplateElement) {
+      const template = boundElement.children[0]
+      if (template.content.children.length !== 1) {
+        throw new Error('ListBinding expects a template with exactly one child element')
+      }
+      this.template = template.content.children[0].cloneNode(true) as HTMLElement
+      template.remove()
+    } else {
+      this.template = boundElement.children[0] as HTMLElement
+    }
     this.bindInstance = bindInstance
   }
 
@@ -35,19 +35,19 @@ class ListBinding {
     let created = 0
 
     // remove elements whose items no longer live in the array
-    for(const element of this.elements) {
-      const item = elementToItem.get(element)
+    for(const element of [...this.boundElement.children]) {
+      const item = elementToItem.get(element as HTMLElement)
       // @ts-ignore-error
       if (!item || !array._xinValue.includes(item)) {
         element.remove()
         itemToElement.delete(item as object)
-        elementToItem.delete(element)
+        elementToItem.delete(element as HTMLElement)
         removed++
       }
     }
 
     // build a complete new set of elements in the right order
-    this.elements = []
+    const elements = []
     for(let i = 0; i < array.length; i++) {
       const item = array[i]
       if(!item) {
@@ -61,28 +61,26 @@ class ListBinding {
           itemToElement.set(item._xinValue, element as HTMLElement)
           elementToItem.set(element as HTMLElement, item._xinValue) 
         }
+        this.boundElement.append(element)
       }
       if (this.bindInstance) {
         this.bindInstance(element as HTMLElement, item)
       }
-      this.elements.push(element as HTMLElement)
+      elements.push(element)
     }
 
     // make sure all the elements are in the DOM and in the correct location
-    let insertionPoint = this.boundElement
-    const parent = insertionPoint.parentElement
-    if (parent) {
-      for(const element of this.elements) {
-        if (element.previousElementSibling !== insertionPoint) {
-          moved++
-          if(insertionPoint.nextElementSibling) {
-            parent.insertBefore(element, insertionPoint.nextElementSibling)
-          } else {
-            parent.append(element) 
-          }
+    let insertionPoint: HTMLElement | null = null
+    for(const element of elements) {
+      if (element.previousElementSibling !== insertionPoint) {
+        moved++
+        if(insertionPoint && insertionPoint.nextElementSibling) {
+          this.boundElement.insertBefore(element, insertionPoint.nextElementSibling)
+        } else {
+          this.boundElement.append(element) 
         }
-        insertionPoint = element
       }
+      insertionPoint = element
     }
 
     // @ts-expect-error
