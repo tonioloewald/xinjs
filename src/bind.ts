@@ -27,4 +27,5 @@ export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinB
       xin[path] = fromDOM(element)
     })
   }
+  return element
 }
