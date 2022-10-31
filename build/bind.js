@@ -22,4 +22,5 @@ export const bind = (element, what, binding, options) => {
             xin[path] = fromDOM(element);
         });
     }
+    return element;
 };

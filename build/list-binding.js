@@ -1,20 +1,23 @@
 const itemToElement = new WeakMap();
 const elementToItem = new WeakMap();
 const listBindings = new WeakMap();
-const getListTemplate = (element) => {
-    if (element instanceof HTMLTemplateElement) {
-        if (element.content.children.length !== 1) {
-            throw new Error('list template must have exactly one top-level element');
-        }
-        return element.content.children[0];
-    }
-    return element;
-};
 class ListBinding {
     constructor(boundElement, bindInstance) {
         this.boundElement = boundElement;
-        this.template = getListTemplate(boundElement);
-        this.elements = [];
+        if (boundElement.children.length !== 1) {
+            throw new Error('ListBinding expects an element with exactly one child element');
+        }
+        if (boundElement.children[0] instanceof HTMLTemplateElement) {
+            const template = boundElement.children[0];
+            if (template.content.children.length !== 1) {
+                throw new Error('ListBinding expects a template with exactly one child element');
+            }
+            this.template = template.content.children[0].cloneNode(true);
+            template.remove();
+        }
+        else {
+            this.template = boundElement.children[0];
+        }
         this.bindInstance = bindInstance;
     }
     update(array) {
@@ -25,7 +28,7 @@ class ListBinding {
         let moved = 0;
         let created = 0;
         // remove elements whose items no longer live in the array
-        for (const element of this.elements) {
+        for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
             // @ts-ignore-error
             if (!item || !array._xinValue.includes(item)) {
@@ -36,7 +39,7 @@ class ListBinding {
             }
         }
         // build a complete new set of elements in the right order
-        this.elements = [];
+        const elements = [];
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
             if (!item) {
@@ -50,28 +53,26 @@ class ListBinding {
                     itemToElement.set(item._xinValue, element);
                     elementToItem.set(element, item._xinValue);
                 }
+                this.boundElement.append(element);
             }
             if (this.bindInstance) {
                 this.bindInstance(element, item);
             }
-            this.elements.push(element);
+            elements.push(element);
         }
         // make sure all the elements are in the DOM and in the correct location
-        let insertionPoint = this.boundElement;
-        const parent = insertionPoint.parentElement;
-        if (parent) {
-            for (const element of this.elements) {
-                if (element.previousElementSibling !== insertionPoint) {
-                    moved++;
-                    if (insertionPoint.nextElementSibling) {
-                        parent.insertBefore(element, insertionPoint.nextElementSibling);
-                    }
-                    else {
-                        parent.append(element);
-                    }
+        let insertionPoint = null;
+        for (const element of elements) {
+            if (element.previousElementSibling !== insertionPoint) {
+                moved++;
+                if (insertionPoint && insertionPoint.nextElementSibling) {
+                    this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
                 }
-                insertionPoint = element;
+                else {
+                    this.boundElement.append(element);
+                }
             }
+            insertionPoint = element;
         }
         // @ts-expect-error
         console.log(array._xinPath, 'updated', { removed, created, moved });
