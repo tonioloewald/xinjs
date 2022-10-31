@@ -175,7 +175,7 @@ Test(
 ~~~~
 */
 
-/* global HTMLElement */
+/* global HTMLElement, document */
 
 import { XinObject } from './xin-types'
 
@@ -186,35 +186,21 @@ const templates: {[key: string]: HTMLElement} = {}
 
 export const create = (tagType: string, ...contents: elementPart[]) => {
   if (!templates[tagType]) {
-    templates[tagType] = window.document.createElement(tagType)
+    templates[tagType] = document.createElement(tagType)
   }
   const elt = templates[tagType].cloneNode() as HTMLElement
   for (const item of contents) {
     if (item instanceof HTMLElement || typeof item === 'string' || typeof item === 'number') {
-      elt.append(item as Node)
+      if (elt instanceof HTMLTemplateElement) {
+        elt.content.append(item as Node)
+      } else {
+        elt.append(item as Node) 
+      }
     } else {
-      const dataBindings = []
-      const eventBindings = []
       for (const key of Object.keys(item)) {
         const value = item[key]
-        if (key === 'bindList') {
-          elt.dataset.list = value
-        } else if (key.includes('.')) {
-          dataBindings.push(`${key}=${value}`)
-        } else if (key.match(/^(bind|on)[A-Z]/)) {
-/*
-  TODO: consider tracking targets and values so that
-    bindFoo: 'path.to.thing',
-    bindBar: 'path.to.thing'
-  becomes:
-    'foo,bar=path.to.thing'
-  (and similarly for events)
-*/
-          if (key.startsWith('bind')) {
-            dataBindings.push(`${key.substr(4).replace(/[A-Z]/, c => c.toLowerCase())}=${value}`)
-          } else {
-            eventBindings.push(`${key.substr(2).replace(/[A-Z]/, c => c.toLowerCase())}:${value}`)
-          }
+        if (key === 'apply') {
+          value(elt)
         } else if (key === 'style') {
           if (typeof value === 'object') {
             for (const prop of Object.keys(value)) {
@@ -224,6 +210,9 @@ export const create = (tagType: string, ...contents: elementPart[]) => {
           } else {
             elt.setAttribute('style', value)
           }
+        } else if (key.match(/^on[A-Z]/)) {
+          const eventType = key.substr(2).toLowerCase()
+          elt.addEventListener(eventType, value)
         } else {
           const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
           if (typeof value === 'boolean') {
@@ -233,20 +222,12 @@ export const create = (tagType: string, ...contents: elementPart[]) => {
           }
         }
       }
-      if (dataBindings.length) {
-        elt.dataset.bind = dataBindings.join('\n')
-      }
-      if (eventBindings.length) {
-        elt.dataset.event = eventBindings.join('\n')
-      }
     }
   }
   return elt
 }
 
-const _comp: ElementCreator = (...contents: elementPart[]) => create('b8r-component', ...contents)
-
-const _fragment: ElementCreator = (...contents: elementPart[]) => {
+const fragment: ElementCreator = (...contents: elementPart[]) => {
   const frag = document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)
@@ -254,7 +235,7 @@ const _fragment: ElementCreator = (...contents: elementPart[]) => {
   return frag
 }
 
-const _elements: {[key: string | symbol]: ElementCreator} = { _comp, _fragment }
+const _elements: {[key: string | symbol]: ElementCreator} = { fragment }
 
 export const elements = new Proxy(_elements, {
   get (target, tagName: string) {
