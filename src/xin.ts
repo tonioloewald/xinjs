@@ -13,13 +13,18 @@ const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()
 
 const isValidPath = (path: string) => validPath.test(path)
 
+export const settings = {
+  debug: false,
+  perf: false
+}
+
 class Listener {
   test: PathTestFunction
   callback: ObserverCallbackFunction
 
   constructor (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) {
     if (typeof test === 'string') {
-      this.test = t => typeof t === 'string' && !!t && (t.startsWith(test) || test.startsWith(t))
+      this.test = t => typeof t === 'string' && !!t && (test.startsWith(t) || t.startsWith(test))
     } else if (test instanceof RegExp) {
       this.test = test.test.bind(test)
     } else if (test instanceof Function) {
@@ -51,33 +56,75 @@ const getPath = (what: string | {_xinPath: string}): string => {
   return typeof what === 'object' ? what._xinPath : what
 }
 
+const touchedPaths: string[] = []
+let updateTriggered: number | boolean = false
+let updatePromise: Promise<undefined>
+let resolveUpdate: Function
+
+export const updates = async () => {
+  if (!updatePromise) {
+    return
+  }
+  await updatePromise
+}
+
+const update = () => {
+  if (settings.perf) {
+    console.time('xin async update')
+  }
+  const paths = [...touchedPaths]
+
+  for(const path of paths) {
+    listeners
+      .filter(listener => {
+        let heard
+        try {
+          heard = listener.test(path)
+        } catch (e) {
+          throw new Error(`${listener.test} threw "${e}" at "${path}"`)
+        }
+        if (heard === observerShouldBeRemoved) {
+          unobserve(listener)
+          return false
+        }
+        return !!heard
+      })
+      .forEach(listener => {
+        let heard
+        try {
+          heard = listener.callback(path)
+        } catch (e) {
+          throw new Error(`${listener.callback} threw "${e}" handling "${path}"`)
+        }
+        if (heard === observerShouldBeRemoved) {
+          unobserve(listener)
+        }
+      })
+  }
+
+  touchedPaths.splice(0)
+  updateTriggered = false
+  if (resolveUpdate) {
+    resolveUpdate()
+  }
+  if (settings.perf) {
+    console.timeEnd('xin async update') 
+  }
+}
+
 const touch = (what: XinTouchableType) => {
   const path = getPath(what)
-  listeners
-    .filter(listener => {
-      let heard
-      try {
-        heard = listener.test(path)
-      } catch (e) {
-        throw new Error(`${listener.test} threw "${e}" at "${path}"`)
-      }
-      if (heard === observerShouldBeRemoved) {
-        unobserve(listener)
-        return false
-      }
-      return !!heard
+
+  if (!updateTriggered) {
+    updatePromise = new Promise(resolve => {
+      resolveUpdate = resolve
     })
-    .forEach(listener => {
-      let heard
-      try {
-        heard = listener.callback(path)
-      } catch (e) {
-        throw new Error(`${listener.callback} threw "${e}" handling "${path}"`)
-      }
-      if (heard === observerShouldBeRemoved) {
-        unobserve(listener)
-      }
-    })
+    updateTriggered = setTimeout(update)
+  }
+
+  if (!touchedPaths.find(touchedPath => path.startsWith(touchedPath))) {
+    touchedPaths.push(path)
+  }
 }
 
 const observe = (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => {
@@ -182,7 +229,7 @@ const regHandler = (path = '') => ({
   },
   set (target: Object, prop: string, value: any) {
     if (value && value._xinPath) {
-      throw new Error('You cannot put xin proxies into the registry')
+      value = value._xinValue
     }
     const fullPath = extendPath(path, prop)
     if (debugPaths && !isValidPath(fullPath)) {

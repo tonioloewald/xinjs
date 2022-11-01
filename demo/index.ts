@@ -1,4 +1,5 @@
 import {xin, touch} from '../src/index'
+import {settings} from '../src/xin'
 import {bind} from '../src/bind'
 import {bindings} from '../src/bindings'
 import {hotReload} from '../src/hot-reload'
@@ -8,6 +9,8 @@ import {makeWebComponent} from '../src/components'
 /* global window, document */
 
 console.time('total')
+
+settings.perf = true
 
 const {fragment, h1, div, input, template, button, span, label, slot, style} = elements
 
@@ -111,45 +114,40 @@ document.body.append(fragment(
     },
     button('reset', {onClick() {
       const items = makeItems(xin.app.itemsToCreate)
-      console.time('reset')
+      console.log('reset')
       xin.app.items = items
-      console.timeEnd('reset')
     }}),
     input({title: 'items to create', placeholder: 'items to create', apply(element) {
       bind(element, 'app.itemsToCreate', bindings.value)
     }}),
     button('scramble', {onClick() {
-      console.time('scramble')
+      console.log('scramble')
       xin.app.items.sort(() => Math.random() - 0.5)
-      console.timeEnd('scramble')
     }}),
     button('swap 4<->7', {onClick(){
-      console.time('swap')
-      let item4 = xin.app.items._xinValue[4]
-      xin.app.items._xinValue[4] = xin.app.items._xinValue[7]
-      xin.app.items._xinValue[7] = item4
+      console.log('swap')
+      let item4 = xin.app.items[4]
+      xin.app.items[4] = xin.app.items[7]
+      xin.app.items[7] = item4
       touch(xin.app.items)
-      console.timeEnd('swap')
     }}),
     button('modify ~10%', {onClick() {
-      console.time('modify')
+      console.log('modify')
       for(const item of xin.app.items._xinValue) {
         if(Math.random() < 0.1) {
           item.color = randomColor() 
         }
       }
       touch(xin.app.items)
-      console.timeEnd('modify')
     }}),
     button('modify & scramble', {onClick() {
-      console.time('scramble and modify')
+      console.log('scramble and modify')
       for(const item of xin.app.items._xinValue) {
         if(Math.random() < 0.1) {
           item.color = randomColor() 
         }
       }
       xin.app.items.sort(() => Math.random() - 0.5)
-      console.timeEnd('scramble and modify')
     }})
   ),
   bind(
