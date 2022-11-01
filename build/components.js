@@ -46,17 +46,15 @@ const css = (obj) => {
 };
 const defaultSpec = {
     superClass: HTMLElement,
-    value: undefined,
     style: {},
     methods: {},
     eventHandlers: {},
     props: {},
     attributes: {},
     content: elements.slot(),
-    role: undefined,
 };
 export const makeWebComponent = (tagName, spec) => {
-    let { superClass, value, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
+    let { superClass, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
     let styleNode;
     if (style) {
         const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style));
@@ -67,11 +65,22 @@ export const makeWebComponent = (tagName, spec) => {
             super();
             this._changeQueued = false;
             this._renderQueued = false;
+            this.value = undefined;
             for (const prop of Object.keys(props)) {
-                const value = props[prop]; // local copy that won't change
+                let value = props[prop];
                 if (typeof value !== 'function') {
-                    // @ts-expect-error
-                    this[prop] = value;
+                    Object.defineProperty(this, prop, {
+                        enumerable: false,
+                        get() {
+                            return value;
+                        },
+                        set(x) {
+                            if (x !== value) {
+                                value = x;
+                                this.queueRender(true);
+                            }
+                        }
+                    });
                 }
                 else {
                     Object.defineProperty(this, prop, {
@@ -169,15 +178,11 @@ export const makeWebComponent = (tagName, spec) => {
                                     else {
                                         this.removeAttribute(attributeName);
                                     }
-                                    if (this.queueRender)
-                                        this.queueRender(attributeName === 'value');
                                 }
                             }
                             else if (typeof attributes[attributeName] === 'number') {
                                 if (value !== parseFloat(this[attributeName])) {
                                     this.setAttribute(attributeName, value);
-                                    if (this.queueRender)
-                                        this.queueRender(attributeName === 'value');
                                 }
                             }
                             else {
@@ -190,8 +195,6 @@ export const makeWebComponent = (tagName, spec) => {
                                     }
                                     // @ts-ignore-error
                                     attributeValues[attributeName] = value;
-                                    if (this.queueRender)
-                                        this.queueRender(attributeName === 'value');
                                 }
                             }
                         }
@@ -226,21 +229,28 @@ export const makeWebComponent = (tagName, spec) => {
             if (eventHandlers.resize) {
                 resizeObserver.observe(this);
             }
-            if (methods.connectedCallback)
-                methods.connectedCallback.call(this);
+            if (props.hasOwnProperty('value') && this.getAttribute('value')) {
+                this.value = this.getAttribute('value');
+            }
+            if (spec.connectedCallback)
+                spec.connectedCallback.call(this);
         }
         disconnectedCallback() {
             resizeObserver.unobserve(this);
+            if (spec.disconnectedCallback)
+                spec.disconnectedCallback.call(this);
+        }
+        render() {
+            if (spec.render)
+                spec.render.call(this);
         }
         static defaultAttributes() {
             return { ...attributes };
         }
     };
     Object.keys(methods).forEach(methodName => {
-        if (methodName !== 'connectedCallback') {
-            // @ts-ignore-error
-            componentClass.prototype[methodName] = methods[methodName];
-        }
+        // @ts-expect-error
+        componentClass.prototype[methodName] = methods[methodName];
     });
     // if-statement is to prevent some node-based "browser" tests from breaking
     if (window.customElements)

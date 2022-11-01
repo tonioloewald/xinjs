@@ -39,16 +39,75 @@ const makeItems = (howMany) => {
   return items
 }
 
-const testComponent = makeWebComponent('test-component', {
-  content: [
-    elements.h3('top'),
-    elements.slot(),
-    elements.div('bottom', {dataRef: 'foo'})
-  ],
-  methods: {
-    render() {
-      console.log(this.elementRefs.foo.textContent)
-    } 
+const labeledValue = makeWebComponent('labeled-value', {
+  style: {
+    ':host > label': {
+      display: 'inline-flex',
+      gap: 'calc(0.5 * var(--item-spacing))',
+      lineHeight: 'var(--line-height)',
+    },
+    ':host *': {
+      fontSize: 'var(--font-size)'
+    }
+  },
+  props: {
+    value: ''
+  },
+  content: label(slot(), span({dataRef: 'field'})),
+  render() {
+    const {field} = this.elementRefs
+    field.textContent = this.value
+  }
+})
+
+const labeledInput = makeWebComponent('labeled-input', {
+  style: {
+    ':host > label': {
+      display: 'inline-flex',
+      gap: 'calc(0.5 * var(--item-spacing))',
+      lineHeight: 'var(--line-height)',
+    },
+    ':host *': {
+      fontSize: 'var(--font-size)'
+    }
+  },
+  attributes: {
+    type: '',
+    placeholder: ''
+  },
+  props: {
+    value: ''
+  },
+  content: label(slot(), input({dataRef: 'field'})),
+  connectedCallback() {
+    const self = this
+    const {field} = self.elementRefs
+    field.addEventListener('input', () => self.value = field.value)
+  },
+  render() {
+    const {field} = this.elementRefs
+    if (this.type) {
+      field.setAttribute('type', this.type)
+    } else {
+      field.removeAttribute('type')
+    }
+    if (this.placeholder) {
+      field.setAttribute('placeholder', this.placeholder)
+    } else {
+      field.removeAttribute('placeholder')
+    }
+    if (field.value !== `${this.value}`) {
+      field.value = this.value 
+    }
+  }
+})
+
+const toolBar = makeWebComponent('tool-bar', {
+  style: {
+    ':host': {
+      display: 'flex',
+      gap: 'var(--item-spacing)',
+    },
   }
 })
 
@@ -96,30 +155,48 @@ const colorConversionSpan = document.createElement('span')
 document.head.append(style('body { font-family: Sans-serif }'))
 
 document.body.append(fragment(
+  style(`
+    :root {
+      --font-size: 15px;
+      --line-height: 25px;
+      --item-spacing: 10px;
+    }
+
+    labeled-input,
+    labeled-value {
+      display: block
+    }
+
+    label, input, button {
+      font-size: var(--font-size)
+    }
+`),
   bind(h1(), 'app.title', bindings.text ),
-  label(
-    span('title'),
-    bind(input({title: 'title', placeholder: 'enter title'}), 'app.title', bindings.value)
-  ),
-  label(
-    span('array size'),
-    bind(span(), 'app.items.length', bindings.text)
-  ),
-  div(
-    {
-      style: {
-        display: 'flex',
-        gap: '5px'
-      }
-    },
+  labeledInput('title', {
+    placeholder: 'enter title',
+    apply(element) {
+      bind(element, 'app.title', bindings.value)
+    }
+  }),
+  labeledValue('current array size', {
+    apply(element) {
+      bind(element, 'app.items.length', bindings.value)
+    }
+  }),
+  toolBar(
     button('reset', {onClick() {
       const items = makeItems(xin.app.itemsToCreate)
       console.log('reset')
       xin.app.items = items
     }}),
-    input({title: 'items to create', placeholder: 'items to create', apply(element) {
-      bind(element, 'app.itemsToCreate', bindings.value)
-    }}),
+    labeledInput('items to create', {
+      placeholder: 'items to create', 
+      type: 'number', 
+      apply(element) {
+        bind(element, 'app.itemsToCreate', bindings.value)
+      }
+    }),
+    span({style: {flex: '1 1 auto'}}),
     button('scramble', {onClick() {
       console.log('scramble')
       xin.app.items.sort(() => Math.random() - 0.5)

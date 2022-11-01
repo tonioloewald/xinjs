@@ -1,125 +1,12 @@
+import { settings } from './settings';
+import { touch, observe as _observe, unobserve, updates, observerShouldBeRemoved } from './path-listener';
 import { getByPath, setByPath } from './by-path';
-export const observerShouldBeRemoved = Symbol('observer should be removed');
 // list of Array functions that change the array  
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift'];
 const registry = {};
-const listeners = []; // { path_string_or_test, callback }
 const debugPaths = true;
 const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/;
 const isValidPath = (path) => validPath.test(path);
-class Listener {
-    constructor(test, callback) {
-        if (typeof test === 'string') {
-            this.test = t => typeof t === 'string' && !!t && (test.startsWith(t) || t.startsWith(test));
-        }
-        else if (test instanceof RegExp) {
-            this.test = test.test.bind(test);
-        }
-        else if (test instanceof Function) {
-            this.test = test;
-        }
-        else {
-            throw new Error('expect listener test to be a string, RegExp, or test function');
-        }
-        if (typeof callback === 'string') {
-            this.callback = (...args) => {
-                const func = xin[callback];
-                if (func) {
-                    func(...args);
-                }
-                else {
-                    throw new Error(`callback path ${callback} does not exist`);
-                }
-            };
-        }
-        else if (typeof callback === 'function') {
-            this.callback = callback;
-        }
-        else {
-            throw new Error('expect callback to be a path or function');
-        }
-        listeners.push(this);
-    }
-}
-const getPath = (what) => {
-    return typeof what === 'object' ? what._xinPath : what;
-};
-const touchedPaths = [];
-let updateTriggered = false;
-let updatePromise;
-let resolveUpdate;
-export const updates = async () => {
-    if (!updatePromise) {
-        return;
-    }
-    await updatePromise;
-};
-const update = () => {
-    console.time('xin async update');
-    const paths = [...touchedPaths];
-    for (const path of paths) {
-        listeners
-            .filter(listener => {
-            let heard;
-            try {
-                heard = listener.test(path);
-            }
-            catch (e) {
-                throw new Error(`${listener.test} threw "${e}" at "${path}"`);
-            }
-            if (heard === observerShouldBeRemoved) {
-                unobserve(listener);
-                return false;
-            }
-            return !!heard;
-        })
-            .forEach(listener => {
-            let heard;
-            try {
-                heard = listener.callback(path);
-            }
-            catch (e) {
-                throw new Error(`${listener.callback} threw "${e}" handling "${path}"`);
-            }
-            if (heard === observerShouldBeRemoved) {
-                unobserve(listener);
-            }
-        });
-    }
-    touchedPaths.splice(0);
-    updateTriggered = false;
-    if (resolveUpdate) {
-        resolveUpdate();
-    }
-    console.timeEnd('xin async update');
-};
-const touch = (what) => {
-    const path = getPath(what);
-    if (!updateTriggered) {
-        updatePromise = new Promise(resolve => {
-            resolveUpdate = resolve;
-        });
-        updateTriggered = setTimeout(update);
-    }
-    if (!touchedPaths.find(touchedPath => path.startsWith(touchedPath))) {
-        touchedPaths.push(path);
-    }
-};
-const observe = (test, callback) => {
-    return new Listener(test, callback);
-};
-const unobserve = (listener) => {
-    let index;
-    let found = false;
-    index = listeners.indexOf(listener);
-    if (index > -1) {
-        listeners.splice(index, 1);
-    }
-    else {
-        throw new Error('unobserve failed, listener not found');
-    }
-    return found;
-};
 const extendPath = (path = '', prop = '') => {
     if (path === '') {
         return prop;
@@ -218,5 +105,12 @@ const regHandler = (path = '') => ({
         return true;
     }
 });
+const observe = (test, callback) => {
+    const func = typeof callback === 'function' ? callback : xin[callback];
+    if (typeof func !== 'function') {
+        throw new Error(`observe expects a function and ${callback} is not a function nor is xin[${callback}]`);
+    }
+    return _observe(test, func);
+};
 const xin = new Proxy(registry, regHandler());
-export { touch, observe, unobserve, xin, isValidPath };
+export { xin, updates, touch, observe, unobserve, observerShouldBeRemoved, isValidPath, settings, };

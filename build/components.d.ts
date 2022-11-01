@@ -17,14 +17,16 @@ declare type PropMap = {
 declare type ContentType = HTMLElement | HTMLElement[] | DocumentFragment | string;
 declare type WebComponentSpec = {
     superClass: typeof HTMLElement;
-    value: any | undefined;
     style: StyleMap;
     methods: FunctionMap;
+    render?: () => void;
+    connectedCallback?: () => void;
+    disconnectedCallback?: () => void;
     eventHandlers: EventHandlerMap;
     props: PropMap;
     attributes: PropMap;
     content: ContentType;
-    role: string | undefined;
+    role?: string;
 };
 export declare const makeWebComponent: (tagName: string, spec: WebComponentSpec) => (...contents: (string | number | import("./xin-types").XinObject | HTMLElement)[]) => HTMLElement | DocumentFragment;
 export {};
