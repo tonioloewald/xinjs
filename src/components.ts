@@ -26,14 +26,16 @@ type ContentType = HTMLElement | HTMLElement[] | DocumentFragment | string
 
 type WebComponentSpec = {
   superClass: typeof HTMLElement
-  value: any | undefined
   style: StyleMap
   methods: FunctionMap
+  render?: () => void
+  connectedCallback?: () => void
+  disconnectedCallback?: () => void
   eventHandlers: EventHandlerMap
   props: PropMap
   attributes: PropMap
   content: ContentType
-  role: string | undefined
+  role?: string
 }
 
 const dispatch = (target: Element, type: string) => {
@@ -84,20 +86,17 @@ const css = (obj: StyleMap) => {
 
 const defaultSpec = {
   superClass: HTMLElement,
-  value: undefined,
   style: {},
   methods: {},
   eventHandlers: {},
   props: {},
   attributes: {},
   content: elements.slot(),
-  role: undefined,
 }
 
 export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
   let {
     superClass,
-    value,
     style,
     methods,
     eventHandlers,
@@ -116,6 +115,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
     _changeQueued: boolean = false
     _renderQueued: boolean = false
     elementRefs: {[key: string]: HTMLElement}
+    value: any = undefined
 
     constructor () {
       super()
@@ -222,12 +222,10 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
                   } else {
                     this.removeAttribute(attributeName)
                   }
-                  if (this.queueRender) this.queueRender(attributeName === 'value')
                 }
               } else if (typeof attributes[attributeName] === 'number') {
                 if (value !== parseFloat(this[attributeName])) {
                   this.setAttribute(attributeName, value)
-                  if (this.queueRender) this.queueRender(attributeName === 'value')
                 }
               } else {
                 if (typeof value === 'object' || `${value}` !== `${this[attributeName]}`) {
@@ -238,7 +236,6 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
                   }
                   // @ts-ignore-error
                   attributeValues[attributeName] = value
-                  if (this.queueRender) this.queueRender(attributeName === 'value')
                 }
               }
             }
@@ -272,16 +269,19 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       if (eventHandlers.resize) {
         resizeObserver.observe(this)
       }
-      if (methods.connectedCallback) methods.connectedCallback.call(this)
+      if (props.hasOwnProperty('value') && this.getAttribute('value')) {
+        this.value = this.getAttribute('value')
+      }
+      if (spec.connectedCallback) spec.connectedCallback.call(this)
     }
 
     disconnectedCallback () {
       resizeObserver.unobserve(this)
-      if (methods.disconnectedCallback) methods.disconnectedCallback.call(this)
+      if (spec.disconnectedCallback) spec.disconnectedCallback.call(this)
     }
 
     render() {
-      if (methods.render) methods.render.call(this)
+      if (spec.render) spec.render.call(this)
     }
 
     static defaultAttributes () {
@@ -290,10 +290,8 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
   }
 
   Object.keys(methods).forEach(methodName => {
-    if (!['connectedCallback', 'disconnectedCallback', 'render'].includes(methodName)) {
-      // @ts-ignore-error
-      componentClass.prototype[methodName] = methods[methodName]
-    }
+    // @ts-expect-error
+    componentClass.prototype[methodName] = methods[methodName]
   })
 
   // if-statement is to prevent some node-based "browser" tests from breaking
