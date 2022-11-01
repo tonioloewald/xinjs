@@ -31,7 +31,7 @@ class ListBinding {
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
             // @ts-ignore-error
-            if (!item || !array.includes(item)) {
+            if (!item || !array._xinValue.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
                 elementToItem.delete(element);
