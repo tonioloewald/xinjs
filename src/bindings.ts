@@ -47,7 +47,6 @@ export const bindings: {[key: string | symbol] : XinBinding} = {
 
   list: {
     toDOM(element: HTMLElement, value: any[], options?: XinObject) {
-      console.log({options})
       const {bindInstance} = options || {}
       const listBinding = getListBinding(element, bindInstance)
       listBinding.update(value)
