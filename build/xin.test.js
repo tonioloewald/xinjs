@@ -1,6 +1,6 @@
 // @ts-ignore
 import { test, expect } from 'bun:test';
-import { xin, observe, unobserve, touch, isValidPath } from './xin';
+import { xin, observe, unobserve, touch, updates, isValidPath } from './xin';
 const changes = [];
 const obj = {
     message: 'hello xin',
@@ -67,84 +67,111 @@ test('isValidPath', () => {
     expect(isValidPath('airtime-rooms[id=1234]]')).toBe(false);
     expect(isValidPath('airtime-rooms[]]')).toBe(false);
 });
-test('triggers listeners', () => {
+test('triggers listeners', async () => {
     changes.splice(0);
     const listener = observe('test', (path) => {
         changes.push({ path, value: xin[path] });
     });
     xin.test.value = Math.PI;
+    await updates();
     expect(changes.length).toBe(1);
     expect(changes[0].path).toBe('test.value');
     expect(changes[0].value).toBe(Math.PI);
     xin.test.message = 'kiss me xin';
+    await updates();
     expect(changes.length).toBe(2);
     expect(changes[1].path).toBe('test.message');
     expect(changes[1].value).toBe('kiss me xin');
     xin.test.things['id=1701'].name = 'formerly known as Enterprise';
+    await updates();
     expect(changes.length).toBe(3);
     expect(changes[2].path).toBe('test.things[id=1701].name');
     expect(changes[2].value).toBe('formerly known as Enterprise');
     xin.test.people.sort();
     // expect sort to trigger change
+    await updates();
     expect(changes.length).toBe(4);
     expect(changes[3].path).toBe('test.people');
     // expect map to NOT trigger change
     const ignore = xin.test.people.map((person) => `hello ${person}`);
+    await updates();
     expect(changes.length).toBe(4);
     unobserve(listener);
 });
-test('listener paths are selective', () => {
+test('listener paths are selective', async () => {
     changes.splice(0);
     const listener = observe('test.value', (path) => {
         changes.push({ path, value: xin[path] });
     });
     xin.test.message = 'ignore this';
     xin.test.value = Math.random();
+    await updates();
     expect(changes.length).toBe(1);
     unobserve(listener);
 });
-test('listener tests are selective', () => {
+test('listener tests are selective', async () => {
     changes.splice(0);
     const listener = observe(/message/, (path) => {
         changes.push({ path, value: xin[path] });
     });
+    xin.test.value = Math.random();
     xin.test.message = 'hello';
     xin.test.value = Math.random();
-    xin.test.message = 'good-bye';
-    xin.test.value = Math.random();
+    await updates();
+    expect(changes.length).toBe(1);
+    unobserve(listener);
+});
+test('async updates skip multiple updates to the same path', async () => {
+    changes.splice(0);
+    const listener = observe('test.value', (path) => {
+        changes.push({ path, value: xin[path] });
+    });
+    xin.test.value = xin.test.value - 1;
+    xin.test.value = 17;
+    xin.test.value = Math.PI;
+    await updates();
+    expect(changes.length).toBe(1);
+    xin.test.value = 17;
+    await updates();
     expect(changes.length).toBe(2);
     unobserve(listener);
 });
-test('listener callback paths work', () => {
+test('listener callback paths work', async () => {
     changes.splice(0);
     const listener = observe('test', 'test.cb');
     xin.test.message = 'hello';
     xin.test.value = Math.random();
     xin.test.message = 'good-bye';
     xin.test.value = Math.random();
-    expect(changes.length).toBe(4);
+    await updates();
+    expect(changes.length).toBe(2);
     unobserve(listener);
 });
-test('you can touch objects', () => {
+test('you can touch objects', async () => {
     changes.splice(0);
     const listener = observe('test', path => {
         changes.push({ path, value: xin[path] });
     });
     xin.test._xinValue.message = 'wham-o';
     expect(xin.test.message).toBe('wham-o');
+    await updates();
     expect(changes.length).toBe(0);
     touch(xin.test);
+    await updates();
     expect(changes.length).toBe(1);
     xin.test.message = 'because';
+    await updates();
     expect(changes.length).toBe(2);
     xin.test._xinValue.message = 'i said so';
+    await updates();
     expect(changes.length).toBe(2);
     touch('test.message');
+    await updates();
     expect(changes.length).toBe(3);
     expect(changes[2].value).toBe('i said so');
     unobserve(listener);
 });
-test('instance changes trigger observers', () => {
+test('instance changes trigger observers', async () => {
     changes.splice(0);
     class Bar {
         constructor(parent) {
@@ -175,39 +202,51 @@ test('instance changes trigger observers', () => {
     const listener = observe(() => true, (path) => {
         changes.push({ path, value: xin[path] });
     });
+    await updates();
+    expect(changes.length).toBe(1);
+    changes.splice(0);
     expect(xin.test.baz._xinValue).toBe(baz);
     expect(xin.test.baz.x).toBe(17);
     expect(xin.test.baz.y).toBe(17);
+    await updates();
     expect(changes.length).toBe(0);
     xin.test.baz.x = 100;
+    await updates();
     expect(changes.length).toBe(1);
     expect(changes[0].path).toBe('test.baz.x');
     xin.test.baz.x = 100;
+    await updates();
     expect(changes.length).toBe(1);
     xin.test.baz.y = 100;
+    await updates();
     expect(changes.length).toBe(1);
     expect(changes[0].path).toBe('test.baz.x');
     xin.test.baz.y = -10;
+    await updates();
     expect(changes.length).toBe(2);
     expect(changes[1].path).toBe('test.baz.y');
     xin.test.baz.inc();
+    await updates();
     expect(changes.length).toBe(2);
     expect(xin.test.baz.x).toBe(-9);
     xin.test.baz.child.inc();
+    await updates();
     expect(changes.length).toBe(2);
     expect(xin.test.baz.x).toBe(-8);
     expect(xin.test.baz.x).toBe(xin.test.baz.child.parent.x);
     unobserve(listener);
 });
-test('handles array changes', () => {
+test('handles array changes', async () => {
     changes.splice(0);
     const listener = observe('test', (path) => {
         changes.push({ path, value: xin[path] });
     });
     xin.test.people.push('stanton');
+    await updates();
     expect(changes.length).toBe(1);
     expect(changes[0].path).toBe('test.people');
     xin.test.people.sort();
+    await updates();
     expect(changes.length).toBe(2);
     expect(changes[1].path).toBe('test.people');
     unobserve(listener);
@@ -220,16 +259,18 @@ test('objects are replaced', () => {
     expect(xin.test.sub.foo).toBe(undefined);
     expect(xin.test.sub.bar).toBe('baz');
 });
-test('unobserve works', () => {
+test('unobserve works', async () => {
     changes.splice(0);
     const listener = observe('test', (path) => {
         changes.push({ path, value: xin[path] });
     });
     xin.test.value = Math.random();
+    await updates();
     expect(changes.length).toBe(1);
     unobserve(listener);
     xin.test.things['id=1701'].name = 'Enterprise II';
     xin.test.value = 0;
+    await updates();
     expect(changes.length).toBe(1);
 });
 test('_xinPath works', () => {
@@ -256,7 +297,7 @@ test('instance properties, computed properties', () => {
     expect(xin.foo.x).toBe('test');
     expect(xin.foo.computedX).toBe('test');
 });
-test('parents and children', () => {
+test('parents and children', async () => {
     xin.grandparent = {
         name: 'Bobby',
         parent: { child: 17 }
@@ -269,13 +310,18 @@ test('parents and children', () => {
         changes.push({ path, value: xin[path], observed: 'parent.child' });
     });
     xin.grandparent.parent = { child: 20 };
+    await updates();
     expect(changes.length).toBe(2);
     xin.grandparent.parent.child = 20;
+    await updates();
     expect(changes.length).toBe(2);
     xin.grandparent.parent.child = 17;
+    await updates();
     expect(changes.length).toBe(4);
     xin.grandparent.parent = { child: 11 };
+    await updates();
     expect(changes.length).toBe(6);
     xin.grandparent.name = 'Drop Tables';
+    await updates();
     expect(changes.length).toBe(6);
 });
