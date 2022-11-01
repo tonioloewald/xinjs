@@ -34,16 +34,14 @@ test('updates simple values', () => {
     expect(xin.test.message).toBe('xin rules');
     expect(xin.test.value).toBe(18);
 });
-/*
 // TODO make this work (see TODO in xin.ts)
 test('array iterators', () => {
-  let count = 0
-  for(const item of xin.test.people) {
-    count++
-  }
-  expect(count).toBe(3)
-})
-*/
+    let count = 0;
+    for (const item of xin.test.people) {
+        count++;
+    }
+    expect(count).toBe(3);
+});
 test('isValidPath', () => {
     expect(isValidPath('')).toBe(false);
     expect(isValidPath('.')).toBe(false);

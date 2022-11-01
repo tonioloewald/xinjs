@@ -115,7 +115,8 @@ const regHandler = (path = '') => ({
   // as you'd expect
   get (target: XinObject, _prop: string | symbol): any {
     if (typeof _prop === 'symbol') {
-      throw new Error('iterators not implemented yet, use for(const item of xin.path.to.array._xinValue) ...')
+      // @ts-ignore-error
+      return target[_prop]
     }
     let prop = _prop
     const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
