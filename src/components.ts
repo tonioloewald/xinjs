@@ -120,10 +120,20 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
     constructor () {
       super()
       for (const prop of Object.keys(props)) {
-        const value = props[prop] // local copy that won't change
+        let value = props[prop]
         if (typeof value !== 'function') {
-          // @ts-expect-error
-          this[prop] = value
+          Object.defineProperty(this, prop, {
+            enumerable: false,
+            get() {
+              return value
+            },
+            set (x) {
+              if (x !== value) {
+                value = x
+                this.queueRender(true)
+              }
+            }
+          })
         } else {
           Object.defineProperty(this, prop, {
             enumerable: false,
@@ -267,6 +277,11 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
 
     disconnectedCallback () {
       resizeObserver.unobserve(this)
+      if (methods.disconnectedCallback) methods.disconnectedCallback.call(this)
+    }
+
+    render() {
+      if (methods.render) methods.render.call(this)
     }
 
     static defaultAttributes () {
@@ -275,7 +290,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
   }
 
   Object.keys(methods).forEach(methodName => {
-    if (methodName !== 'connectedCallback') {
+    if (!['connectedCallback', 'disconnectedCallback', 'render'].includes(methodName)) {
       // @ts-ignore-error
       componentClass.prototype[methodName] = methods[methodName]
     }
