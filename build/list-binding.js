@@ -27,7 +27,6 @@ class ListBinding {
         let removed = 0;
         let moved = 0;
         let created = 0;
-        // remove elements whose items no longer live in the array
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
             // @ts-ignore-error

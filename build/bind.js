@@ -1,4 +1,5 @@
 import { xin, observe, observerShouldBeRemoved } from './xin';
+import { throttle } from './throttle';
 export const bind = (element, what, binding, options) => {
     const { toDOM, fromDOM } = binding;
     if (!what || (typeof what === 'object' && !what._xinPath)) {
@@ -18,7 +19,10 @@ export const bind = (element, what, binding, options) => {
         });
     }
     if (fromDOM) {
-        element.addEventListener('input', () => {
+        element.addEventListener('input', throttle(() => {
+            xin[path] = fromDOM(element);
+        }, 500));
+        element.addEventListener('change', () => {
             xin[path] = fromDOM(element);
         });
     }

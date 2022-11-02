@@ -1,10 +1,9 @@
-import {xin, touch} from '../src/index'
-import {settings} from '../src/xin'
+import {xin, touch, elements, makeWebComponent, hotReload, settings} from '../src/index'
 import {bind} from '../src/bind'
 import {bindings} from '../src/bindings'
-import {hotReload} from '../src/hot-reload'
-import {elements} from '../src/elements'
-import {makeWebComponent} from '../src/components'
+import {debounce} from '../src/throttle'
+import {toolBar, labeledInput, labeledValue} from './custom-elements'
+import {WordList} from './WordList'
 
 /* global window, document */
 
@@ -12,19 +11,26 @@ console.time('total')
 
 settings.perf = true
 
-const {fragment, h1, div, input, template, button, span, label, slot, style} = elements
+const {fragment, h1, b, div, input, template, button, span, label, slot, style} = elements
 
 const randomColor = () => `hsl(${Math.floor(Math.random() * 360)} ${Math.floor(Math.random() * 4 + 1) * 25}% 50%)`
 
-/*
+async function getEmoji() {
+  const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
+  xin.emoji = await request.json()
+  console.log(xin.emoji.length, 'emoji loaded')
+}
+
+getEmoji()
+
 async function getWords () {
-  const {words} = await import('https://cdn.jsdelivr.net/npm/popular-english-words@1.0.2/words.js')
-  window.words = words
-  console.log(window.words.length, 'words loaded')
+  const request = await fetch('https://cdn.jsdelivr.net/npm/words-dictionary@1.0.3/words/en.txt')
+  const words = (await request.text()).split('\n').filter(x => !!x.trim())
+  xin.words = new WordList(words)
+  console.log(xin.words.wordCount, 'words loaded')
 }
 
 getWords()
-*/
 
 const INITIAL_ITEMS = 25
 
@@ -39,118 +45,30 @@ const makeItems = (howMany) => {
   return items
 }
 
-const labeledValue = makeWebComponent('labeled-value', {
-  style: {
-    ':host > label': {
-      display: 'inline-flex',
-      gap: 'calc(0.5 * var(--item-spacing))',
-      lineHeight: 'var(--line-height)',
-    },
-    ':host *': {
-      fontSize: 'var(--font-size)'
-    }
-  },
-  props: {
-    value: ''
-  },
-  content: label(slot(), span({dataRef: 'field'})),
-  render() {
-    const {field} = this.elementRefs
-    field.textContent = this.value
-  }
-})
-
-const labeledInput = makeWebComponent('labeled-input', {
-  style: {
-    ':host > label': {
-      display: 'inline-flex',
-      gap: 'calc(0.5 * var(--item-spacing))',
-      lineHeight: 'var(--line-height)',
-    },
-    ':host *': {
-      fontSize: 'var(--font-size)'
-    }
-  },
-  attributes: {
-    type: '',
-    placeholder: ''
-  },
-  props: {
-    value: ''
-  },
-  content: label(slot(), input({dataRef: 'field'})),
-  connectedCallback() {
-    const self = this
-    const {field} = self.elementRefs
-    field.addEventListener('input', () => self.value = field.value)
-  },
-  render() {
-    const {field} = this.elementRefs
-    if (this.type) {
-      field.setAttribute('type', this.type)
-    } else {
-      field.removeAttribute('type')
-    }
-    if (this.placeholder) {
-      field.setAttribute('placeholder', this.placeholder)
-    } else {
-      field.removeAttribute('placeholder')
-    }
-    if (field.value !== `${this.value}`) {
-      field.value = this.value 
-    }
-  }
-})
-
-const toolBar = makeWebComponent('tool-bar', {
-  style: {
-    ':host': {
-      display: 'flex',
-      gap: 'var(--item-spacing)',
-    },
-  }
-})
-
-const appLayout = makeWebComponent('app-layout', {
-  style: {
-    ':host': {
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    ':host .body': {
-      display: 'flex',
-      flex: '1 1 auto',
-      width: '100%'
-    },
-    '::slotted(:not([slot]))': {
-      flex: '1 1 auto'
-    }
-  },
-  content: [
-    slot({name: 'header'}),
-    div(
-      { class: 'body' },
-      slot({name: 'left'}),
-      slot(),
-      slot({name: 'right'})
-    ),
-    slot({name: 'footer'})
-  ]
-})
-
 xin.app = {
   title: 'xinjs binding test',
   itemsToCreate: INITIAL_ITEMS,
   items: makeItems(INITIAL_ITEMS),
 }
 
-hotReload()
+hotReload(path => {
+  if (path.startsWith('words') || path.startsWith('emoji')) {
+    return false
+  }
+  return true
+})
 
 Object.assign(window, {
   xin
 })
 
-const colorConversionSpan = document.createElement('span')
+const colorConversionSpan = span()
+
+const matchColors = (a, b) => {
+  colorConversionSpan.style.color = a
+  colorConversionSpan.style.backgroundColor = b
+  return colorConversionSpan.style.color === colorConversionSpan.style.backgroundColor
+}
 
 document.head.append(style('body { font-family: Sans-serif }'))
 
@@ -236,23 +154,62 @@ document.body.append(fragment(
       width: '200px'
     }}))), xin.app.items, bindings.list, {
       bindInstance(element, obj) {
-        colorConversionSpan.style.color = obj.color
-        const color = colorConversionSpan.style.color
-        if (element.style.color !== color) {
-          element.style.border = `1px solid ${color}`
-          element.style.color = color
+        if (!matchColors(element.style.color, obj.color)) {
+          element.style.border = `1px solid ${obj.color}`
+          element.style.color = obj.color
           element.textContent = `${obj.id} ${obj.color}`
         }
       }
     }
   ),
+  toolBar(
+    b('Word Search'),
+    span({style: {flex: '1 1 auto'}}),
+    labeledInput('letters', {
+      placeholder: 'letters to use',
+      apply(element){
+        bind(element, 'words.letters', bindings.value)
+      }
+    }),
+    labeledInput('must contain', {
+      placeholder: 'required substring',
+      apply(element){
+        bind(element, 'words.mustContain', bindings.value)
+      }
+    }),
+    labeledInput('min length', {
+      type: 'number',
+      apply(element){
+        bind(element, 'words.minLength', bindings.value)
+      }
+    }),
+    labeledInput('reuse letters', {
+      type: 'checkbox',
+      apply(element) {
+        bind(element, 'words.reuseLetters', bindings.value)
+      }
+    }),
+    {
+      onInput: debounce(() => {
+        if (xin.words) {
+          touch('words.list')
+          touch('words.filterCount')
+        }
+      })
+    },
+    span({style: {flex: '1 1 auto'}}),
+    span({apply(element){
+      bind(element, 'words.filterCount', {toDOM(element, value){
+        console.log('word count', value)
+        element.textContent = value !== undefined ? `${value} words` : ''
+      }})
+    }})
+  ),
   bind(div(span({style: {
     display: 'inline-block',
-    padding: '10px',
-    margin: '5px',
-    fontFamily: 'monospace',
-    width: '200px'
-  }})), 'words', bindings.list, {
+    padding: '5px 10px',
+    fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
+  }})), 'words.list', bindings.list, {
     bindInstance(element, word) {
       element.textContent = word
     }

@@ -1,1 +1,1 @@
-{"version":3,"file":"hot-reload.d.ts","sourceRoot":"","sources":["../src/hot-reload.ts"],"names":[],"mappings":"AACA,OAAO,EAAa,gBAAgB,EAAC,MAAM,aAAa,CAAA;AAExD,eAAO,MAAM,SAAS,UAAU,gBAAgB,SA6B/C,CAAA"}
+{"version":3,"file":"hot-reload.d.ts","sourceRoot":"","sources":["../src/hot-reload.ts"],"names":[],"mappings":"AACA,OAAO,EAAa,gBAAgB,EAAC,MAAM,aAAa,CAAA;AAGxD,eAAO,MAAM,SAAS,UAAU,gBAAgB,SAwB/C,CAAA"}

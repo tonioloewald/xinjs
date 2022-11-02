@@ -115,7 +115,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
     _changeQueued: boolean = false
     _renderQueued: boolean = false
     elementRefs: {[key: string]: HTMLElement}
-    value: any = undefined
+    value?: any
 
     constructor () {
       super()
@@ -130,6 +130,9 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
             set (x) {
               if (x !== value) {
                 value = x
+                if (prop === 'value') {
+                  this.value = x
+                }
                 this.queueRender(true)
               }
             }
@@ -269,8 +272,8 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       if (eventHandlers.resize) {
         resizeObserver.observe(this)
       }
-      if (props.hasOwnProperty('value') && this.getAttribute('value')) {
-        this.value = this.getAttribute('value')
+      if (props.hasOwnProperty('value')) {
+        this.value = this.getAttribute('value') || null
       }
       if (spec.connectedCallback) spec.connectedCallback.call(this)
     }

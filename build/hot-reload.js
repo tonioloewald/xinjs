@@ -1,4 +1,5 @@
 import { xin, observe } from './xin';
+import { debounce } from './throttle';
 export const hotReload = (test = () => true) => {
     const savedState = localStorage.getItem('xin-state');
     if (savedState) {
@@ -12,18 +13,14 @@ export const hotReload = (test = () => true) => {
             }
         }
     }
-    let deferredSave = 0;
-    const saveState = () => {
+    const saveState = debounce(() => {
         const obj = {};
         const state = xin._xinValue;
         for (const key of Object.keys(state).filter(test)) {
             obj[key] = state[key];
         }
-        localStorage.setItem('xin-state', JSON.stringify(xin._xinValue));
+        localStorage.setItem('xin-state', JSON.stringify(obj));
         console.log('xin state saved to localStorage');
-    };
-    observe(test, () => {
-        clearTimeout(deferredSave);
-        deferredSave = setTimeout(saveState, 250);
-    });
+    }, 500);
+    observe(test, saveState);
 };

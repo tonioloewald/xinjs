@@ -65,7 +65,6 @@ export const makeWebComponent = (tagName, spec) => {
             super();
             this._changeQueued = false;
             this._renderQueued = false;
-            this.value = undefined;
             for (const prop of Object.keys(props)) {
                 let value = props[prop];
                 if (typeof value !== 'function') {
@@ -77,6 +76,9 @@ export const makeWebComponent = (tagName, spec) => {
                         set(x) {
                             if (x !== value) {
                                 value = x;
+                                if (prop === 'value') {
+                                    this.value = x;
+                                }
                                 this.queueRender(true);
                             }
                         }
@@ -229,8 +231,8 @@ export const makeWebComponent = (tagName, spec) => {
             if (eventHandlers.resize) {
                 resizeObserver.observe(this);
             }
-            if (props.hasOwnProperty('value') && this.getAttribute('value')) {
-                this.value = this.getAttribute('value');
+            if (props.hasOwnProperty('value')) {
+                this.value = this.getAttribute('value') || null;
             }
             if (spec.connectedCallback)
                 spec.connectedCallback.call(this);

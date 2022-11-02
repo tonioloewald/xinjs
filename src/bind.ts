@@ -1,7 +1,7 @@
 import { xin, touch, observe, observerShouldBeRemoved } from './xin'
 import { XinObject, XinTouchableType } from './xin-types'
 import { XinBinding, bindings } from './bindings'
-
+import { throttle } from './throttle'
 
 export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinBinding, options?: XinObject) => {
   const {toDOM, fromDOM} = binding
@@ -23,7 +23,11 @@ export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinB
     })
   }
   if (fromDOM) {
-    element.addEventListener('input', () => {
+    element.addEventListener('input', throttle(() => {
+      xin[path] = fromDOM(element)
+    }, 500))
+
+    element.addEventListener('change', () => {
       xin[path] = fromDOM(element)
     })
   }
