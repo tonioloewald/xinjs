@@ -22,3 +22,5 @@ those objects in any way.
 3. [filter](filter.md) — filtering objects using types
 4. [react integration](useXin.md) — powering pure components via xin hooks
 5. [paths](by-path.md) - querying objects by path
+6. [elements](elements.md) — conveniently creating DOM elements
+7. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")

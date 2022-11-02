@@ -1,5 +1,6 @@
 import { xin, observe } from './xin'
 import { XinObject, PathTestFunction} from './xin-types'
+import { debounce } from './throttle'
 
 export const hotReload = (test: PathTestFunction = () => true) => {
   const savedState = localStorage.getItem('xin-state')
@@ -14,22 +15,17 @@ export const hotReload = (test: PathTestFunction = () => true) => {
     }
   }
 
-  let deferredSave: number = 0
-
-  const saveState = () => {
+  const saveState = debounce(() => {
     const obj: XinObject = {}
     const state = xin._xinValue
     for(const key of Object.keys(state).filter(test)) {
       obj[key] = state[key]
     }
-    localStorage.setItem('xin-state', JSON.stringify(xin._xinValue))
+    localStorage.setItem('xin-state', JSON.stringify(obj))
     console.log('xin state saved to localStorage')
-  }
+  }, 500)
 
-  observe(test, () => {
-    clearTimeout(deferredSave)
-    deferredSave = setTimeout(saveState, 250)
-  })
+  observe(test, saveState)
 }
 
 
