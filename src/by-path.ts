@@ -1,7 +1,7 @@
 // unique tokens passed to set by path to delete or create properties
 
-import {XinObject} from './xin-types'
-import {makeError} from './make-error'
+import { XinObject } from './xin-types'
+import { makeError } from './make-error'
 
 const now36 = () => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1)
 let _seq = 0
@@ -21,7 +21,7 @@ function pathParts (path: string) {
   } else {
     const parts = []
     while (path.length) {
-      var index = path.search(/\[[^\]]+\]/)
+      let index = path.search(/\[[^\]]+\]/)
       if (index === -1) {
         parts.push(path.split('.'))
         break
@@ -133,13 +133,13 @@ function expectObject (obj: any) {
 
 function getByPath (obj: XinObject, path: string) {
   const parts = pathParts(path)
-  var found = obj
-  var i, iMax, j, jMax
+  let found = obj
+  let i, iMax, j, jMax
   for (i = 0, iMax = parts.length; found && i < iMax; i++) {
-    var part = parts[i]
+    const part = parts[i]
     if (Array.isArray(part)) {
       for (j = 0, jMax = part.length; found && j < jMax; j++) {
-        var key = part[j]
+        const key = part[j]
         found = found[key]
       }
     } else {
@@ -198,13 +198,13 @@ function setByPath (orig: XinObject, path: string, val: any) {
           return true
         }
       }
-    } else if (Array.isArray(part) && part.length) {
+    } else if (Array.isArray(part) && (part.length > 0)) {
       expectObject(obj)
-      while (part.length) {
+      while (part.length > 0) {
         const key = part.shift()
-        if (part.length || parts.length) {
+        if ((part.length > 0) || parts.length) {
           // if we're at the end of part.length then we need to insert an array
-          obj = byKey(obj, key, part.length ? {} : [])
+          obj = byKey(obj, key, (part.length > 0) ? {} : [])
         } else {
           if (val !== _delete_) {
             if (obj[key] === val) {

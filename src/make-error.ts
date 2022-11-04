@@ -1,7 +1,7 @@
 const stringify = (x: any) => {
   try {
     return JSON.stringify(x)
-  } catch(_) {
+  } catch (_) {
     return '{has circular references}'
   }
 }

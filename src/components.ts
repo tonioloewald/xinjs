@@ -1,30 +1,30 @@
 import { elements } from './elements'
 
-type StyleRule = {
+interface StyleRule {
   [key: string]: string | number
 }
 
-type StyleMap = {
+interface StyleMap {
   [key: string]: StyleRule
 }
 
-type FunctionMap = {
+interface FunctionMap {
   [key: string]: Function
 }
 
 type EventHandler = (event: Event) => void
 
-type EventHandlerMap = {
+interface EventHandlerMap {
   [key: string]: EventHandler
 }
 
-type PropMap = {
+interface PropMap {
   [key: string]: any
 }
 
 type ContentType = HTMLElement | HTMLElement[] | DocumentFragment | string
 
-type WebComponentSpec = {
+interface WebComponentSpec {
   superClass: typeof HTMLElement
   style: StyleMap
   methods: FunctionMap
@@ -91,11 +91,11 @@ const defaultSpec = {
   eventHandlers: {},
   props: {},
   attributes: {},
-  content: elements.slot(),
+  content: elements.slot()
 }
 
 export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
-  let {
+  const {
     superClass,
     style,
     methods,
@@ -114,7 +114,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
   const componentClass = class extends superClass {
     _changeQueued: boolean = false
     _renderQueued: boolean = false
-    elementRefs: {[key: string]: HTMLElement}
+    elementRefs: { [key: string]: HTMLElement }
     value?: any
 
     constructor () {
@@ -124,7 +124,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
         if (typeof value !== 'function') {
           Object.defineProperty(this, prop, {
             enumerable: false,
-            get() {
+            get () {
               return value
             },
             set (x) {
@@ -155,10 +155,10 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       }
       const self = this
       this.elementRefs = new Proxy({}, {
-        get (target: {[key: string]: HTMLElement}, ref: string) {
+        get (target: { [key: string]: HTMLElement }, ref: string) {
           if (!target[ref]) {
-            const element = self.shadowRoot ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`)
-            if (!element) throw new Error(`elementRef "${ref}" does not exist!`)
+            const element = (self.shadowRoot != null) ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`)
+            if (element == null) throw new Error(`elementRef "${ref}" does not exist!`)
             element.removeAttribute('data-ref')
             target[ref] = element as HTMLElement
           }
@@ -185,7 +185,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
         observer.observe(this, { childList: true })
       }
       const attributeNames = Object.keys(attributes)
-      if (attributeNames.length) {
+      if (attributeNames.length > 0) {
         const attributeValues = {}
         const observer = new MutationObserver((mutationsList) => {
           let triggerRender = false
@@ -246,7 +246,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       this.queueRender()
     }
 
-    queueRender(change = false) {
+    queueRender (change = false) {
       if (!this.render) {
         return
       }
@@ -271,16 +271,16 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       if (props.hasOwnProperty('value')) {
         this.value = this.getAttribute('value') || null
       }
-      if (spec.connectedCallback) spec.connectedCallback.call(this)
+      if (spec.connectedCallback != null) spec.connectedCallback.call(this)
     }
 
     disconnectedCallback () {
       resizeObserver.unobserve(this)
-      if (spec.disconnectedCallback) spec.disconnectedCallback.call(this)
+      if (spec.disconnectedCallback != null) spec.disconnectedCallback.call(this)
     }
 
-    render() {
-      if (spec.render) spec.render.call(this)
+    render () {
+      if (spec.render != null) spec.render.call(this)
     }
 
     static defaultAttributes () {

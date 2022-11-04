@@ -3,7 +3,7 @@ export default [
     input: 'build/index.js',
     output: {
       file: 'dist/index.js',
-      format: 'cjs',
+      format: 'cjs'
     },
     external: ['react']
   },
@@ -11,8 +11,8 @@ export default [
     input: 'build/index.js',
     output: {
       file: 'dist/index.mjs',
-      format: 'esm',
+      format: 'esm'
     },
-    external: ['react'],
-  },
+    external: ['react']
+  }
 ]

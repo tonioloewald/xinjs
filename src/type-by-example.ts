@@ -62,7 +62,7 @@ const inRange = (spec: string, x: number) => {
   return true
 }
 
-const regExps: {[key: string]: RegExp} = {}
+const regExps: { [key: string]: RegExp } = {}
 
 const regexpTest = (spec: string, subject: any) => {
   const regexp = regExps[spec] ? regExps[spec] : regExps[spec] = new RegExp(spec)
@@ -74,7 +74,7 @@ export const isInstanceOf = (obj: any, constructor: string | Function) => {
     return obj instanceof Function
   } else {
     let proto = Object.getPrototypeOf(obj)
-    while(proto.constructor && proto.constructor !== Object) {
+    while (proto.constructor && proto.constructor !== Object) {
       if (proto.constructor.name === constructor) {
         return true
       }
@@ -155,33 +155,36 @@ export const describeType = (x: any) => {
     case 'array':
       return x.map(describeType)
     case 'object':
-    if (x.constructor === Object) {
-      const _type: XinObject = {}
-      Object.keys(x as XinObject).forEach((key) => { _type[key] = describeType(x[key]) })
-      return _type
-    } else {
-      return `#instance x.constructor.name`
-    }
+      if (x.constructor === Object) {
+        const _type: XinObject = {}
+        Object.keys(x as XinObject).forEach((key) => { _type[key] = describeType(x[key]) })
+        return _type
+      } else {
+        return '#instance x.constructor.name'
+      }
     case 'function':
     case 'async':
     {
       if (x.protoype) {
-        return `#class x.name`
+        return '#class x.name'
       }
-      const source = x.toString()
+      const source = (x as Function).toString()
       if (source.endsWith('() { [native code] }')) {
         return `#native ${scalarType}`
       }
       const functionSource = source.match(functionDeclaration)
       const arrowSource = source.match(arrowDeclaration)
-      const hasReturnValue = source.match(returnsValue) || source.match(arrowDeclaration)
+      const hasReturnValue = (source.match(returnsValue) != null) || source.match(arrowDeclaration)
+
+      // eslint-disable-next-line
       const paramText = ((functionSource && functionSource[3]) ||
+          // eslint-disable-next-line
           (arrowSource && (arrowSource[2] || arrowSource[3] || arrowSource[4])) || '').trim()
       const params = paramText.split(',').map((param: string) => {
         const [key] = param.split('=')
         return `${key} #any`
       })
-      return `${scalarType} ( ${params.join(', ')} ) => ${hasReturnValue ? '#any' : '#nothing'}`
+      return `${scalarType} ( ${params.join(', ')} ) => ${(hasReturnValue != null) ? '#any' : '#nothing'}`
     }
     default:
       return `#${scalarType}`
@@ -311,11 +314,11 @@ const matchKeys = (example: any, subject: any, errors: string[] = [], path = '')
   return errors
 }
 
-type TypeErrorConfig = {
-  functionName?: string,
-  isParamFailure: boolean,
-  expected: any,
-  found: any,
+interface TypeErrorConfig {
+  functionName?: string
+  isParamFailure: boolean
+  expected: any
+  found: any
   errors: string[]
 }
 
@@ -365,22 +368,22 @@ export const matchParamTypes = (types: any[], params: any[]) => {
     }
   }
   const errors = types.map((type, i) => matchType(type, params[i]))
-  return errors.flat().length ? errors : []
+  return (errors.flat().length > 0) ? errors : []
 }
 
-type TypeSafeFunction = {
-  (...args: any[]) : any,
-  paramTypes: any[],
+interface TypeSafeFunction {
+  (...args: any[]): any
+  paramTypes: any[]
   resultType: any
 }
 
-export const typeSafe = (func: Function, paramTypes: any[] = [], resultType:any = undefined, functionName:string|undefined = undefined): TypeSafeFunction => {
+export const typeSafe = (func: Function, paramTypes: any[] = [], resultType: any = undefined, functionName: string | undefined = undefined): TypeSafeFunction => {
   const paramErrors = matchParamTypes(
     ['#function', '#?array', '#?any', '#?string'],
     [func, paramTypes, resultType, functionName]
   )
   if (paramErrors instanceof TypeError) {
-    throw new Error(`typeSafe was passed bad paramters`)
+    throw new Error('typeSafe was passed bad paramters')
   }
 
   if (!functionName) functionName = func.name || 'anonymous'

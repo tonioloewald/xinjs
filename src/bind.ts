@@ -1,30 +1,30 @@
 import { xin, touch, observe, observerShouldBeRemoved } from './xin'
-import { XinObject, XinTouchableType } from './xin-types'
-import { XinBinding, bindings } from './bindings'
+import { XinObject, XinTouchableType, XinBinding } from './xin-types'
 import { throttle } from './throttle'
 
-export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinBinding, options?: XinObject) => {
-  const {toDOM, fromDOM} = binding
-  if (!what || (typeof what === 'object' && !what._xinPath)) {
+export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinBinding, options?: XinObject): HTMLElement => {
+  const { toDOM, fromDOM } = binding
+  // eslint-disable-next-line
+  if (typeof what !== 'string' && what !== null && typeof what === 'object' && !what._xinPath) {
     throw new Error('bind requires a path or object with xin Proxy')
   }
   const path = typeof what === 'string' ? what : what._xinPath
-  if (toDOM) {
+  if (toDOM != null) {
     // toDOM(element, xin[path], options)
     touch(path)
 
     observe(path, () => {
-      if(!element.closest('body')) {
+      if (element.closest('body') == null) {
         return observerShouldBeRemoved
       }
       const value = xin[path]
-      if (typeof value === 'object' || !fromDOM || fromDOM(element) !== value) {
+      if (typeof value === 'object' || (fromDOM == null) || fromDOM(element) !== value) {
         toDOM(element, value, options)
       }
     })
   }
-  if (fromDOM) {
-    const updateXin = () => {
+  if (fromDOM != null) {
+    const updateXin = (): void => {
       const value = fromDOM(element)
       if (value !== undefined && value !== null) {
         xin[path] = value

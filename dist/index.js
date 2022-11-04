@@ -98,7 +98,7 @@ const observe$1 = (test, callback) => {
 };
 const unobserve = (listener) => {
     let index;
-    let found = false;
+    const found = false;
     index = listeners.indexOf(listener);
     if (index > -1) {
         listeners.splice(index, 1);
@@ -136,7 +136,7 @@ function pathParts(path) {
     else {
         const parts = [];
         while (path.length) {
-            var index = path.search(/\[[^\]]+\]/);
+            let index = path.search(/\[[^\]]+\]/);
             if (index === -1) {
                 parts.push(path.split('.'));
                 break;
@@ -246,13 +246,13 @@ function expectObject(obj) {
 }
 function getByPath(obj, path) {
     const parts = pathParts(path);
-    var found = obj;
-    var i, iMax, j, jMax;
+    let found = obj;
+    let i, iMax, j, jMax;
     for (i = 0, iMax = parts.length; found && i < iMax; i++) {
-        var part = parts[i];
+        const part = parts[i];
         if (Array.isArray(part)) {
             for (j = 0, jMax = part.length; found && j < jMax; j++) {
-                var key = part[j];
+                const key = part[j];
                 found = found[key];
             }
         }
@@ -318,13 +318,13 @@ function setByPath(orig, path, val) {
                 }
             }
         }
-        else if (Array.isArray(part) && part.length) {
+        else if (Array.isArray(part) && (part.length > 0)) {
             expectObject(obj);
-            while (part.length) {
+            while (part.length > 0) {
                 const key = part.shift();
-                if (part.length || parts.length) {
+                if ((part.length > 0) || parts.length) {
                     // if we're at the end of part.length then we need to insert an array
-                    obj = byKey(obj, key, part.length ? {} : []);
+                    obj = byKey(obj, key, (part.length > 0) ? {} : []);
                 }
                 else {
                     if (val !== _delete_) {
@@ -779,12 +779,12 @@ const matchParamTypes = (types, params) => {
         }
     }
     const errors = types.map((type, i) => matchType(type, params[i]));
-    return errors.flat().length ? errors : [];
+    return (errors.flat().length > 0) ? errors : [];
 };
 const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = undefined) => {
     const paramErrors = matchParamTypes(['#function', '#?array', '#?any', '#?string'], [func, paramTypes, resultType, functionName]);
     if (paramErrors instanceof TypeError) {
-        throw new Error(`typeSafe was passed bad paramters`);
+        throw new Error('typeSafe was passed bad paramters');
     }
     if (!functionName)
         functionName = func.name || 'anonymous';
@@ -834,7 +834,7 @@ const filterArray = (template, obj) => {
     }
     const output = [];
     for (const item of obj) {
-        const itemTemplate = template.find(possible => matchType(possible, item).length === 0);
+        const itemTemplate = (template).find(possible => matchType(possible, item).length === 0);
         if (itemTemplate !== undefined) {
             output.push(filter(itemTemplate, item));
         }
@@ -842,7 +842,7 @@ const filterArray = (template, obj) => {
     return output;
 };
 const filterObject = (template, obj) => {
-    if (matchType(template, obj).length) {
+    if (matchType(template, obj).length > 0) {
         return undefined;
     }
     const output = {};
@@ -858,7 +858,7 @@ const filter = (template, obj) => {
     if (obj === undefined || obj === null) {
         return undefined;
     }
-    else if (typeof obj !== 'object' && matchType(template, obj).length) {
+    else if (typeof obj !== 'object' && (matchType(template, obj).length > 0)) {
         return undefined;
     }
     else if (Array.isArray(template)) {
@@ -868,7 +868,7 @@ const filter = (template, obj) => {
         return filterObject(template, obj);
     }
     else {
-        return matchType(template, obj).length ? undefined : obj;
+        return (matchType(template, obj).length > 0) ? undefined : obj;
     }
 };
 
@@ -932,24 +932,25 @@ const hotReload = (test = () => true) => {
 
 const bind = (element, what, binding, options) => {
     const { toDOM, fromDOM } = binding;
-    if (!what || (typeof what === 'object' && !what._xinPath)) {
+    // eslint-disable-next-line
+    if (typeof what !== 'string' && what !== null && typeof what === 'object' && !what._xinPath) {
         throw new Error('bind requires a path or object with xin Proxy');
     }
     const path = typeof what === 'string' ? what : what._xinPath;
-    if (toDOM) {
+    if (toDOM != null) {
         // toDOM(element, xin[path], options)
         touch(path);
         observe(path, () => {
-            if (!element.closest('body')) {
+            if (element.closest('body') == null) {
                 return observerShouldBeRemoved;
             }
             const value = xin[path];
-            if (typeof value === 'object' || !fromDOM || fromDOM(element) !== value) {
+            if (typeof value === 'object' || (fromDOM == null) || fromDOM(element) !== value) {
                 toDOM(element, value, options);
             }
         });
     }
-    if (fromDOM) {
+    if (fromDOM != null) {
         const updateXin = () => {
             const value = fromDOM(element);
             if (value !== undefined && value !== null) {
@@ -986,7 +987,7 @@ class ListBinding {
         this.options = options;
     }
     update(array) {
-        if (!array) {
+        if (array == null) {
             array = [];
         }
         const { idPath, initInstance, updateInstance } = this.options;
@@ -995,7 +996,7 @@ class ListBinding {
         let created = 0;
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
-            if (!item || !array.includes(item)) {
+            if ((item == null) || !array.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
                 elementToItem.delete(element);
@@ -1013,19 +1014,19 @@ class ListBinding {
                 continue;
             }
             let element = itemToElement.get(item._xinValue);
-            if (!element) {
+            if (element == null) {
                 created++;
                 element = this.template.cloneNode(true);
                 if (typeof item === 'object') {
                     itemToElement.set(item._xinValue, element);
                     elementToItem.set(element, item._xinValue);
                 }
-                if (initInstance) {
+                if (initInstance != null) {
                     initInstance(element, path || item);
                 }
                 this.boundElement.append(element);
             }
-            if (updateInstance) {
+            if (updateInstance != null) {
                 updateInstance(element, path || item);
             }
             elements.push(element);
@@ -1035,7 +1036,7 @@ class ListBinding {
         for (const element of elements) {
             if (element.previousElementSibling !== insertionPoint) {
                 moved++;
-                if (insertionPoint && insertionPoint.nextElementSibling) {
+                if ((insertionPoint != null) && (insertionPoint.nextElementSibling != null)) {
                     this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
                 }
                 else {
@@ -1052,7 +1053,7 @@ class ListBinding {
 }
 const getListBinding = (boundElement, options) => {
     let listBinding = listBindings.get(boundElement);
-    if (!listBinding) {
+    if (listBinding == null) {
         listBinding = new ListBinding(boundElement, options);
         listBindings.set(boundElement, listBinding);
     }
@@ -1142,11 +1143,11 @@ const create = (tagType, ...contents) => {
                         elt.setAttribute('style', value);
                     }
                 }
-                else if (key.match(/^on[A-Z]/)) {
+                else if (key.match(/^on[A-Z]/) != null) {
                     const eventType = key.substr(2).toLowerCase();
                     elt.addEventListener(eventType, value);
                 }
-                else if (key.match(/^bind[A-Z]/)) {
+                else if (key.match(/^bind[A-Z]/) != null) {
                     const bindingType = key.substr(4).toLowerCase();
                     const binding = bindings[bindingType];
                     if (binding) {
@@ -1181,7 +1182,7 @@ const _elements = { fragment };
 const elements = new Proxy(_elements, {
     get(target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`);
-        if (!tagName.match(/^\w+(-\w+)*$/)) {
+        if (tagName.match(/^\w+(-\w+)*$/) == null) {
             throw new Error(`${tagName} does not appear to be a valid element tagName`);
         }
         else if (!target[tagName]) {
@@ -1246,10 +1247,10 @@ const defaultSpec = {
     eventHandlers: {},
     props: {},
     attributes: {},
-    content: elements.slot(),
+    content: elements.slot()
 };
 const makeWebComponent = (tagName, spec) => {
-    let { superClass, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
+    const { superClass, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
     let styleNode;
     if (style) {
         const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style));
@@ -1300,8 +1301,8 @@ const makeWebComponent = (tagName, spec) => {
             this.elementRefs = new Proxy({}, {
                 get(target, ref) {
                     if (!target[ref]) {
-                        const element = self.shadowRoot ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`);
-                        if (!element)
+                        const element = (self.shadowRoot != null) ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`);
+                        if (element == null)
                             throw new Error(`elementRef "${ref}" does not exist!`);
                         element.removeAttribute('data-ref');
                         target[ref] = element;
@@ -1330,7 +1331,7 @@ const makeWebComponent = (tagName, spec) => {
                 observer.observe(this, { childList: true });
             }
             const attributeNames = Object.keys(attributes);
-            if (attributeNames.length) {
+            if (attributeNames.length > 0) {
                 const attributeValues = {};
                 const observer = new MutationObserver((mutationsList) => {
                     let triggerRender = false;
@@ -1425,16 +1426,16 @@ const makeWebComponent = (tagName, spec) => {
             if (props.hasOwnProperty('value')) {
                 this.value = this.getAttribute('value') || null;
             }
-            if (spec.connectedCallback)
+            if (spec.connectedCallback != null)
                 spec.connectedCallback.call(this);
         }
         disconnectedCallback() {
             resizeObserver.unobserve(this);
-            if (spec.disconnectedCallback)
+            if (spec.disconnectedCallback != null)
                 spec.disconnectedCallback.call(this);
         }
         render() {
-            if (spec.render)
+            if (spec.render != null)
                 spec.render.call(this);
         }
         static defaultAttributes() {
