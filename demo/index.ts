@@ -145,8 +145,7 @@ document.body.append(fragment(
       background: 'var(--input-bg)'
     }}))), xin.app.items, bindings.list, {
       idPath: 'id',
-      updateInstance(element, path) {
-        const obj = xin[path]
+      updateInstance(element, obj) {
         if (obj.color !== element.dataset.color) {
           element.dataset.color = obj.color
           element.style.border = `1px solid ${obj.color}`
