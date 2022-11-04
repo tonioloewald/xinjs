@@ -879,6 +879,28 @@ const debounce = (origFn, minInterval = 250) => {
         }, minInterval);
     };
 };
+const throttle = (origFn, minInterval = 250) => {
+    let debounceId;
+    let previousCall = Date.now() - minInterval;
+    let inFlight = false;
+    return (...args) => {
+        clearTimeout(debounceId);
+        debounceId = setTimeout(async () => {
+            origFn(...args);
+            previousCall = Date.now();
+        }, minInterval);
+        if (!inFlight && Date.now() - previousCall >= minInterval) {
+            inFlight = true;
+            try {
+                origFn(...args);
+                previousCall = Date.now();
+            }
+            finally {
+                inFlight = false;
+            }
+        }
+    };
+};
 
 const hotReload = (test = () => true) => {
     const savedState = localStorage.getItem('xin-state');
@@ -905,6 +927,182 @@ const hotReload = (test = () => true) => {
     observe(test, saveState);
 };
 
+const bind = (element, what, binding, options) => {
+    const { toDOM, fromDOM } = binding;
+    if (!what || (typeof what === 'object' && !what._xinPath)) {
+        throw new Error('bind requires a path or object with xin Proxy');
+    }
+    const path = typeof what === 'string' ? what : what._xinPath;
+    if (toDOM) {
+        // toDOM(element, xin[path], options)
+        touch(path);
+        observe(path, () => {
+            if (!element.closest('body')) {
+                return observerShouldBeRemoved;
+            }
+            const value = xin[path];
+            if (typeof value === 'object' || !fromDOM || fromDOM(element) !== value) {
+                toDOM(element, value, options);
+            }
+        });
+    }
+    if (fromDOM) {
+        const updateXin = () => {
+            const value = fromDOM(element);
+            if (value !== undefined && value !== null) {
+                xin[path] = value;
+            }
+        };
+        element.addEventListener('input', throttle(updateXin, 500));
+        element.addEventListener('change', updateXin);
+    }
+    return element;
+};
+
+const itemToElement = new WeakMap();
+const elementToItem = new WeakMap();
+const listBindings = new WeakMap();
+class ListBinding {
+    constructor(boundElement, options = {}) {
+        this.boundElement = boundElement;
+        if (boundElement.children.length !== 1) {
+            throw new Error('ListBinding expects an element with exactly one child element');
+        }
+        if (boundElement.children[0] instanceof HTMLTemplateElement) {
+            const template = boundElement.children[0];
+            if (template.content.children.length !== 1) {
+                throw new Error('ListBinding expects a template with exactly one child element');
+            }
+            template.remove();
+            this.template = template.content.children[0].cloneNode(true);
+        }
+        else {
+            this.template = boundElement.children[0];
+            this.template.remove();
+        }
+        this.options = options;
+    }
+    update(array) {
+        if (!array) {
+            array = [];
+        }
+        const { idPath, initInstance, updateInstance } = this.options;
+        let removed = 0;
+        let moved = 0;
+        let created = 0;
+        for (const element of [...this.boundElement.children]) {
+            const item = elementToItem.get(element);
+            // @ts-ignore-error
+            if (!item || !array.includes(item)) {
+                element.remove();
+                itemToElement.delete(item);
+                elementToItem.delete(element);
+                removed++;
+            }
+        }
+        // build a complete new set of elements in the right order
+        const elements = [];
+        // @ts-ignore-error
+        const arrayPath = array._xinPath;
+        for (let i = 0; i < array.length; i++) {
+            const item = array[i];
+            const path = idPath ? `${arrayPath}[${idPath}=${item[idPath]}]` : false;
+            if (!item) {
+                continue;
+            }
+            let element = itemToElement.get(item._xinValue);
+            if (!element) {
+                created++;
+                element = this.template.cloneNode(true);
+                if (typeof item === 'object') {
+                    itemToElement.set(item._xinValue, element);
+                    elementToItem.set(element, item._xinValue);
+                }
+                if (initInstance) {
+                    initInstance(element, path || item);
+                }
+                this.boundElement.append(element);
+            }
+            if (updateInstance) {
+                updateInstance(element, path || item);
+            }
+            elements.push(element);
+        }
+        // make sure all the elements are in the DOM and in the correct location
+        let insertionPoint = null;
+        for (const element of elements) {
+            if (element.previousElementSibling !== insertionPoint) {
+                moved++;
+                if (insertionPoint && insertionPoint.nextElementSibling) {
+                    this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
+                }
+                else {
+                    this.boundElement.append(element);
+                }
+            }
+            insertionPoint = element;
+        }
+        if (settings.perf) {
+            // @ts-ignore-error
+            console.log(array._xinPath, 'updated', { removed, created, moved });
+        }
+    }
+}
+const getListBinding = (boundElement, options) => {
+    let listBinding = listBindings.get(boundElement);
+    if (!listBinding) {
+        listBinding = new ListBinding(boundElement, options);
+        listBindings.set(boundElement, listBinding);
+    }
+    return listBinding;
+};
+
+const bindings = {
+    value: {
+        toDOM(element, value, options) {
+            // @ts-expect-error
+            if (element.value !== undefined) {
+                // @ts-expect-error
+                element.value = value;
+            }
+            else {
+                throw new Error(`cannot set value of <${element.tagName}>`);
+            }
+        },
+        fromDOM(element) {
+            // @ts-expect-error
+            return element.value;
+        }
+    },
+    text: {
+        toDOM(element, value) {
+            element.textContent = value;
+        }
+    },
+    style: {
+        toDOM(element, value) {
+            if (typeof value === 'object') {
+                for (const prop of Object.keys(value)) {
+                    // @ts-ignore-error
+                    element.style[prop] = value[prop];
+                }
+            }
+            else if (typeof value === 'string') {
+                element.setAttribute('style', value);
+            }
+            else {
+                throw new Error('style binding expects either a string or object');
+            }
+        }
+    },
+    list: {
+        toDOM(element, value, options) {
+            const listBinding = getListBinding(element, options);
+            listBinding.update(value);
+        }
+    }
+};
+
 const templates = {};
 const create = (tagType, ...contents) => {
     if (!templates[tagType]) {
@@ -929,8 +1127,13 @@ const create = (tagType, ...contents) => {
                 else if (key === 'style') {
                     if (typeof value === 'object') {
                         for (const prop of Object.keys(value)) {
-                            // @ts-expect-error
-                            elt.style[prop] = value[prop];
+                            if (prop.startsWith('--')) {
+                                elt.style.setProperty(prop, value[prop]);
+                            }
+                            else {
+                                // @ts-expect-error
+                                elt.style[prop] = value[prop];
+                            }
                         }
                     }
                     else {
@@ -940,6 +1143,16 @@ const create = (tagType, ...contents) => {
                 else if (key.match(/^on[A-Z]/)) {
                     const eventType = key.substr(2).toLowerCase();
                     elt.addEventListener(eventType, value);
+                }
+                else if (key.match(/^bind[A-Z]/)) {
+                    const bindingType = key.substr(4).toLowerCase();
+                    const binding = bindings[bindingType];
+                    if (binding) {
+                        bind(elt, value, binding);
+                    }
+                    else {
+                        throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
+                    }
                 }
                 else {
                     const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
@@ -1118,14 +1331,12 @@ const makeWebComponent = (tagName, spec) => {
             if (attributeNames.length) {
                 const attributeValues = {};
                 const observer = new MutationObserver((mutationsList) => {
-                    let triggerChange = false;
                     let triggerRender = false;
                     mutationsList.forEach((mutation) => {
-                        triggerChange = mutation.attributeName === 'value';
-                        triggerRender = triggerChange || !!(mutation.attributeName && attributeNames.includes(mutation.attributeName));
+                        triggerRender = !!(mutation.attributeName && attributeNames.includes(mutation.attributeName));
                     });
                     if (triggerRender && this.queueRender)
-                        this.queueRender(triggerChange);
+                        this.queueRender(false);
                 });
                 observer.observe(this, { attributes: true });
                 attributeNames.forEach(attributeName => {
@@ -1240,4 +1451,4 @@ const makeWebComponent = (tagName, spec) => {
     return elements[tagName];
 };
 
-export { elements, filter, hotReload, makeWebComponent, matchType, observe, observerShouldBeRemoved, settings, touch, typeSafe, unobserve, useXin, xin };
+export { bind, bindings, elements, filter, hotReload, makeWebComponent, matchType, observe, observerShouldBeRemoved, settings, touch, typeSafe, unobserve, useXin, xin };

@@ -10,7 +10,8 @@ export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinB
   }
   const path = typeof what === 'string' ? what : what._xinPath
   if (toDOM) {
-    toDOM(element, xin[path], options)
+    // toDOM(element, xin[path], options)
+    touch(path)
 
     observe(path, () => {
       if(!element.closest('body')) {
@@ -23,13 +24,15 @@ export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinB
     })
   }
   if (fromDOM) {
-    element.addEventListener('input', throttle(() => {
-      xin[path] = fromDOM(element)
-    }, 500))
+    const updateXin = () => {
+      const value = fromDOM(element)
+      if (value !== undefined && value !== null) {
+        xin[path] = value
+      }
+    }
 
-    element.addEventListener('change', () => {
-      xin[path] = fromDOM(element)
-    })
+    element.addEventListener('input', throttle(updateXin, 500))
+    element.addEventListener('change', updateXin)
   }
   return element
 }
