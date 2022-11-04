@@ -4,5 +4,5 @@ import { Listener, touch, unobserve, updates, observerShouldBeRemoved } from './
 declare const isValidPath: (path: string) => boolean;
 declare const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 declare const xin: XinObject;
-export { xin, updates, touch, observe, unobserve, observerShouldBeRemoved, isValidPath, settings, };
+export { xin, updates, touch, observe, unobserve, observerShouldBeRemoved, isValidPath, settings };
 //# sourceMappingURL=xin.d.ts.map

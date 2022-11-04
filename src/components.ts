@@ -206,9 +206,9 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
                   return typeof attributes[attributeName] === 'number'
                     ? parseFloat(this.getAttribute(attributeName))
                     : this.getAttribute(attributeName)
-                // @ts-ignore-error
+                // @ts-expect-error
                 } else if (attributeValues[attributeName] !== undefined) {
-                // @ts-ignore-error
+                // @ts-expect-error
                   return attributeValues[attributeName]
                 } else {
                   return attributes[attributeName]
@@ -235,7 +235,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
                   } else {
                     this.setAttribute(attributeName, value)
                   }
-                  // @ts-ignore-error
+                  // @ts-expect-error
                   attributeValues[attributeName] = value
                 }
               }
@@ -247,7 +247,6 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
     }
 
     queueRender(change = false) {
-      // @ts-ignore-error
       if (!this.render) {
         return
       }
@@ -258,7 +257,6 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
           if (this._changeQueued) dispatch(this, 'change')
           this._changeQueued = false
           this._renderQueued = false
-          // @ts-ignore-error
           this.render()
         })
       }

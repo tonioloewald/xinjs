@@ -25,7 +25,7 @@ export const bindings = {
         toDOM(element, value) {
             if (typeof value === 'object') {
                 for (const prop of Object.keys(value)) {
-                    // @ts-ignore-error
+                    // @ts-expect-error
                     element.style[prop] = value[prop];
                 }
             }

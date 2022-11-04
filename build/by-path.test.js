@@ -1,4 +1,5 @@
-// @ts-ignore
+/* eslint-disable */
+// @ts-expect-error
 import { test, expect } from 'bun:test';
 import { getByPath, setByPath, deleteByPath } from './by-path';
 const obj = {

@@ -348,7 +348,7 @@ function setByPath(orig, path, val) {
     throw new Error(`setByPath(${orig}, ${path}, ${val}) failed`);
 }
 
-// list of Array functions that change the array  
+// list of Array functions that change the array
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift'];
 const registry = {};
 const validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/;
@@ -358,7 +358,7 @@ const extendPath = (path = '', prop = '') => {
         return prop;
     }
     else {
-        if (prop.match(/^\d+$/) || prop.includes('=')) {
+        if (prop.match(/^\d+$/) !== null || prop.includes('=')) {
             return `${path}[${prop}]`;
         }
         else {
@@ -371,20 +371,19 @@ const regHandler = (path = '') => ({
     // as you'd expect
     get(target, _prop) {
         if (typeof _prop === 'symbol') {
-            // @ts-ignore-error
+            // @ts-expect-error
             return target[_prop];
         }
         let prop = _prop;
-        const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) || // basePath.subPath (omit '.')
-            prop.match(/^([^\]]+)(\[.+)/) || // basePath[subPath
-            prop.match(/^(\[[^\]]+\])\.(.+)$/) || // [basePath].subPath (omit '.')
+        const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) ?? // basePath.subPath (omit '.')
+            prop.match(/^([^\]]+)(\[.+)/) ?? // basePath[subPath
+            prop.match(/^(\[[^\]]+\])\.(.+)$/) ?? // [basePath].subPath (omit '.')
             prop.match(/^(\[[^\]]+\])\[(.+)$/); // [basePath][subPath
-        if (compoundProp) {
+        if (compoundProp !== null) {
             const [, basePath, subPath] = compoundProp;
             const currentPath = extendPath(path, basePath);
             const value = getByPath(target, basePath);
-            // @ts-expect-error
-            return value && typeof value === 'object' ? new Proxy(value, regHandler(currentPath))[subPath] : value;
+            return value !== null && typeof value === 'object' ? new Proxy(value, regHandler(currentPath))[subPath] : value;
         }
         if (prop === '_xinPath') {
             return path;
@@ -400,12 +399,14 @@ const regHandler = (path = '') => ({
             let value;
             if (prop.includes('=')) {
                 const [idPath, needle] = prop.split('=');
-                value = target.find((candidate) => `${getByPath(candidate, idPath)}` === needle);
+                value = target.find(
+                // eslint-disable-next-line
+                (candidate) => `${getByPath(candidate, idPath)}` === needle);
             }
             else {
                 value = (target)[prop];
             }
-            if (value && typeof value === 'object') {
+            if (value !== null && typeof value === 'object') {
                 const currentPath = extendPath(path, prop);
                 const proxy = new Proxy(value, regHandler(currentPath));
                 return proxy;
@@ -418,11 +419,11 @@ const regHandler = (path = '') => ({
             }
         }
         else if (Array.isArray(target)) {
-            // @ts-ignore -- we could be looking for an index, a property, or a method
+            // @ts-expect-error -- we could be looking for an index, a property, or a method
             const value = target[prop];
             return typeof value === 'function'
                 ? (...items) => {
-                    // @ts-ignore
+                    // @ts-expect-error
                     const result = (Array.prototype[prop]).apply(target, items);
                     if (ARRAY_MUTATIONS.includes(prop)) {
                         touch(path);
@@ -434,11 +435,12 @@ const regHandler = (path = '') => ({
                     : value;
         }
         else {
-            return target ? target[prop] : undefined;
+            return target[prop];
         }
     },
     set(target, prop, value) {
-        if (value && value._xinPath) {
+        // eslint-disable-next-line
+        if (value?._xinPath) {
             value = value._xinValue;
         }
         const fullPath = extendPath(path, prop);
@@ -454,7 +456,7 @@ const regHandler = (path = '') => ({
 const observe = (test, callback) => {
     const func = typeof callback === 'function' ? callback : xin[callback];
     if (typeof func !== 'function') {
-        throw new Error(`observe expects a function and ${callback} is not a function nor is xin[${callback}]`);
+        throw new Error(`observe expects a function or path to a function, ${callback} is neither`);
     }
     return observe$1(test, func);
 };
@@ -463,7 +465,7 @@ const xin = new Proxy(registry, regHandler());
 // TODO declare type the way it's declated for useState so that TypeScript
 // passes through type of initialValue to the right thing
 const useXin = (path, initialValue = '') => {
-    const [value, update] = useState(xin[path] || initialValue);
+    const [value, update] = useState(xin[path] !== undefined ? xin[path] : initialValue);
     useEffect(() => {
         const observer = () => {
             update(xin[path]);
@@ -622,7 +624,6 @@ const specificTypeMatch = (type, subject) => {
         case 'array':
             return Array.isArray(subject);
         case 'instance':
-            // @ts-ignore
             return isInstanceOf(subject, spec);
         case 'promise':
             return subject instanceof Promise;
@@ -992,7 +993,6 @@ class ListBinding {
         let created = 0;
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
-            // @ts-ignore-error
             if (!item || !array.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
@@ -1002,7 +1002,7 @@ class ListBinding {
         }
         // build a complete new set of elements in the right order
         const elements = [];
-        // @ts-ignore-error
+        // @ts-expect-error
         const arrayPath = array._xinPath;
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
@@ -1043,7 +1043,7 @@ class ListBinding {
             insertionPoint = element;
         }
         if (settings.perf) {
-            // @ts-ignore-error
+            // @ts-expect-error
             console.log(array._xinPath, 'updated', { removed, created, moved });
         }
     }
@@ -1083,7 +1083,7 @@ const bindings = {
         toDOM(element, value) {
             if (typeof value === 'object') {
                 for (const prop of Object.keys(value)) {
-                    // @ts-ignore-error
+                    // @ts-expect-error
                     element.style[prop] = value[prop];
                 }
             }
@@ -1351,10 +1351,10 @@ const makeWebComponent = (tagName, spec) => {
                                     return typeof attributes[attributeName] === 'number'
                                         ? parseFloat(this.getAttribute(attributeName))
                                         : this.getAttribute(attributeName);
-                                    // @ts-ignore-error
+                                    // @ts-expect-error
                                 }
                                 else if (attributeValues[attributeName] !== undefined) {
-                                    // @ts-ignore-error
+                                    // @ts-expect-error
                                     return attributeValues[attributeName];
                                 }
                                 else {
@@ -1386,7 +1386,7 @@ const makeWebComponent = (tagName, spec) => {
                                     else {
                                         this.setAttribute(attributeName, value);
                                     }
-                                    // @ts-ignore-error
+                                    // @ts-expect-error
                                     attributeValues[attributeName] = value;
                                 }
                             }
@@ -1397,7 +1397,6 @@ const makeWebComponent = (tagName, spec) => {
             this.queueRender();
         }
         queueRender(change = false) {
-            // @ts-ignore-error
             if (!this.render) {
                 return;
             }
@@ -1410,7 +1409,6 @@ const makeWebComponent = (tagName, spec) => {
                         dispatch(this, 'change');
                     this._changeQueued = false;
                     this._renderQueued = false;
-                    // @ts-ignore-error
                     this.render();
                 });
             }

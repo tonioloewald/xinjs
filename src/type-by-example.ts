@@ -130,7 +130,6 @@ export const specificTypeMatch = (type: any, subject: any) => {
     case 'array':
       return Array.isArray(subject)
     case 'instance':
-      // @ts-ignore
       return isInstanceOf(subject, spec)
     case 'promise':
       return subject instanceof Promise
@@ -266,7 +265,7 @@ export const exampleAtPath = (example: any, path: string | string[]): any => {
         return undefined
       }
     } else {
-      // @ts-ignore
+      // @ts-expect-error
       return exampleAtPath(example[part], parts)
     }
   }

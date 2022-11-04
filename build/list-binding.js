@@ -32,7 +32,6 @@ class ListBinding {
         let created = 0;
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
-            // @ts-ignore-error
             if (!item || !array.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
@@ -42,7 +41,7 @@ class ListBinding {
         }
         // build a complete new set of elements in the right order
         const elements = [];
-        // @ts-ignore-error
+        // @ts-expect-error
         const arrayPath = array._xinPath;
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
@@ -83,7 +82,7 @@ class ListBinding {
             insertionPoint = element;
         }
         if (settings.perf) {
-            // @ts-ignore-error
+            // @ts-expect-error
             console.log(array._xinPath, 'updated', { removed, created, moved });
         }
     }

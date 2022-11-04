@@ -1,5 +1,5 @@
 import { xin, observe } from './xin'
-import { XinObject, PathTestFunction} from './xin-types'
+import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { debounce } from './throttle'
 
 export const hotReload = (test: PathTestFunction = () => true) => {
@@ -25,7 +25,7 @@ export const hotReload = (test: PathTestFunction = () => true) => {
     console.log('xin state saved to localStorage')
   }, 500)
 
-  observe(test, saveState)
+  observe(test, saveState as ObserverCallbackFunction)
 }
 
 

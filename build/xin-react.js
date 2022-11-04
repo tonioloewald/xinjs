@@ -3,7 +3,7 @@ import { xin, observe, unobserve } from './xin';
 // TODO declare type the way it's declated for useState so that TypeScript
 // passes through type of initialValue to the right thing
 export const useXin = (path, initialValue = '') => {
-    const [value, update] = useState(xin[path] || initialValue);
+    const [value, update] = useState(xin[path] !== undefined ? xin[path] : initialValue);
     useEffect(() => {
         const observer = () => {
             update(xin[path]);

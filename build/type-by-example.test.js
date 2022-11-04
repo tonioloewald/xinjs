@@ -1,4 +1,5 @@
-// @ts-ignore
+/* eslint-disable */
+// @ts-expect-error
 import { test, expect } from 'bun:test';
 import { matchType, exampleAtPath, matchParamTypes, typeSafe, TypeError } from './type-by-example';
 const join = (errors) => errors.join(';');
@@ -227,7 +228,7 @@ test('type safe functions', () => {
     catch (e) {
         expect(!!e).toBe(true);
     }
-    // @ts-ignore
+    // @ts-expect-error
     const safeVectorAdd = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'vectorAdd');
     expect(safeVectorAdd([1, 2], [3, 4]).toString()).toBe('4,6');
     expect(safeVectorAdd([1, 2], [3, 'x']).toString()).toBe('vectorAdd failed: bad parameter, [[],["[1] was \\"x\\", expected number"]]');
@@ -236,7 +237,7 @@ test('type safe functions', () => {
     expect(safeVectorAdd([1, 2], safeVectorAdd([1, 2], [1, 1])).toString()).toBe('3,5');
     // failed function returns TypeError
     expect(safeVectorAdd([1, 2], [1]) instanceof TypeError).toBe(true);
-    // @ts-ignore
+    // @ts-expect-error
     const inner = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'inner');
     // failed function returns TypeError
     expect(inner([1, 2], [1]) instanceof TypeError).toBe(true);
