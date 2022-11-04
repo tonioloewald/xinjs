@@ -19,10 +19,13 @@ export class WordList {
 
   constructor(words) {
     this.words = words
-    this.filterCount = words.length
   }
 
   get list () {
+    if (!this.letters) {
+      this.filterCount = 0
+      return []
+    }
     let filtered = this.words.filter(word => word.length >= this.minLength)
     if (this.mustContain) {
       filtered = filtered.filter(word => word.includes(this.mustContain))

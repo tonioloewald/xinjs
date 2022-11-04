@@ -1,9 +1,10 @@
-import {xin, touch, elements, makeWebComponent, hotReload, settings} from '../src/index'
-import {bind} from '../src/bind'
-import {bindings} from '../src/bindings'
+import {xin, touch, elements, makeWebComponent, hotReload, settings, bind, bindings} from '../src/index'
 import {debounce} from '../src/throttle'
-import {toolBar, labeledInput, labeledValue} from './custom-elements'
+import {toolBar, labeledInput, labeledValue, appLayout} from './components/index'
 import {WordList} from './WordList'
+import './base-style'
+import words from './words'
+import logo from '../xinjs-logo.svg'
 
 /* global window, document */
 
@@ -11,7 +12,7 @@ console.time('total')
 
 settings.perf = true
 
-const {fragment, h1, b, div, input, template, button, span, label, slot, style} = elements
+const {fragment, img, h1, a, b, div, input, template, button, span, label, slot, style} = elements
 
 const randomColor = () => `hsl(${Math.floor(Math.random() * 360)} ${Math.floor(Math.random() * 4 + 1) * 25}% 50%)`
 
@@ -22,15 +23,6 @@ async function getEmoji() {
 }
 
 getEmoji()
-
-async function getWords () {
-  const request = await fetch('https://cdn.jsdelivr.net/npm/words-dictionary@1.0.3/words/en.txt')
-  const words = (await request.text()).split('\n').filter(x => !!x.trim())
-  xin.words = new WordList(words)
-  console.log(xin.words.wordCount, 'words loaded')
-}
-
-getWords()
 
 const INITIAL_ITEMS = 25
 
@@ -46,10 +38,13 @@ const makeItems = (howMany) => {
 }
 
 xin.app = {
-  title: 'xinjs binding test',
+  title: 'xinjs documentation',
   itemsToCreate: INITIAL_ITEMS,
   items: makeItems(INITIAL_ITEMS),
 }
+
+xin.words = new WordList(words)
+console.log(xin.words.wordCount, 'words loaded')
 
 hotReload(path => {
   if (path.startsWith('words') || path.startsWith('emoji')) {
@@ -73,77 +68,79 @@ const matchColors = (a, b) => {
 document.head.append(style('body { font-family: Sans-serif }'))
 
 document.body.append(fragment(
-  style(`
-    :root {
-      --font-size: 15px;
-      --line-height: 25px;
-      --item-spacing: 10px;
-    }
-
-    labeled-input,
-    labeled-value {
-      display: block
-    }
-
-    label, input, button {
-      font-size: var(--font-size)
-    }
-`),
-  bind(h1(), 'app.title', bindings.text ),
+  h1(
+    img({
+      alt: 'xinjs logo',
+      style: {
+        width: '44px',
+        height: '44px',
+        margin: '-8px 10px -8px 0'
+      },
+      src: logo
+    }),
+    span({bindText: 'app.title'})
+  ),
   labeledInput('title', {
     placeholder: 'enter title',
-    apply(element) {
-      bind(element, 'app.title', bindings.value)
-    }
-  }),
-  labeledValue('current array size', {
-    apply(element) {
-      bind(element, 'app.items.length', bindings.value)
-    }
+    bindValue: 'app.title'
   }),
   toolBar(
-    button('reset', {onClick() {
-      const items = makeItems(xin.app.itemsToCreate)
-      console.log('reset')
-      xin.app.items = items
-    }}),
-    labeledInput('items to create', {
-      placeholder: 'items to create', 
-      type: 'number', 
-      apply(element) {
-        bind(element, 'app.itemsToCreate', bindings.value)
+    labeledValue('item count', {
+      bindValue: 'app.items.length' 
+    }),
+    button('reset', {
+      onClick() {
+        const items = makeItems(xin.app.itemsToCreate)
+        console.log('reset')
+        xin.app.items = items
       }
     }),
+    labeledInput('items to create', {
+      placeholder: 'items to create', 
+      type: 'number',
+      style: {
+        '--input-width': '80px'
+      },
+      bindValue: 'app.itemsToCreate'
+    }),
     span({style: {flex: '1 1 auto'}}),
-    button('scramble', {onClick() {
-      console.log('scramble')
-      xin.app.items.sort(() => Math.random() - 0.5)
-    }}),
-    button('swap 4<->7', {onClick(){
-      console.log('swap')
-      let item4 = xin.app.items[4]
-      xin.app.items[4] = xin.app.items[7]
-      xin.app.items[7] = item4
-      touch(xin.app.items)
-    }}),
-    button('modify ~10%', {onClick() {
-      console.log('modify')
-      for(const item of xin.app.items._xinValue) {
-        if(Math.random() < 0.1) {
-          item.color = randomColor() 
-        }
+    button('scramble', {
+      onClick() {
+        console.log('scramble')
+        xin.app.items.sort(() => Math.random() - 0.5)
       }
-      touch(xin.app.items)
-    }}),
-    button('modify & scramble', {onClick() {
-      console.log('scramble and modify')
-      for(const item of xin.app.items._xinValue) {
-        if(Math.random() < 0.1) {
-          item.color = randomColor() 
-        }
+    }),
+    button('swap 4<->7', {
+      onClick(){
+        console.log('swap')
+        let item4 = xin.app.items[4]
+        xin.app.items[4] = xin.app.items[7]
+        xin.app.items[7] = item4
+        touch(xin.app.items)
       }
-      xin.app.items.sort(() => Math.random() - 0.5)
-    }})
+    }),
+    button('modify ~10%', {
+      onClick() {
+        console.log('modify')
+        for(const item of xin.app.items._xinValue) {
+          if(Math.random() < 0.1) {
+            item.color = randomColor() 
+          }
+        }
+        touch(xin.app.items)
+      }
+    }),
+    button('modify & scramble', {
+      onClick() {
+        console.log('scramble and modify')
+        for(const item of xin.app.items._xinValue) {
+          if(Math.random() < 0.1) {
+            item.color = randomColor() 
+          }
+        }
+        xin.app.items.sort(() => Math.random() - 0.5)
+      }
+    })
   ),
   bind(
     div(template(span({style: {
@@ -151,9 +148,12 @@ document.body.append(fragment(
       padding: '10px',
       margin: '5px',
       fontFamily: 'monospace',
-      width: '200px'
+      width: '200px',
+      background: 'var(--input-bg)'
     }}))), xin.app.items, bindings.list, {
-      bindInstance(element, obj) {
+      idPath: 'id',
+      updateInstance(element, path) {
+        const obj = xin[path]
         if (!matchColors(element.style.color, obj.color)) {
           element.style.border = `1px solid ${obj.color}`
           element.style.color = obj.color
@@ -167,18 +167,27 @@ document.body.append(fragment(
     span({style: {flex: '1 1 auto'}}),
     labeledInput('letters', {
       placeholder: 'letters to use',
+      style: {
+        '--input-width': '160px'
+      },
       apply(element){
         bind(element, 'words.letters', bindings.value)
       }
     }),
     labeledInput('must contain', {
       placeholder: 'required substring',
+      style: {
+        '--input-width': '60px'
+      },
       apply(element){
         bind(element, 'words.mustContain', bindings.value)
       }
     }),
     labeledInput('min length', {
       type: 'number',
+      style: {
+        '--input-width': '60px'
+      },
       apply(element){
         bind(element, 'words.minLength', bindings.value)
       }
@@ -197,22 +206,32 @@ document.body.append(fragment(
         }
       })
     },
-    span({style: {flex: '1 1 auto'}}),
-    span({apply(element){
-      bind(element, 'words.filterCount', {toDOM(element, value){
-        console.log('word count', value)
-        element.textContent = value !== undefined ? `${value} words` : ''
-      }})
-    }})
+    span(
+      { style: { flex: '0 0 100px', textAlign: 'right' } },
+      span({ bindText: 'words.filterCount' }),
+      ' words'
+    )
   ),
-  bind(div(span({style: {
-    display: 'inline-block',
-    padding: '5px 10px',
-    fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
-  }})), 'words.list', bindings.list, {
-    bindInstance(element, word) {
-      element.textContent = word
-    }
+  bind(
+    div(
+      a({
+          style: {
+            display: 'inline-block',
+            padding: '2px 10px',
+            margin: '2px',
+            borderRadius: '99px',
+            background: '#00f2',
+            fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
+            textDecoration: 'none',
+            color: 'var(--text-color)'
+          }
+      })
+    ), 'words.list', bindings.list, {
+      initInstance(element, word) {
+        element.textContent = word
+        element.setAttribute('href', `https://thefreedictionary.com/${word}`)
+        element.setAttribute('target', `definition`)
+      }
   }),
 ))
 

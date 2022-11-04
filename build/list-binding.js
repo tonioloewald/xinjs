@@ -1,8 +1,9 @@
+import { settings } from './settings';
 const itemToElement = new WeakMap();
 const elementToItem = new WeakMap();
 const listBindings = new WeakMap();
 class ListBinding {
-    constructor(boundElement, bindInstance) {
+    constructor(boundElement, options = {}) {
         this.boundElement = boundElement;
         if (boundElement.children.length !== 1) {
             throw new Error('ListBinding expects an element with exactly one child element');
@@ -12,25 +13,27 @@ class ListBinding {
             if (template.content.children.length !== 1) {
                 throw new Error('ListBinding expects a template with exactly one child element');
             }
-            this.template = template.content.children[0].cloneNode(true);
             template.remove();
+            this.template = template.content.children[0].cloneNode(true);
         }
         else {
             this.template = boundElement.children[0];
+            this.template.remove();
         }
-        this.bindInstance = bindInstance;
+        this.options = options;
     }
     update(array) {
         if (!array) {
             array = [];
         }
+        const { idPath, initInstance, updateInstance } = this.options;
         let removed = 0;
         let moved = 0;
         let created = 0;
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
             // @ts-ignore-error
-            if (!item || !array._xinValue.includes(item)) {
+            if (!item || !array.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
                 elementToItem.delete(element);
@@ -39,8 +42,11 @@ class ListBinding {
         }
         // build a complete new set of elements in the right order
         const elements = [];
+        // @ts-ignore-error
+        const arrayPath = array._xinPath;
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
+            const path = idPath ? `${arrayPath}[${idPath}=${item[idPath]}]` : false;
             if (!item) {
                 continue;
             }
@@ -52,10 +58,13 @@ class ListBinding {
                     itemToElement.set(item._xinValue, element);
                     elementToItem.set(element, item._xinValue);
                 }
+                if (initInstance) {
+                    initInstance(element, path || item);
+                }
                 this.boundElement.append(element);
             }
-            if (this.bindInstance) {
-                this.bindInstance(element, item);
+            if (updateInstance) {
+                updateInstance(element, path || item);
             }
             elements.push(element);
         }
@@ -73,14 +82,16 @@ class ListBinding {
             }
             insertionPoint = element;
         }
-        // @ts-expect-error
-        console.log(array._xinPath, 'updated', { removed, created, moved });
+        if (settings.perf) {
+            // @ts-ignore-error
+            console.log(array._xinPath, 'updated', { removed, created, moved });
+        }
     }
 }
-export const getListBinding = (boundElement, bindInstance) => {
+export const getListBinding = (boundElement, options) => {
     let listBinding = listBindings.get(boundElement);
     if (!listBinding) {
-        listBinding = new ListBinding(boundElement, bindInstance);
+        listBinding = new ListBinding(boundElement, options);
         listBindings.set(boundElement, listBinding);
     }
     return listBinding;

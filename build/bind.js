@@ -1,4 +1,4 @@
-import { xin, observe, observerShouldBeRemoved } from './xin';
+import { xin, touch, observe, observerShouldBeRemoved } from './xin';
 import { throttle } from './throttle';
 export const bind = (element, what, binding, options) => {
     const { toDOM, fromDOM } = binding;
@@ -7,7 +7,8 @@ export const bind = (element, what, binding, options) => {
     }
     const path = typeof what === 'string' ? what : what._xinPath;
     if (toDOM) {
-        toDOM(element, xin[path], options);
+        // toDOM(element, xin[path], options)
+        touch(path);
         observe(path, () => {
             if (!element.closest('body')) {
                 return observerShouldBeRemoved;
@@ -19,12 +20,14 @@ export const bind = (element, what, binding, options) => {
         });
     }
     if (fromDOM) {
-        element.addEventListener('input', throttle(() => {
-            xin[path] = fromDOM(element);
-        }, 500));
-        element.addEventListener('change', () => {
-            xin[path] = fromDOM(element);
-        });
+        const updateXin = () => {
+            const value = fromDOM(element);
+            if (value !== undefined && value !== null) {
+                xin[path] = value;
+            }
+        };
+        element.addEventListener('input', throttle(updateXin, 500));
+        element.addEventListener('change', updateXin);
     }
     return element;
 };

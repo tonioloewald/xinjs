@@ -1,10 +1,15 @@
+declare type ListBindingOptions = {
+    idPath?: string;
+    initInstance?: (element: HTMLElement, pathOrObj: any) => void;
+    updateInstance?: (element: HTMLElement, pathOrObj: any) => void;
+};
 declare class ListBinding {
     boundElement: HTMLElement;
     template: HTMLElement;
-    bindInstance?: (element: HTMLElement, obj: any) => void;
-    constructor(boundElement: HTMLElement, bindInstance?: (element: HTMLElement, obj: any) => void);
+    options: ListBindingOptions;
+    constructor(boundElement: HTMLElement, options?: ListBindingOptions);
     update(array?: any[]): void;
 }
-export declare const getListBinding: (boundElement: HTMLElement, bindInstance?: ((element: HTMLElement, obj: any) => void) | undefined) => ListBinding;
+export declare const getListBinding: (boundElement: HTMLElement, options?: ListBindingOptions) => ListBinding;
 export {};
 //# sourceMappingURL=list-binding.d.ts.map

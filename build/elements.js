@@ -1,3 +1,5 @@
+import { bind } from './bind';
+import { bindings } from './bindings';
 const templates = {};
 export const create = (tagType, ...contents) => {
     if (!templates[tagType]) {
@@ -22,8 +24,13 @@ export const create = (tagType, ...contents) => {
                 else if (key === 'style') {
                     if (typeof value === 'object') {
                         for (const prop of Object.keys(value)) {
-                            // @ts-expect-error
-                            elt.style[prop] = value[prop];
+                            if (prop.startsWith('--')) {
+                                elt.style.setProperty(prop, value[prop]);
+                            }
+                            else {
+                                // @ts-expect-error
+                                elt.style[prop] = value[prop];
+                            }
                         }
                     }
                     else {
@@ -33,6 +40,16 @@ export const create = (tagType, ...contents) => {
                 else if (key.match(/^on[A-Z]/)) {
                     const eventType = key.substr(2).toLowerCase();
                     elt.addEventListener(eventType, value);
+                }
+                else if (key.match(/^bind[A-Z]/)) {
+                    const bindingType = key.substr(4).toLowerCase();
+                    const binding = bindings[bindingType];
+                    if (binding) {
+                        bind(elt, value, binding);
+                    }
+                    else {
+                        throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
+                    }
                 }
                 else {
                     const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase());

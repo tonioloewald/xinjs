@@ -39,8 +39,7 @@ export const bindings = {
     },
     list: {
         toDOM(element, value, options) {
-            const { bindInstance } = options || {};
-            const listBinding = getListBinding(element, bindInstance);
+            const listBinding = getListBinding(element, options);
             listBinding.update(value);
         }
     }

@@ -15,14 +15,12 @@ export const throttle = (origFn, minInterval = 250) => {
     return (...args) => {
         clearTimeout(debounceId);
         debounceId = setTimeout(async () => {
-            console.log('calling with delay');
             origFn(...args);
             previousCall = Date.now();
         }, minInterval);
         if (!inFlight && Date.now() - previousCall >= minInterval) {
             inFlight = true;
             try {
-                console.log('calling delayed');
                 origFn(...args);
                 previousCall = Date.now();
             }

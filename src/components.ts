@@ -188,13 +188,11 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       if (attributeNames.length) {
         const attributeValues = {}
         const observer = new MutationObserver((mutationsList) => {
-          let triggerChange = false
           let triggerRender = false
           mutationsList.forEach((mutation) => {
-            triggerChange = mutation.attributeName === 'value'
-            triggerRender = triggerChange || !!(mutation.attributeName && attributeNames.includes(mutation.attributeName))
+            triggerRender = !!(mutation.attributeName && attributeNames.includes(mutation.attributeName))
           })
-          if (triggerRender && this.queueRender) this.queueRender(triggerChange)
+          if (triggerRender && this.queueRender) this.queueRender(false)
         })
         observer.observe(this, { attributes: true })
         attributeNames.forEach(attributeName => {
