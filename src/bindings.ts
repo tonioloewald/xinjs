@@ -34,7 +34,7 @@ export const bindings: {[key: string | symbol] : XinBinding} = {
     toDOM(element: HTMLElement, value: any) {
       if (typeof value === 'object') {
         for(const prop of Object.keys(value)) {
-          // @ts-ignore-error
+          // @ts-expect-error
           element.style[prop] = value[prop]
         }
       } else if (typeof value === 'string') {
