@@ -18,7 +18,7 @@ export const filterArray = (template: any[], obj: any[]): any[] | undefined => {
   return output
 }
 
-export const filterObject = (template: XinObject, obj: XinObject) => {
+export const filterObject = (template: XinObject, obj: XinObject): XinObject | undefined => {
   if (matchType(template, obj).length > 0) {
     return undefined
   }

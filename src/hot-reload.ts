@@ -2,12 +2,12 @@ import { xin, observe } from './xin'
 import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { debounce } from './throttle'
 
-export const hotReload = (test: PathTestFunction = () => true) => {
+export const hotReload = (test: PathTestFunction = () => true): void => {
   const savedState = localStorage.getItem('xin-state')
-  if (savedState) {
+  if (savedState != null) {
     const state = JSON.parse(savedState)
     for (const key of Object.keys(state).filter(test)) {
-      if (xin[key]) {
+      if (xin[key] !== undefined) {
         Object.assign(xin[key], state[key])
       } else {
         xin[key] = state[key]
