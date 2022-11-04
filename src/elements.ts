@@ -3,7 +3,7 @@ import { bind } from './bind'
 import { bindings } from './bindings'
 
 type elementPart = HTMLElement | XinObject | string | number
-type ElementCreator = (...contents: elementPart[]) => HTMLElement | DocumentFragment
+export type ElementCreator = (...contents: elementPart[]) => HTMLElement | DocumentFragment
 
 const templates: { [key: string]: HTMLElement } = {}
 

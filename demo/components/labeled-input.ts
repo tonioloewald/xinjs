@@ -20,6 +20,9 @@ export const labeledInput = makeWebComponent('labeled-input', {
       borderRadius: 'calc(0.5 * var(--rounded-radius))',
       width: 'var(--input-width)'
     },
+    ':host input[type="number"]': {
+      paddingRight: 'calc(var(--spacing) * 0.5)'
+    }
   },
   attributes: {
     type: '',
