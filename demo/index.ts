@@ -118,7 +118,6 @@ document.body.append(fragment(
         let item4 = xin.app.items[4]
         xin.app.items[4] = xin.app.items[7]
         xin.app.items[7] = item4
-        touch(xin.app.items)
       }
     }),
     button('modify ~10%', {
