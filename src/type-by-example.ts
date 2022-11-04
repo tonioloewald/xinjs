@@ -1,9 +1,10 @@
 import { XinObject } from './xin-types'
 import { makeError } from './make-error'
 
-export const isAsync = (func: Function) => func && func.constructor === (async () => {}).constructor
+const asyncFunc = async (): Promise<void> => {}
+export const isAsync = (func: Function): boolean => func.constructor === (asyncFunc).constructor
 
-export const describe = (x: any) => {
+export const describe = (x: any): string => {
   if (x === null) return 'null'
   if (Array.isArray(x)) return 'array'
   if (typeof x === 'number') {
@@ -24,7 +25,7 @@ export const describe = (x: any) => {
 
 // FIXME: bun doesn't handle unicode characters in code correctly
 // should be able to replace \u221E with ∞
-const parseFloatOrInfinity = (x: string) => {
+const parseFloatOrInfinity = (x: string): number => {
   if (x === '-\u221E') {
     return -Infinity
   } else if (x[0] === '\u221E') {
@@ -34,16 +35,16 @@ const parseFloatOrInfinity = (x: string) => {
   }
 }
 
-const inRange = (spec: string, x: number) => {
-  let lower, upper
+const inRange = (spec: string, x: number): boolean => {
+  let lower: string, upper: string
   if (spec === undefined) return true
   try {
     // @ts-expect-error
-    [, lower, upper] = (spec || '').match(/^([[(]-?[\d.\u221E]+)?,?(-?[\d.\u221E]+[\])])?$/)
+    [, lower, upper] = spec.match(/^([[(]-?[\d.\u221E]+)?,?(-?[\d.\u221E]+[\])])?$/)
   } catch (e) {
     throw new Error(`bad range ${spec}`)
   }
-  if (lower) {
+  if (lower !== undefined && lower !== '') {
     const min = parseFloatOrInfinity(lower.substr(1))
     if (lower[0] === '(') {
       if (x <= min) return false
@@ -51,7 +52,7 @@ const inRange = (spec: string, x: number) => {
       if (x < min) return false
     }
   }
-  if (upper) {
+  if (upper !== undefined && upper !== '') {
     const max = parseFloatOrInfinity(upper)
     if (upper.endsWith(')')) {
       if (x >= max) return false
@@ -64,17 +65,17 @@ const inRange = (spec: string, x: number) => {
 
 const regExps: { [key: string]: RegExp } = {}
 
-const regexpTest = (spec: string, subject: any) => {
-  const regexp = regExps[spec] ? regExps[spec] : regExps[spec] = new RegExp(spec)
+const regexpTest = (spec: string, subject: any): boolean => {
+  const regexp = regExps[spec] !== undefined ? regExps[spec] : regExps[spec] = new RegExp(spec)
   return regexp.test(subject)
 }
 
-export const isInstanceOf = (obj: any, constructor: string | Function) => {
+export const isInstanceOf = (obj: any, constructor: string | Function): boolean => {
   if (typeof constructor === 'function') {
     return obj instanceof Function
   } else {
     let proto = Object.getPrototypeOf(obj)
-    while (proto.constructor && proto.constructor !== Object) {
+    while (proto.constructor !== undefined && proto.constructor !== Object) {
       if (proto.constructor.name === constructor) {
         return true
       }
@@ -84,9 +85,10 @@ export const isInstanceOf = (obj: any, constructor: string | Function) => {
   }
 }
 
-export const specificTypeMatch = (type: any, subject: any) => {
+export const specificTypeMatch = (type: any, subject: any): boolean => {
+  // eslint-disable-next-line
   const [, optional, baseType, , spec] = type.match(/^#([?]?)([^\s]+)(\s(.*))?$/) || []
-  if (optional && (subject === null || subject === undefined)) return true
+  if (optional !== '' && (subject === null || subject === undefined)) return true
   const subjectType = describe(subject)
   switch (baseType) {
     case 'forbidden':
@@ -97,7 +99,7 @@ export const specificTypeMatch = (type: any, subject: any) => {
       if (typeof subject !== 'function' || subject.toString() !== 'function () { [native code] }') {
         return false
       }
-      if (!type) {
+      if (type == null) {
         return true
       }
       return isAsync(subject) ? type.match(/^async\b/) : type.match(/^function\b/)
@@ -112,12 +114,12 @@ export const specificTypeMatch = (type: any, subject: any) => {
       if (subjectType !== 'number' || subject !== Math.floor(subject)) return false
       return inRange(spec, subject)
     case 'union':
-      return !!spec.split('||').find((type: string) => specificTypeMatch(`#${type}`, subject))
+      return spec.split('||').find((type: string) => specificTypeMatch(`#${type}`, subject)) !== undefined
     case 'enum':
       try {
         return spec.split('|').map(JSON.parse).includes(subject)
       } catch (e) {
-        throw new Error(`bad enum specification (${spec}), expect JSON strings`)
+        throw new Error(`bad enum specification (${spec as string}), expect JSON strings`)
       }
     case 'void':
       return subjectType === 'undefined' || subjectType === 'null'
@@ -134,11 +136,10 @@ export const specificTypeMatch = (type: any, subject: any) => {
     case 'promise':
       return subject instanceof Promise
     case 'object':
-      return !!subject && typeof subject === 'object' && !Array.isArray(subject)
+      return (subject !== null) && typeof subject === 'object' && !Array.isArray(subject)
     default:
       if (subjectType !== baseType) {
-        throw makeError('got', subject, `expected "${type}", "${subjectType}" does not match "${baseType}"`)
-        return false
+        throw makeError('got', subject, `expected "${type as string}", "${subjectType}" does not match "${baseType as string}"`)
       } else {
         return true
       }
@@ -149,7 +150,7 @@ const functionDeclaration = /^((async\s+)?function)?\s*\((.*?)\)\s*(=>)?\s*\{/
 const arrowDeclaration = /^((\.\.\.\w+)|(\w+)|\((.*?)\))\s*=>\s*[^\s{]/
 const returnsValue = /\w+\s*=>\s*[^\s{]|\breturn\b/
 
-export const describeType = (x: any) => {
+export const describeType = (x: any): XinObject | string => {
   const scalarType = describe(x)
   switch (scalarType) {
     case 'array':
@@ -165,7 +166,7 @@ export const describeType = (x: any) => {
     case 'function':
     case 'async':
     {
-      if (x.protoype) {
+      if (x.protoype !== undefined) {
         return '#class x.name'
       }
       const source = (x as Function).toString()
@@ -191,13 +192,13 @@ export const describeType = (x: any) => {
   }
 }
 
-export const typeJSON = (x: any) => JSON.stringify(describeType(x))
-export const typeJS = (x: any) => typeJSON(x).replace(/"(\w+)":/g, '$1:')
+export const typeJSON = (x: any): string => JSON.stringify(describeType(x))
+export const typeJS = (x: any): string => typeJSON(x).replace(/"(\w+)":/g, '$1:')
 
-const quoteIfString = (x: any) => typeof x === 'string' ? `"${x}"` : (typeof x === 'object' ? describe(x) : x)
+const quoteIfString = (x: any): string => typeof x === 'string' ? `"${x}"` : (typeof x === 'object' ? describe(x) : x)
 
 // when checking large arrays, only check a maximum of 111 elements
-function * arraySampler (a: any[]) {
+function * arraySampler (a: any[]): any {
   let i = 0
   // 101 is a prime number so hopefully we'll avoid sampling fixed patterns
   const increment = Math.ceil(a.length / 101)
@@ -218,21 +219,21 @@ function * arraySampler (a: any[]) {
   }
 }
 
-export const matchType = (example: any, subject: any, errors: string[] = [], path = '') => {
+export const matchType = (example: any, subject: any, errors: string[] = [], path = ''): string[] => {
   const exampleType = describe(example)
   const subjectType = describe(subject)
   const typesMatch = exampleType.startsWith('#')
     ? specificTypeMatch(exampleType, subject)
     : exampleType === subjectType
   if (!typesMatch) {
-    errors.push(`${path ? path + ' ' : ''}was ${quoteIfString(subject)}, expected ${exampleType}`)
+    errors.push(`${path !== '' ? path + ' ' : ''}was ${quoteIfString(subject)}, expected ${exampleType}`)
   } else if (exampleType === 'array') {
     // only checking first element of subject for now
-    const sampler = subject.length ? arraySampler(subject) : false
-    if (example.length === 1 && sampler) {
+    const sampler = subject.length > 0 ? arraySampler(subject) : false
+    if (example.length === 1 && sampler !== false) {
       // assume homogenous array
-      for (const { sample, i } of sampler) matchType(example[0], sample, errors, `${path}[${i}]`)
-    } else if (example.length > 1 && sampler) {
+      for (const { sample, i } of sampler) matchType(example[0], sample, errors, `${path}[${i as number}]`)
+    } else if (example.length > 1 && sampler !== false) {
       // assume heterogeneous array
       for (const { sample, i } of sampler) {
         let foundMatch = false
@@ -242,7 +243,7 @@ export const matchType = (example: any, subject: any, errors: string[] = [], pat
             break
           }
         }
-        if (!foundMatch) errors.push(`${path}[${i}] had no matching type`)
+        if (!foundMatch) errors.push(`${path}[${i as number}] had no matching type`)
       }
     }
   } else if (exampleType === 'object') {
@@ -275,7 +276,7 @@ export const exampleAtPath = (example: any, path: string | string[]): any => {
 }
 
 const legalVarName = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/
-const matchKeys = (example: any, subject: any, errors: string[] = [], path = '') => {
+const matchKeys = (example: any, subject: any, errors: string[] = [], path = ''): string[] => {
   const testedKeys = new Set()
   for (const key of Object.keys(example)) {
     if (key.startsWith('#')) {
@@ -324,7 +325,7 @@ interface TypeErrorConfig {
 
 export class TypeError {
   // initializers are unnecessary but TypeScript is too stupid
-  functionName?: string = undefined
+  functionName: string = 'anonymous'
   isParamFailure: boolean = false
   expected: any
   found: any
@@ -334,17 +335,17 @@ export class TypeError {
     Object.assign(this, config)
   }
 
-  toString () {
+  toString (): string {
     const {
       functionName,
       isParamFailure,
       errors
     } = this
-    return `${functionName} failed: bad ${isParamFailure ? 'parameter' : 'result'}, ${JSON.stringify(errors)}`
+    return `${functionName}() failed, bad ${isParamFailure ? 'parameter' : 'return'}: ${JSON.stringify(errors)}`
   }
 }
 
-export const assignReadOnly = (obj: any, propMap: XinObject) => {
+export const assignReadOnly = (obj: any, propMap: XinObject): any => {
   propMap = { ...propMap }
   for (const key of Object.keys(propMap)) {
     const value = propMap[key]
@@ -361,14 +362,14 @@ export const assignReadOnly = (obj: any, propMap: XinObject) => {
   return obj
 }
 
-export const matchParamTypes = (types: any[], params: any[]) => {
+export const matchParamTypes = (types: any[], params: any[]): string[] => {
   for (let i = 0; i < params.length; i++) {
     if (params[i] instanceof TypeError) {
       return params[i]
     }
   }
-  const errors = types.map((type, i) => matchType(type, params[i]))
-  return (errors.flat().length > 0) ? errors : []
+  const [paramErrors, returnErrors] = types.map((type, i) => matchType(type, params[i]))
+  return [...paramErrors, ...returnErrors]
 }
 
 interface TypeSafeFunction {
@@ -377,16 +378,18 @@ interface TypeSafeFunction {
   resultType: any
 }
 
-export const typeSafe = (func: Function, paramTypes: any[] = [], resultType: any = undefined, functionName: string | undefined = undefined): TypeSafeFunction => {
+export const typeSafe = (func: Function, paramTypes: any[] = [], resultType: any = undefined, functionName: string = 'anonymous'): TypeSafeFunction => {
   const paramErrors = matchParamTypes(
     ['#function', '#?array', '#?any', '#?string'],
     [func, paramTypes, resultType, functionName]
   )
   if (paramErrors instanceof TypeError) {
-    throw new Error('typeSafe was passed bad paramters')
+    throw new Error('typeSafe was passed bad parameters')
   }
 
-  if (!functionName) functionName = func.name || 'anonymous'
+  if (func.name !== '') {
+    functionName = func.name
+  }
   let callCount = 0
   return assignReadOnly(function (...params: any[]) {
     callCount += 1

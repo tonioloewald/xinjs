@@ -1,4 +1,4 @@
-import {xin, touch, elements, makeWebComponent, hotReload, settings, bind, bindings} from '../src/index'
+import {xin, touch, elements, makeWebComponent, hotReload, settings, bind, bindings, matchType} from '../src/index'
 import {debounce} from '../src/throttle'
 import {toolBar, labeledInput, labeledValue, appLayout} from './components/index'
 import {WordList} from './WordList'
@@ -54,7 +54,9 @@ hotReload(path => {
 })
 
 Object.assign(window, {
-  xin
+  xin,
+  matchType,
+  touch
 })
 
 const colorConversionSpan = span()

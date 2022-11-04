@@ -1,7 +1,7 @@
 export const debounce = (origFn, minInterval = 250) => {
     let debounceId;
     return (...args) => {
-        if (debounceId)
+        if (debounceId !== undefined)
             clearTimeout(debounceId);
         debounceId = setTimeout(() => {
             origFn(...args);

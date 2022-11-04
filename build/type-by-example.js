@@ -1,5 +1,6 @@
 import { makeError } from './make-error';
-export const isAsync = (func) => func && func.constructor === (async () => { }).constructor;
+const asyncFunc = async () => { };
+export const isAsync = (func) => func.constructor === (asyncFunc).constructor;
 export const describe = (x) => {
     if (x === null)
         return 'null';
@@ -42,12 +43,12 @@ const inRange = (spec, x) => {
         return true;
     try {
         // @ts-expect-error
-        [, lower, upper] = (spec || '').match(/^([[(]-?[\d.\u221E]+)?,?(-?[\d.\u221E]+[\])])?$/);
+        [, lower, upper] = spec.match(/^([[(]-?[\d.\u221E]+)?,?(-?[\d.\u221E]+[\])])?$/);
     }
     catch (e) {
         throw new Error(`bad range ${spec}`);
     }
-    if (lower) {
+    if (lower !== undefined && lower !== '') {
         const min = parseFloatOrInfinity(lower.substr(1));
         if (lower[0] === '(') {
             if (x <= min)
@@ -58,7 +59,7 @@ const inRange = (spec, x) => {
                 return false;
         }
     }
-    if (upper) {
+    if (upper !== undefined && upper !== '') {
         const max = parseFloatOrInfinity(upper);
         if (upper.endsWith(')')) {
             if (x >= max)
@@ -73,7 +74,7 @@ const inRange = (spec, x) => {
 };
 const regExps = {};
 const regexpTest = (spec, subject) => {
-    const regexp = regExps[spec] ? regExps[spec] : regExps[spec] = new RegExp(spec);
+    const regexp = regExps[spec] !== undefined ? regExps[spec] : regExps[spec] = new RegExp(spec);
     return regexp.test(subject);
 };
 export const isInstanceOf = (obj, constructor) => {
@@ -82,7 +83,7 @@ export const isInstanceOf = (obj, constructor) => {
     }
     else {
         let proto = Object.getPrototypeOf(obj);
-        while (proto.constructor && proto.constructor !== Object) {
+        while (proto.constructor !== undefined && proto.constructor !== Object) {
             if (proto.constructor.name === constructor) {
                 return true;
             }
@@ -92,8 +93,9 @@ export const isInstanceOf = (obj, constructor) => {
     }
 };
 export const specificTypeMatch = (type, subject) => {
+    // eslint-disable-next-line
     const [, optional, baseType, , spec] = type.match(/^#([?]?)([^\s]+)(\s(.*))?$/) || [];
-    if (optional && (subject === null || subject === undefined))
+    if (optional !== '' && (subject === null || subject === undefined))
         return true;
     const subjectType = describe(subject);
     switch (baseType) {
@@ -105,7 +107,7 @@ export const specificTypeMatch = (type, subject) => {
             if (typeof subject !== 'function' || subject.toString() !== 'function () { [native code] }') {
                 return false;
             }
-            if (!type) {
+            if (type == null) {
                 return true;
             }
             return isAsync(subject) ? type.match(/^async\b/) : type.match(/^function\b/);
@@ -123,7 +125,7 @@ export const specificTypeMatch = (type, subject) => {
                 return false;
             return inRange(spec, subject);
         case 'union':
-            return !!spec.split('||').find((type) => specificTypeMatch(`#${type}`, subject));
+            return spec.split('||').find((type) => specificTypeMatch(`#${type}`, subject)) !== undefined;
         case 'enum':
             try {
                 return spec.split('|').map(JSON.parse).includes(subject);
@@ -146,11 +148,10 @@ export const specificTypeMatch = (type, subject) => {
         case 'promise':
             return subject instanceof Promise;
         case 'object':
-            return !!subject && typeof subject === 'object' && !Array.isArray(subject);
+            return (subject !== null) && typeof subject === 'object' && !Array.isArray(subject);
         default:
             if (subjectType !== baseType) {
                 throw makeError('got', subject, `expected "${type}", "${subjectType}" does not match "${baseType}"`);
-                return false;
             }
             else {
                 return true;
@@ -177,7 +178,7 @@ export const describeType = (x) => {
         case 'function':
         case 'async':
             {
-                if (x.protoype) {
+                if (x.protoype !== undefined) {
                     return '#class x.name';
                 }
                 const source = x.toString();
@@ -234,17 +235,17 @@ export const matchType = (example, subject, errors = [], path = '') => {
         ? specificTypeMatch(exampleType, subject)
         : exampleType === subjectType;
     if (!typesMatch) {
-        errors.push(`${path ? path + ' ' : ''}was ${quoteIfString(subject)}, expected ${exampleType}`);
+        errors.push(`${path !== '' ? path + ' ' : ''}was ${quoteIfString(subject)}, expected ${exampleType}`);
     }
     else if (exampleType === 'array') {
         // only checking first element of subject for now
-        const sampler = subject.length ? arraySampler(subject) : false;
-        if (example.length === 1 && sampler) {
+        const sampler = subject.length > 0 ? arraySampler(subject) : false;
+        if (example.length === 1 && sampler !== false) {
             // assume homogenous array
             for (const { sample, i } of sampler)
                 matchType(example[0], sample, errors, `${path}[${i}]`);
         }
-        else if (example.length > 1 && sampler) {
+        else if (example.length > 1 && sampler !== false) {
             // assume heterogeneous array
             for (const { sample, i } of sampler) {
                 let foundMatch = false;
@@ -334,14 +335,14 @@ const matchKeys = (example, subject, errors = [], path = '') => {
 export class TypeError {
     constructor(config) {
         // initializers are unnecessary but TypeScript is too stupid
-        this.functionName = undefined;
+        this.functionName = 'anonymous';
         this.isParamFailure = false;
         this.errors = [];
         Object.assign(this, config);
     }
     toString() {
         const { functionName, isParamFailure, errors } = this;
-        return `${functionName} failed: bad ${isParamFailure ? 'parameter' : 'result'}, ${JSON.stringify(errors)}`;
+        return `${functionName}() failed, bad ${isParamFailure ? 'parameter' : 'return'}: ${JSON.stringify(errors)}`;
     }
 }
 export const assignReadOnly = (obj, propMap) => {
@@ -366,16 +367,17 @@ export const matchParamTypes = (types, params) => {
             return params[i];
         }
     }
-    const errors = types.map((type, i) => matchType(type, params[i]));
-    return (errors.flat().length > 0) ? errors : [];
+    const [paramErrors, returnErrors] = types.map((type, i) => matchType(type, params[i]));
+    return [...paramErrors, ...returnErrors];
 };
-export const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = undefined) => {
+export const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 'anonymous') => {
     const paramErrors = matchParamTypes(['#function', '#?array', '#?any', '#?string'], [func, paramTypes, resultType, functionName]);
     if (paramErrors instanceof TypeError) {
-        throw new Error('typeSafe was passed bad paramters');
+        throw new Error('typeSafe was passed bad parameters');
     }
-    if (!functionName)
-        functionName = func.name || 'anonymous';
+    if (func.name !== '') {
+        functionName = func.name;
+    }
     let callCount = 0;
     return assignReadOnly(function (...params) {
         callCount += 1;
