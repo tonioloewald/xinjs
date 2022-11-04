@@ -3,7 +3,7 @@ type VoidFunc = (...args: any[]) => void
 export const debounce = (origFn: VoidFunc, minInterval = 250): VoidFunc => {
   let debounceId: number
   return (...args: any[]) => {
-    if (debounceId) clearTimeout(debounceId)
+    if (debounceId !== undefined) clearTimeout(debounceId)
     debounceId = setTimeout(() => {
       origFn(...args)
     }, minInterval)
