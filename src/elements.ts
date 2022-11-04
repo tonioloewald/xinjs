@@ -7,8 +7,8 @@ export type ElementCreator = (...contents: elementPart[]) => HTMLElement | Docum
 
 const templates: { [key: string]: HTMLElement } = {}
 
-export const create = (tagType: string, ...contents: elementPart[]) => {
-  if (!templates[tagType]) {
+export const create = (tagType: string, ...contents: elementPart[]): HTMLElement => {
+  if (templates[tagType] === undefined) {
     templates[tagType] = document.createElement(tagType)
   }
   const elt = templates[tagType].cloneNode() as HTMLElement
@@ -43,7 +43,7 @@ export const create = (tagType: string, ...contents: elementPart[]) => {
         } else if (key.match(/^bind[A-Z]/) != null) {
           const bindingType = key.substr(4).toLowerCase()
           const binding = bindings[bindingType]
-          if (binding) {
+          if (binding !== undefined) {
             bind(elt, value, binding)
           } else {
             throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`)
@@ -77,7 +77,7 @@ export const elements = new Proxy(_elements, {
     tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`)
     if (tagName.match(/^\w+(-\w+)*$/) == null) {
       throw new Error(`${tagName} does not appear to be a valid element tagName`)
-    } else if (!target[tagName]) {
+    } else if (target[tagName] === undefined) {
       target[tagName] = (...contents: elementPart[]) => create(tagName, ...contents)
     }
     return target[tagName]
