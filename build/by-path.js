@@ -7,7 +7,7 @@ const id = () => now36() + seq();
 const _delete_ = {};
 const _newObject_ = {};
 function pathParts(path) {
-    if (!path) {
+    if (path === '') {
         return [];
     }
     if (Array.isArray(path)) {
@@ -15,7 +15,7 @@ function pathParts(path) {
     }
     else {
         const parts = [];
-        while (path.length) {
+        while (path.length > 0) {
             let index = path.search(/\[[^\]]+\]/);
             if (index === -1) {
                 parts.push(path.split('.'));
@@ -24,7 +24,7 @@ function pathParts(path) {
             else {
                 const part = path.substr(0, index);
                 path = path.substr(index);
-                if (part) {
+                if (part !== '') {
                     parts.push(part.split('.'));
                 }
                 index = path.indexOf(']') + 1;
@@ -41,10 +41,10 @@ function pathParts(path) {
 }
 const idPathMaps = new WeakMap();
 function buildIdPathValueMap(array, idPath) {
-    if (array && !idPathMaps.get(array)) {
+    if (idPathMaps.get(array) === undefined) {
         idPathMaps.set(array, {});
     }
-    if (!idPathMaps.get(array)[idPath]) {
+    if (idPathMaps.get(array)[idPath] === undefined) {
         idPathMaps.get(array)[idPath] = {};
     }
     const map = idPathMaps.get(array)[idPath];
@@ -63,7 +63,7 @@ function buildIdPathValueMap(array, idPath) {
     return map;
 }
 function getIdPathMap(array, idPath) {
-    if (!idPathMaps.get(array) || !idPathMaps.get(array)[idPath]) {
+    if (idPathMaps.get(array) === undefined || idPathMaps.get(array)[idPath] === undefined) {
         return buildIdPathValueMap(array, idPath);
     }
     else {
@@ -72,10 +72,6 @@ function getIdPathMap(array, idPath) {
 }
 function keyToIndex(array, idPath, idValue) {
     idValue = idValue + '';
-    /*
-    if (array.length > 200) {
-      return array.findIndex(a => getByPath(a, idPath) + '' === idValue)
-    } */
     let idx = getIdPathMap(array, idPath)[idValue];
     if (idx === undefined || getByPath(array[idx], idPath) + '' !== idValue) {
         idx = buildIdPathValueMap(array, idPath)[idValue];
@@ -83,28 +79,28 @@ function keyToIndex(array, idPath, idValue) {
     return idx;
 }
 function byKey(obj, key, valueToInsert) {
-    if (!obj[key]) {
+    if (obj[key] === undefined && valueToInsert !== undefined) {
         obj[key] = valueToInsert;
     }
     return obj[key];
 }
 function byIdPath(array, idPath, idValue, valueToInsert) {
-    let idx = idPath ? keyToIndex(array, idPath, idValue) : idValue;
+    let idx = idPath !== '' ? keyToIndex(array, idPath, idValue) : idValue;
     if (valueToInsert === _delete_) {
         array.splice(idx, 1);
         idPathMaps.delete(array);
         return Symbol('deleted');
     }
     else if (valueToInsert === _newObject_) {
-        if (!idPath && !array[idx]) {
+        if (idPath === '' && array[idx] === undefined) {
             array[idx] = {};
         }
     }
-    else if (valueToInsert) {
+    else if (valueToInsert !== undefined) {
         if (idx !== undefined) {
             array[idx] = valueToInsert;
         }
-        else if (idPath && getByPath(valueToInsert, idPath) + '' === idValue + '') {
+        else if (idPath !== '' && getByPath(valueToInsert, idPath) + '' === idValue + '') {
             array.push(valueToInsert);
             idx = array.length - 1;
         }
@@ -120,7 +116,7 @@ function expectArray(obj) {
     }
 }
 function expectObject(obj) {
-    if (!obj || obj.constructor !== Object) {
+    if ((obj == null) || obj.constructor !== Object) {
         throw makeError('setByPath failed: expected Object, found', obj);
     }
 }
@@ -128,16 +124,16 @@ function getByPath(obj, path) {
     const parts = pathParts(path);
     let found = obj;
     let i, iMax, j, jMax;
-    for (i = 0, iMax = parts.length; found && i < iMax; i++) {
+    for (i = 0, iMax = parts.length; found !== undefined && i < iMax; i++) {
         const part = parts[i];
         if (Array.isArray(part)) {
-            for (j = 0, jMax = part.length; found && j < jMax; j++) {
+            for (j = 0, jMax = part.length; found !== undefined && j < jMax; j++) {
                 const key = part[j];
                 found = found[key];
             }
         }
         else {
-            if (!found.length) {
+            if (found.length === 0) {
                 if (part[0] === '=') {
                     found = found[part.substr(1)];
                 }
@@ -145,7 +141,7 @@ function getByPath(obj, path) {
                     return undefined;
                 }
             }
-            else if (part.indexOf('=') > -1) {
+            else if (part.includes('=')) {
                 const [idPath, ...tail] = part.split('=');
                 found = byIdPath(found, idPath, tail.join('='));
             }
@@ -160,7 +156,7 @@ function getByPath(obj, path) {
 function setByPath(orig, path, val) {
     let obj = orig;
     const parts = pathParts(path);
-    while (obj && parts.length) {
+    while ((obj != null) && (parts.length > 0)) {
         const part = parts.shift();
         if (typeof part === 'string') {
             const equalsOffset = part.indexOf('=');
@@ -173,15 +169,15 @@ function setByPath(orig, path, val) {
                 }
                 const idPath = part.substr(0, equalsOffset);
                 const idValue = part.substr(equalsOffset + 1);
-                obj = byIdPath(obj, idPath, idValue, parts.length ? _newObject_ : val);
-                if (!parts.length) {
+                obj = byIdPath(obj, idPath, idValue, (parts.length > 0) ? _newObject_ : val);
+                if (parts.length === 0) {
                     return true;
                 }
             }
             else {
                 expectArray(obj);
                 const idx = parseInt(part, 10);
-                if (parts.length) {
+                if (parts.length > 0) {
                     obj = obj[idx];
                 }
                 else {
@@ -202,7 +198,7 @@ function setByPath(orig, path, val) {
             expectObject(obj);
             while (part.length > 0) {
                 const key = part.shift();
-                if ((part.length > 0) || parts.length) {
+                if ((part.length > 0) || (parts.length > 0)) {
                     // if we're at the end of part.length then we need to insert an array
                     obj = byKey(obj, key, (part.length > 0) ? {} : []);
                 }
@@ -214,9 +210,10 @@ function setByPath(orig, path, val) {
                         obj[key] = val;
                     }
                     else {
-                        if (!obj.hasOwnProperty(key)) {
+                        if (!Object.prototype.hasOwnProperty.call(obj, key)) {
                             return false;
                         }
+                        // eslint-disable-next-line
                         delete obj[key];
                     }
                     return true;
@@ -227,6 +224,7 @@ function setByPath(orig, path, val) {
             throw new Error(`setByPath failed, bad path ${path}`);
         }
     }
+    // eslint-disable-next-line
     throw new Error(`setByPath(${orig}, ${path}, ${val}) failed`);
 }
 function deleteByPath(orig, path) {
