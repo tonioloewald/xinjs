@@ -9,7 +9,6 @@ const observerShouldBeRemoved = Symbol('observer should be removed');
 const listeners = []; // { path_string_or_test, callback }
 const touchedPaths = [];
 let updateTriggered = false;
-let updatePromise;
 let resolveUpdate;
 const getPath = (what) => {
     return typeof what === 'object' ? what._xinPath : what;
@@ -43,12 +42,6 @@ class Listener {
         listeners.push(this);
     }
 }
-const updates = async () => {
-    if (updatePromise !== undefined) {
-        return;
-    }
-    await updatePromise;
-};
 const update = () => {
     if (settings.perf) {
         console.time('xin async update');
@@ -95,7 +88,7 @@ const update = () => {
 const touch = (what) => {
     const path = getPath(what);
     if (updateTriggered === false) {
-        updatePromise = new Promise(resolve => {
+        new Promise(resolve => {
             resolveUpdate = resolve;
         });
         updateTriggered = setTimeout(update);
@@ -999,7 +992,7 @@ class ListBinding {
         if (array == null) {
             array = [];
         }
-        const { idPath, initInstance, updateInstance } = this.options;
+        const { initInstance, updateInstance } = this.options;
         let removed = 0;
         let moved = 0;
         let created = 0;
@@ -1014,11 +1007,8 @@ class ListBinding {
         }
         // build a complete new set of elements in the right order
         const elements = [];
-        // @ts-expect-error
-        const arrayPath = array._xinPath;
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
-            const path = idPath !== undefined ? `${arrayPath}[${idPath}=${item[idPath]}]` : false;
             if (item === undefined) {
                 continue;
             }
@@ -1032,13 +1022,13 @@ class ListBinding {
                 }
                 if (initInstance != null) {
                     // eslint-disable-next-line
-                    initInstance(element, path || item);
+                    initInstance(element, item);
                 }
                 this.boundElement.append(element);
             }
             if (updateInstance != null) {
                 // eslint-disable-next-line
-                updateInstance(element, path || item);
+                updateInstance(element, item);
             }
             elements.push(element);
         }
@@ -1462,4 +1452,4 @@ const makeWebComponent = (tagName, spec) => {
     return elements[tagName];
 };
 
-export { bind, bindings, elements, filter, hotReload, makeWebComponent, matchType, observe, observerShouldBeRemoved, settings, touch, typeSafe, unobserve, updates, useXin, xin };
+export { bind, bindings, elements, filter, hotReload, makeWebComponent, matchType, observe, observerShouldBeRemoved, settings, touch, typeSafe, unobserve, useXin, xin };

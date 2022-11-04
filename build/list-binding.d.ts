@@ -1,7 +1,6 @@
 interface ListBindingOptions {
-    idPath?: string;
-    initInstance?: (element: HTMLElement, pathOrObj: any) => void;
-    updateInstance?: (element: HTMLElement, pathOrObj: any) => void;
+    initInstance?: (element: HTMLElement, value: any) => void;
+    updateInstance?: (element: HTMLElement, value: any) => void;
 }
 declare class ListBinding {
     boundElement: HTMLElement;

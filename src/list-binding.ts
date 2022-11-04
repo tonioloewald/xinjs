@@ -5,9 +5,8 @@ const elementToItem: WeakMap<HTMLElement, object> = new WeakMap()
 const listBindings: WeakMap<HTMLElement, ListBinding> = new WeakMap()
 
 interface ListBindingOptions {
-  idPath?: string
-  initInstance?: (element: HTMLElement, pathOrObj: any) => void
-  updateInstance?: (element: HTMLElement, pathOrObj: any) => void
+  initInstance?: (element: HTMLElement, value: any) => void
+  updateInstance?: (element: HTMLElement, value: any) => void
 }
 
 class ListBinding {
@@ -39,7 +38,7 @@ class ListBinding {
       array = []
     }
 
-    const { idPath, initInstance, updateInstance } = this.options
+    const { initInstance, updateInstance } = this.options
 
     let removed = 0
     let moved = 0
@@ -57,11 +56,8 @@ class ListBinding {
 
     // build a complete new set of elements in the right order
     const elements = []
-    // @ts-expect-error
-    const arrayPath = array._xinPath
     for (let i = 0; i < array.length; i++) {
       const item = array[i]
-      const path = idPath !== undefined ? `${arrayPath as string}[${idPath}=${item[idPath] as string}]` : false
       if (item === undefined) {
         continue
       }
@@ -75,13 +71,13 @@ class ListBinding {
         }
         if (initInstance != null) {
           // eslint-disable-next-line
-          initInstance(element, path || item)
+          initInstance(element, item)
         }
         this.boundElement.append(element)
       }
       if (updateInstance != null) {
         // eslint-disable-next-line
-        updateInstance(element, path || item)
+        updateInstance(element, item)
       }
       elements.push(element)
     }
