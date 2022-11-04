@@ -2,7 +2,7 @@ import { bind } from './bind';
 import { bindings } from './bindings';
 const templates = {};
 export const create = (tagType, ...contents) => {
-    if (!templates[tagType]) {
+    if (templates[tagType] === undefined) {
         templates[tagType] = document.createElement(tagType);
     }
     const elt = templates[tagType].cloneNode();
@@ -44,7 +44,7 @@ export const create = (tagType, ...contents) => {
                 else if (key.match(/^bind[A-Z]/) != null) {
                     const bindingType = key.substr(4).toLowerCase();
                     const binding = bindings[bindingType];
-                    if (binding) {
+                    if (binding !== undefined) {
                         bind(elt, value, binding);
                     }
                     else {
@@ -79,7 +79,7 @@ export const elements = new Proxy(_elements, {
         if (tagName.match(/^\w+(-\w+)*$/) == null) {
             throw new Error(`${tagName} does not appear to be a valid element tagName`);
         }
-        else if (!target[tagName]) {
+        else if (target[tagName] === undefined) {
             target[tagName] = (...contents) => create(tagName, ...contents);
         }
         return target[tagName];
