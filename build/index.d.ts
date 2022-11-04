@@ -1,4 +1,4 @@
-export { xin, observe, unobserve, touch, observerShouldBeRemoved } from './xin';
+export { xin, observe, unobserve, touch, observerShouldBeRemoved, updates } from './xin';
 export { useXin } from './xin-react';
 export { matchType, typeSafe } from './type-by-example';
 export { filter } from './filter';
