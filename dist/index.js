@@ -11,6 +11,7 @@ const observerShouldBeRemoved = Symbol('observer should be removed');
 const listeners = []; // { path_string_or_test, callback }
 const touchedPaths = [];
 let updateTriggered = false;
+let updatePromise;
 let resolveUpdate;
 const getPath = (what) => {
     return typeof what === 'object' ? what._xinPath : what;
@@ -44,6 +45,12 @@ class Listener {
         listeners.push(this);
     }
 }
+const updates = async () => {
+    if (updatePromise !== undefined) {
+        return;
+    }
+    await updatePromise;
+};
 const update = () => {
     if (settings.perf) {
         console.time('xin async update');
@@ -90,7 +97,7 @@ const update = () => {
 const touch = (what) => {
     const path = getPath(what);
     if (updateTriggered === false) {
-        new Promise(resolve => {
+        updatePromise = new Promise(resolve => {
             resolveUpdate = resolve;
         });
         updateTriggered = setTimeout(update);
@@ -1470,5 +1477,6 @@ exports.settings = settings;
 exports.touch = touch;
 exports.typeSafe = typeSafe;
 exports.unobserve = unobserve;
+exports.updates = updates;
 exports.useXin = useXin;
 exports.xin = xin;
