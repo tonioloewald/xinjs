@@ -97,7 +97,7 @@ export const observe = (test, callback) => {
 };
 export const unobserve = (listener) => {
     let index;
-    let found = false;
+    const found = false;
     index = listeners.indexOf(listener);
     if (index > -1) {
         listeners.splice(index, 1);

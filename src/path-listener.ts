@@ -8,7 +8,7 @@ let updateTriggered: number | boolean = false
 let updatePromise: Promise<undefined>
 let resolveUpdate: Function
 
-const getPath = (what: string | {_xinPath: string}): string => {
+const getPath = (what: string | { _xinPath: string }): string => {
   return typeof what === 'object' ? what._xinPath : what
 }
 
@@ -50,7 +50,7 @@ const update = () => {
   }
   const paths = [...touchedPaths]
 
-  for(const path of paths) {
+  for (const path of paths) {
     listeners
       .filter(listener => {
         let heard
@@ -84,7 +84,7 @@ const update = () => {
     resolveUpdate()
   }
   if (settings.perf) {
-    console.timeEnd('xin async update') 
+    console.timeEnd('xin async update')
   }
 }
 
@@ -109,7 +109,7 @@ export const observe = (test: string | RegExp | PathTestFunction, callback: Obse
 
 export const unobserve = (listener: Listener) => {
   let index
-  let found = false
+  const found = false
 
   index = listeners.indexOf(listener)
   if (index > -1) {

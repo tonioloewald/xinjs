@@ -172,13 +172,13 @@ export const describeType = (x) => {
                 return _type;
             }
             else {
-                return `#instance x.constructor.name`;
+                return '#instance x.constructor.name';
             }
         case 'function':
         case 'async':
             {
                 if (x.protoype) {
-                    return `#class x.name`;
+                    return '#class x.name';
                 }
                 const source = x.toString();
                 if (source.endsWith('() { [native code] }')) {
@@ -186,14 +186,16 @@ export const describeType = (x) => {
                 }
                 const functionSource = source.match(functionDeclaration);
                 const arrowSource = source.match(arrowDeclaration);
-                const hasReturnValue = source.match(returnsValue) || source.match(arrowDeclaration);
+                const hasReturnValue = (source.match(returnsValue) != null) || source.match(arrowDeclaration);
+                // eslint-disable-next-line
                 const paramText = ((functionSource && functionSource[3]) ||
+                    // eslint-disable-next-line
                     (arrowSource && (arrowSource[2] || arrowSource[3] || arrowSource[4])) || '').trim();
                 const params = paramText.split(',').map((param) => {
                     const [key] = param.split('=');
                     return `${key} #any`;
                 });
-                return `${scalarType} ( ${params.join(', ')} ) => ${hasReturnValue ? '#any' : '#nothing'}`;
+                return `${scalarType} ( ${params.join(', ')} ) => ${(hasReturnValue != null) ? '#any' : '#nothing'}`;
             }
         default:
             return `#${scalarType}`;
@@ -365,12 +367,12 @@ export const matchParamTypes = (types, params) => {
         }
     }
     const errors = types.map((type, i) => matchType(type, params[i]));
-    return errors.flat().length ? errors : [];
+    return (errors.flat().length > 0) ? errors : [];
 };
 export const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = undefined) => {
     const paramErrors = matchParamTypes(['#function', '#?array', '#?any', '#?string'], [func, paramTypes, resultType, functionName]);
     if (paramErrors instanceof TypeError) {
-        throw new Error(`typeSafe was passed bad paramters`);
+        throw new Error('typeSafe was passed bad paramters');
     }
     if (!functionName)
         functionName = func.name || 'anonymous';

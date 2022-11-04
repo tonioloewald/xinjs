@@ -1,8 +1,8 @@
-declare type ListBindingOptions = {
+interface ListBindingOptions {
     idPath?: string;
     initInstance?: (element: HTMLElement, pathOrObj: any) => void;
     updateInstance?: (element: HTMLElement, pathOrObj: any) => void;
-};
+}
 declare class ListBinding {
     boundElement: HTMLElement;
     template: HTMLElement;

@@ -1,6 +1,6 @@
 type VoidFunc = (...args: any[]) => void
 
-export const debounce = (origFn: VoidFunc, minInterval = 250) => {
+export const debounce = (origFn: VoidFunc, minInterval = 250): VoidFunc => {
   let debounceId: number
   return (...args: any[]) => {
     if (debounceId) clearTimeout(debounceId)
@@ -10,7 +10,7 @@ export const debounce = (origFn: VoidFunc, minInterval = 250) => {
   }
 }
 
-export const throttle = (origFn: VoidFunc, minInterval = 250) => {
+export const throttle = (origFn: VoidFunc, minInterval = 250): VoidFunc => {
   let debounceId: number
   let previousCall = Date.now() - minInterval
   let inFlight = false

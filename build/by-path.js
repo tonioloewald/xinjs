@@ -16,7 +16,7 @@ function pathParts(path) {
     else {
         const parts = [];
         while (path.length) {
-            var index = path.search(/\[[^\]]+\]/);
+            let index = path.search(/\[[^\]]+\]/);
             if (index === -1) {
                 parts.push(path.split('.'));
                 break;
@@ -126,13 +126,13 @@ function expectObject(obj) {
 }
 function getByPath(obj, path) {
     const parts = pathParts(path);
-    var found = obj;
-    var i, iMax, j, jMax;
+    let found = obj;
+    let i, iMax, j, jMax;
     for (i = 0, iMax = parts.length; found && i < iMax; i++) {
-        var part = parts[i];
+        const part = parts[i];
         if (Array.isArray(part)) {
             for (j = 0, jMax = part.length; found && j < jMax; j++) {
-                var key = part[j];
+                const key = part[j];
                 found = found[key];
             }
         }
@@ -198,13 +198,13 @@ function setByPath(orig, path, val) {
                 }
             }
         }
-        else if (Array.isArray(part) && part.length) {
+        else if (Array.isArray(part) && (part.length > 0)) {
             expectObject(obj);
-            while (part.length) {
+            while (part.length > 0) {
                 const key = part.shift();
-                if (part.length || parts.length) {
+                if ((part.length > 0) || parts.length) {
                     // if we're at the end of part.length then we need to insert an array
-                    obj = byKey(obj, key, part.length ? {} : []);
+                    obj = byKey(obj, key, (part.length > 0) ? {} : []);
                 }
                 else {
                     if (val !== _delete_) {

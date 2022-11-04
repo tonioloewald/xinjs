@@ -5,7 +5,7 @@ import { bindings } from './bindings'
 type elementPart = HTMLElement | XinObject | string | number
 type ElementCreator = (...contents: elementPart[]) => HTMLElement | DocumentFragment
 
-const templates: {[key: string]: HTMLElement} = {}
+const templates: { [key: string]: HTMLElement } = {}
 
 export const create = (tagType: string, ...contents: elementPart[]) => {
   if (!templates[tagType]) {
@@ -17,7 +17,7 @@ export const create = (tagType: string, ...contents: elementPart[]) => {
       if (elt instanceof HTMLTemplateElement) {
         elt.content.append(item as Node)
       } else {
-        elt.append(item as Node) 
+        elt.append(item as Node)
       }
     } else {
       for (const key of Object.keys(item)) {
@@ -31,16 +31,16 @@ export const create = (tagType: string, ...contents: elementPart[]) => {
                 elt.style.setProperty(prop, value[prop])
               } else {
                 // @ts-expect-error
-                elt.style[prop] = value[prop] 
+                elt.style[prop] = value[prop]
               }
             }
           } else {
             elt.setAttribute('style', value)
           }
-        } else if (key.match(/^on[A-Z]/)) {
+        } else if (key.match(/^on[A-Z]/) != null) {
           const eventType = key.substr(2).toLowerCase()
           elt.addEventListener(eventType, value)
-        } else if (key.match(/^bind[A-Z]/)) {
+        } else if (key.match(/^bind[A-Z]/) != null) {
           const bindingType = key.substr(4).toLowerCase()
           const binding = bindings[bindingType]
           if (binding) {
@@ -70,12 +70,12 @@ const fragment: ElementCreator = (...contents: elementPart[]) => {
   return frag
 }
 
-const _elements: {[key: string | symbol]: ElementCreator} = { fragment }
+const _elements: { [key: string | symbol]: ElementCreator } = { fragment }
 
 export const elements = new Proxy(_elements, {
   get (target, tagName: string) {
     tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`)
-    if (!tagName.match(/^\w+(-\w+)*$/)) {
+    if (tagName.match(/^\w+(-\w+)*$/) == null) {
       throw new Error(`${tagName} does not appear to be a valid element tagName`)
     } else if (!target[tagName]) {
       target[tagName] = (...contents: elementPart[]) => create(tagName, ...contents)

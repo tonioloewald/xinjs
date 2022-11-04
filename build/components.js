@@ -51,10 +51,10 @@ const defaultSpec = {
     eventHandlers: {},
     props: {},
     attributes: {},
-    content: elements.slot(),
+    content: elements.slot()
 };
 export const makeWebComponent = (tagName, spec) => {
-    let { superClass, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
+    const { superClass, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
     let styleNode;
     if (style) {
         const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style));
@@ -105,8 +105,8 @@ export const makeWebComponent = (tagName, spec) => {
             this.elementRefs = new Proxy({}, {
                 get(target, ref) {
                     if (!target[ref]) {
-                        const element = self.shadowRoot ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`);
-                        if (!element)
+                        const element = (self.shadowRoot != null) ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`);
+                        if (element == null)
                             throw new Error(`elementRef "${ref}" does not exist!`);
                         element.removeAttribute('data-ref');
                         target[ref] = element;
@@ -135,7 +135,7 @@ export const makeWebComponent = (tagName, spec) => {
                 observer.observe(this, { childList: true });
             }
             const attributeNames = Object.keys(attributes);
-            if (attributeNames.length) {
+            if (attributeNames.length > 0) {
                 const attributeValues = {};
                 const observer = new MutationObserver((mutationsList) => {
                     let triggerRender = false;
@@ -230,16 +230,16 @@ export const makeWebComponent = (tagName, spec) => {
             if (props.hasOwnProperty('value')) {
                 this.value = this.getAttribute('value') || null;
             }
-            if (spec.connectedCallback)
+            if (spec.connectedCallback != null)
                 spec.connectedCallback.call(this);
         }
         disconnectedCallback() {
             resizeObserver.unobserve(this);
-            if (spec.disconnectedCallback)
+            if (spec.disconnectedCallback != null)
                 spec.disconnectedCallback.call(this);
         }
         render() {
-            if (spec.render)
+            if (spec.render != null)
                 spec.render.call(this);
         }
         static defaultAttributes() {

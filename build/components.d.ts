@@ -1,21 +1,21 @@
-declare type StyleRule = {
+interface StyleRule {
     [key: string]: string | number;
-};
-declare type StyleMap = {
+}
+interface StyleMap {
     [key: string]: StyleRule;
-};
-declare type FunctionMap = {
+}
+interface FunctionMap {
     [key: string]: Function;
-};
+}
 declare type EventHandler = (event: Event) => void;
-declare type EventHandlerMap = {
+interface EventHandlerMap {
     [key: string]: EventHandler;
-};
-declare type PropMap = {
+}
+interface PropMap {
     [key: string]: any;
-};
+}
 declare type ContentType = HTMLElement | HTMLElement[] | DocumentFragment | string;
-declare type WebComponentSpec = {
+interface WebComponentSpec {
     superClass: typeof HTMLElement;
     style: StyleMap;
     methods: FunctionMap;
@@ -27,7 +27,7 @@ declare type WebComponentSpec = {
     attributes: PropMap;
     content: ContentType;
     role?: string;
-};
+}
 export declare const makeWebComponent: (tagName: string, spec: WebComponentSpec) => (...contents: (string | number | import("./xin-types").XinObject | HTMLElement)[]) => HTMLElement | DocumentFragment;
 export {};
 //# sourceMappingURL=components.d.ts.map

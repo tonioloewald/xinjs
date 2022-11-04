@@ -23,7 +23,7 @@ class ListBinding {
         this.options = options;
     }
     update(array) {
-        if (!array) {
+        if (array == null) {
             array = [];
         }
         const { idPath, initInstance, updateInstance } = this.options;
@@ -32,7 +32,7 @@ class ListBinding {
         let created = 0;
         for (const element of [...this.boundElement.children]) {
             const item = elementToItem.get(element);
-            if (!item || !array.includes(item)) {
+            if ((item == null) || !array.includes(item)) {
                 element.remove();
                 itemToElement.delete(item);
                 elementToItem.delete(element);
@@ -50,19 +50,19 @@ class ListBinding {
                 continue;
             }
             let element = itemToElement.get(item._xinValue);
-            if (!element) {
+            if (element == null) {
                 created++;
                 element = this.template.cloneNode(true);
                 if (typeof item === 'object') {
                     itemToElement.set(item._xinValue, element);
                     elementToItem.set(element, item._xinValue);
                 }
-                if (initInstance) {
+                if (initInstance != null) {
                     initInstance(element, path || item);
                 }
                 this.boundElement.append(element);
             }
-            if (updateInstance) {
+            if (updateInstance != null) {
                 updateInstance(element, path || item);
             }
             elements.push(element);
@@ -72,7 +72,7 @@ class ListBinding {
         for (const element of elements) {
             if (element.previousElementSibling !== insertionPoint) {
                 moved++;
-                if (insertionPoint && insertionPoint.nextElementSibling) {
+                if ((insertionPoint != null) && (insertionPoint.nextElementSibling != null)) {
                     this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
                 }
                 else {
@@ -89,7 +89,7 @@ class ListBinding {
 }
 export const getListBinding = (boundElement, options) => {
     let listBinding = listBindings.get(boundElement);
-    if (!listBinding) {
+    if (listBinding == null) {
         listBinding = new ListBinding(boundElement, options);
         listBindings.set(boundElement, listBinding);
     }

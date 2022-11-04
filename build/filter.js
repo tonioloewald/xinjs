@@ -8,7 +8,7 @@ export const filterArray = (template, obj) => {
     }
     const output = [];
     for (const item of obj) {
-        const itemTemplate = template.find(possible => matchType(possible, item).length === 0);
+        const itemTemplate = (template).find(possible => matchType(possible, item).length === 0);
         if (itemTemplate !== undefined) {
             output.push(filter(itemTemplate, item));
         }
@@ -16,7 +16,7 @@ export const filterArray = (template, obj) => {
     return output;
 };
 export const filterObject = (template, obj) => {
-    if (matchType(template, obj).length) {
+    if (matchType(template, obj).length > 0) {
         return undefined;
     }
     const output = {};
@@ -32,7 +32,7 @@ export const filter = (template, obj) => {
     if (obj === undefined || obj === null) {
         return undefined;
     }
-    else if (typeof obj !== 'object' && matchType(template, obj).length) {
+    else if (typeof obj !== 'object' && (matchType(template, obj).length > 0)) {
         return undefined;
     }
     else if (Array.isArray(template)) {
@@ -42,6 +42,6 @@ export const filter = (template, obj) => {
         return filterObject(template, obj);
     }
     else {
-        return matchType(template, obj).length ? undefined : obj;
+        return (matchType(template, obj).length > 0) ? undefined : obj;
     }
 };

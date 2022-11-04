@@ -8,13 +8,13 @@ export declare const typeJSON: (x: any) => string;
 export declare const typeJS: (x: any) => string;
 export declare const matchType: (example: any, subject: any, errors?: string[], path?: string) => string[];
 export declare const exampleAtPath: (example: any, path: string | string[]) => any;
-declare type TypeErrorConfig = {
+interface TypeErrorConfig {
     functionName?: string;
     isParamFailure: boolean;
     expected: any;
     found: any;
     errors: string[];
-};
+}
 export declare class TypeError {
     functionName?: string;
     isParamFailure: boolean;
@@ -26,11 +26,11 @@ export declare class TypeError {
 }
 export declare const assignReadOnly: (obj: any, propMap: XinObject) => any;
 export declare const matchParamTypes: (types: any[], params: any[]) => any;
-declare type TypeSafeFunction = {
+interface TypeSafeFunction {
     (...args: any[]): any;
     paramTypes: any[];
     resultType: any;
-};
+}
 export declare const typeSafe: (func: Function, paramTypes?: any[], resultType?: any, functionName?: string | undefined) => TypeSafeFunction;
 export {};
 //# sourceMappingURL=type-by-example.d.ts.map

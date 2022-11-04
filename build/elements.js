@@ -37,11 +37,11 @@ export const create = (tagType, ...contents) => {
                         elt.setAttribute('style', value);
                     }
                 }
-                else if (key.match(/^on[A-Z]/)) {
+                else if (key.match(/^on[A-Z]/) != null) {
                     const eventType = key.substr(2).toLowerCase();
                     elt.addEventListener(eventType, value);
                 }
-                else if (key.match(/^bind[A-Z]/)) {
+                else if (key.match(/^bind[A-Z]/) != null) {
                     const bindingType = key.substr(4).toLowerCase();
                     const binding = bindings[bindingType];
                     if (binding) {
@@ -76,7 +76,7 @@ const _elements = { fragment };
 export const elements = new Proxy(_elements, {
     get(target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`);
-        if (!tagName.match(/^\w+(-\w+)*$/)) {
+        if (tagName.match(/^\w+(-\w+)*$/) == null) {
             throw new Error(`${tagName} does not appear to be a valid element tagName`);
         }
         else if (!target[tagName]) {

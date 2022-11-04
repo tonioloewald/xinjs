@@ -4,9 +4,9 @@ import { debounce } from './throttle'
 
 export const hotReload = (test: PathTestFunction = () => true) => {
   const savedState = localStorage.getItem('xin-state')
-  if(savedState) {
+  if (savedState) {
     const state = JSON.parse(savedState)
-    for(const key of Object.keys(state).filter(test)) {
+    for (const key of Object.keys(state).filter(test)) {
       if (xin[key]) {
         Object.assign(xin[key], state[key])
       } else {
@@ -18,7 +18,7 @@ export const hotReload = (test: PathTestFunction = () => true) => {
   const saveState = debounce(() => {
     const obj: XinObject = {}
     const state = xin._xinValue
-    for(const key of Object.keys(state).filter(test)) {
+    for (const key of Object.keys(state).filter(test)) {
       obj[key] = state[key]
     }
     localStorage.setItem('xin-state', JSON.stringify(obj))
@@ -27,5 +27,3 @@ export const hotReload = (test: PathTestFunction = () => true) => {
 
   observe(test, saveState as ObserverCallbackFunction)
 }
-
-
