@@ -1,4 +1,4 @@
-const stringify = (x: any) => {
+const stringify = (x: any): string => {
   try {
     return JSON.stringify(x)
   } catch (_) {
@@ -6,4 +6,4 @@ const stringify = (x: any) => {
   }
 }
 
-export const makeError = (...messages: any[]) => new Error(messages.map(stringify).join(' '))
+export const makeError = (...messages: any[]): Error => new Error(messages.map(stringify).join(' '))

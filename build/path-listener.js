@@ -10,18 +10,24 @@ const getPath = (what) => {
 };
 export class Listener {
     constructor(test, callback) {
+        const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`;
+        let testDescription;
         if (typeof test === 'string') {
-            this.test = t => typeof t === 'string' && !!t && (test.startsWith(t) || t.startsWith(test));
+            this.test = t => typeof t === 'string' && t !== '' && (test.startsWith(t) || t.startsWith(test));
+            testDescription = `test = "${test}"`;
         }
         else if (test instanceof RegExp) {
             this.test = test.test.bind(test);
+            testDescription = `test = "${test.toString()}"`;
         }
         else if (test instanceof Function) {
             this.test = test;
+            testDescription = `test = function ${test.name}`;
         }
         else {
             throw new Error('expect listener test to be a string, RegExp, or test function');
         }
+        this.description = `${testDescription}, ${callbackDescription}`;
         if (typeof callback === 'function') {
             this.callback = callback;
         }
@@ -32,7 +38,7 @@ export class Listener {
     }
 }
 export const updates = async () => {
-    if (!updatePromise) {
+    if (updatePromise !== undefined) {
         return;
     }
     await updatePromise;
@@ -50,13 +56,13 @@ const update = () => {
                 heard = listener.test(path);
             }
             catch (e) {
-                throw new Error(`${listener.test} threw "${e}" at "${path}"`);
+                throw new Error(`Listener ${listener.description} threw "${e}" at "${path}"`);
             }
             if (heard === observerShouldBeRemoved) {
                 unobserve(listener);
                 return false;
             }
-            return !!heard;
+            return heard;
         })
             .forEach(listener => {
             let heard;
@@ -64,7 +70,7 @@ const update = () => {
                 heard = listener.callback(path);
             }
             catch (e) {
-                throw new Error(`${listener.callback} threw "${e}" handling "${path}"`);
+                throw new Error(`Listener ${listener.description} threw "${e}" handling "${path}"`);
             }
             if (heard === observerShouldBeRemoved) {
                 unobserve(listener);
@@ -73,7 +79,7 @@ const update = () => {
     }
     touchedPaths.splice(0);
     updateTriggered = false;
-    if (resolveUpdate) {
+    if (typeof resolveUpdate === 'function') {
         resolveUpdate();
     }
     if (settings.perf) {
@@ -82,13 +88,13 @@ const update = () => {
 };
 export const touch = (what) => {
     const path = getPath(what);
-    if (!updateTriggered) {
+    if (updateTriggered === false) {
         updatePromise = new Promise(resolve => {
             resolveUpdate = resolve;
         });
         updateTriggered = setTimeout(update);
     }
-    if (!touchedPaths.find(touchedPath => path.startsWith(touchedPath))) {
+    if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
         touchedPaths.push(path);
     }
 };
@@ -96,14 +102,11 @@ export const observe = (test, callback) => {
     return new Listener(test, callback);
 };
 export const unobserve = (listener) => {
-    let index;
-    const found = false;
-    index = listeners.indexOf(listener);
+    const index = listeners.indexOf(listener);
     if (index > -1) {
         listeners.splice(index, 1);
     }
     else {
         throw new Error('unobserve failed, listener not found');
     }
-    return found;
 };
