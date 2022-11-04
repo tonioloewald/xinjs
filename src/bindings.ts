@@ -3,7 +3,7 @@ import { getListBinding } from './list-binding'
 
 export const bindings: { [key: string | symbol]: XinBinding } = {
   value: {
-    toDOM (element: HTMLElement, value: any, options?: XinObject) {
+    toDOM (element: HTMLElement, value: any) {
       // @ts-expect-error
       if (element.value !== undefined) {
         // @ts-expect-error

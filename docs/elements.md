@@ -9,11 +9,11 @@ without using `innerHTML` or other unsafe methods.
 
     document.body.append(
       label(
-        {style: {
-          display: 'inline-flex'
-        }},
-        span('This is a field'),
-        input({value: 'hello world', placeholder: 'type something'})
+      {style: {
+        display: 'inline-flex'
+      }},
+      span('This is a field'),
+      input({value: 'hello world', placeholder: 'type something'})
       )
     )
 
@@ -42,12 +42,12 @@ so:
 element's `style` object (while a string property will just change the
 element's `style` attribute, eliminating previous changes).
 
-    span({style: 'border: 1px solid red'}, {style: 'font-size: 15px'})
+  span({style: 'border: 1px solid red'}, {style: 'font-size: 15px'})
 
 …produces `<span style="font-size: 15px"></span>`, which is probably
 not what was wanted.
 
-    span({style: {border: '1px solid red'}, {style: {fontSize: '15px'}}})
+  span({style: {border: '1px solid red'}, {style: {fontSize: '15px'}}})
 
 …produces `<span style="border: 1px solid red; fon-size: 15px></span>`
 which is probably what was wanted.
@@ -57,6 +57,33 @@ which is probably what was wanted.
 Properties starting with `on` (followed by an uppercase letter) 
 will be converted into event-handlers, so `onMouseup` will be 
 turned into a `mouseup` listener.
+
+## binding
+
+You can [bind](bind.md) an element to state using [bindings](bindings.md)
+using convenient properties, e.g.
+
+    import { elements } from 'xinjs'
+    const {div} = elements
+    div({ bindValue: 'app.title' })
+
+…is syntax sugar for:
+
+    import { elements, bind, bindings } from 'xinjs'
+    const { div } = elements
+    bind( div(), 'app.title', bindings.value )
+
+If you want to use your own bindings, you can use `apply`:
+
+    const visibleBinding = {
+      toDOM(element, value) {
+        element.classList.toggle('hidden', !value)
+      }
+    }
+
+    div({ apply(elt){
+      bind(elt, 'app.prefs.isVisible', visibleBinding})
+    } })
 
 ## apply
 
