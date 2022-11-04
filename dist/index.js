@@ -1007,8 +1007,8 @@ class ListBinding {
         const arrayPath = array._xinPath;
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
-            const path = idPath ? `${arrayPath}[${idPath}=${item[idPath]}]` : false;
-            if (!item) {
+            const path = idPath !== undefined ? `${arrayPath}[${idPath}=${item[idPath]}]` : false;
+            if (item === undefined) {
                 continue;
             }
             let element = itemToElement.get(item._xinValue);
@@ -1020,11 +1020,13 @@ class ListBinding {
                     elementToItem.set(element, item._xinValue);
                 }
                 if (initInstance != null) {
+                    // eslint-disable-next-line
                     initInstance(element, path || item);
                 }
                 this.boundElement.append(element);
             }
             if (updateInstance != null) {
+                // eslint-disable-next-line
                 updateInstance(element, path || item);
             }
             elements.push(element);
@@ -1034,7 +1036,7 @@ class ListBinding {
         for (const element of elements) {
             if (element.previousElementSibling !== insertionPoint) {
                 moved++;
-                if ((insertionPoint != null) && (insertionPoint.nextElementSibling != null)) {
+                if (insertionPoint?.nextElementSibling != null) {
                     this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
                 }
                 else {
