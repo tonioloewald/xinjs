@@ -1063,7 +1063,7 @@ const getListBinding = (boundElement, options) => {
 
 const bindings = {
     value: {
-        toDOM(element, value, options) {
+        toDOM(element, value) {
             // @ts-expect-error
             if (element.value !== undefined) {
                 // @ts-expect-error
