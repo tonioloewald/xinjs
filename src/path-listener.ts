@@ -13,21 +13,28 @@ const getPath = (what: string | { _xinPath: string }): string => {
 }
 
 export class Listener {
+  description: string
   test: PathTestFunction
   callback: ObserverCallbackFunction
 
   constructor (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) {
+    const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`
+    let testDescription
     if (typeof test === 'string') {
-      this.test = t => typeof t === 'string' && !!t && (test.startsWith(t) || t.startsWith(test))
+      this.test = t => typeof t === 'string' && t !== '' && (test.startsWith(t) || t.startsWith(test))
+      testDescription = `test = "${test}"`
     } else if (test instanceof RegExp) {
       this.test = test.test.bind(test)
+      testDescription = `test = "${test.toString()}"`
     } else if (test instanceof Function) {
       this.test = test
+      testDescription = `test = function ${test.name}`
     } else {
       throw new Error(
         'expect listener test to be a string, RegExp, or test function'
       )
     }
+    this.description = `${testDescription}, ${callbackDescription}`
     if (typeof callback === 'function') {
       this.callback = callback
     } else {
@@ -37,14 +44,14 @@ export class Listener {
   }
 }
 
-export const updates = async () => {
-  if (!updatePromise) {
+export const updates = async (): Promise<void> => {
+  if (updatePromise !== undefined) {
     return
   }
   await updatePromise
 }
 
-const update = () => {
+const update = (): void => {
   if (settings.perf) {
     console.time('xin async update')
   }
@@ -57,20 +64,20 @@ const update = () => {
         try {
           heard = listener.test(path)
         } catch (e) {
-          throw new Error(`${listener.test} threw "${e}" at "${path}"`)
+          throw new Error(`Listener ${listener.description} threw "${e as string}" at "${path}"`)
         }
         if (heard === observerShouldBeRemoved) {
           unobserve(listener)
           return false
         }
-        return !!heard
+        return heard as boolean
       })
       .forEach(listener => {
         let heard
         try {
           heard = listener.callback(path)
         } catch (e) {
-          throw new Error(`${listener.callback} threw "${e}" handling "${path}"`)
+          throw new Error(`Listener ${listener.description} threw "${e as string}" handling "${path}"`)
         }
         if (heard === observerShouldBeRemoved) {
           unobserve(listener)
@@ -80,7 +87,7 @@ const update = () => {
 
   touchedPaths.splice(0)
   updateTriggered = false
-  if (resolveUpdate) {
+  if (typeof resolveUpdate === 'function') {
     resolveUpdate()
   }
   if (settings.perf) {
@@ -88,35 +95,30 @@ const update = () => {
   }
 }
 
-export const touch = (what: XinTouchableType) => {
+export const touch = (what: XinTouchableType): void => {
   const path = getPath(what)
 
-  if (!updateTriggered) {
+  if (updateTriggered === false) {
     updatePromise = new Promise(resolve => {
       resolveUpdate = resolve
     })
     updateTriggered = setTimeout(update)
   }
 
-  if (!touchedPaths.find(touchedPath => path.startsWith(touchedPath))) {
+  if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
     touchedPaths.push(path)
   }
 }
 
-export const observe = (test: string | RegExp | PathTestFunction, callback: ObserverCallbackFunction) => {
+export const observe = (test: string | RegExp | PathTestFunction, callback: ObserverCallbackFunction): Listener => {
   return new Listener(test, callback)
 }
 
-export const unobserve = (listener: Listener) => {
-  let index
-  const found = false
-
-  index = listeners.indexOf(listener)
+export const unobserve = (listener: Listener): void => {
+  const index = listeners.indexOf(listener)
   if (index > -1) {
     listeners.splice(index, 1)
   } else {
     throw new Error('unobserve failed, listener not found')
   }
-
-  return found
 }
