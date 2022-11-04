@@ -2,10 +2,10 @@ import { xin, observe } from './xin';
 import { debounce } from './throttle';
 export const hotReload = (test = () => true) => {
     const savedState = localStorage.getItem('xin-state');
-    if (savedState) {
+    if (savedState != null) {
         const state = JSON.parse(savedState);
         for (const key of Object.keys(state).filter(test)) {
-            if (xin[key]) {
+            if (xin[key] !== undefined) {
                 Object.assign(xin[key], state[key]);
             }
             else {
