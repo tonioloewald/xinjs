@@ -3,7 +3,9 @@ import { bind } from './bind'
 import { bindings } from './bindings'
 
 type elementPart = HTMLElement | XinObject | string | number
-export type ElementCreator = (...contents: elementPart[]) => HTMLElement | DocumentFragment
+export type HTMLElementCreator = (...contents: elementPart[]) => HTMLElement
+export type FragmentCreator = (...contents: elementPart[]) => DocumentFragment
+export type ElementCreator = HTMLElementCreator | FragmentCreator
 
 const templates: { [key: string]: HTMLElement } = {}
 
@@ -62,7 +64,7 @@ export const create = (tagType: string, ...contents: elementPart[]): HTMLElement
   return elt
 }
 
-const fragment: ElementCreator = (...contents: elementPart[]) => {
+const fragment = (...contents: elementPart[]): DocumentFragment => {
   const frag = document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)

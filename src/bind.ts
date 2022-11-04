@@ -2,7 +2,10 @@ import { xin, touch, observe, observerShouldBeRemoved } from './xin'
 import { XinObject, XinTouchableType, XinBinding } from './xin-types'
 import { throttle } from './throttle'
 
-export const bind = (element: HTMLElement, what: XinTouchableType, binding: XinBinding, options?: XinObject): HTMLElement => {
+export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchableType, binding: XinBinding, options?: XinObject): HTMLElement => {
+  if (element instanceof DocumentFragment) {
+    throw new Error('bind cannot bind to a DocumentFragment')
+  }
   const { toDOM, fromDOM } = binding
   // eslint-disable-next-line
   if (typeof what !== 'string' && what !== null && typeof what === 'object' && !what._xinPath) {

@@ -255,6 +255,8 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
       if (!this._renderQueued) {
         this._renderQueued = true
         requestAnimationFrame(() => {
+          // TODO add mechanism to allow component developer to have more control over
+          // whether input vs. change events are emitted
           if (this._changeQueued) dispatch(this, 'change')
           this._changeQueued = false
           this._renderQueued = false

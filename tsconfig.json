@@ -14,15 +14,5 @@
   "allowJs": true,
   "types": ["bun-types"],
   "include": ["src/**/*"],
-  "exclude": ["node_nodules", "**.*.spec.ts"],
-  "ts-standard": {
-    "ignore": [
-      "dist",
-      "build",
-      "public",
-      "**/*.js",
-      "**/*.mjs",
-      "**/*.d.ts"
-    ]
-  }
+  "exclude": ["node_nodules", "**.*.spec.ts"]
 }

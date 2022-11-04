@@ -1,26 +1,41 @@
 import {xin, elements, bind, bindings, touch} from '../src/index'
 import {toolBar, labeledValue, labeledInput} from './components/index'
+import {randomColor} from './random-color'
+
+const INITIAL_ITEMS = 25
+
+type ColorRec = {id: number, color: string}
+
+const makeItems = (howMany: number) => {
+  const items: ColorRec[] = []
+  for(let id = 1; id <= howMany; id++) {
+    items.push({
+      id,
+      color: randomColor(),
+    })
+  } 
+  return items
+}
+
+xin.colors = {
+  itemsToCreate: INITIAL_ITEMS,
+  items: makeItems(INITIAL_ITEMS),
+  reset() {
+    xin.colors.items = makeItems(xin.colors.itemsToCreate)
+  }
+}
 
 const {fragment, button, template, div, span} = elements
 
-const colorConversionSpan = span()
-
-const matchColors = (a, b) => {
-  colorConversionSpan.style.color = a
-  colorConversionSpan.style.backgroundColor = b
-  return colorConversionSpan.style.color === colorConversionSpan.style.backgroundColor
-}
-
-export const arrayBindingTest = fragment(
+export const arrayBindingTest = () => fragment(
   toolBar(
     labeledValue('item count', {
-      bindValue: 'app.items.length' 
+      bindValue: 'colors.items.length' 
     }),
     button('reset', {
       onClick() {
-        xin.app.makeItems(xin.app.itemsToCreate)
         console.log('reset')
-        xin.app.items = items
+        xin.colors.reset()
       }
     }),
     labeledInput('items to create', {
@@ -29,44 +44,44 @@ export const arrayBindingTest = fragment(
       style: {
         '--input-width': '80px'
       },
-      bindValue: 'app.itemsToCreate'
+      bindValue: 'colors.itemsToCreate'
     }),
     span({style: {flex: '1 1 auto'}}),
     button('scramble', {
       onClick() {
         console.log('scramble')
-        xin.app.items.sort(() => Math.random() - 0.5)
+        xin.colors.items.sort(() => Math.random() - 0.5)
       }
     }),
     button('swap 4<->7', {
       onClick(){
         console.log('swap')
-        let item4 = xin.app.items[4]
-        xin.app.items[4] = xin.app.items[7]
-        xin.app.items[7] = item4
-        touch(xin.app.items)
+        let item4 = xin.colors.items[4]
+        xin.colors.items[4] = xin.colors.items[7]
+        xin.colors.items[7] = item4
+        touch(xin.colors.items)
       }
     }),
     button('modify ~10%', {
       onClick() {
         console.log('modify')
-        for(const item of xin.app.items._xinValue) {
+        for(const item of xin.colors.items._xinValue) {
           if(Math.random() < 0.1) {
             item.color = randomColor() 
           }
         }
-        touch(xin.app.items)
+        touch(xin.colors.items)
       }
     }),
     button('modify & scramble', {
       onClick() {
         console.log('scramble and modify')
-        for(const item of xin.app.items._xinValue) {
+        for(const item of xin.colors.items._xinValue) {
           if(Math.random() < 0.1) {
             item.color = randomColor() 
           }
         }
-        xin.app.items.sort(() => Math.random() - 0.5)
+        xin.colors.items.sort(() => Math.random() - 0.5)
       }
     })
   ),
@@ -78,11 +93,11 @@ export const arrayBindingTest = fragment(
       fontFamily: 'monospace',
       width: '200px',
       background: 'var(--input-bg)'
-    }}))), xin.app.items, bindings.list, {
+    }}))), xin.colors.items, bindings.list, {
       idPath: 'id',
-      updateInstance(element, path) {
-        const obj = xin[path]
-        if (!matchColors(element.style.color, obj.color)) {
+      updateInstance(element, obj) {
+        if (obj.color !== element.dataset.color) {
+          element.dataset.color = obj.color
           element.style.border = `1px solid ${obj.color}`
           element.style.color = obj.color
           element.textContent = `${obj.id} ${obj.color}`

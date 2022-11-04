@@ -935,6 +935,9 @@ const hotReload = (test = () => true) => {
 };
 
 const bind = (element, what, binding, options) => {
+    if (element instanceof DocumentFragment) {
+        throw new Error('bind cannot bind to a DocumentFragment');
+    }
     const { toDOM, fromDOM } = binding;
     // eslint-disable-next-line
     if (typeof what !== 'string' && what !== null && typeof what === 'object' && !what._xinPath) {
@@ -1410,6 +1413,8 @@ const makeWebComponent = (tagName, spec) => {
             if (!this._renderQueued) {
                 this._renderQueued = true;
                 requestAnimationFrame(() => {
+                    // TODO add mechanism to allow component developer to have more control over
+                    // whether input vs. change events are emitted
                     if (this._changeQueued)
                         dispatch(this, 'change');
                     this._changeQueued = false;
