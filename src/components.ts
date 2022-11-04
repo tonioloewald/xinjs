@@ -1,4 +1,5 @@
-import { elements } from './elements'
+import { elements, ElementCreator } from './elements'
+import { XinObject } from './xin-types'
 
 interface StyleRule {
   [key: string]: string | number
@@ -22,23 +23,23 @@ interface PropMap {
   [key: string]: any
 }
 
-type ContentType = HTMLElement | HTMLElement[] | DocumentFragment | string
+type ContentType = HTMLElement | Array<HTMLElement | string> | DocumentFragment | string
 
 interface WebComponentSpec {
-  superClass: typeof HTMLElement
-  style: StyleMap
-  methods: FunctionMap
+  superClass?: typeof HTMLElement
+  style?: StyleMap
+  methods?: FunctionMap
   render?: () => void
   connectedCallback?: () => void
   disconnectedCallback?: () => void
-  eventHandlers: EventHandlerMap
-  props: PropMap
-  attributes: PropMap
-  content: ContentType
+  eventHandlers?: EventHandlerMap
+  props?: PropMap
+  attributes?: PropMap
+  content?: ContentType
   role?: string
 }
 
-const dispatch = (target: Element, type: string) => {
+const dispatch = (target: Element, type: string): void => {
   const event = new Event(type)
   target.dispatchEvent(event)
 }
@@ -51,15 +52,16 @@ const resizeObserver = new ResizeObserver(entries => {
   }
 })
 
-const appendContentToElement = (elt: Element | ShadowRoot, content: ContentType) => {
-  if (content) {
+const appendContentToElement = (elt: Element | ShadowRoot, content: ContentType): void => {
+  if (content != null) {
     if (typeof content === 'string') {
       elt.textContent = content
     } else if (Array.isArray(content)) {
       content.forEach(node => {
-        elt.appendChild(node.cloneNode ? node.cloneNode(true) : node)
+        // @ts-expect-error-error
+        elt.appendChild(node instanceof HTMLElement ? node.cloneNode(true) : node)
       })
-    } else if (content.cloneNode) {
+    } else if (content instanceof HTMLElement) {
       elt.appendChild(content.cloneNode(true))
     } else {
       throw new Error('expect text content or document node')
@@ -67,26 +69,21 @@ const appendContentToElement = (elt: Element | ShadowRoot, content: ContentType)
   }
 }
 
-const hyphenated = (s: string) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
+const hyphenated = (s: string): string => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
 
-const css = (obj: StyleMap) => {
-  if (typeof obj === 'object') {
-    const selectors = Object.keys(obj).map((selector) => {
-      const body = obj[selector]
-      const rule = Object.keys(body)
-        .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
-        .join('\n')
-      return `${selector} {\n${rule}\n}`
-    })
-    return selectors.join('\n\n')
-  } else {
-    return obj
-  }
+const css = (obj: StyleMap): string => {
+  const selectors = Object.keys(obj).map((selector) => {
+    const body = obj[selector]
+    const rule = Object.keys(body)
+      .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
+      .join('\n')
+    return `${selector} {\n${rule}\n}`
+  })
+  return selectors.join('\n\n')
 }
 
 const defaultSpec = {
   superClass: HTMLElement,
-  style: {},
   methods: {},
   eventHandlers: {},
   props: {},
@@ -94,7 +91,7 @@ const defaultSpec = {
   content: elements.slot()
 }
 
-export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
+export const makeWebComponent = (tagName: string, spec: WebComponentSpec): ElementCreator => {
   const {
     superClass,
     style,
@@ -106,7 +103,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
     role
   } = Object.assign({}, defaultSpec, spec)
   let styleNode: HTMLStyleElement
-  if (style) {
+  if (style !== undefined) {
     const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style))
     styleNode = elements.style(styleText) as HTMLStyleElement
   }
@@ -153,10 +150,11 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
           })
         }
       }
+      // eslint-disable-next-line
       const self = this
       this.elementRefs = new Proxy({}, {
         get (target: { [key: string]: HTMLElement }, ref: string) {
-          if (!target[ref]) {
+          if (target[ref] === undefined) {
             const element = (self.shadowRoot != null) ? self.shadowRoot.querySelector(`[data-ref="${ref}"]`) : self.querySelector(`[data-ref="${ref}"]`)
             if (element == null) throw new Error(`elementRef "${ref}" does not exist!`)
             element.removeAttribute('data-ref')
@@ -168,7 +166,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
           throw new Error('elementRefs is read-only')
         }
       })
-      if (styleNode) {
+      if (styleNode !== undefined) {
         const shadow = this.attachShadow({ mode: 'open' })
         shadow.appendChild(styleNode.cloneNode(true))
         appendContentToElement(shadow, content)
@@ -179,7 +177,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
         const passive = eventType.startsWith('touch') ? { passive: true } : false
         this.addEventListener(eventType, eventHandlers[eventType].bind(this), passive)
       })
-      if (eventHandlers.childListChange) {
+      if (eventHandlers.childListChange !== undefined) {
         // @ts-expect-error
         const observer = new MutationObserver(eventHandlers.childListChange.bind(this))
         observer.observe(this, { childList: true })
@@ -190,9 +188,10 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
         const observer = new MutationObserver((mutationsList) => {
           let triggerRender = false
           mutationsList.forEach((mutation) => {
+            // eslint-disable-next-line
             triggerRender = !!(mutation.attributeName && attributeNames.includes(mutation.attributeName))
           })
-          if (triggerRender && this.queueRender) this.queueRender(false)
+          if (triggerRender && this.queueRender !== undefined) this.queueRender(false)
         })
         observer.observe(this, { attributes: true })
         attributeNames.forEach(attributeName => {
@@ -202,6 +201,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
               if (typeof attributes[attributeName] === 'boolean') {
                 return this.hasAttribute(attributeName)
               } else {
+                // eslint-disable-next-line
                 if (this.hasAttribute(attributeName)) {
                   return typeof attributes[attributeName] === 'number'
                     ? parseFloat(this.getAttribute(attributeName))
@@ -218,6 +218,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
             set (value) {
               if (typeof attributes[attributeName] === 'boolean') {
                 if (value !== this[attributeName]) {
+                  // eslint-disable-next-line
                   if (value) {
                     this.setAttribute(attributeName, '')
                   } else {
@@ -229,7 +230,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
                   this.setAttribute(attributeName, value)
                 }
               } else {
-                if (typeof value === 'object' || `${value}` !== `${this[attributeName]}`) {
+                if (typeof value === 'object' || `${value as string}` !== `${this[attributeName] as string}`) {
                   if (value === null || value === undefined || typeof value === 'object') {
                     this.removeAttribute(attributeName)
                   } else {
@@ -246,8 +247,8 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       this.queueRender()
     }
 
-    queueRender (change = false) {
-      if (!this.render) {
+    queueRender (change = false): void {
+      if (this.render === undefined) {
         return
       }
       if (!this._changeQueued) this._changeQueued = change
@@ -262,28 +263,28 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
       }
     }
 
-    connectedCallback () {
+    connectedCallback (): void {
       // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
-      if (role) this.setAttribute('role', role)
-      if (eventHandlers.resize) {
+      if (role !== undefined && role !== '') this.setAttribute('role', role)
+      if (eventHandlers.resize !== undefined) {
         resizeObserver.observe(this)
       }
-      if (props.hasOwnProperty('value')) {
-        this.value = this.getAttribute('value') || null
+      if (Object.prototype.hasOwnProperty.call(props, 'value')) {
+        this.value = this.getAttribute('value') ?? null
       }
       if (spec.connectedCallback != null) spec.connectedCallback.call(this)
     }
 
-    disconnectedCallback () {
+    disconnectedCallback (): void {
       resizeObserver.unobserve(this)
       if (spec.disconnectedCallback != null) spec.disconnectedCallback.call(this)
     }
 
-    render () {
+    render (): void {
       if (spec.render != null) spec.render.call(this)
     }
 
-    static defaultAttributes () {
+    static defaultAttributes (): XinObject {
       return { ...attributes }
     }
   }
@@ -294,7 +295,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec) => {
   })
 
   // if-statement is to prevent some node-based "browser" tests from breaking
-  if (window.customElements) window.customElements.define(tagName, componentClass)
+  if (window.customElements !== undefined) window.customElements.define(tagName, componentClass)
 
   return elements[tagName]
 }
