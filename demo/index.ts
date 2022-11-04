@@ -59,14 +59,6 @@ Object.assign(window, {
   touch
 })
 
-const colorConversionSpan = span()
-
-const matchColors = (a, b) => {
-  colorConversionSpan.style.color = a
-  colorConversionSpan.style.backgroundColor = b
-  return colorConversionSpan.style.color === colorConversionSpan.style.backgroundColor
-}
-
 document.head.append(style('body { font-family: Sans-serif }'))
 
 document.body.append(fragment(
@@ -155,7 +147,8 @@ document.body.append(fragment(
       idPath: 'id',
       updateInstance(element, path) {
         const obj = xin[path]
-        if (!matchColors(element.style.color, obj.color)) {
+        if (obj.color !== element.dataset.color) {
+          element.dataset.color = obj.color
           element.style.border = `1px solid ${obj.color}`
           element.style.color = obj.color
           element.textContent = `${obj.id} ${obj.color}`
