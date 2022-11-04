@@ -229,13 +229,13 @@ test('type safe functions', () => {
 
   // typesafe function works when used correctly
   expect(safeAdd(1,2)).toBe(3)
-  expect(safeAdd(1).toString()).toBe('add failed: bad parameter, [[],["was undefined, expected number"]]')
+  expect(safeAdd(1).toString()).toBe('add() failed, bad parameter: ["was undefined, expected number"]')
 
   const badAdd = typeSafe((a: number, b: number) => `${a + b}`, [1, 2], 3, 'badAdd')
 
   // typesafe function fails with wrong return type
   expect(badAdd(1,2).toString())
-    .toBe('badAdd failed: bad result, ["was \\"3\\", expected number"]')
+    .toBe('badAdd() failed, bad return: ["was \\"3\\", expected number"]')
 
   const labeller = typeSafe((label: string, number: number) => `${label}: ${number}`, ['label', 0], 'label: 17', 'labeller')
 
@@ -262,8 +262,8 @@ test('type safe functions', () => {
   // @ts-expect-error
   const safeVectorAdd = typeSafe((a, b) => a.map((x, i) => x + b[i]), [[1], [2]], [3], 'vectorAdd')
   expect(safeVectorAdd([1,2],[3,4]).toString()).toBe('4,6')
-  expect(safeVectorAdd([1,2],[3,'x']).toString()).toBe('vectorAdd failed: bad parameter, [[],["[1] was \\"x\\", expected number"]]')
-  expect(safeVectorAdd([1,2],[3]).toString()).toBe('vectorAdd failed: bad result, ["[1] was NaN, expected number"]')
+  expect(safeVectorAdd([1,2],[3,'x']).toString()).toBe('vectorAdd() failed, bad parameter: ["[1] was \\"x\\", expected number"]')
+  expect(safeVectorAdd([1,2],[3]).toString()).toBe('vectorAdd() failed, bad return: ["[1] was NaN, expected number"]')
 
   // chaining works
   expect(safeVectorAdd([1,2], safeVectorAdd([1,2],[1,1])).toString()).toBe('3,5')
@@ -280,5 +280,5 @@ test('type safe functions', () => {
   expect(inner([1,2],[1]).functionName).toBe('inner')
 
   // short circuit works
-  expect(safeVectorAdd([1,2], inner([1,2],[1])).toString()).toBe('inner failed: bad result, ["[1] was NaN, expected number"]')
+  expect(safeVectorAdd([1,2], inner([1,2],[1])).toString()).toBe('inner() failed, bad return: ["[1] was NaN, expected number"]')
 })
