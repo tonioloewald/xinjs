@@ -15,7 +15,7 @@
     "start": "bun dev",
     "lint": "bun ts-standard --fix src/*.ts",
     "make": "rm -rf build && bun test && bun tsc && ./build.command",
-    "pack": "bun run make && npm pack --pack-destination ~",
+    "pack": "bun lint && bun run make && npm pack --pack-destination ~",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",

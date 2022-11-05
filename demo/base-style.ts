@@ -13,6 +13,9 @@ const css = `/* base-style */
   --background: #eee;
   --panel-bg: #ddd;
   --input-bg: #fff;
+  --hover-bg: #eef;
+  --active-bg: #dde;
+  --selected-bg: #ddf;
   --input-border: 1px solid #0004;
   --light-border: 1px solid #fff2;
   --dark-border: 1px solid #0002;
@@ -36,6 +39,14 @@ label, input, button {
   border: var(--input-border);
   padding: 0 var(--spacing);
   line-height: var(--line-height);
+}
+
+button:hover {
+  background: var(--hover-bg);
+}
+
+button:active {
+  background: var(--active-bg);
 }
 
 button {

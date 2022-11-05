@@ -1,6 +1,5 @@
-import {xin, touch, elements, hotReload, settings, bind, bindings, matchType} from '../src/index'
-import {toolBar, labeledInput, labeledValue} from './components'
-import {randomColor} from './random-color'
+import {xin, touch, elements, hotReload, settings, matchType} from '../src/index'
+import {settingsDialog} from './SettingsDialog'
 import {arrayBindingTest} from './ArrayBindingTest'
 import {wordSearch} from './WordSearch'
 import './base-style'
@@ -16,7 +15,7 @@ console.time('total')
 
 settings.perf = true
 
-const {fragment, img, h1, span, style} = elements
+const {fragment, img, h1, span, style, button} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
@@ -42,22 +41,43 @@ Object.assign(window, {
 document.head.append(style('body { font-family: Sans-serif }'))
 
 document.body.append(fragment(
-  h1(
+  span(
+    {
+      style: {
+        display: 'flex',
+        height: '60px',
+        padding: '8px',
+        alignItems: 'center',
+        marginTop: 'calc(var(--spacing) * -1)'
+      }
+    },
     img({
       alt: 'xinjs logo',
       style: {
         width: '44px',
         height: '44px',
-        margin: '-8px 10px -8px 0'
+        marginRight: '10px'
       },
       src: logo
     }),
-    span({bindText: 'app.title'})
+    h1({
+      style: {
+        lineHeight: '44px',
+        fontSize: '24px',
+        fontWeight: '200',
+        padding: 0,
+        margin: 0,
+      },
+      bindText: 'app.title'
+    }),
+    span({style: {flex: '1 1 auto'}}),
+    button('settings', {
+      onClick() {
+        document.querySelector('.settings').showModal()
+      }
+    })
   ),
-  labeledInput('title', {
-    placeholder: 'enter title',
-    bindValue: 'app.title'
-  }),
+  settingsDialog(),
   arrayBindingTest(),
   wordSearch()
 ))
