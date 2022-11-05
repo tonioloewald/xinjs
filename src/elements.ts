@@ -1,15 +1,22 @@
-import { XinObject } from './xin-types'
 import { bind } from './bind'
 import { bindings } from './bindings'
 
-type elementPart = HTMLElement | XinObject | string | number
-export type HTMLElementCreator = (...contents: elementPart[]) => HTMLElement
-export type FragmentCreator = (...contents: elementPart[]) => DocumentFragment
+interface ElementProps {
+  onClick?: (evt: MouseEvent) => void
+  onInput?: (evt: Event) => void
+  onChange?: (evt: Event) => void
+  onSubmit?: (evt: Event) => void
+  [key: string]: any
+}
+
+type ElementPart = HTMLElement | ElementProps | string | number
+export type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement
+export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
 export type ElementCreator = HTMLElementCreator | FragmentCreator
 
 const templates: { [key: string]: HTMLElement } = {}
 
-export const create = (tagType: string, ...contents: elementPart[]): HTMLElement => {
+export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   if (templates[tagType] === undefined) {
     templates[tagType] = document.createElement(tagType)
   }
@@ -64,7 +71,7 @@ export const create = (tagType: string, ...contents: elementPart[]): HTMLElement
   return elt
 }
 
-const fragment = (...contents: elementPart[]): DocumentFragment => {
+const fragment = (...contents: ElementPart[]): DocumentFragment => {
   const frag = document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)
@@ -80,7 +87,7 @@ export const elements = new Proxy(_elements, {
     if (tagName.match(/^\w+(-\w+)*$/) == null) {
       throw new Error(`${tagName} does not appear to be a valid element tagName`)
     } else if (target[tagName] === undefined) {
-      target[tagName] = (...contents: elementPart[]) => create(tagName, ...contents)
+      target[tagName] = (...contents: ElementPart[]) => create(tagName, ...contents)
     }
     return target[tagName]
   },

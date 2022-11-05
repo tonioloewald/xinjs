@@ -39,7 +39,7 @@ interface WebComponentSpec {
   role?: string
 }
 
-const dispatch = (target: Element, type: string): void => {
+export const dispatch = (target: Element, type: string): void => {
   const event = new Event(type)
   target.dispatchEvent(event)
 }
