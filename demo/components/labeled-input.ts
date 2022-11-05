@@ -14,7 +14,7 @@ export const labeledInput = makeWebComponent('labeled-input', {
       whiteSpace: 'nowrap'
     },
     ':host input': {
-      border: 'none',
+      border: 'var(--input-border)',
       padding: '0 var(--spacing)',
       lineHeight: 'var(--lineHeight)',
       borderRadius: 'calc(0.5 * var(--rounded-radius))',
@@ -37,6 +37,14 @@ export const labeledInput = makeWebComponent('labeled-input', {
     const {field} = self.elementRefs
     field.addEventListener('input', () => {
       self.value = this.type !== 'checkbox' ? field.value : field.checked
+    })
+    field.addEventListener('keydown', (evt) => {
+      if(evt.code === 'Enter') {
+        const form = this.closest('form')
+        if (form) {
+          form.dispatchEvent(new Event('submit'))
+        }
+      }
     })
   },
   render() {
