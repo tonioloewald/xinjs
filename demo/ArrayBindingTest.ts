@@ -53,7 +53,7 @@ export const arrayBindingTest = () => fragment(
         xin.colors.items.sort(() => Math.random() - 0.5)
       }
     }),
-    button('swap 4<->7', {
+    button('swap [4] and [7]', {
       onClick(){
         console.log('swap')
         let item4 = xin.colors.items[4]
