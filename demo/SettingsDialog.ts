@@ -31,7 +31,7 @@ export const settingsDialog = () => dialog(
         { 
           style: {
             position: 'absolute',
-            top: 0,
+            top: 'calc(var(--spacing) * 0.5)',
             right: 'calc(var(--spacing) * 0.5)',
             width: '32px',
             height: '32px',
