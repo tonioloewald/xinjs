@@ -35,20 +35,14 @@ const colorSwatch = makeWebComponent('color-swatch', {
       margin: '5px',
       gap: '10px',
       width: '240px',
-      background: 'var(--input-bg)'
+      background: 'var(--input-bg)',
+      '--input-width': '140px'
     },
     ':host > span': {
-      display: 'inline-flex',
+      display: 'inline-block',
       flex: '0 0 30px',
-      textAlign: 'right'
-    },
-    ':host label': {
-      display: 'flex',
-      gap: '10px'
-    },
-    ':host input': {
-      fontFamily: 'monospace',
-      width: '140px'
+      textAlign: 'right',
+      lineHeight: '27px'
     }
   },
   value: {
@@ -57,10 +51,7 @@ const colorSwatch = makeWebComponent('color-swatch', {
   },
   content: [
     span({dataRef: 'idSpan'}),
-    label(
-      span('color'),
-      input({ dataRef: 'colorInput' })
-    )
+    labeledInput(span('color'), { dataRef: 'colorInput' })
   ],
   bindValue(path: string) {
     const self = this

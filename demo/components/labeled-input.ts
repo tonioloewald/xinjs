@@ -33,7 +33,7 @@ export const labeledInput = makeWebComponent('labeled-input', {
   connectedCallback() {
     const self = this
     const {field} = self.elementRefs
-    field.addEventListener('input', () => {
+    field.addEventListener('change', () => {
       self.value = this.type !== 'checkbox' ? field.value : field.checked
     })
     field.addEventListener('keydown', (evt) => {
@@ -58,10 +58,12 @@ export const labeledInput = makeWebComponent('labeled-input', {
     } else {
       field.removeAttribute('placeholder')
     }
-    if (field.value !== `${this.value}`) {
-      if (this.type === 'checkbox') {
+    if (this.type === 'checkbox') {
+      if(field.checked !== this.value) {
         field.checked = this.value
-      } else {
+      }
+    } else {
+      if (field.value !== this.value) {
         field.value = this.value 
       }
     }
