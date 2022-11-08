@@ -41,13 +41,21 @@ E.g. if you have a simple unordered list:
 You can bind an array to the `<ul>` and it will make a copy of the `<li>` inside
 for each item in the source array.
 
-The `list` binding accepts as options `initInstance` and `updateInstance` each of
-which have this signature:
-
-    (element: HTMLElement, value: any) => void
+The `list` binding accepts as options:
+- `idPath: string`
+- `initInstance: (element, item: any) => void`
+- `updateInstance: (element, item: any) => void` 
 
 `initInstance` is called once for each element created, and is passed
 that element and the array value that it represents.
 
 Meanwhile, `updateInstance` is called once on creation and then any time the 
 array value is updated.
+
+### Binding custom-elements using idPath
+
+If you list-bind a custom-element with `bindValue` implemented and providing an
+`idPath` then the list-binding will bind the array items to the value of the 
+custom-element.
+
+See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.

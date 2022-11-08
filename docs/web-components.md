@@ -17,10 +17,34 @@ web-components (or "custom elements").
 By default, a component will comprise a `<slot>`, so it's possible to create
 a simple structural component very easily.
 
+## WebComponentSpec
+
+The appearance and behavior of the custom element are entirely defined by the 
+specification object:
+
+    interface WebComponentSpec {
+      superClass?: typeof HTMLElement
+      style?: StyleMap
+      methods?: FunctionMap
+      render?: () => void
+      bindValue?: (path: string) => void
+      connectedCallback?: () => void
+      disconnectedCallback?: () => void
+      eventHandlers?: EventHandlerMap
+      props?: PropMap
+      attributes?: PropMap
+      content?: ContentType
+      role?: string
+      value?: any
+    }
+
+|| Property || Description
+|| superClass | (optional) Use this to specify a superclass other than HTMLElement.
+
 ## <labeled-input> example
 
-This is a more complex example that shows a lot of the deeper functionality
-provided by `makeWebComponent`.
+[labeled-input.ts](../demo/components/labeled-input.ts) is a more complex example 
+that shows a lot of the deeper functionality provided by `makeWebComponent`.
 
 ### style
 
@@ -36,14 +60,27 @@ when other CSS rules are not.
 
 ### value
 
-If you want your component to handle a value then give it a `prop` named
-`value` of the appropriate type.
+The goal of this module is to make a custom-element's `value` behave as much
+like an `<input>` element's as possible. As such:
 
-If your element is given a `value` attribute in the DOM, this will be used
-when the element is connected, but not otherwise.
+- if you provide a `value` property for your component specification, it will
+  have a `value` property that defaults to the value provided.
+- if you create an instance of the custom-element with a `value` attribute, its
+  value will be initialized to the attribute, but changing the attribute later
+  will have no effect, nor will changes to the `value` property update the 
+  attribute.
+- if you change your component's `value`, it will trigger a `change` event on
+  the component. (If you want to trigger `input` events, etc., that's on you.)
+  Note that for `object` values, you may want to replace the object to trigger
+  updates.
 
-If you change the `value` of the component, a `change` event will automatically
-be fired on that element.
+[labeled-input.ts](../demo/components/labeled-input.ts) wraps a single `<input>`
+in a custom-element and passes the component's value to-and-from between the
+`<input>`.
+
+[ArrayBindingTest.ts](../demo/ArrayBindingTest.ts) creates a more complex
+component and binds a component (object) value's different properties
+to different elements within it.
 
 ### attributes
 
@@ -60,6 +97,13 @@ boolean attribute, and will disappear if given the attribute.
 
 `props` are properties that are assigned/obtained programmatically but do not
 appear in the DOM.
+
+You can specify a prop as a `function`. If the function takes no arguments
+(i.e. has a `length` of 1) it will be treated as ready-only. If it takes an
+argument it is also used as a setter.
+
+E.g. you could implement something like the `checked` property of
+`<input type="checkbox">` by looking at / setting the element's `value`.
 
 ### Life-Cycle Methods
 

@@ -8,12 +8,12 @@ Copyright ©2016-2022 Tonio Loewald
   </a>
 </div>
 
-> Much of this code is derived from [bindinator](https://b8rjs.com).
-
 `xinjs` is a collection of small modules designed to make writing javascript
 code more productive and simpler. The core component is `xin` itself, an 
 object that observes the state of any objects passed to it without changing
 those objects in any way.
+
+A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 
 ## Contents
 
