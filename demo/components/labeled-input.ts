@@ -26,14 +26,15 @@ export const labeledInput = makeWebComponent('labeled-input', {
   },
   attributes: {
     type: '',
-    placeholder: ''
+    placeholder: '',
+    input: false
   },
   value: '',
   content: label({dataRef: 'label'}, slot(), input({dataRef: 'field'})),
   connectedCallback() {
     const self = this
     const {field} = self.elementRefs
-    field.addEventListener('change', () => {
+    field.addEventListener(this.input ? 'input' : 'change', () => {
       self.value = this.type !== 'checkbox' ? field.value : field.checked
     })
     field.addEventListener('keydown', (evt) => {
