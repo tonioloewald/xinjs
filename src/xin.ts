@@ -109,7 +109,7 @@ const regHandler = (path = ''): ProxyHandler => ({
       throw new Error(`setting invalid path ${fullPath}`)
     }
     let existing = xin[fullPath]
-    if (existing?._xinValue) {
+    if (existing?._xinValue != null) {
       existing = existing._xinValue
     }
     if (existing !== value && setByPath(registry, fullPath, value)) {

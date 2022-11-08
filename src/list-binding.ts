@@ -1,5 +1,3 @@
-import { bind } from './bind'
-import { bindings } from './bindings'
 import { settings } from './settings'
 
 const itemToElement: WeakMap<object, HTMLElement> = new WeakMap()
@@ -43,7 +41,7 @@ class ListBinding {
 
     const { idPath, initInstance, updateInstance } = this.options
     // @ts-expect-error
-    const arrayPath = array._xinPath
+    const arrayPath: string = array._xinPath
 
     let removed = 0
     let moved = 0
@@ -81,16 +79,15 @@ class ListBinding {
         }
         // @ts-expect-error
         if (typeof element.bindValue === 'function') {
-          if (!idPath) {
+          if (idPath == null) {
             throw new Error('cannot bindValue without an idPath')
           }
           // @ts-expect-error
           element._value = item
-          const idValue = item[idPath]
+          const idValue = item[idPath] as string
           const path = `${arrayPath}[${idPath}=${idValue}]`
-          bind(element, path, bindings.value)
           // @ts-expect-error
-          element.bindValue()
+          element.bindValue(path)
         }
       }
       if (updateInstance != null) {

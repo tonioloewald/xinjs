@@ -26,7 +26,9 @@ export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchable
     const updateXin = (): void => {
       const value = fromDOM(element)
       if (value !== undefined && value !== null) {
+        // eslint-disable-next-line
         const existing = xin[path]._xinValue || xin[path]
+        // eslint-disable-next-line
         const actual = value._xinValue || value
         if (xin[path] != null && existing !== actual) {
           xin[path] = value

@@ -64,14 +64,14 @@ const update = () => {
             return heard;
         })
             .forEach(listener => {
-            let heard;
+            let outcome;
             try {
-                heard = listener.callback(path);
+                outcome = listener.callback(path);
             }
             catch (e) {
                 throw new Error(`Listener ${listener.description} threw "${e}" handling "${path}"`);
             }
-            if (heard === observerShouldBeRemoved) {
+            if (outcome === observerShouldBeRemoved) {
                 unobserve(listener);
             }
         });
@@ -448,7 +448,11 @@ const regHandler = (path = '') => ({
         if (!isValidPath(fullPath)) {
             throw new Error(`setting invalid path ${fullPath}`);
         }
-        if (setByPath(registry, fullPath, value)) {
+        let existing = xin[fullPath];
+        if (existing?._xinValue != null) {
+            existing = existing._xinValue;
+        }
+        if (existing !== value && setByPath(registry, fullPath, value)) {
             touch(fullPath);
         }
         return true;
@@ -943,12 +947,8 @@ const bind = (element, what, binding, options) => {
     }
     const path = typeof what === 'string' ? what : what._xinPath;
     if (toDOM != null) {
-        // toDOM(element, xin[path], options)
         touch(path);
         observe(path, () => {
-            if (element.closest('body') == null) {
-                return observerShouldBeRemoved;
-            }
             const value = xin[path];
             if (typeof value === 'object' || (fromDOM == null) || fromDOM(element) !== value) {
                 toDOM(element, value, options);
@@ -959,7 +959,13 @@ const bind = (element, what, binding, options) => {
         const updateXin = () => {
             const value = fromDOM(element);
             if (value !== undefined && value !== null) {
-                xin[path] = value;
+                // eslint-disable-next-line
+                const existing = xin[path]._xinValue || xin[path];
+                // eslint-disable-next-line
+                const actual = value._xinValue || value;
+                if (xin[path] != null && existing !== actual) {
+                    xin[path] = value;
+                }
             }
         };
         element.addEventListener('input', throttle(updateXin, 500));
@@ -995,7 +1001,9 @@ class ListBinding {
         if (array == null) {
             array = [];
         }
-        const { initInstance, updateInstance } = this.options;
+        const { idPath, initInstance, updateInstance } = this.options;
+        // @ts-expect-error
+        const arrayPath = array._xinPath;
         let removed = 0;
         let moved = 0;
         let created = 0;
@@ -1023,11 +1031,23 @@ class ListBinding {
                     itemToElement.set(item._xinValue, element);
                     elementToItem.set(element, item._xinValue);
                 }
+                this.boundElement.append(element);
                 if (initInstance != null) {
                     // eslint-disable-next-line
                     initInstance(element, item);
                 }
-                this.boundElement.append(element);
+                // @ts-expect-error
+                if (typeof element.bindValue === 'function') {
+                    if (idPath == null) {
+                        throw new Error('cannot bindValue without an idPath');
+                    }
+                    // @ts-expect-error
+                    element._value = item;
+                    const idValue = item[idPath];
+                    const path = `${arrayPath}[${idPath}=${idValue}]`;
+                    // @ts-expect-error
+                    element.bindValue(path);
+                }
             }
             if (updateInstance != null) {
                 // eslint-disable-next-line
@@ -1050,8 +1070,7 @@ class ListBinding {
             insertionPoint = element;
         }
         if (settings.perf) {
-            // @ts-expect-error
-            console.log(array._xinPath, 'updated', { removed, created, moved });
+            console.log(arrayPath, 'updated', { removed, created, moved });
         }
     }
 }
@@ -1248,8 +1267,24 @@ const defaultSpec = {
     attributes: {},
     content: elements.slot()
 };
+function deepClone(obj) {
+    if (typeof obj !== 'object') {
+        return obj;
+    }
+    const clone = {};
+    for (const key in obj) {
+        const val = obj[key];
+        if (obj != null && typeof obj === 'object') {
+            clone[key] = deepClone(val);
+        }
+        else {
+            clone[key] = val;
+        }
+    }
+    return clone;
+}
 const makeWebComponent = (tagName, spec) => {
-    const { superClass, style, methods, eventHandlers, props, attributes, content, role } = Object.assign({}, defaultSpec, spec);
+    const { superClass, style, methods, eventHandlers, props, attributes, content, role, value, bindValue } = Object.assign({}, defaultSpec, spec);
     let styleNode;
     if (style !== undefined) {
         const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style));
@@ -1258,36 +1293,50 @@ const makeWebComponent = (tagName, spec) => {
     const componentClass = class extends superClass {
         constructor() {
             super();
+            this._initialized = false;
             this._changeQueued = false;
             this._renderQueued = false;
+            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+                throw new Error('do not define an attribute named "value"; define value directly instead');
+            }
+            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+                throw new Error('do not define a prop named "value"; define value directly instead');
+            }
+            if (value !== undefined) {
+                this._value = deepClone(value);
+            }
+            if (bindValue !== undefined) {
+                this.bindValue = (path) => {
+                    bind(this, path, bindings.value);
+                    bindValue.call(this, path);
+                };
+            }
             for (const prop of Object.keys(props)) {
-                let value = props[prop];
-                if (typeof value !== 'function') {
+                let propVal = deepClone(props[prop]);
+                if (typeof propVal !== 'function') {
                     Object.defineProperty(this, prop, {
                         enumerable: false,
                         get() {
-                            return value;
+                            return propVal;
                         },
                         set(x) {
-                            if (x !== value) {
-                                value = x;
-                                if (prop === 'value') {
-                                    this.value = x;
-                                }
+                            if (x !== undefined && (x !== propVal || typeof x === 'object')) {
+                                propVal = x;
                                 this.queueRender(true);
                             }
                         }
                     });
                 }
                 else {
+                    const setter = propVal;
                     Object.defineProperty(this, prop, {
                         enumerable: false,
                         get() {
-                            return value.call(this);
+                            return setter.call(this);
                         },
                         set(x) {
-                            if (value.length === 1) {
-                                value.call(this, x);
+                            if (setter.length === 1) {
+                                setter.call(this, x);
                             }
                             else {
                                 throw new Error(`cannot set ${prop}, it is read-only`);
@@ -1401,6 +1450,16 @@ const makeWebComponent = (tagName, spec) => {
                 });
             }
             this.queueRender();
+            this._initialized = true;
+        }
+        get value() {
+            return this._value;
+        }
+        set value(newValue) {
+            if (newValue !== undefined && (typeof newValue === 'object' || newValue !== this._value)) {
+                this._value = newValue;
+                this.queueRender(true);
+            }
         }
         queueRender(change = false) {
             if (this.render === undefined) {
@@ -1428,8 +1487,8 @@ const makeWebComponent = (tagName, spec) => {
             if (eventHandlers.resize !== undefined) {
                 resizeObserver.observe(this);
             }
-            if (Object.prototype.hasOwnProperty.call(props, 'value')) {
-                this.value = this.getAttribute('value') ?? null;
+            if (value != null && this.getAttribute('value') != null) {
+                this._value = this.getAttribute('value');
             }
             if (spec.connectedCallback != null)
                 spec.connectedCallback.call(this);

@@ -29,8 +29,8 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
         elt.append(item as Node)
       }
     } else {
-      for (const key of Object.keys(item)) {
-        const value = item[key]
+      for (const key of Object.keys(item as ElementProps)) {
+        const value = (item as ElementProps)[key]
         if (key === 'apply') {
           value(elt)
         } else if (key === 'style') {

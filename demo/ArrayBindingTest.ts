@@ -62,7 +62,7 @@ const colorSwatch = makeWebComponent('color-swatch', {
       input({ dataRef: 'colorInput' })
     )
   ],
-  bindValue() {
+  bindValue(path: string) {
     const self = this
     const {colorInput} = self.elementRefs
     colorInput.addEventListener('change', () => {

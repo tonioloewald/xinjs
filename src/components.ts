@@ -1,3 +1,5 @@
+import { bind } from './bind'
+import { bindings } from './bindings'
 import { elements, ElementCreator } from './elements'
 import { XinObject } from './xin-types'
 
@@ -31,7 +33,7 @@ interface WebComponentSpec {
   style?: StyleMap
   methods?: FunctionMap
   render?: () => void
-  bindValue?: () => void
+  bindValue?: (path: string) => void
   connectedCallback?: () => void
   disconnectedCallback?: () => void
   eventHandlers?: EventHandlerMap
@@ -136,7 +138,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     _renderQueued: boolean = false
     elementRefs: { [key: string]: HTMLElement }
     _value?: any
-    bindValue?: () => void
+    bindValue?: (path: string) => void
 
     constructor () {
       super()
@@ -150,7 +152,10 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
         this._value = deepClone(value)
       }
       if (bindValue !== undefined) {
-        this.bindValue = bindValue
+        this.bindValue = (path: string) => {
+          bind(this, path, bindings.value)
+          bindValue.call(this, path)
+        }
       }
 
       for (const prop of Object.keys(props)) {
@@ -283,11 +288,11 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
       this._initialized = true
     }
 
-    get value () {
+    get value (): any {
       return this._value
     }
 
-    set value (newValue) {
+    set value (newValue: any) {
       if (newValue !== undefined && (typeof newValue === 'object' || newValue !== this._value)) {
         this._value = newValue
         this.queueRender(true)
@@ -318,7 +323,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
       if (eventHandlers.resize !== undefined) {
         resizeObserver.observe(this)
       }
-      if (value !== undefined && this.getAttribute('value')) {
+      if (value != null && this.getAttribute('value') != null) {
         this._value = this.getAttribute('value')
       }
       if (spec.connectedCallback != null) spec.connectedCallback.call(this)
