@@ -1,3 +1,5 @@
+import { bind } from './bind'
+import { bindings } from './bindings'
 import { settings } from './settings'
 
 const itemToElement: WeakMap<object, HTMLElement> = new WeakMap()
@@ -5,6 +7,7 @@ const elementToItem: WeakMap<HTMLElement, object> = new WeakMap()
 const listBindings: WeakMap<HTMLElement, ListBinding> = new WeakMap()
 
 interface ListBindingOptions {
+  idPath?: string
   initInstance?: (element: HTMLElement, value: any) => void
   updateInstance?: (element: HTMLElement, value: any) => void
 }
@@ -38,7 +41,9 @@ class ListBinding {
       array = []
     }
 
-    const { initInstance, updateInstance } = this.options
+    const { idPath, initInstance, updateInstance } = this.options
+    // @ts-expect-error
+    const arrayPath = array._xinPath
 
     let removed = 0
     let moved = 0
@@ -69,11 +74,24 @@ class ListBinding {
           itemToElement.set(item._xinValue, element)
           elementToItem.set(element, item._xinValue)
         }
+        this.boundElement.append(element)
         if (initInstance != null) {
           // eslint-disable-next-line
           initInstance(element, item)
         }
-        this.boundElement.append(element)
+        // @ts-expect-error
+        if (typeof element.bindValue === 'function') {
+          if (!idPath) {
+            throw new Error('cannot bindValue without an idPath')
+          }
+          // @ts-expect-error
+          element._value = item
+          const idValue = item[idPath]
+          const path = `${arrayPath}[${idPath}=${idValue}]`
+          bind(element, path, bindings.value)
+          // @ts-expect-error
+          element.bindValue()
+        }
       }
       if (updateInstance != null) {
         // eslint-disable-next-line
@@ -97,8 +115,7 @@ class ListBinding {
     }
 
     if (settings.perf) {
-      // @ts-expect-error
-      console.log(array._xinPath, 'updated', { removed, created, moved })
+      console.log(arrayPath, 'updated', { removed, created, moved })
     }
   }
 }

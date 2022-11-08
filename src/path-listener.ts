@@ -73,13 +73,13 @@ const update = (): void => {
         return heard as boolean
       })
       .forEach(listener => {
-        let heard
+        let outcome
         try {
-          heard = listener.callback(path)
+          outcome = listener.callback(path)
         } catch (e) {
           throw new Error(`Listener ${listener.description} threw "${e as string}" handling "${path}"`)
         }
-        if (heard === observerShouldBeRemoved) {
+        if (outcome === observerShouldBeRemoved) {
           unobserve(listener)
         }
       })

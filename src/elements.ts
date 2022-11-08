@@ -9,7 +9,7 @@ interface ElementProps {
   [key: string]: any
 }
 
-type ElementPart = HTMLElement | ElementProps | string | number
+type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
 export type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
 export type ElementCreator = HTMLElementCreator | FragmentCreator

@@ -1,4 +1,4 @@
-import {xin, elements, bind, bindings, touch} from '../src/index'
+import {xin, elements, bind, bindings, touch, makeWebComponent} from '../src/index'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
@@ -25,7 +25,62 @@ xin.colors = {
   }
 }
 
-const {fragment, button, template, div, span} = elements
+const {fragment, button, template, div, span, label, input} = elements
+
+const colorSwatch = makeWebComponent('color-swatch', {
+  style: {
+    ':host': {
+      display: 'inline-flex',
+      padding: '10px',
+      margin: '5px',
+      gap: '10px',
+      width: '240px',
+      background: 'var(--input-bg)'
+    },
+    ':host > span': {
+      display: 'inline-flex',
+      flex: '0 0 30px',
+      textAlign: 'right'
+    },
+    ':host label': {
+      display: 'flex',
+      gap: '10px'
+    },
+    ':host input': {
+      fontFamily: 'monospace',
+      width: '140px'
+    }
+  },
+  value: {
+    id: 0,
+    color: 'red'
+  },
+  content: [
+    span({dataRef: 'idSpan'}),
+    label(
+      span('color'),
+      input({ dataRef: 'colorInput' })
+    )
+  ],
+  bindValue() {
+    const self = this
+    const {colorInput} = self.elementRefs
+    colorInput.addEventListener('change', () => {
+      if (self.value.color !== colorInput.value) {
+        self.value = {
+          ...self.value,
+          color: colorInput.value
+        }
+      }
+    })
+  },
+  render() {
+    const {idSpan, colorInput} = this.elementRefs
+    idSpan.textContent = this.value.id
+    colorInput.value = this.value.color
+    this.style.border = `2px solid ${this.value.color}`
+  }
+})
 
 export const arrayBindingTest = () => fragment(
   toolBar(
@@ -85,24 +140,12 @@ export const arrayBindingTest = () => fragment(
       }
     })
   ),
+
   bind(
-    div(template(span({style: {
-      display: 'inline-block',
-      padding: '10px',
-      margin: '5px',
-      fontFamily: 'monospace',
-      width: '200px',
-      background: 'var(--input-bg)'
-    }}))), xin.colors.items, bindings.list, {
+    div(template(
+      colorSwatch()
+    )), xin.colors.items, bindings.list, {
       idPath: 'id',
-      updateInstance(element, obj) {
-        if (obj.color !== element.dataset.color) {
-          element.dataset.color = obj.color
-          element.style.border = `1px solid ${obj.color}`
-          element.style.color = obj.color
-          element.textContent = `${obj.id} ${obj.color}`
-        }
-      }
     }
   )
 )

@@ -12,9 +12,7 @@ export const labeledValue = makeWebComponent('labeled-value', {
       fontSize: 'var(--font-size)'
     }
   },
-  props: {
-    value: ''
-  },
+  value: '',
   content: label(slot(), span({dataRef: 'field'})),
   render() {
     const {field} = this.elementRefs

@@ -28,9 +28,7 @@ export const labeledInput = makeWebComponent('labeled-input', {
     type: '',
     placeholder: ''
   },
-  props: {
-    value: ''
-  },
+  value: '',
   content: label({dataRef: 'label'}, slot(), input({dataRef: 'field'})),
   connectedCallback() {
     const self = this

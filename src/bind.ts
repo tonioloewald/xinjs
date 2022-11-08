@@ -1,4 +1,4 @@
-import { xin, touch, observe, observerShouldBeRemoved } from './xin'
+import { xin, touch, observe } from './xin'
 import { XinObject, XinTouchableType, XinBinding } from './xin-types'
 import { throttle } from './throttle'
 
@@ -13,13 +13,9 @@ export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchable
   }
   const path = typeof what === 'string' ? what : what._xinPath
   if (toDOM != null) {
-    // toDOM(element, xin[path], options)
     touch(path)
 
     observe(path, () => {
-      if (element.closest('body') == null) {
-        return observerShouldBeRemoved
-      }
       const value = xin[path]
       if (typeof value === 'object' || (fromDOM == null) || fromDOM(element) !== value) {
         toDOM(element, value, options)
@@ -30,7 +26,11 @@ export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchable
     const updateXin = (): void => {
       const value = fromDOM(element)
       if (value !== undefined && value !== null) {
-        xin[path] = value
+        const existing = xin[path]._xinValue || xin[path]
+        const actual = value._xinValue || value
+        if (xin[path] != null && existing !== actual) {
+          xin[path] = value
+        }
       }
     }
 

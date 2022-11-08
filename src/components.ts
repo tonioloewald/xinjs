@@ -23,13 +23,15 @@ interface PropMap {
   [key: string]: any
 }
 
-type ContentType = HTMLElement | Array<HTMLElement | string> | DocumentFragment | string
+type ContentPart = HTMLElement | DocumentFragment | string
+type ContentType = ContentPart | ContentPart[]
 
 interface WebComponentSpec {
   superClass?: typeof HTMLElement
   style?: StyleMap
   methods?: FunctionMap
   render?: () => void
+  bindValue?: () => void
   connectedCallback?: () => void
   disconnectedCallback?: () => void
   eventHandlers?: EventHandlerMap
@@ -37,6 +39,7 @@ interface WebComponentSpec {
   attributes?: PropMap
   content?: ContentType
   role?: string
+  value?: any
 }
 
 export const dispatch = (target: Element, type: string): void => {
@@ -91,6 +94,23 @@ const defaultSpec = {
   content: elements.slot()
 }
 
+type Scalar = string | boolean | number | Function
+function deepClone (obj: XinObject | Scalar): XinObject | Scalar {
+  if (typeof obj !== 'object') {
+    return obj
+  }
+  const clone: XinObject = {}
+  for (const key in obj) {
+    const val = obj[key]
+    if (obj != null && typeof obj === 'object') {
+      clone[key] = deepClone(val) as XinObject
+    } else {
+      clone[key] = val
+    }
+  }
+  return clone
+}
+
 export const makeWebComponent = (tagName: string, spec: WebComponentSpec): ElementCreator => {
   const {
     superClass,
@@ -100,7 +120,9 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     props,
     attributes,
     content,
-    role
+    role,
+    value,
+    bindValue
   } = Object.assign({}, defaultSpec, spec)
   let styleNode: HTMLStyleElement
   if (style !== undefined) {
@@ -109,40 +131,53 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
   }
 
   const componentClass = class extends superClass {
+    _initialized: boolean = false
     _changeQueued: boolean = false
     _renderQueued: boolean = false
     elementRefs: { [key: string]: HTMLElement }
-    value?: any
+    _value?: any
+    bindValue?: () => void
 
     constructor () {
       super()
+      if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+        throw new Error('do not define an attribute named "value"; define value directly instead')
+      }
+      if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+        throw new Error('do not define a prop named "value"; define value directly instead')
+      }
+      if (value !== undefined) {
+        this._value = deepClone(value)
+      }
+      if (bindValue !== undefined) {
+        this.bindValue = bindValue
+      }
+
       for (const prop of Object.keys(props)) {
-        let value = props[prop]
-        if (typeof value !== 'function') {
+        let propVal = deepClone(props[prop])
+        if (typeof propVal !== 'function') {
           Object.defineProperty(this, prop, {
             enumerable: false,
             get () {
-              return value
+              return propVal
             },
             set (x) {
-              if (x !== value) {
-                value = x
-                if (prop === 'value') {
-                  this.value = x
-                }
+              if (x !== undefined && (x !== propVal || typeof x === 'object')) {
+                propVal = x
                 this.queueRender(true)
               }
             }
           })
         } else {
+          const setter = propVal
           Object.defineProperty(this, prop, {
             enumerable: false,
             get () {
-              return value.call(this)
+              return setter.call(this)
             },
             set (x) {
-              if (value.length === 1) {
-                value.call(this, x)
+              if (setter.length === 1) {
+                setter.call(this, x)
               } else {
                 throw new Error(`cannot set ${prop}, it is read-only`)
               }
@@ -245,6 +280,18 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
         })
       }
       this.queueRender()
+      this._initialized = true
+    }
+
+    get value () {
+      return this._value
+    }
+
+    set value (newValue) {
+      if (newValue !== undefined && (typeof newValue === 'object' || newValue !== this._value)) {
+        this._value = newValue
+        this.queueRender(true)
+      }
     }
 
     queueRender (change = false): void {
@@ -271,8 +318,8 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
       if (eventHandlers.resize !== undefined) {
         resizeObserver.observe(this)
       }
-      if (Object.prototype.hasOwnProperty.call(props, 'value')) {
-        this.value = this.getAttribute('value') ?? null
+      if (value !== undefined && this.getAttribute('value')) {
+        this._value = this.getAttribute('value')
       }
       if (spec.connectedCallback != null) spec.connectedCallback.call(this)
     }
