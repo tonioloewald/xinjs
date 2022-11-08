@@ -1,9 +1,11 @@
 import {xin, touch, elements, hotReload, settings, matchType} from '../src/index'
 import {settingsDialog} from './SettingsDialog'
 import {arrayBindingTest} from './ArrayBindingTest'
+import { markdownViewer } from './components/markdown-viewer'
 import {wordSearch} from './WordSearch'
 import './base-style'
 import logo from '../xinjs-logo.svg'
+import readmeMd from '../readme.md'
 
 /* global window, document */
 
@@ -45,7 +47,7 @@ document.body.append(fragment(
     {
       style: {
         display: 'flex',
-        height: '60px',
+        height: '44px',
         padding: '8px',
         alignItems: 'center',
         marginTop: 'calc(var(--spacing) * -1)'
@@ -77,9 +79,10 @@ document.body.append(fragment(
       }
     })
   ),
+  markdownViewer({src: readmeMd, style: { margin: '0 calc(var(--spacing) * -1)'}}),
   settingsDialog(),
   arrayBindingTest(),
-  wordSearch()
+  wordSearch(),
 ))
 
 console.timeEnd('total')

@@ -42,5 +42,8 @@
       "**/*.mjs",
       "**/*.d.ts"
     ]
+  },
+  "dependencies": {
+    "marked": "^4.2.2"
   }
 }
