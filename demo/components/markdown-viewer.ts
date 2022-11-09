@@ -8,14 +8,23 @@ export const markdownViewer = makeWebComponent('markdown-viewer', {
       display: 'block',
       background: 'var(--doc-bg)',
     },
-    ':host code, :host pre': {
+    '::slotted(a)': {
+      background: 'red'
+    },
+    '::slotted(code), ::slotted(pre)': {
+      background: 'var(--code-bg, #222)',
+      color: 'var(--code-color, #eee)',
+      borderRadius: '5px',
       fontFamily: 'Menlo, monaco, monospace'
+    },
+    '::slotted(blockquote), ::slotted(pre)': {
+      padding: 'var(--spacing, 20px)'
     }
   },
   attributes: {
     src: ''
   },
-  value: '# test\n\nhello, world',
+  value: '# markdown viewer\n\nI render my value (in markdown) as HTML.',
   connectedCallback() {
     if(this.src !== '') {
       const load = async () => {

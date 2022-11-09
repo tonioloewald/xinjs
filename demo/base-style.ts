@@ -22,21 +22,20 @@ const css = `/* base-style */
   --rounded-radius: calc(var(--line-height) * 0.25);
 }
 
-* {
-  padding: 0;
-  margin: 0;
-}
-
 h1, h2, h3 {
-  margin-top: calc(var(--spacing) * 2);
+  margin: calc(var(--spacing) * 2) 0 var(--spacing);
 }
 
-p, h1, h2, h3, h4, h5, h6, ul, ol, pre, blockquote {
-  margin-bottom: var(--spacing);
+p, h4, h5, h6, pre, blockquote {
+  margin: 0 0 var(--spacing);
 }
 
 ul, ol {
-  margin-left: calc(var(--spacing) * 2);
+  margin: 0 calc(var(--spacing) * 2) var(--spacing) 0;
+}
+
+li {
+  margin: 0 0 calc(var(--spacing) * 0.5);
 }
 
 body {

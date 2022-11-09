@@ -39,7 +39,7 @@ interface WebComponentSpec {
   eventHandlers?: EventHandlerMap
   props?: PropMap
   attributes?: PropMap
-  content?: ContentType
+  content?: ContentType | null
   role?: string
   value?: any
 }

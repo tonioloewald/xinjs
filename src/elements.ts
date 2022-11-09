@@ -35,10 +35,10 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
             elt.setAttribute('style', value)
           }
         } else if (key.match(/^on[A-Z]/) != null) {
-          const eventType = key.substr(2).toLowerCase()
+          const eventType = key.substring(2).toLowerCase()
           elt.addEventListener(eventType, value)
         } else if (key.match(/^bind[A-Z]/) != null) {
-          const bindingType = key.substr(4).toLowerCase()
+          const bindingType = key.substring(4).toLowerCase()
           const binding = bindings[bindingType]
           if (binding !== undefined) {
             bind(elt, value, binding)

@@ -6,7 +6,7 @@
 	</a>
 </div>
 
-[xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/about.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs)
+[xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs)
 
 ### Path-based State for JS Apps
 
@@ -56,7 +56,7 @@ and direct updates to application state.
 
 ### No Tax, No Packaging
 
-`xinjs` does not modify the stuff you hand over to it! It just wraps objects 
+`xinjs` does not modify the stuff you hand over to it… it just wraps objects 
 with a `Proxy` and then if you use `xin` to make changes to those objects,
 `xinjs` will notify any interested observers.
 

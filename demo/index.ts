@@ -2,6 +2,7 @@ import { xin, touch, elements, hotReload, settings, matchType, bind } from '../s
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
+import { babylon3d } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
 import './base-style'
 import logo from '../xinjs-logo.svg'
@@ -40,10 +41,10 @@ Object.assign(window, {
   touch
 })
 
-const routes = ['read-me', 'array-binding', 'word-search']
+const routes = ['read-me', 'array-binding', 'word-search', 'babylon-3d']
 
 function showRoute () {
-  const route = location.search.substring(1).split('&').shift()
+  const route = location.search.substring(1).split('&').shift() || routes[0]
   const routedElements = [...document.querySelectorAll('[data-route]')] as HTMLElement[]
   for(const element of routedElements) {
     element.toggleAttribute('hidden', element.dataset?.route !== route)
@@ -130,15 +131,19 @@ document.body.append(div(
         style: {
           overflowY: 'overlay',
           flex: '1 1 auto',
-          background: 'var(--input-bg)'
+          background: 'var(--input-bg)',
+          position: 'relative'
         }
       },
       markdownViewer({src: readmeMd, style: { padding: '20px 40px'}, dataRoute: 'read-me'}),
       arrayBindingTest({dataRoute: 'array-binding', hidden: true}),
-      wordSearch({dataRoute: 'word-search', hidden: true})
+      wordSearch({dataRoute: 'word-search', hidden: true}),
+      babylon3d({dataRoute: 'babylon-3d', hidden: true})
     )
   ),
   settingsDialog(),
 ))
+
+showRoute()
 
 console.timeEnd('total')
