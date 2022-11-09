@@ -8,7 +8,7 @@ const css = `/* base-style */
   --font-size: 15px;
   --line-height: 25px;
   --spacing: 10px;
-  --item-spacing: var(--spacing);
+  --item-spacing: calc(var(--spacing) * 0.5);
   --text-color: #222;
   --background: #eee;
   --panel-bg: #ddd;
@@ -22,10 +22,27 @@ const css = `/* base-style */
   --rounded-radius: calc(var(--line-height) * 0.25);
 }
 
+* {
+  padding: 0;
+  margin: 0;
+}
+
+h1, h2, h3 {
+  margin-top: calc(var(--spacing) * 2);
+}
+
+p, h1, h2, h3, h4, h5, h6, ul, ol, pre, blockquote {
+  margin-bottom: var(--spacing);
+}
+
+ul, ol {
+  margin-left: calc(var(--spacing) * 2);
+}
+
 body {
   background: var(--background);
   color: var(--text-color);
-  margin: var(--spacing);
+  margin: 0;
 }
 
 labeled-input,
@@ -55,6 +72,11 @@ button {
 
 input {
   border-radius: calc(0.5 * var(--rounded-radius));
-}`
+}
+
+[hidden] {
+  display: none !important;
+}
+`
 
 document.head.append(style(css)) 

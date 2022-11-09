@@ -9,9 +9,10 @@ export const toolBar = makeWebComponent('tool-bar', {
       background: 'var(--panel-bg)',
       borderTop: 'var(--light-border)',
       borderBottom: 'var(--dark-border)',
-      padding: '0 var(--spacing)',
-      margin: '0 calc(-1 * var(--spacing))',
-      height: 'calc(var(--line-height) + var(--spacing))'
+      padding: '0 var(--spacing) !important',
+      margin: 0,
+      height: 'calc(var(--line-height) + var(--spacing))',
+      overflow: 'hidden'
     },
     ':host > *': {
       whiteSpace: 'nowrap',

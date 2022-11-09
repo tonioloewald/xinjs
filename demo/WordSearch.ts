@@ -1,15 +1,16 @@
 import { labeledInput, toolBar } from './components'
-import { xin, elements, touch, bind, bindings } from '../src'
+import { xin, elements, touch, bind, bindings, ElementPart } from '../src'
 import { debounce } from '../src/throttle'
-import {WordList} from './WordList'
+import { WordList } from './WordList'
 import words from './words'
 
-const {b, span, div, a, fragment} = elements
+const {b, span, div, a} = elements
 
 xin.words = new WordList(words)
 console.log(xin.words.wordCount, 'words loaded')
 
-export const wordSearch = () => fragment(
+export const wordSearch = (...args: ElementPart[]) => div(
+  ...args,
   toolBar(
     b('Word Search'),
     span({style: {flex: '1 1 auto'}}),
@@ -18,15 +19,24 @@ export const wordSearch = () => fragment(
       style: {
         '--input-width': '160px'
       },
+      input: true,
       apply(element){
         bind(element, 'words.letters', bindings.value)
       }
     }),
+    labeledInput('reuse', {
+      type: 'checkbox',
+      input: true,
+      apply(element) {
+        bind(element, 'words.reuseLetters', bindings.value)
+      }
+    }),
     labeledInput('must contain', {
-      placeholder: 'required substring',
+      placeholder: 'required',
       style: {
         '--input-width': '60px'
       },
+      input: true,
       apply(element){
         bind(element, 'words.mustContain', bindings.value)
       }
@@ -36,14 +46,9 @@ export const wordSearch = () => fragment(
       style: {
         '--input-width': '60px'
       },
+      input: true,
       apply(element){
         bind(element, 'words.minLength', bindings.value)
-      }
-    }),
-    labeledInput('reuse letters', {
-      type: 'checkbox',
-      apply(element) {
-        bind(element, 'words.reuseLetters', bindings.value)
       }
     }),
     {
@@ -76,7 +81,7 @@ export const wordSearch = () => fragment(
       })
     ),
     'words.list',
-    bindings.list, 
+    bindings.list,
     {
       initInstance(element, word) {
         element.textContent = word

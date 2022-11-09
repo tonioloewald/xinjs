@@ -5,10 +5,8 @@ export const markdownViewer = makeWebComponent('markdown-viewer', {
   style: {
     ':host': {
       '--doc-bg': 'white',
-      '--doc-padding': '40px',
       display: 'block',
       background: 'var(--doc-bg)',
-      padding: 'var(--doc-padding)',
     },
     ':host code, :host pre': {
       fontFamily: 'Menlo, monaco, monospace'

@@ -25,7 +25,7 @@ xin.colors = {
   }
 }
 
-const {fragment, button, template, div, span, label, input} = elements
+const {button, template, div, span} = elements
 
 const colorSwatch = makeWebComponent('color-swatch', {
   style: {
@@ -73,26 +73,32 @@ const colorSwatch = makeWebComponent('color-swatch', {
   }
 })
 
-export const arrayBindingTest = () => fragment(
+export const arrayBindingTest = (...args) => div(
+  ...args,
   toolBar(
-    labeledValue('item count', {
-      bindValue: 'colors.items.length' 
-    }),
-    button('reset', {
+    button('create', {
       onClick() {
-        console.log('reset')
+        console.log('create')
         xin.colors.reset()
       }
     }),
-    labeledInput('items to create', {
-      placeholder: 'items to create', 
+    labeledInput('items', {
+      placeholder: 'items to create',
+      reversed: true,
       type: 'number',
       style: {
-        '--input-width': '80px'
+        '--flex-direction': 'row-reverse',
+        '--input-width': '60px'
       },
       bindValue: 'colors.itemsToCreate'
     }),
     span({style: {flex: '1 1 auto'}}),
+    labeledValue('items', {
+      style: {
+        '--flex-direction': 'row-reverse'
+      },
+      bindValue: 'colors.items.length' 
+    }),
     button('scramble', {
       onClick() {
         console.log('scramble')

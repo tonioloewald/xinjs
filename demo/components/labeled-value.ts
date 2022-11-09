@@ -7,6 +7,7 @@ export const labeledValue = makeWebComponent('labeled-value', {
       display: 'inline-flex',
       gap: 'calc(0.5 * var(--item-spacing))',
       lineHeight: 'var(--line-height)',
+      flexDirection: 'var(--flex-direction, row)'
     },
     ':host *': {
       fontSize: 'var(--font-size)'

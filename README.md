@@ -51,7 +51,7 @@ and direct updates to application state.
     })
 
     observe('app.docs', () => {
-      // render the app
+      // render docs
     })
 
 ### No Tax, No Packaging

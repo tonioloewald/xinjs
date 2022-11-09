@@ -5,6 +5,7 @@ export const labeledInput = makeWebComponent('labeled-input', {
   style: {
     ':host > label': {
       display: 'inline-flex',
+      flexDirection: 'var(--flex-direction, row)',
       gap: 'calc(0.5 * var(--item-spacing))',
       lineHeight: 'var(--line-height)',
       alignItems: 'center',

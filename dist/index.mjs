@@ -123,7 +123,7 @@ const makeError = (...messages) => new Error(messages.map(stringify).join(' '));
 // unique tokens passed to set by path to delete or create properties
 const now36 = () => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1);
 let _seq = 0;
-const seq = () => (parseInt('10000', 36) + (++_seq)).toString(36).substr(-5);
+const seq = () => (parseInt('10000', 36) + (++_seq)).toString(36).slice(-5);
 const id = () => now36() + seq();
 const _delete_ = {};
 const _newObject_ = {};
@@ -143,18 +143,18 @@ function pathParts(path) {
                 break;
             }
             else {
-                const part = path.substr(0, index);
-                path = path.substr(index);
+                const part = path.slice(0, index);
+                path = path.slice(index);
                 if (part !== '') {
                     parts.push(part.split('.'));
                 }
                 index = path.indexOf(']') + 1;
-                parts.push(path.substr(1, index - 2));
+                parts.push(path.slice(1, index - 1));
                 // handle paths dereferencing array element like foo[0].id
-                if (path.substr(index, 1) === '.') {
+                if (path.slice(index, index + 1) === '.') {
                     index += 1;
                 }
-                path = path.substr(index);
+                path = path.slice(index);
             }
         }
         return parts;
@@ -256,7 +256,7 @@ function getByPath(obj, path) {
         else {
             if (found.length === 0) {
                 if (part[0] === '=') {
-                    found = found[part.substr(1)];
+                    found = found[part.slice(1)];
                 }
                 else {
                     return undefined;
@@ -288,8 +288,8 @@ function setByPath(orig, path, val) {
                 else {
                     expectArray(obj);
                 }
-                const idPath = part.substr(0, equalsOffset);
-                const idValue = part.substr(equalsOffset + 1);
+                const idPath = part.slice(0, equalsOffset);
+                const idValue = part.slice(equalsOffset + 1);
                 obj = byIdPath(obj, idPath, idValue, (parts.length > 0) ? _newObject_ : val);
                 if (parts.length === 0) {
                     return true;
@@ -393,7 +393,7 @@ const regHandler = (path = '') => ({
             return target;
         }
         if (prop.startsWith('[') && prop.endsWith(']')) {
-            prop = prop.substr(1, prop.length - 2);
+            prop = prop.substring(1, prop.length - 1);
         }
         if ((!Array.isArray(target) && target[prop] !== undefined) ||
             (Array.isArray(target) && prop.includes('='))) {
@@ -536,7 +536,7 @@ const inRange = (spec, x) => {
         throw new Error(`bad range ${spec}`);
     }
     if (lower !== undefined && lower !== '') {
-        const min = parseFloatOrInfinity(lower.substr(1));
+        const min = parseFloatOrInfinity(lower.substring(1));
         if (lower[0] === '(') {
             if (x <= min)
                 return false;
@@ -714,7 +714,7 @@ const matchKeys = (example, subject, errors = [], path = '') => {
             let keyTest = legalVarName;
             try {
                 if (key !== '#') {
-                    keyTest = new RegExp(`^${key.substr(1)}$`);
+                    keyTest = new RegExp(`^${key.substring(1)}$`);
                 }
             }
             catch (e) {
@@ -725,13 +725,13 @@ const matchKeys = (example, subject, errors = [], path = '') => {
             const matchingKeys = Object.keys(subject).filter(key => keyTest.test(key));
             for (const k of matchingKeys) {
                 if (!testedKeys.has(k)) {
-                    matchType(example[key], subject[k], errors, `${path}./^${key.substr(1)}$/:${k}`);
+                    matchType(example[key], subject[k], errors, `${path}./^${key.substring(1)}$/:${k}`);
                     testedKeys.add(k);
                 }
             }
         }
         else if (key.endsWith('?')) {
-            const k = key.substr(0, key.length - 1);
+            const k = key.slice(0, key.length - 1);
             if (Object.hasOwnProperty.call(subject, k)) {
                 if (!testedKeys.has(k)) {
                     matchType(example[key], subject[k], errors, path + '.' + k);
@@ -1136,7 +1136,7 @@ const create = (tagType, ...contents) => {
     }
     const elt = templates[tagType].cloneNode();
     for (const item of contents) {
-        if (item instanceof HTMLElement || typeof item === 'string' || typeof item === 'number') {
+        if (item instanceof HTMLElement || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
             if (elt instanceof HTMLTemplateElement) {
                 elt.content.append(item);
             }
@@ -1146,7 +1146,7 @@ const create = (tagType, ...contents) => {
         }
         else {
             for (const key of Object.keys(item)) {
-                const value = item[key];
+                const value = (item)[key];
                 if (key === 'apply') {
                     value(elt);
                 }
