@@ -1,7 +1,7 @@
 import { bind } from './bind'
 import { bindings } from './bindings'
-import { elements, ElementCreator } from './elements'
-import { XinObject } from './xin-types'
+import { elements } from './elements'
+import { XinObject, ElementCreator } from './xin-types'
 
 interface StyleRule {
   [key: string]: string | number

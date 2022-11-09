@@ -45,7 +45,7 @@ const inRange = (spec: string, x: number): boolean => {
     throw new Error(`bad range ${spec}`)
   }
   if (lower !== undefined && lower !== '') {
-    const min = parseFloatOrInfinity(lower.substr(1))
+    const min = parseFloatOrInfinity(lower.substring(1))
     if (lower[0] === '(') {
       if (x <= min) return false
     } else {
@@ -283,7 +283,7 @@ const matchKeys = (example: any, subject: any, errors: string[] = [], path = '')
       let keyTest = legalVarName
       try {
         if (key !== '#') {
-          keyTest = new RegExp(`^${key.substr(1)}$`)
+          keyTest = new RegExp(`^${key.substring(1)}$`)
         }
       } catch (e) {
         const badKeyError = `illegal regular expression in example key '${key}'`
@@ -293,12 +293,12 @@ const matchKeys = (example: any, subject: any, errors: string[] = [], path = '')
       const matchingKeys = Object.keys(subject).filter(key => keyTest.test(key))
       for (const k of matchingKeys) {
         if (!testedKeys.has(k)) {
-          matchType(example[key], subject[k], errors, `${path}./^${key.substr(1)}$/:${k}`)
+          matchType(example[key], subject[k], errors, `${path}./^${key.substring(1)}$/:${k}`)
           testedKeys.add(k)
         }
       }
     } else if (key.endsWith('?')) {
-      const k = key.substr(0, key.length - 1)
+      const k = key.slice(0, key.length - 1)
       if (Object.hasOwnProperty.call(subject, k)) {
         if (!testedKeys.has(k)) {
           matchType(example[key], subject[k], errors, path + '.' + k)

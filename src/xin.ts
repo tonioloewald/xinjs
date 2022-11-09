@@ -55,7 +55,7 @@ const regHandler = (path = ''): ProxyHandler => ({
       return target
     }
     if (prop.startsWith('[') && prop.endsWith(']')) {
-      prop = prop.substr(1, prop.length - 2)
+      prop = prop.substring(1, prop.length - 1)
     }
     if (
       (!Array.isArray(target) && target[prop] !== undefined) ||

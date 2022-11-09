@@ -17,3 +17,16 @@ export interface XinBinding {
   toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
   fromDOM?: (element: HTMLElement) => any
 }
+
+export interface ElementProps {
+  onClick?: (evt: MouseEvent) => void
+  onInput?: (evt: Event) => void
+  onChange?: (evt: Event) => void
+  onSubmit?: (evt: Event) => void
+  [key: string]: any
+}
+
+export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
+export type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement
+export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
+export type ElementCreator = HTMLElementCreator | FragmentCreator

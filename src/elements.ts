@@ -1,18 +1,6 @@
 import { bind } from './bind'
 import { bindings } from './bindings'
-
-interface ElementProps {
-  onClick?: (evt: MouseEvent) => void
-  onInput?: (evt: Event) => void
-  onChange?: (evt: Event) => void
-  onSubmit?: (evt: Event) => void
-  [key: string]: any
-}
-
-type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
-export type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement
-export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
-export type ElementCreator = HTMLElementCreator | FragmentCreator
+import { ElementPart, ElementCreator } from '../src/xin-types'
 
 const templates: { [key: string]: HTMLElement } = {}
 
@@ -22,15 +10,15 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
   }
   const elt = templates[tagType].cloneNode() as HTMLElement
   for (const item of contents) {
-    if (item instanceof HTMLElement || typeof item === 'string' || typeof item === 'number') {
+    if (item instanceof HTMLElement || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
       if (elt instanceof HTMLTemplateElement) {
         elt.content.append(item as Node)
       } else {
         elt.append(item as Node)
       }
     } else {
-      for (const key of Object.keys(item as ElementProps)) {
-        const value = (item as ElementProps)[key]
+      for (const key of Object.keys(item)) {
+        const value = (item)[key]
         if (key === 'apply') {
           value(elt)
         } else if (key === 'style') {

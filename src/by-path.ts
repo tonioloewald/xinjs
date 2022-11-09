@@ -5,7 +5,7 @@ import { makeError } from './make-error'
 
 const now36 = (): string => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1)
 let _seq = 0
-const seq = (): string => (parseInt('10000', 36) + (++_seq)).toString(36).substr(-5)
+const seq = (): string => (parseInt('10000', 36) + (++_seq)).toString(36).slice(-5)
 const id = (): string => now36() + seq()
 
 const _delete_ = {}
@@ -29,18 +29,18 @@ function pathParts (path: string | PartArray): PartArray {
         parts.push(path.split('.'))
         break
       } else {
-        const part = path.substr(0, index)
-        path = path.substr(index)
+        const part = path.slice(0, index)
+        path = path.slice(index)
         if (part !== '') {
           parts.push(part.split('.'))
         }
         index = path.indexOf(']') + 1
-        parts.push(path.substr(1, index - 2))
+        parts.push(path.slice(1, index - 1))
         // handle paths dereferencing array element like foo[0].id
-        if (path.substr(index, 1) === '.') {
+        if (path.slice(index, index + 1) === '.') {
           index += 1
         }
-        path = path.substr(index)
+        path = path.slice(index)
       }
     }
     return parts
@@ -148,7 +148,7 @@ function getByPath (obj: XinObject, path: string): any {
     } else {
       if (found.length === 0) {
         if (part[0] === '=') {
-          found = found[part.substr(1)]
+          found = found[part.slice(1)]
         } else {
           return undefined
         }
@@ -178,8 +178,8 @@ function setByPath (orig: XinObject, path: string, val: any): boolean {
         } else {
           expectArray(obj)
         }
-        const idPath = part.substr(0, equalsOffset)
-        const idValue = part.substr(equalsOffset + 1)
+        const idPath = part.slice(0, equalsOffset)
+        const idValue = part.slice(equalsOffset + 1)
         obj = byIdPath(obj as any[], idPath, idValue, (parts.length > 0) ? _newObject_ : val)
         if (parts.length === 0) {
           return true
