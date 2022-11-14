@@ -1131,6 +1131,65 @@ const bindings = {
     }
 };
 
+const hyphenated = (s) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+const css = (obj) => {
+    const selectors = Object.keys(obj).map((selector) => {
+        const body = obj[selector];
+        const rule = Object.keys(body)
+            .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
+            .join('\n');
+        return `${selector} {\n${rule}\n}`;
+    });
+    return selectors.join('\n\n');
+};
+
+function deepClone(obj) {
+    if (obj == null || typeof obj !== 'object') {
+        return obj;
+    }
+    const clone = {};
+    for (const key in obj) {
+        const val = obj[key];
+        if (obj != null && typeof obj === 'object') {
+            clone[key] = deepClone(val);
+        }
+        else {
+            clone[key] = val;
+        }
+    }
+    return clone;
+}
+
+const dispatch = (target, type) => {
+    const event = new Event(type);
+    target.dispatchEvent(event);
+};
+/* global ResizeObserver */
+const resizeObserver = new ResizeObserver(entries => {
+    for (const entry of entries) {
+        const element = entry.target;
+        dispatch(element, 'resize');
+    }
+});
+const appendContentToElement = (elt, content) => {
+    if (content != null) {
+        if (typeof content === 'string') {
+            elt.textContent = content;
+        }
+        else if (Array.isArray(content)) {
+            content.forEach(node => {
+                elt.append(node instanceof HTMLElement ? node.cloneNode(true) : node);
+            });
+        }
+        else if (content instanceof HTMLElement) {
+            elt.append(content.cloneNode(true));
+        }
+        else {
+            throw new Error('expect text content or document node');
+        }
+    }
+};
+
 const templates = {};
 const create = (tagType, ...contents) => {
     if (templates[tagType] === undefined) {
@@ -1184,7 +1243,12 @@ const create = (tagType, ...contents) => {
                 }
                 else {
                     const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
-                    if (typeof value === 'boolean') {
+                    // @ts-expect-error-error
+                    if (elt[attr] !== undefined) {
+                        // @ts-expect-error-error
+                        elt[attr] = value;
+                    }
+                    else if (typeof value === 'boolean') {
                         value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr);
                     }
                     else {
@@ -1220,47 +1284,6 @@ const elements = new Proxy(_elements, {
     }
 });
 
-const dispatch = (target, type) => {
-    const event = new Event(type);
-    target.dispatchEvent(event);
-};
-/* global ResizeObserver */
-const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-        const element = entry.target;
-        dispatch(element, 'resize');
-    }
-});
-const appendContentToElement = (elt, content) => {
-    if (content != null) {
-        if (typeof content === 'string') {
-            elt.textContent = content;
-        }
-        else if (Array.isArray(content)) {
-            content.forEach(node => {
-                // @ts-expect-error-error
-                elt.appendChild(node instanceof HTMLElement ? node.cloneNode(true) : node);
-            });
-        }
-        else if (content instanceof HTMLElement) {
-            elt.appendChild(content.cloneNode(true));
-        }
-        else {
-            throw new Error('expect text content or document node');
-        }
-    }
-};
-const hyphenated = (s) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
-const css = (obj) => {
-    const selectors = Object.keys(obj).map((selector) => {
-        const body = obj[selector];
-        const rule = Object.keys(body)
-            .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
-            .join('\n');
-        return `${selector} {\n${rule}\n}`;
-    });
-    return selectors.join('\n\n');
-};
 const defaultSpec = {
     superClass: HTMLElement,
     methods: {},
@@ -1269,24 +1292,8 @@ const defaultSpec = {
     attributes: {},
     content: elements.slot()
 };
-function deepClone(obj) {
-    if (typeof obj !== 'object') {
-        return obj;
-    }
-    const clone = {};
-    for (const key in obj) {
-        const val = obj[key];
-        if (obj != null && typeof obj === 'object') {
-            clone[key] = deepClone(val);
-        }
-        else {
-            clone[key] = val;
-        }
-    }
-    return clone;
-}
 const makeWebComponent = (tagName, spec) => {
-    const { superClass, style, methods, eventHandlers, props, attributes, content, role, value, bindValue } = Object.assign({}, defaultSpec, spec);
+    const { superClass, style, methods, eventHandlers, props, attributes, content, role, value, bindValue, childListChange } = Object.assign({}, defaultSpec, spec);
     let styleNode;
     if (style !== undefined) {
         const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style));
@@ -1298,21 +1305,22 @@ const makeWebComponent = (tagName, spec) => {
             this._initialized = false;
             this._changeQueued = false;
             this._renderQueued = false;
+            this._hydrated = false;
             if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
                 throw new Error('do not define an attribute named "value"; define value directly instead');
             }
             if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
                 throw new Error('do not define a prop named "value"; define value directly instead');
             }
-            if (value !== undefined) {
-                this._value = deepClone(value);
-            }
-            if (bindValue !== undefined) {
-                this.bindValue = (path) => {
-                    bind(this, path, bindings.value);
-                    bindValue.call(this, path);
-                };
-            }
+            this.initAttributes();
+            this.initProps();
+            this.initValue();
+            this.initEventHandlers();
+            this.initRefs();
+            this.queueRender();
+            this._initialized = true;
+        }
+        initProps() {
             for (const prop of Object.keys(props)) {
                 let propVal = deepClone(props[prop]);
                 if (typeof propVal !== 'function') {
@@ -1347,6 +1355,8 @@ const makeWebComponent = (tagName, spec) => {
                     });
                 }
             }
+        }
+        initRefs() {
             // eslint-disable-next-line
             const self = this;
             this.elementRefs = new Proxy({}, {
@@ -1364,23 +1374,18 @@ const makeWebComponent = (tagName, spec) => {
                     throw new Error('elementRefs is read-only');
                 }
             });
-            if (styleNode !== undefined) {
-                const shadow = this.attachShadow({ mode: 'open' });
-                shadow.appendChild(styleNode.cloneNode(true));
-                appendContentToElement(shadow, content);
-            }
-            else {
-                appendContentToElement(this, content);
-            }
+        }
+        initEventHandlers() {
             Object.keys(eventHandlers).forEach(eventType => {
                 const passive = eventType.startsWith('touch') ? { passive: true } : false;
                 this.addEventListener(eventType, eventHandlers[eventType].bind(this), passive);
             });
-            if (eventHandlers.childListChange !== undefined) {
-                // @ts-expect-error
-                const observer = new MutationObserver(eventHandlers.childListChange.bind(this));
+            if (childListChange !== undefined) {
+                const observer = new MutationObserver(childListChange.bind(this));
                 observer.observe(this, { childList: true });
             }
+        }
+        initAttributes() {
             const attributeNames = Object.keys(attributes);
             if (attributeNames.length > 0) {
                 const attributeValues = {};
@@ -1451,8 +1456,17 @@ const makeWebComponent = (tagName, spec) => {
                     });
                 });
             }
-            this.queueRender();
-            this._initialized = true;
+        }
+        initValue() {
+            if (value !== undefined) {
+                this._value = deepClone(value);
+            }
+            if (bindValue !== undefined) {
+                this.bindValue = (path) => {
+                    bind(this, path, bindings.value);
+                    bindValue.call(this, path);
+                };
+            }
         }
         get value() {
             return this._value;
@@ -1461,6 +1475,19 @@ const makeWebComponent = (tagName, spec) => {
             if (newValue !== undefined && (typeof newValue === 'object' || newValue !== this._value)) {
                 this._value = newValue;
                 this.queueRender(true);
+            }
+        }
+        hydrate() {
+            if (!this._hydrated) {
+                if (styleNode !== undefined) {
+                    const shadow = this.attachShadow({ mode: 'open' });
+                    shadow.appendChild(styleNode.cloneNode(true));
+                    appendContentToElement(shadow, content);
+                }
+                else {
+                    appendContentToElement(this, content);
+                }
+                this._hydrated = true;
             }
         }
         queueRender(change = false) {
@@ -1483,6 +1510,7 @@ const makeWebComponent = (tagName, spec) => {
             }
         }
         connectedCallback() {
+            this.hydrate();
             // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
             if (role !== undefined && role !== '')
                 this.setAttribute('role', role);
@@ -1501,6 +1529,7 @@ const makeWebComponent = (tagName, spec) => {
                 spec.disconnectedCallback.call(this);
         }
         render() {
+            this.hydrate();
             if (spec.render != null)
                 spec.render.call(this);
         }

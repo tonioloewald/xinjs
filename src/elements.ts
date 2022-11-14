@@ -47,7 +47,12 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
           }
         } else {
           const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
-          if (typeof value === 'boolean') {
+
+          // @ts-expect-error-error
+          if (elt[attr] !== undefined) {
+            // @ts-expect-error-error
+            elt[attr] = value
+          } else if (typeof value === 'boolean') {
             value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr)
           } else {
             elt.setAttribute(attr, value)

@@ -49,13 +49,13 @@ export const labeledInput = makeWebComponent('labeled-input', {
   },
   render() {
     const {field, label} = this.elementRefs
-    if (this.type) {
+    if (this.type !== '') {
       field.setAttribute('type', this.type)
     } else {
       field.removeAttribute('type')
     }
     label.style.flexDirection = ['radio', 'checkbox'].includes(this.type) ? 'row-reverse' : ''
-    if (this.placeholder) {
+    if (this.placeholder !== '') {
       field.setAttribute('placeholder', this.placeholder)
     } else {
       field.removeAttribute('placeholder')

@@ -28,14 +28,14 @@ export class WordList {
     }
     let filtered = this.words.filter(word => word.length >= this.minLength)
     if (this.mustContain) {
-      filtered = filtered.filter(word => word.includes(this.mustContain))
+      filtered = filtered.filter(word => word.includes(this.mustContain.toLocaleLowerCase()))
     }
     if (this.letters) {
-      const regex = new RegExp(`^[${this.letters}]+$`)
+      const regex = new RegExp(`^[${this.letters.toLocaleLowerCase()}]+$`)
       if (this.reuseLetters) {
         filtered = filtered.filter(word => regex.test(word))
       } else {
-        const maxCounts = countLetters(this.letters)
+        const maxCounts = countLetters(this.letters.toLocaleLowerCase())
         filtered = filtered.filter(word => {
           if (!regex.test(word)) {
             return false

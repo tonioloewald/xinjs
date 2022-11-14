@@ -1,8 +1,8 @@
-import { xin, touch, elements, hotReload, settings, matchType, bind } from '../src/index'
+import { xin, touch, elements, hotReload, settings, matchType } from '../src/index'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
-import { babylon3d } from './components/babylon3d'
+import { b3d, bSphere, bLoader, bButton } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
 import './base-style'
 import logo from '../xinjs-logo.svg'
@@ -18,7 +18,7 @@ console.time('total')
 
 settings.perf = true
 
-const {img, h1, div, span, style, button} = elements
+const {img, h1, div, span, style, button, input} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
@@ -138,7 +138,15 @@ document.body.append(div(
       markdownViewer({src: readmeMd, style: { padding: '20px 40px'}, dataRoute: 'read-me'}),
       arrayBindingTest({dataRoute: 'array-binding', hidden: true}),
       wordSearch({dataRoute: 'word-search', hidden: true}),
-      babylon3d({dataRoute: 'babylon-3d', hidden: true})
+      b3d(
+        {dataRoute: 'babylon-3d', hidden: true},
+        bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
+        bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
+        bLoader({scale: 0.5}),
+        bButton({caption: 'xinjs rules', x: -2, y: 1.5, action: () => {
+          alert('yes it does!')
+        }})
+      )
     )
   ),
   settingsDialog(),

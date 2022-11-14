@@ -21,13 +21,22 @@ without using `innerHTML` or other unsafe methods.
 so `elements.foo` is a function that returns a `<foo>` element.
 
 The arguments of the factory functions can be strings, numbers, other
-elements, or property-maps, which are converted into attributes.
+elements, or property-maps, which are converted into attributes or properties.
 
 E.g.
 
     const {span} = elements
     span('foo')                   // produces <span>foo</foo>
     span('bar', {class: 'foo'})   // produces <span class="foo">bar</span>
+    button('click me', {
+      onclick() {
+        alert('you clicked me')
+      }
+    })                            // creates a button with an event handler
+    input({
+      type: 'checkbox', 
+      checked: true
+    })                            // produces a checked checkbox
 
 ## camelCase conversion
 

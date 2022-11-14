@@ -1,15 +1,10 @@
 import { bind } from './bind'
 import { bindings } from './bindings'
+import { css, StyleMap } from './css'
+import { deepClone } from './deep-clone'
+import { appendContentToElement, ContentType, dispatch, resizeObserver } from './dom'
 import { elements } from './elements'
 import { XinObject, ElementCreator } from './xin-types'
-
-interface StyleRule {
-  [key: string]: string | number
-}
-
-interface StyleMap {
-  [key: string]: StyleRule
-}
 
 interface FunctionMap {
   [key: string]: Function
@@ -25,66 +20,21 @@ interface PropMap {
   [key: string]: any
 }
 
-type ContentPart = HTMLElement | DocumentFragment | string
-type ContentType = ContentPart | ContentPart[]
-
 interface WebComponentSpec {
   superClass?: typeof HTMLElement
   style?: StyleMap
   methods?: FunctionMap
-  render?: () => void
+  render?: VoidFunction
   bindValue?: (path: string) => void
-  connectedCallback?: () => void
-  disconnectedCallback?: () => void
+  connectedCallback?: VoidFunction
+  disconnectedCallback?: VoidFunction
+  childListChange?: MutationCallback
   eventHandlers?: EventHandlerMap
   props?: PropMap
   attributes?: PropMap
   content?: ContentType | null
   role?: string
   value?: any
-}
-
-export const dispatch = (target: Element, type: string): void => {
-  const event = new Event(type)
-  target.dispatchEvent(event)
-}
-
-/* global ResizeObserver */
-const resizeObserver = new ResizeObserver(entries => {
-  for (const entry of entries) {
-    const element = entry.target
-    dispatch(element, 'resize')
-  }
-})
-
-const appendContentToElement = (elt: Element | ShadowRoot, content: ContentType): void => {
-  if (content != null) {
-    if (typeof content === 'string') {
-      elt.textContent = content
-    } else if (Array.isArray(content)) {
-      content.forEach(node => {
-        // @ts-expect-error-error
-        elt.appendChild(node instanceof HTMLElement ? node.cloneNode(true) : node)
-      })
-    } else if (content instanceof HTMLElement) {
-      elt.appendChild(content.cloneNode(true))
-    } else {
-      throw new Error('expect text content or document node')
-    }
-  }
-}
-
-const hyphenated = (s: string): string => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
-
-const css = (obj: StyleMap): string => {
-  const selectors = Object.keys(obj).map((selector) => {
-    const body = obj[selector]
-    const rule = Object.keys(body)
-      .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
-      .join('\n')
-    return `${selector} {\n${rule}\n}`
-  })
-  return selectors.join('\n\n')
 }
 
 const defaultSpec = {
@@ -94,23 +44,6 @@ const defaultSpec = {
   props: {},
   attributes: {},
   content: elements.slot()
-}
-
-type Scalar = string | boolean | number | Function
-function deepClone (obj: XinObject | Scalar): XinObject | Scalar {
-  if (typeof obj !== 'object') {
-    return obj
-  }
-  const clone: XinObject = {}
-  for (const key in obj) {
-    const val = obj[key]
-    if (obj != null && typeof obj === 'object') {
-      clone[key] = deepClone(val) as XinObject
-    } else {
-      clone[key] = val
-    }
-  }
-  return clone
 }
 
 export const makeWebComponent = (tagName: string, spec: WebComponentSpec): ElementCreator => {
@@ -124,7 +57,8 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     content,
     role,
     value,
-    bindValue
+    bindValue,
+    childListChange
   } = Object.assign({}, defaultSpec, spec)
   let styleNode: HTMLStyleElement
   if (style !== undefined) {
@@ -136,28 +70,13 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     _initialized: boolean = false
     _changeQueued: boolean = false
     _renderQueued: boolean = false
+    _hydrated: boolean = false
+    // @ts-expect-error-error
     elementRefs: { [key: string]: HTMLElement }
     _value?: any
     bindValue?: (path: string) => void
 
-    constructor () {
-      super()
-      if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
-        throw new Error('do not define an attribute named "value"; define value directly instead')
-      }
-      if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
-        throw new Error('do not define a prop named "value"; define value directly instead')
-      }
-      if (value !== undefined) {
-        this._value = deepClone(value)
-      }
-      if (bindValue !== undefined) {
-        this.bindValue = (path: string) => {
-          bind(this, path, bindings.value)
-          bindValue.call(this, path)
-        }
-      }
-
+    initProps (): void {
       for (const prop of Object.keys(props)) {
         let propVal = deepClone(props[prop])
         if (typeof propVal !== 'function') {
@@ -190,6 +109,9 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
           })
         }
       }
+    }
+
+    initRefs (): void {
       // eslint-disable-next-line
       const self = this
       this.elementRefs = new Proxy({}, {
@@ -206,22 +128,21 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
           throw new Error('elementRefs is read-only')
         }
       })
-      if (styleNode !== undefined) {
-        const shadow = this.attachShadow({ mode: 'open' })
-        shadow.appendChild(styleNode.cloneNode(true))
-        appendContentToElement(shadow, content)
-      } else {
-        appendContentToElement(this, content)
-      }
+    }
+
+    initEventHandlers (): void {
       Object.keys(eventHandlers).forEach(eventType => {
         const passive = eventType.startsWith('touch') ? { passive: true } : false
         this.addEventListener(eventType, eventHandlers[eventType].bind(this), passive)
       })
-      if (eventHandlers.childListChange !== undefined) {
-        // @ts-expect-error
-        const observer = new MutationObserver(eventHandlers.childListChange.bind(this))
+
+      if (childListChange !== undefined) {
+        const observer = new MutationObserver(childListChange.bind(this))
         observer.observe(this, { childList: true })
       }
+    }
+
+    initAttributes (): void {
       const attributeNames = Object.keys(attributes)
       if (attributeNames.length > 0) {
         const attributeValues = {}
@@ -284,7 +205,41 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
           })
         })
       }
+    }
+
+    initValue (): void {
+      if (value !== undefined) {
+        this._value = deepClone(value)
+      }
+      if (bindValue !== undefined) {
+        this.bindValue = (path: string) => {
+          bind(this, path, bindings.value)
+          bindValue.call(this, path)
+        }
+      }
+    }
+
+    constructor () {
+      super()
+      if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+        throw new Error('do not define an attribute named "value"; define value directly instead')
+      }
+      if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+        throw new Error('do not define a prop named "value"; define value directly instead')
+      }
+
+      this.initAttributes()
+
+      this.initProps()
+
+      this.initValue()
+
+      this.initEventHandlers()
+
+      this.initRefs()
+
       this.queueRender()
+
       this._initialized = true
     }
 
@@ -296,6 +251,19 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
       if (newValue !== undefined && (typeof newValue === 'object' || newValue !== this._value)) {
         this._value = newValue
         this.queueRender(true)
+      }
+    }
+
+    hydrate (): void {
+      if (!this._hydrated) {
+        if (styleNode !== undefined) {
+          const shadow = this.attachShadow({ mode: 'open' })
+          shadow.appendChild(styleNode.cloneNode(true))
+          appendContentToElement(shadow, content)
+        } else {
+          appendContentToElement(this, content)
+        }
+        this._hydrated = true
       }
     }
 
@@ -318,6 +286,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     }
 
     connectedCallback (): void {
+      this.hydrate()
       // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
       if (role !== undefined && role !== '') this.setAttribute('role', role)
       if (eventHandlers.resize !== undefined) {
@@ -335,6 +304,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     }
 
     render (): void {
+      this.hydrate()
       if (spec.render != null) spec.render.call(this)
     }
 
