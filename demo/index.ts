@@ -2,7 +2,7 @@ import { xin, touch, elements, hotReload, settings, matchType } from '../src/ind
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
-import { b3d, bSphere, bLoader, bButton } from './components/babylon3d'
+import { b3d, bSphere, bLoader, bButton, bLight, bSun } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
 import './base-style'
 import logo from '../xinjs-logo.svg'
@@ -145,7 +145,9 @@ document.body.append(div(
         bLoader({scale: 0.5}),
         bButton({caption: 'xinjs rules', x: -2, y: 1.5, action: () => {
           alert('yes it does!')
-        }})
+        }}),
+        bLight({y: 1, z: 0.5, intensity: 0.5, diffuse: [0.5,0.5,1]}),
+        bSun()
       )
     )
   ),
