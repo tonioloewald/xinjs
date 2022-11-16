@@ -3,7 +3,7 @@ import { bindings } from './bindings'
 import { css, StyleMap } from './css'
 import { deepClone } from './deep-clone'
 import { appendContentToElement, ContentType, dispatch, resizeObserver } from './dom'
-import { elements } from './elements'
+import { elements, camelToKabob, kabobToCamel } from './elements'
 import { XinObject, ElementCreator } from './xin-types'
 
 interface FunctionMap {
@@ -150,23 +150,24 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
           let triggerRender = false
           mutationsList.forEach((mutation) => {
             // eslint-disable-next-line
-            triggerRender = !!(mutation.attributeName && attributeNames.includes(mutation.attributeName))
+            triggerRender = !!(mutation.attributeName && attributeNames.includes(kabobToCamel(mutation.attributeName)))
           })
           if (triggerRender && this.queueRender !== undefined) this.queueRender(false)
         })
         observer.observe(this, { attributes: true })
         attributeNames.forEach(attributeName => {
+          const attributeKabob = camelToKabob(attributeName)
           Object.defineProperty(this, attributeName, {
             enumerable: false,
             get () {
               if (typeof attributes[attributeName] === 'boolean') {
-                return this.hasAttribute(attributeName)
+                return this.hasAttribute(attributeKabob)
               } else {
                 // eslint-disable-next-line
-                if (this.hasAttribute(attributeName)) {
+                if (this.hasAttribute(attributeKabob)) {
                   return typeof attributes[attributeName] === 'number'
-                    ? parseFloat(this.getAttribute(attributeName))
-                    : this.getAttribute(attributeName)
+                    ? parseFloat(this.getAttribute(attributeKabob))
+                    : this.getAttribute(attributeKabob)
                 // @ts-expect-error
                 } else if (attributeValues[attributeName] !== undefined) {
                 // @ts-expect-error
@@ -181,21 +182,21 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
                 if (value !== this[attributeName]) {
                   // eslint-disable-next-line
                   if (value) {
-                    this.setAttribute(attributeName, '')
+                    this.setAttribute(attributeKabob, '')
                   } else {
-                    this.removeAttribute(attributeName)
+                    this.removeAttribute(attributeKabob)
                   }
                 }
               } else if (typeof attributes[attributeName] === 'number') {
                 if (value !== parseFloat(this[attributeName])) {
-                  this.setAttribute(attributeName, value)
+                  this.setAttribute(attributeKabob, value)
                 }
               } else {
                 if (typeof value === 'object' || `${value as string}` !== `${this[attributeName] as string}`) {
                   if (value === null || value === undefined || typeof value === 'object') {
-                    this.removeAttribute(attributeName)
+                    this.removeAttribute(attributeKabob)
                   } else {
-                    this.setAttribute(attributeName, value)
+                    this.setAttribute(attributeKabob, value)
                   }
                   // @ts-expect-error
                   attributeValues[attributeName] = value

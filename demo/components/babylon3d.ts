@@ -28,17 +28,50 @@ export const b3d = makeWebComponent('b-3d', {
       height: '100%'
     }
   },
+  attributes: {
+    glowLayerIntensity: 0,
+    frameRate: 5
+  },
   props: {
     BABYLON,
     engine: null,
     scene: null,
     camera: null,
     gui: null,
+    shadowGenerators: [],
+    renderInterval: null
   },
   content: [
     canvas({dataRef: 'canvas'}),
     slot()
   ],
+  methods: {
+    async addShadowGenerator(generator: BABYLON.ShadowGenerator) {
+      if (!this.shadowGenerators.includes(generator)) {
+        this.shadowGenerators.push(generator)
+        this.processMeshes(...this.scene.meshes)
+      }
+    },
+    async removeShadowGenerator(generator: BABYLON.ShadowGenerator) {
+      const idx = this.shadowGenerators.findIndex(generator)
+      if (idx > -1) {
+        this.shadowGenerators.splice(idx, 1)
+      }
+    },
+    async processMeshes(...meshes: BABYLON.Mesh[]) {
+      for (const mesh of meshes) {
+        for(const generator of this.shadowGenerators) {
+          generator.addShadowCaster(mesh)
+        }
+      }
+    },
+    renderFrame() {
+      if(this.scene) {
+        this.scene.render()
+        setTimeout(() => this.renderFrame(), 1000 / this.frameRate)
+      }
+    }
+  },
   eventHandlers: {
     resize() {
       this.engine.resize()
@@ -53,9 +86,18 @@ export const b3d = makeWebComponent('b-3d', {
     this.camera.setTarget(BABYLON.Vector3.Zero())
     this.camera.attachControl(canvas, false)
     
-    this.engine.runRenderLoop(() => {
-      this.scene.render()
-    })    
+    this.renderFrame()  
+  },
+  render() {
+    if (this.glowLayerIntensity > 0) {
+      if (!this.glowLayer) {
+        this.glowLayer = new BABYLON.GlowLayer("glow", this.scene)
+      }
+      this.glowLayer.intensity = this.glowLayerIntensity
+    } else if (this.glowLayer) {
+      this.glowLayer.dispose()
+      this.glowLayer = null
+    }
   }
 })
 
@@ -72,6 +114,7 @@ export const bSphere = makeWebComponent('b-sphere', {
   props: {
     owner: null,
     mesh: null,
+    receiveShadows: true
   },
   connectedCallback () {
     this.owner = this.closest('b-3d')
@@ -81,7 +124,8 @@ export const bSphere = makeWebComponent('b-sphere', {
         segments,
         diameter,
         updatable
-      }, this.owner.scene);
+      }, this.owner.scene)
+      this.owner.processMeshes(this.mesh)
     }
   },
   disconnectedCallback () {
@@ -94,6 +138,7 @@ export const bSphere = makeWebComponent('b-sphere', {
       this.mesh.position.x = this.x
       this.mesh.position.y = this.y
       this.mesh.position.z = this.z
+      this.mesh.receiveShadows = this.receiveShadows
     }
   }
 })
@@ -110,7 +155,8 @@ export const bGround = makeWebComponent('b-ground', {
   },
   props: {
     owner: null,
-    mesh: null
+    mesh: null,
+    receiveShadows: true,
   },
   connectedCallback () {
     this.owner = this.closest('b-3d')
@@ -121,6 +167,7 @@ export const bGround = makeWebComponent('b-ground', {
         height,
         updatable
       }, this.owner.scene);
+      this.owner.processMeshes(this.mesh)
     }
   },
   disconnectedCallback () {
@@ -135,6 +182,7 @@ export const bGround = makeWebComponent('b-ground', {
       this.mesh.position.x = this.x
       this.mesh.position.y = this.y
       this.mesh.position.z = this.z
+      this.mesh.receiveShadows = this.receiveShadows
     }
   }
 })
@@ -148,7 +196,32 @@ export const bLoader = makeWebComponent('b-loader', {
   },
   props: {
     owner: null,
-    meshes: [] as BABYLON.Mesh[]
+    meshes: [] as BABYLON.Mesh[],
+    reflective: [],
+    probes: [],
+    receiveShadows: true
+  },
+  methods: {
+    makeReflective(mesh: BABYLON.Mesh) {
+      const material = mesh.material
+      if (material != null) {
+        const probe = new BABYLON.ReflectionProbe("main", 512, this.owner.scene)
+        try {
+          probe.attachToMesh(mesh)
+          for(const reflected of this.owner.scene.meshes) {
+            if (reflected !== mesh) {
+              probe.renderList?.push(reflected)
+            }
+          }
+          material.reflectionTexture = probe.cubeTexture
+          material.reflectionFresnelParameters = new BABYLON.FresnelParameters()
+          material.reflectionFresnelParameters.bias = 0.02
+          this.probes.push(probe)
+        } catch (e) {
+          console.log(e)
+        }
+      }
+    }
   },
   connectedCallback() {
     this.owner = this.closest('b-3d')
@@ -160,8 +233,13 @@ export const bLoader = makeWebComponent('b-loader', {
         for(const mesh of loaded.meshes) {
           if (!existingMeshes.includes(mesh)) {
             this.meshes.push(mesh)
+            mesh.receiveShadows = this.receiveShadows
+            if (this.reflective.includes(mesh.name)) {
+              this.makeReflective(mesh)
+            }
           }
         }
+        this.owner.processMeshes(...this.meshes)
       })
     }
   },
@@ -170,7 +248,11 @@ export const bLoader = makeWebComponent('b-loader', {
       for(const mesh of this.meshes) {
         mesh.dispose()
       }
+      for(const probe of this.probes) {
+        probe.dispose()
+      }
       this.meshes.splice(0)
+      this.probes.splice(0)
       this.owner = null
     }
   }
@@ -279,6 +361,7 @@ export const bSun = makeWebComponent('b-sun', {
     shadowMaxZ: 10,
     shadowMinZ: 0.01,
     shadowDarkness: 0.1,
+    shadowTextureSize: 1024,
     x: 0,
     y: -1,
     z: -0.5,
@@ -288,21 +371,30 @@ export const bSun = makeWebComponent('b-sun', {
     sun: null,
     shadowGenerator: null
   },
-  methods: {
-    addMeshes() {
-      if (this.owner != null && this.sun !== null) {
-        for(const mesh of this.owner.scene.meshes) {
-          this.shadowGenerator.addShadowCaster(mesh);
-          mesh.receiveShadows = true;
-        }
-      }
-    },
-  },
   connectedCallback() {
     this.owner = this.closest('b-3d')
     if (this.owner) {
       const sun = new BABYLON.DirectionalLight(this.name, new BABYLON.Vector3(this.x, this.y, this.z), this.owner.scene)
-      const shadowGenerator = new BABYLON.ShadowGenerator(1024, sun)
+      const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, sun)
+      this.sun = sun
+      this.shadowGenerator = shadowGenerator
+      this.owner.addShadowGenerator(this.shadowGenerator)
+    }
+  },
+  disconnectedCallback() {
+    if (this.sun != null) {
+      this.sun.dispose()
+      this.owner.removeShadowGenerator(this.shadowGenerator)
+      this.sun = null
+      this.shadowGenerator = null
+    }
+  },
+  render () {
+    if (this.sun != null) {
+      const {sun, shadowGenerator} = this
+      sun.direction.x = this.x
+      sun.direction.y = this.y
+      sun.direction.z = this.z
       shadowGenerator.bias = this.bias
       shadowGenerator.normalBias = this.normalBias
       sun.shadowMaxZ = this.shadowMaxZ
@@ -310,25 +402,6 @@ export const bSun = makeWebComponent('b-sun', {
       shadowGenerator.useContactHardeningShadow = true
       shadowGenerator.contactHardeningLightSizeUVRatio = 0.05
       shadowGenerator.setDarkness(this.shadowDarkness)
-      this.sun = sun
-      this.shadowGenerator = shadowGenerator
-      this.addMeshes()
-      setInterval(() => this.addMeshes(), 500)
-    }
-  },
-  disconnectedCallback() {
-    if (this.sun != null) {
-      this.sun.dispose()
-      this.shadowGenerator.dispose()
-      this.sun = null
-      this.shadowGenerator = null
-    }
-  },
-  render () {
-    if (this.sun != null) {
-      this.sun.direction.x = this.x
-      this.sun.direction.y = this.y
-      this.sun.direction.z = this.z
     }
   }
 })

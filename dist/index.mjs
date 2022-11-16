@@ -1192,6 +1192,16 @@ const appendContentToElement = (elt, content) => {
 };
 
 const templates = {};
+function camelToKabob(s) {
+    return s.replace(/[A-Z]/g, (c) => {
+        return `-${c.toLocaleLowerCase()}`;
+    });
+}
+function kabobToCamel(s) {
+    return s.replace(/-([a-z])/g, (_, c) => {
+        return c.toLocaleUpperCase();
+    });
+}
 const create = (tagType, ...contents) => {
     if (templates[tagType] === undefined) {
         templates[tagType] = document.createElement(tagType);
@@ -1243,7 +1253,7 @@ const create = (tagType, ...contents) => {
                     }
                 }
                 else {
-                    const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+                    const attr = camelToKabob(key);
                     // @ts-expect-error-error
                     if (elt[attr] !== undefined) {
                         // @ts-expect-error-error
@@ -1394,25 +1404,26 @@ const makeWebComponent = (tagName, spec) => {
                     let triggerRender = false;
                     mutationsList.forEach((mutation) => {
                         // eslint-disable-next-line
-                        triggerRender = !!(mutation.attributeName && attributeNames.includes(mutation.attributeName));
+                        triggerRender = !!(mutation.attributeName && attributeNames.includes(kabobToCamel(mutation.attributeName)));
                     });
                     if (triggerRender && this.queueRender !== undefined)
                         this.queueRender(false);
                 });
                 observer.observe(this, { attributes: true });
                 attributeNames.forEach(attributeName => {
+                    const attributeKabob = camelToKabob(attributeName);
                     Object.defineProperty(this, attributeName, {
                         enumerable: false,
                         get() {
                             if (typeof attributes[attributeName] === 'boolean') {
-                                return this.hasAttribute(attributeName);
+                                return this.hasAttribute(attributeKabob);
                             }
                             else {
                                 // eslint-disable-next-line
-                                if (this.hasAttribute(attributeName)) {
+                                if (this.hasAttribute(attributeKabob)) {
                                     return typeof attributes[attributeName] === 'number'
-                                        ? parseFloat(this.getAttribute(attributeName))
-                                        : this.getAttribute(attributeName);
+                                        ? parseFloat(this.getAttribute(attributeKabob))
+                                        : this.getAttribute(attributeKabob);
                                     // @ts-expect-error
                                 }
                                 else if (attributeValues[attributeName] !== undefined) {
@@ -1429,25 +1440,25 @@ const makeWebComponent = (tagName, spec) => {
                                 if (value !== this[attributeName]) {
                                     // eslint-disable-next-line
                                     if (value) {
-                                        this.setAttribute(attributeName, '');
+                                        this.setAttribute(attributeKabob, '');
                                     }
                                     else {
-                                        this.removeAttribute(attributeName);
+                                        this.removeAttribute(attributeKabob);
                                     }
                                 }
                             }
                             else if (typeof attributes[attributeName] === 'number') {
                                 if (value !== parseFloat(this[attributeName])) {
-                                    this.setAttribute(attributeName, value);
+                                    this.setAttribute(attributeKabob, value);
                                 }
                             }
                             else {
                                 if (typeof value === 'object' || `${value}` !== `${this[attributeName]}`) {
                                     if (value === null || value === undefined || typeof value === 'object') {
-                                        this.removeAttribute(attributeName);
+                                        this.removeAttribute(attributeKabob);
                                     }
                                     else {
-                                        this.setAttribute(attributeName, value);
+                                        this.setAttribute(attributeKabob, value);
                                     }
                                     // @ts-expect-error
                                     attributeValues[attributeName] = value;

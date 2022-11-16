@@ -4,6 +4,18 @@ import { ElementPart, ElementCreator } from '../src/xin-types'
 
 const templates: { [key: string]: HTMLElement } = {}
 
+export function camelToKabob (s: string): string {
+  return s.replace(/[A-Z]/g, (c: string): string => {
+    return `-${c.toLocaleLowerCase()}`
+  })
+}
+
+export function kabobToCamel (s: string): string {
+  return s.replace(/-([a-z])/g, (_: string, c: string): string => {
+    return c.toLocaleUpperCase()
+  })
+}
+
 export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   if (templates[tagType] === undefined) {
     templates[tagType] = document.createElement(tagType)
@@ -46,7 +58,7 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
             throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`)
           }
         } else {
-          const attr = key.replace(/[A-Z]/g, c => '-' + c.toLowerCase())
+          const attr = camelToKabob(key)
 
           // @ts-expect-error-error
           if (elt[attr] !== undefined) {

@@ -7,6 +7,7 @@ import { wordSearch } from './WordSearch'
 import './base-style'
 import logo from '../xinjs-logo.svg'
 import readmeMd from '../readme.md'
+import scene from './b-frame-test.glb'
 
 /* global window, document */
 
@@ -139,15 +140,15 @@ document.body.append(div(
       arrayBindingTest({dataRoute: 'array-binding', hidden: true}),
       wordSearch({dataRoute: 'word-search', hidden: true}),
       b3d(
-        {dataRoute: 'babylon-3d', hidden: true},
+        {dataRoute: 'babylon-3d', hidden: true, glowLayerIntensity: 1},
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
         bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
-        bLoader({scale: 0.5}),
+        bLoader({url: scene, scale: 0.5, reflective: ['Cube.001']}),
         bButton({caption: 'xinjs rules', x: -2, y: 1.5, action: () => {
           alert('yes it does!')
         }}),
-        bLight({y: 1, z: 0.5, intensity: 0.5, diffuse: [0.5,0.5,1]}),
-        bSun()
+        bLight({y: 1, z: 0.5, intensity: 0.05, diffuse: [0.5,0.5,1]}),
+        bSun({shadowMinZ: 0.1, shadowMaxZ: 100, bias: 0.003, normalBias: 0.005, shadowTextureSize: 2048})
       )
     )
   ),
