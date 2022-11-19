@@ -1,4 +1,4 @@
-import {elements, makeWebComponent} from '../../src/index'
+import {makeWebComponent} from '../../src/index'
 
 export const toolBar = makeWebComponent('tool-bar', {
   style: {

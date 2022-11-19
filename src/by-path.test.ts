@@ -2,6 +2,7 @@
 // @ts-expect-error
 import { test, expect } from 'bun:test'
 import { getByPath, setByPath, deleteByPath } from './by-path'
+import { XinObject } from './xin-types'
 
 const obj = {
   foo: 17,
@@ -30,17 +31,22 @@ const obj = {
       }
     }
   ]
-}
+} as XinObject
 
 test('getByPath works', () => {
   expect(getByPath(obj, '')).toBe(obj)
   expect(getByPath(obj, 'foo')).toBe(17)
   expect(getByPath(obj, '[=foo]')).toBe(17)
+  // @ts-ignore-error
   expect(getByPath(obj, 'bar.baz')).toBe(obj.bar.baz)
   expect(getByPath(obj, 'movies')).toBe(obj.movies)
+  // @ts-ignore-error
   expect(getByPath(obj, 'movies[0]')).toBe(obj.movies[0])
+  // @ts-ignore-error
   expect(getByPath(obj, 'movieObjs[0]')).toBe(obj.movieObjs[0])
+  // @ts-ignore-error
   expect(getByPath(obj, 'movieObjs[id=123]')).toBe(obj.movieObjs[1])
+  // @ts-ignore-error
   expect(getByPath(obj, 'movieObjs[reviews.metaCritic=72]')).toBe(obj.movieObjs[0])
 })
 
@@ -48,8 +54,10 @@ test('setByPath works', () => {
   setByPath(obj, 'foo', -11)
   expect(obj.foo).toBe(-11)
   setByPath(obj, 'bar.baz', 'luhrman')
+  // @ts-ignore-error
   expect(obj.bar.baz).toBe('luhrman')
   ;(getByPath(obj, 'movies') as any[]).push('TBD')
+  // @ts-ignore-error
   expect(obj.movies.length).toBe(3)
   setByPath(obj, 'movies[2]', 'moulin rouge')
   expect(getByPath(obj, 'movies[2]')).toBe('moulin rouge')
@@ -80,7 +88,6 @@ test('setByPath does not change values that do not need changing', () => {
 
 test('setByPath adds properties to objects if needed', () => {
   setByPath(obj, 'pi', Math.PI)
-  // @ts-expect-error
   expect(obj.pi).toBe(Math.PI)
   setByPath(obj, 'deep.down.there', true)
   // @ts-expect-error
@@ -95,7 +102,9 @@ test('setByPath adds properties to objects if needed', () => {
 
 test('id-path edge cases, including deleteByPath', () => {
   const romeoPlusJuliet = getByPath(obj, 'movieObjs[id=17]')
+  // @ts-ignore-error
   expect(romeoPlusJuliet).toBe(obj.movieObjs[0])
+  // @ts-ignore-error
   expect(getByPath(obj, 'movieObjs[reviews.rottenTomatoes=73]')).toBe(obj.movieObjs[1])
   deleteByPath(obj, 'movieObjs[reviews.metaCritic=72]')
   expect(getByPath(obj, 'movieObjs[id=17]')).toBe(undefined)
@@ -109,8 +118,10 @@ test('id-path edge cases, including deleteByPath', () => {
     id: 777,
     name: 'australia'
   })
+  // @ts-ignore-error
   expect(obj.movieObjs.length).toBe(3)
   setByPath(obj, 'movieObjs[id=17]', romeoPlusJuliet)
+  // @ts-ignore-error
   expect(obj.movieObjs[3]).toBe(romeoPlusJuliet)
   setByPath(obj, 'movieObjs[id=777].reviews', {
     metaCritic: 53

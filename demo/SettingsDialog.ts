@@ -1,7 +1,7 @@
 import {elements} from '../src'
 import {labeledInput} from './components'
 
-const {form, dialog, h2, span, button } = elements
+const {form, dialog, h2, span, button, label } = elements
 
 export const settingsDialog = () => dialog(
     {
@@ -48,6 +48,23 @@ export const settingsDialog = () => dialog(
         placeholder: 'enter title',
         bindValue: 'app.title'
       }),
+      span(
+        {
+          style: {
+            marginTop: 'calc(var(--spacing) * 0.5)',
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }
+        },
+        span('Local Storage'),
+        span(' ', { style: {flex: '1 1 auto'}}),
+        button('Clear and Reload', {
+          onClick() {
+            localStorage.clear()
+            window.location.reload()
+          }
+        })
+      ),
       span(
         {
           style: {

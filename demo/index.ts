@@ -2,6 +2,7 @@ import { xin, touch, elements, hotReload, settings, matchType } from '../src/ind
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
+import { todo } from './components/todo'
 import { b3d, bSphere, bLoader, bButton, bLight, bSun } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
 import './base-style'
@@ -19,7 +20,7 @@ console.time('total')
 
 settings.perf = true
 
-const {img, h1, div, span, style, button, input} = elements
+const {img, h1, div, span, style, button} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
@@ -42,7 +43,7 @@ Object.assign(window, {
   touch
 })
 
-const routes = ['read-me', 'array-binding', 'word-search', 'babylon-3d']
+const routes = ['read-me', 'todo', 'array-binding', 'word-search', 'babylon-3d']
 
 function showRoute () {
   const route = location.search.substring(1).split('&').shift() || routes[0]
@@ -137,6 +138,7 @@ document.body.append(div(
         }
       },
       markdownViewer({src: readmeMd, style: { padding: '20px 40px'}, dataRoute: 'read-me'}),
+      todo({dataRoute: 'todo', hidden: true}),
       arrayBindingTest({dataRoute: 'array-binding', hidden: true}),
       wordSearch({dataRoute: 'word-search', hidden: true}),
       b3d(

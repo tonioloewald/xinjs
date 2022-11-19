@@ -51,17 +51,20 @@ labeled-value {
 
 label, input, button {
   font-size: var(--font-size);
-  background: var(--input-bg);
-  border: var(--input-border);
   padding: 0 var(--spacing);
   line-height: var(--line-height);
 }
 
-button:hover {
+input, button {
+  background: var(--input-bg);
+  border: var(--input-border);
+}
+
+button:not(:disabled):hover {
   background: var(--hover-bg);
 }
 
-button:active {
+button:not(:disabled):active {
   background: var(--active-bg);
 }
 
@@ -75,6 +78,16 @@ input {
 
 [hidden] {
   display: none !important;
+}
+
+code, pre {
+  font-family: Menlo, monaco, monospace;
+}
+
+pre {
+  background: var(--code-bg, #333);
+  color: var(--code-color, #eee);
+  borderRadius: 5px;
 }
 `
 

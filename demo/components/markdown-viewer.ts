@@ -8,15 +8,6 @@ export const markdownViewer = makeWebComponent('markdown-viewer', {
       display: 'block',
       background: 'var(--doc-bg)',
     },
-    '::slotted(a)': {
-      background: 'red'
-    },
-    '::slotted(code), ::slotted(pre)': {
-      background: 'var(--code-bg, #222)',
-      color: 'var(--code-color, #eee)',
-      borderRadius: '5px',
-      fontFamily: 'Menlo, monaco, monospace'
-    },
     '::slotted(blockquote), ::slotted(pre)': {
       padding: 'var(--spacing, 20px)'
     }

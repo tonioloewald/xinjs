@@ -1,7 +1,17 @@
-import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { XinProxyObject, XinProxy, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { settings } from './settings'
 import { Listener, touch, observe as _observe, unobserve, updates, observerShouldBeRemoved } from './path-listener'
 import { getByPath, setByPath } from './by-path'
+
+interface ProxyConstructor {
+  revocable: <T extends object, P extends object>(
+    target: T,
+    handler: ProxyHandler<P>,
+  ) => { proxy: P, revoke: () => void }
+  new <T extends object>(target: T, handler: ProxyHandler<T>): T
+  new <T extends object, P extends object>(target: T, handler: ProxyHandler<P>): P
+}
+declare let Proxy: ProxyConstructor
 
 // list of Array functions that change the array
 const ARRAY_MUTATIONS = ['sort', 'splice', 'copyWithin', 'fill', 'pop', 'push', 'reverse', 'shift', 'unshift']
@@ -24,15 +34,15 @@ const extendPath = (path = '', prop = ''): string => {
   }
 }
 
-interface ProxyHandler {
-  get: (target: XinObject, prop: string) => any
-  set: (target: XinObject, prop: string, newValue: any) => boolean
+interface XinProxyHandler {
+  get: (target: XinObject | XinArray, prop: string) => XinValue
+  set: (target: XinObject | XinArray, prop: string, newValue: XinValue) => boolean
 }
 
-const regHandler = (path = ''): ProxyHandler => ({
+const regHandler = (path = ''): XinProxyHandler => ({
   // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
   // as you'd expect
-  get (target: XinObject, _prop: string | symbol): any {
+  get (target: XinObject | XinArray, _prop: string | symbol): XinValue {
     if (typeof _prop === 'symbol') {
       // @ts-expect-error
       return target[_prop]
@@ -46,7 +56,7 @@ const regHandler = (path = ''): ProxyHandler => ({
       const [, basePath, subPath] = compoundProp
       const currentPath = extendPath(path, basePath)
       const value = getByPath(target, basePath)
-      return value !== null && typeof value === 'object' ? new Proxy(value, regHandler(currentPath))[subPath] : value
+      return value !== null && typeof value === 'object' ? new Proxy<XinObject, XinProxyObject>(value, regHandler(currentPath))[subPath] : value
     }
     if (prop === '_xinPath') {
       return path
@@ -61,28 +71,25 @@ const regHandler = (path = ''): ProxyHandler => ({
       (!Array.isArray(target) && target[prop] !== undefined) ||
       (Array.isArray(target) && prop.includes('='))
     ) {
-      let value
+      let value: XinValue
       if (prop.includes('=')) {
         const [idPath, needle] = prop.split('=')
-        value = (target as any[]).find(
-          // eslint-disable-next-line
-          (candidate: Object) => `${getByPath(candidate, idPath)}` === needle
+        value = (target as XinObject[]).find(
+          (candidate: XinObject) => `${getByPath(candidate, idPath) as string}` === needle
         )
       } else {
-        value = (target)[prop]
+        value = (target as XinArray)[prop as unknown as number]
       }
       if (value !== null && typeof value === 'object') {
         const currentPath = extendPath(path, prop)
-        const proxy: Object = new Proxy(value, regHandler(currentPath))
-        return proxy
+        return new Proxy<XinObject, XinProxyObject>(value, regHandler(currentPath)) as XinValue
       } else if (typeof value === 'function') {
         return value.bind(target)
       } else {
         return value
       }
     } else if (Array.isArray(target)) {
-      // @ts-expect-error -- we could be looking for an index, a property, or a method
-      const value = target[prop]
+      const value = target[prop as unknown as number]
       return typeof value === 'function'
         ? (...items: any[]) => {
             // @ts-expect-error
@@ -93,13 +100,13 @@ const regHandler = (path = ''): ProxyHandler => ({
             return result
           }
         : typeof value === 'object'
-          ? new Proxy(value, regHandler(extendPath(path, prop)))
+          ? new Proxy<XinProxyTarget, XinProxy>(value, regHandler(extendPath(path, prop)))
           : value
     } else {
       return target[prop]
     }
   },
-  set (target: Object, prop: string, value: any) {
+  set (_, prop: string, value: any) {
     // eslint-disable-next-line
     if (value?._xinPath) {
       value = value._xinValue
@@ -108,8 +115,8 @@ const regHandler = (path = ''): ProxyHandler => ({
     if (debugPaths && !isValidPath(fullPath)) {
       throw new Error(`setting invalid path ${fullPath}`)
     }
-    let existing = xin[fullPath]
-    if (existing?._xinValue != null) {
+    let existing: any = xin[fullPath]
+    if ((existing as XinProxy)?._xinValue != null) {
       existing = existing._xinValue
     }
     if (existing !== value && setByPath(registry, fullPath, value)) {
@@ -120,16 +127,16 @@ const regHandler = (path = ''): ProxyHandler => ({
 })
 
 const observe = (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction): Listener => {
-  const func = typeof callback === 'function' ? callback : xin[callback]
+  const func = typeof callback === 'function' ? callback : (xin)[callback]
 
   if (typeof func !== 'function') {
     throw new Error(`observe expects a function or path to a function, ${callback as string} is neither`)
   }
 
-  return _observe(test, func)
+  return _observe(test, func as ObserverCallbackFunction)
 }
 
-const xin = new Proxy(registry, regHandler())
+const xin = new Proxy<XinObject, XinProxyObject>(registry, regHandler())
 
 export {
   xin,

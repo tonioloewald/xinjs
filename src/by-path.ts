@@ -1,6 +1,6 @@
 // unique tokens passed to set by path to delete or create properties
 
-import { XinObject } from './xin-types'
+import { XinObject, XinArray, XinScalar } from './xin-types'
 import { makeError } from './make-error'
 
 const now36 = (): string => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1)
@@ -134,22 +134,22 @@ function expectObject (obj: any): void {
   }
 }
 
-function getByPath (obj: XinObject, path: string): any {
+function getByPath (obj: XinObject | XinArray, path: string): any {
   const parts = pathParts(path)
-  let found = obj
+  let found: XinObject | XinArray | XinScalar = obj
   let i, iMax, j, jMax
   for (i = 0, iMax = parts.length; found !== undefined && i < iMax; i++) {
     const part = parts[i]
     if (Array.isArray(part)) {
       for (j = 0, jMax = part.length; found !== undefined && j < jMax; j++) {
         const key = part[j]
-        found = found[key]
+        found = (found as XinObject)[key]
       }
     } else {
-      if (found.length === 0) {
-        if (part[0] === '=') {
-          found = found[part.slice(1)]
-        } else {
+      if ((found as XinArray).length === 0) {
+        // @ts-expect-error-error
+        found = (found as XinArray)[part.slice(1)]
+        if (part[0] !== '=') {
           return undefined
         }
       } else if (part.includes('=')) {
@@ -157,15 +157,15 @@ function getByPath (obj: XinObject, path: string): any {
         found = byIdPath(found as any[], idPath, tail.join('='))
       } else {
         j = parseInt(part, 10)
-        found = found[j]
+        found = (found as XinArray)[j]
       }
     }
   }
   return found
 }
 
-function setByPath (orig: XinObject, path: string, val: any): boolean {
-  let obj = orig
+function setByPath (orig: XinObject | XinArray, path: string, val: any): boolean {
+  let obj: XinObject | XinArray | XinScalar = orig
   const parts = pathParts(path)
 
   while ((obj != null) && (parts.length > 0)) {
@@ -188,15 +188,15 @@ function setByPath (orig: XinObject, path: string, val: any): boolean {
         expectArray(obj)
         const idx = parseInt(part, 10)
         if (parts.length > 0) {
-          obj = obj[idx]
+          obj = (obj as XinArray)[idx]
         } else {
           if (val !== _delete_) {
-            if (obj[idx] === val) {
+            if ((obj as XinArray)[idx] === val) {
               return false
             }
-            obj[idx] = val
+            (obj as XinArray)[idx] = val
           } else {
-            obj.splice(idx, 1)
+            (obj as XinArray).splice(idx, 1)
           }
           return true
         }
@@ -207,19 +207,19 @@ function setByPath (orig: XinObject, path: string, val: any): boolean {
         const key = part.shift() as string
         if ((part.length > 0) || (parts.length > 0)) {
           // if we're at the end of part.length then we need to insert an array
-          obj = byKey(obj, key, (part.length > 0) ? {} : [])
+          obj = byKey((obj as XinObject), key, (part.length > 0) ? {} : [])
         } else {
           if (val !== _delete_) {
-            if (obj[key] === val) {
+            if ((obj as XinObject)[key] === val) {
               return false
             }
-            obj[key] = val
+            (obj as XinObject)[key] = val
           } else {
             if (!Object.prototype.hasOwnProperty.call(obj, key)) {
               return false
             }
             // eslint-disable-next-line
-            delete obj[key]
+            delete (obj as XinObject)[key]
           }
           return true
         }

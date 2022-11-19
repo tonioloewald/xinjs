@@ -1,8 +1,35 @@
+export type XinScalar = string | boolean | number | Function
+
+export type XinArray = XinObject[] | XinScalar[]
+
 export interface XinObject {
-  [key: string]: any
+  [key: string]: XinObject | XinArray | XinScalar
 }
 
-export type XinTouchableType = string | { _xinPath: string }
+export type XinProxyTarget = XinObject | XinArray
+
+export type XinValue = XinObject | XinArray | XinScalar | null | undefined
+
+export interface XinProps {
+  _xinPath: string
+  _xinValue: XinObject
+}
+
+export type XinProxyObject = XinProps & {
+  [key: string]: XinProxyObject | XinProxyArray | XinScalar
+}
+
+export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (XinProxyObject[] | XinScalar[])
+
+export type XinProxy = XinProps & (XinObject | XinArray)
+
+export type XinProxyValue = XinProxy | XinScalar | null | undefined
+
+export type XinTouchableType = string | XinProps
+
+export type XinEventHandler<T=Event> = ((evt: T) => void) | string
+
+export type XinBindingShortcut = XinTouchableType | XinBindingSpec
 
 type _BooleanFunction = () => boolean
 type _PathTestFunction = (path: string) => boolean | Symbol
@@ -13,16 +40,27 @@ type _CallbackFunction = (() => void) | (() => OptionalSymbol)
 type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol)
 export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction
 
+export interface XinBindingSpec {
+  value: XinTouchableType
+  [key: string]: any
+}
+
 export interface XinBinding {
   toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
-  fromDOM?: (element: HTMLElement) => any
+  fromDOM?: (element: HTMLElement, options?: XinObject) => any
 }
 
 export interface ElementProps {
-  onClick?: (evt: MouseEvent) => void
-  onInput?: (evt: Event) => void
-  onChange?: (evt: Event) => void
-  onSubmit?: (evt: Event) => void
+  onClick?: XinEventHandler<MouseEvent>
+  onInput?: XinEventHandler
+  onChange?: XinEventHandler
+  onSubmit?: XinEventHandler
+  bindValue?: XinBindingShortcut
+  bindText?: XinBindingShortcut
+  bindList?: XinBindingShortcut
+  bindEnabled?: XinBindingShortcut
+  bindDisabled?: XinBindingShortcut
+  bindStyle?: XinBindingShortcut
   [key: string]: any
 }
 

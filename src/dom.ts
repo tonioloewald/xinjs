@@ -1,3 +1,4 @@
+import { cloneWithBindings } from './metadata'
 export type ContentPart = HTMLElement | DocumentFragment | string
 export type ContentType = ContentPart | ContentPart[]
 
@@ -20,10 +21,10 @@ export const appendContentToElement = (elt: Element | ShadowRoot, content: Conte
       elt.textContent = content
     } else if (Array.isArray(content)) {
       content.forEach(node => {
-        elt.append(node instanceof HTMLElement ? node.cloneNode(true) : node)
+        elt.append(node instanceof Node ? cloneWithBindings(node) : node)
       })
     } else if (content instanceof HTMLElement) {
-      elt.append(content.cloneNode(true))
+      elt.append(cloneWithBindings(content))
     } else {
       throw new Error('expect text content or document node')
     }

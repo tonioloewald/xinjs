@@ -1,4 +1,4 @@
-import { bind } from './bind'
+import { bind, on } from './bind'
 import { bindings } from './bindings'
 import { ElementPart, ElementCreator } from '../src/xin-types'
 
@@ -16,9 +16,13 @@ export function kabobToCamel (s: string): string {
   })
 }
 
+export const makeComponent = (...componentParts: ElementPart[]) => {
+  return (...args: ElementPart[]) => elements.div(...args, ...componentParts)
+}
+
 export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   if (templates[tagType] === undefined) {
-    templates[tagType] = document.createElement(tagType)
+    templates[tagType] = globalThis.document.createElement(tagType)
   }
   const elt = templates[tagType].cloneNode() as HTMLElement
   for (const item of contents) {
@@ -48,7 +52,7 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
           }
         } else if (key.match(/^on[A-Z]/) != null) {
           const eventType = key.substring(2).toLowerCase()
-          elt.addEventListener(eventType, value)
+          on(elt, eventType, value)
         } else if (key.match(/^bind[A-Z]/) != null) {
           const bindingType = key.substring(4).toLowerCase()
           const binding = bindings[bindingType]
@@ -77,7 +81,7 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
 }
 
 const fragment = (...contents: ElementPart[]): DocumentFragment => {
-  const frag = document.createDocumentFragment()
+  const frag = globalThis.document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)
   }

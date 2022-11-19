@@ -1,7 +1,8 @@
 import { settings } from './settings'
+import { xin } from './xin'
+import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding } from './metadata'
+import { XinObject } from './xin-types'
 
-const itemToElement: WeakMap<object, HTMLElement> = new WeakMap()
-const elementToItem: WeakMap<HTMLElement, object> = new WeakMap()
 const listBindings: WeakMap<HTMLElement, ListBinding> = new WeakMap()
 
 interface ListBindingOptions {
@@ -10,13 +11,33 @@ interface ListBindingOptions {
   updateInstance?: (element: HTMLElement, value: any) => void
 }
 
+function updateRelativeBindings (element: HTMLElement, path: string): void {
+  const boundElements = [...element.querySelectorAll(BOUND_SELECTOR)]
+  if (element.matches(BOUND_SELECTOR)) {
+    boundElements.unshift(element)
+  }
+  for (const boundElement of boundElements) {
+    const bindings = elementToBindings.get(boundElement) as DataBinding[]
+    for (const binding of bindings) {
+      if (binding.path.startsWith('^')) {
+        binding.path = `${path}${binding.path.substring(1)}`
+      }
+      if (binding.binding.toDOM != null) {
+        binding.binding.toDOM(boundElement as HTMLElement, xin[binding.path])
+      }
+    }
+  }
+}
+
 class ListBinding {
   boundElement: HTMLElement
   template: HTMLElement
   options: ListBindingOptions
+  itemToElement: WeakMap<XinObject, HTMLElement>
 
   constructor (boundElement: HTMLElement, options: ListBindingOptions = {}) {
     this.boundElement = boundElement
+    this.itemToElement = new WeakMap()
     if (boundElement.children.length !== 1) {
       throw new Error('ListBinding expects an element with exactly one child element')
     }
@@ -26,7 +47,7 @@ class ListBinding {
         throw new Error('ListBinding expects a template with exactly one child element')
       }
       template.remove()
-      this.template = template.content.children[0].cloneNode(true) as HTMLElement
+      this.template = cloneWithBindings(template.content.children[0]) as HTMLElement
     } else {
       this.template = boundElement.children[0] as HTMLElement
       this.template.remove()
@@ -39,7 +60,7 @@ class ListBinding {
       array = []
     }
 
-    const { idPath, initInstance, updateInstance } = this.options
+    const { initInstance, updateInstance } = this.options
     // @ts-expect-error
     const arrayPath: string = array._xinPath
 
@@ -48,10 +69,11 @@ class ListBinding {
     let created = 0
 
     for (const element of [...this.boundElement.children]) {
-      const item = elementToItem.get(element as HTMLElement)
-      if ((item == null) || !array.includes(item)) {
+      const proxy = elementToItem.get(element as HTMLElement)
+      if ((proxy == null) || !array.includes(proxy._xinValue)) {
         element.remove()
-        itemToElement.delete(item as object)
+        // @ts-expect-error-error
+        this.itemToElement.delete(proxy._xinValue)
         elementToItem.delete(element as HTMLElement)
         removed++
       }
@@ -59,35 +81,29 @@ class ListBinding {
 
     // build a complete new set of elements in the right order
     const elements = []
+    const { idPath } = this.options
     for (let i = 0; i < array.length; i++) {
       const item = array[i]
       if (item === undefined) {
         continue
       }
-      let element = itemToElement.get(item._xinValue)
+      let element = this.itemToElement.get(item._xinValue)
       if (element == null) {
         created++
-        element = this.template.cloneNode(true) as HTMLElement
+        element = cloneWithBindings(this.template) as HTMLElement
         if (typeof item === 'object') {
-          itemToElement.set(item._xinValue, element)
-          elementToItem.set(element, item._xinValue)
+          this.itemToElement.set(item._xinValue, element)
+          elementToItem.set(element, item)
         }
         this.boundElement.append(element)
+        if (idPath != null) {
+          const idValue = item[idPath] as string
+          const itemPath = `${arrayPath}[${idPath}=${idValue}]`
+          updateRelativeBindings(element, itemPath)
+        }
         if (initInstance != null) {
           // eslint-disable-next-line
           initInstance(element, item)
-        }
-        // @ts-expect-error
-        if (typeof element.bindValue === 'function') {
-          if (idPath == null) {
-            throw new Error('cannot bindValue without an idPath')
-          }
-          // @ts-expect-error
-          element._value = item
-          const idValue = item[idPath] as string
-          const path = `${arrayPath}[${idPath}=${idValue}]`
-          // @ts-expect-error
-          element.bindValue(path)
         }
       }
       if (updateInstance != null) {

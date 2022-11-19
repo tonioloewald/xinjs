@@ -2,9 +2,9 @@ import {elements, makeWebComponent} from '../../src/index'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 import { GLTFFileLoader } from 'babylonjs-loaders'
-import { MeshAssetTask } from 'babylonjs'
 
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
+BABYLON.SceneLoaderFlags.ShowLoadingScreen = false
 
 const makeColor = (rgb: BABYLON.Color3 | BABYLON.Color4 | number[]): BABYLON.Color3 | BABYLON.Color4 => {
   if (Array.isArray(rgb)) {
@@ -30,7 +30,7 @@ export const b3d = makeWebComponent('b-3d', {
   },
   attributes: {
     glowLayerIntensity: 0,
-    frameRate: 5
+    frameRate: 90
   },
   props: {
     BABYLON,
@@ -67,7 +67,9 @@ export const b3d = makeWebComponent('b-3d', {
     },
     renderFrame() {
       if(this.scene) {
-        this.scene.render()
+        if (!this.hidden) {
+          this.scene.render()
+        }
         setTimeout(() => this.renderFrame(), 1000 / this.frameRate)
       }
     }

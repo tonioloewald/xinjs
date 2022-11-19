@@ -255,10 +255,9 @@ function getByPath(obj, path) {
         }
         else {
             if (found.length === 0) {
-                if (part[0] === '=') {
-                    found = found[part.slice(1)];
-                }
-                else {
+                // @ts-expect-error-error
+                found = found[part.slice(1)];
+                if (part[0] !== '=') {
                     return undefined;
                 }
             }
@@ -400,17 +399,14 @@ const regHandler = (path = '') => ({
             let value;
             if (prop.includes('=')) {
                 const [idPath, needle] = prop.split('=');
-                value = target.find(
-                // eslint-disable-next-line
-                (candidate) => `${getByPath(candidate, idPath)}` === needle);
+                value = target.find((candidate) => `${getByPath(candidate, idPath)}` === needle);
             }
             else {
-                value = (target)[prop];
+                value = target[prop];
             }
             if (value !== null && typeof value === 'object') {
                 const currentPath = extendPath(path, prop);
-                const proxy = new Proxy(value, regHandler(currentPath));
-                return proxy;
+                return new Proxy(value, regHandler(currentPath));
             }
             else if (typeof value === 'function') {
                 return value.bind(target);
@@ -420,7 +416,6 @@ const regHandler = (path = '') => ({
             }
         }
         else if (Array.isArray(target)) {
-            // @ts-expect-error -- we could be looking for an index, a property, or a method
             const value = target[prop];
             return typeof value === 'function'
                 ? (...items) => {
@@ -439,7 +434,7 @@ const regHandler = (path = '') => ({
             return target[prop];
         }
     },
-    set(target, prop, value) {
+    set(_, prop, value) {
         // eslint-disable-next-line
         if (value?._xinPath) {
             value = value._xinValue;
@@ -459,7 +454,7 @@ const regHandler = (path = '') => ({
     }
 });
 const observe = (test, callback) => {
-    const func = typeof callback === 'function' ? callback : xin[callback];
+    const func = typeof callback === 'function' ? callback : (xin)[callback];
     if (typeof func !== 'function') {
         throw new Error(`observe expects a function or path to a function, ${callback} is neither`);
     }
@@ -888,28 +883,6 @@ const debounce = (origFn, minInterval = 250) => {
         }, minInterval);
     };
 };
-const throttle = (origFn, minInterval = 250) => {
-    let debounceId;
-    let previousCall = Date.now() - minInterval;
-    let inFlight = false;
-    return (...args) => {
-        clearTimeout(debounceId);
-        debounceId = setTimeout(async () => {
-            origFn(...args);
-            previousCall = Date.now();
-        }, minInterval);
-        if (!inFlight && Date.now() - previousCall >= minInterval) {
-            inFlight = true;
-            try {
-                origFn(...args);
-                previousCall = Date.now();
-            }
-            finally {
-                inFlight = false;
-            }
-        }
-    };
-};
 
 const hotReload = (test = () => true) => {
     const savedState = localStorage.getItem('xin-state');
@@ -936,50 +909,282 @@ const hotReload = (test = () => true) => {
     observe(test, saveState);
 };
 
+const hyphenated = (s) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
+const css = (obj) => {
+    const selectors = Object.keys(obj).map((selector) => {
+        const body = obj[selector];
+        const rule = Object.keys(body)
+            .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
+            .join('\n');
+        return `${selector} {\n${rule}\n}`;
+    });
+    return selectors.join('\n\n');
+};
+
+function deepClone(obj) {
+    if (obj == null || typeof obj !== 'object') {
+        return obj;
+    }
+    if (Array.isArray(obj)) {
+        // @ts-expect-error-error
+        return obj.map(deepClone);
+    }
+    const clone = {};
+    for (const key in obj) {
+        const val = obj[key];
+        if (obj != null && typeof obj === 'object') {
+            clone[key] = deepClone(val);
+        }
+        else {
+            clone[key] = val;
+        }
+    }
+    return clone;
+}
+
+const BOUND_CLASS = '-xin-data';
+const BOUND_SELECTOR = `.${BOUND_CLASS}`;
+const EVENT_CLASS = '-xin-event';
+const EVENT_SELECTOR = `.${EVENT_CLASS}`;
+const elementToHandlers = new WeakMap();
+const elementToBindings = new WeakMap();
+const cloneWithBindings = (element) => {
+    const cloned = element.cloneNode();
+    if (cloned instanceof HTMLElement) {
+        const dataBindings = elementToBindings.get(element);
+        const eventHandlers = elementToHandlers.get(element);
+        if (dataBindings != null) {
+            // @ts-expect-error-error
+            elementToBindings.set(cloned, deepClone(dataBindings));
+        }
+        if (eventHandlers != null) {
+            // @ts-expect-error-error
+            elementToHandlers.set(cloned, deepClone(eventHandlers));
+        }
+    }
+    for (const node of element.childNodes) {
+        if (node instanceof HTMLElement || node instanceof DocumentFragment) {
+            cloned.appendChild(cloneWithBindings(node));
+        }
+        else {
+            cloned.appendChild(node.cloneNode());
+        }
+    }
+    return cloned;
+};
+const elementToItem = new WeakMap();
+const getListItem = (element) => {
+    const html = document.body.parentElement;
+    while (element.parentElement != null && element.parentElement !== html) {
+        const item = elementToItem.get(element);
+        if (item != null) {
+            return item;
+        }
+        element = element.parentElement;
+    }
+    return false;
+};
+
+const dispatch = (target, type) => {
+    const event = new Event(type);
+    target.dispatchEvent(event);
+};
+/* global ResizeObserver */
+const resizeObserver = new ResizeObserver(entries => {
+    for (const entry of entries) {
+        const element = entry.target;
+        dispatch(element, 'resize');
+    }
+});
+const appendContentToElement = (elt, content) => {
+    if (content != null) {
+        if (typeof content === 'string') {
+            elt.textContent = content;
+        }
+        else if (Array.isArray(content)) {
+            content.forEach(node => {
+                elt.append(node instanceof Node ? cloneWithBindings(node) : node);
+            });
+        }
+        else if (content instanceof HTMLElement) {
+            elt.append(cloneWithBindings(content));
+        }
+        else {
+            throw new Error('expect text content or document node');
+        }
+    }
+};
+
+observe(() => true, (changedPath) => {
+    const boundElements = globalThis.document.body.querySelectorAll(BOUND_SELECTOR);
+    for (const element of boundElements) {
+        const dataBindings = elementToBindings.get(element);
+        for (const dataBinding of dataBindings) {
+            let { path, binding, options } = dataBinding;
+            const { toDOM } = binding;
+            if (toDOM != null) {
+                if (path.startsWith('^')) {
+                    const dataSource = getListItem(element);
+                    if (dataSource != null && dataSource._xinPath != null) {
+                        path = dataBinding.path = `${dataSource._xinPath}${path.substring(1)}`;
+                    }
+                    else {
+                        console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list');
+                    }
+                }
+                if (path.startsWith(changedPath)) {
+                    toDOM(element, xin[path], options);
+                }
+            }
+        }
+    }
+});
+const handleChange = (event) => {
+    // @ts-expect-error-error
+    let target = event.target.closest(BOUND_SELECTOR);
+    while (target != null) {
+        const dataBindings = elementToBindings.get(target);
+        for (const dataBinding of dataBindings) {
+            const { binding, path } = dataBinding;
+            const { fromDOM } = binding;
+            if (fromDOM != null) {
+                const value = fromDOM(target, dataBinding.options);
+                if (value != null) {
+                    const existing = xin[path];
+                    // eslint-disable-next-line
+                    const existingActual = existing?._xinPath || existing;
+                    // eslint-disable-next-line
+                    const valueActual = value?._xinPath || value;
+                    if (valueActual != null && existingActual !== valueActual) {
+                        xin[path] = valueActual;
+                    }
+                }
+            }
+        }
+        target = target.parentElement.closest(BOUND_SELECTOR);
+    }
+};
+if (globalThis.document != null) {
+    globalThis.document.body.addEventListener('change', handleChange, true);
+    globalThis.document.body.addEventListener('input', handleChange, true);
+}
 const bind = (element, what, binding, options) => {
     if (element instanceof DocumentFragment) {
         throw new Error('bind cannot bind to a DocumentFragment');
     }
-    const { toDOM, fromDOM } = binding;
-    // eslint-disable-next-line
-    if (typeof what !== 'string' && what !== null && typeof what === 'object' && !what._xinPath) {
+    let path;
+    if (typeof what === 'object' && what._xinPath === undefined && options === undefined) {
+        const { value } = what;
+        path = typeof value === 'string' ? value : value._xinPath;
+        options = what;
+        delete options.value;
+    }
+    else {
+        path = typeof what === 'string' ? what : what._xinPath;
+    }
+    if (path == null) {
         throw new Error('bind requires a path or object with xin Proxy');
     }
-    const path = typeof what === 'string' ? what : what._xinPath;
-    if (toDOM != null) {
-        touch(path);
-        observe(path, () => {
-            const value = xin[path];
-            if (typeof value === 'object' || (fromDOM == null) || fromDOM(element) !== value) {
-                toDOM(element, value, options);
-            }
-        });
+    const { toDOM } = binding;
+    element.classList.add(BOUND_CLASS);
+    let dataBindings = elementToBindings.get(element);
+    if (dataBindings == null) {
+        dataBindings = [];
+        elementToBindings.set(element, dataBindings);
     }
-    if (fromDOM != null) {
-        const updateXin = () => {
-            const value = fromDOM(element);
-            if (value !== undefined && value !== null) {
-                // eslint-disable-next-line
-                const existing = xin[path]._xinValue || xin[path];
-                // eslint-disable-next-line
-                const actual = value._xinValue || value;
-                if (xin[path] != null && existing !== actual) {
-                    xin[path] = value;
-                }
-            }
-        };
-        element.addEventListener('input', throttle(updateXin, 500));
-        element.addEventListener('change', updateXin);
+    dataBindings.push({ path, binding, options });
+    if (toDOM != null && !path.startsWith('^')) {
+        touch(path);
     }
     return element;
 };
+const handledEventTypes = new Set();
+const handleBoundEvent = (event) => {
+    // @ts-expect-error-error
+    let target = event?.target.closest(EVENT_SELECTOR);
+    let propagationStopped = false;
+    const wrappedEvent = new Proxy(event, {
+        get(target, prop) {
+            if (prop === 'stopPropagation') {
+                return () => {
+                    event.stopPropagation();
+                    propagationStopped = true;
+                };
+            }
+            else {
+                // @ts-expect-error-error
+                const value = target[prop];
+                return typeof value === 'function' ? value.bind(target) : value;
+            }
+        }
+    });
+    // eslint-disable-next-line no-unmodified-loop-condition
+    while (!propagationStopped && target != null) {
+        const eventBindings = elementToHandlers.get(target);
+        // eslint-disable-next-line
+        const handlers = eventBindings[event.type] || [];
+        for (const handler of handlers) {
+            if (typeof handler === 'function') {
+                handler(wrappedEvent);
+            }
+            else {
+                const func = xin[handler];
+                if (typeof func === 'function') {
+                    func(wrappedEvent);
+                }
+                else {
+                    throw new Error(`no event handler found at path ${handler}`);
+                }
+            }
+            if (propagationStopped) {
+                continue;
+            }
+        }
+        target = target.parentElement.closest(EVENT_SELECTOR);
+    }
+};
+const on = (element, eventType, eventHandler) => {
+    let eventBindings = elementToHandlers.get(element);
+    element.classList.add(EVENT_CLASS);
+    if (eventBindings == null) {
+        eventBindings = {};
+        elementToHandlers.set(element, eventBindings);
+    }
+    // eslint-disable-next-line
+    if (!eventBindings[eventType]) {
+        eventBindings[eventType] = [];
+    }
+    if (!eventBindings[eventType].includes(eventHandler)) {
+        eventBindings[eventType].push(eventHandler);
+    }
+    if (!handledEventTypes.has(eventType)) {
+        handledEventTypes.add(eventType);
+        document.body.addEventListener(eventType, handleBoundEvent, true);
+    }
+};
 
-const itemToElement = new WeakMap();
-const elementToItem = new WeakMap();
 const listBindings = new WeakMap();
+function updateRelativeBindings(element, path) {
+    const boundElements = [...element.querySelectorAll(BOUND_SELECTOR)];
+    if (element.matches(BOUND_SELECTOR)) {
+        boundElements.unshift(element);
+    }
+    for (const boundElement of boundElements) {
+        const bindings = elementToBindings.get(boundElement);
+        for (const binding of bindings) {
+            if (binding.path.startsWith('^')) {
+                binding.path = `${path}${binding.path.substring(1)}`;
+            }
+            if (binding.binding.toDOM != null) {
+                binding.binding.toDOM(boundElement, xin[binding.path]);
+            }
+        }
+    }
+}
 class ListBinding {
     constructor(boundElement, options = {}) {
         this.boundElement = boundElement;
+        this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) {
             throw new Error('ListBinding expects an element with exactly one child element');
         }
@@ -989,7 +1194,7 @@ class ListBinding {
                 throw new Error('ListBinding expects a template with exactly one child element');
             }
             template.remove();
-            this.template = template.content.children[0].cloneNode(true);
+            this.template = cloneWithBindings(template.content.children[0]);
         }
         else {
             this.template = boundElement.children[0];
@@ -1001,52 +1206,47 @@ class ListBinding {
         if (array == null) {
             array = [];
         }
-        const { idPath, initInstance, updateInstance } = this.options;
+        const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
         const arrayPath = array._xinPath;
         let removed = 0;
         let moved = 0;
         let created = 0;
         for (const element of [...this.boundElement.children]) {
-            const item = elementToItem.get(element);
-            if ((item == null) || !array.includes(item)) {
+            const proxy = elementToItem.get(element);
+            if ((proxy == null) || !array.includes(proxy._xinValue)) {
                 element.remove();
-                itemToElement.delete(item);
+                // @ts-expect-error-error
+                this.itemToElement.delete(proxy._xinValue);
                 elementToItem.delete(element);
                 removed++;
             }
         }
         // build a complete new set of elements in the right order
         const elements = [];
+        const { idPath } = this.options;
         for (let i = 0; i < array.length; i++) {
             const item = array[i];
             if (item === undefined) {
                 continue;
             }
-            let element = itemToElement.get(item._xinValue);
+            let element = this.itemToElement.get(item._xinValue);
             if (element == null) {
                 created++;
-                element = this.template.cloneNode(true);
+                element = cloneWithBindings(this.template);
                 if (typeof item === 'object') {
-                    itemToElement.set(item._xinValue, element);
-                    elementToItem.set(element, item._xinValue);
+                    this.itemToElement.set(item._xinValue, element);
+                    elementToItem.set(element, item);
                 }
                 this.boundElement.append(element);
+                if (idPath != null) {
+                    const idValue = item[idPath];
+                    const itemPath = `${arrayPath}[${idPath}=${idValue}]`;
+                    updateRelativeBindings(element, itemPath);
+                }
                 if (initInstance != null) {
                     // eslint-disable-next-line
                     initInstance(element, item);
-                }
-                // @ts-expect-error
-                if (typeof element.bindValue === 'function') {
-                    if (idPath == null) {
-                        throw new Error('cannot bindValue without an idPath');
-                    }
-                    // @ts-expect-error
-                    element._value = item;
-                    const idValue = item[idPath];
-                    const path = `${arrayPath}[${idPath}=${idValue}]`;
-                    // @ts-expect-error
-                    element.bindValue(path);
                 }
             }
             if (updateInstance != null) {
@@ -1105,6 +1305,17 @@ const bindings = {
             element.textContent = value;
         }
     },
+    enabled: {
+        toDOM(element, value) {
+            // eslint-disable-next-line
+            element.disabled = !value;
+        }
+    },
+    disabled: {
+        toDOM(element, value) {
+            element.disabled = Boolean(value);
+        }
+    },
     style: {
         toDOM(element, value) {
             if (typeof value === 'object') {
@@ -1129,68 +1340,6 @@ const bindings = {
     }
 };
 
-const hyphenated = (s) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
-const css = (obj) => {
-    const selectors = Object.keys(obj).map((selector) => {
-        const body = obj[selector];
-        const rule = Object.keys(body)
-            .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
-            .join('\n');
-        return `${selector} {\n${rule}\n}`;
-    });
-    return selectors.join('\n\n');
-};
-
-function deepClone(obj) {
-    if (obj == null || typeof obj !== 'object') {
-        return obj;
-    }
-    if (Array.isArray(obj)) {
-        return obj.map(deepClone);
-    }
-    const clone = {};
-    for (const key in obj) {
-        const val = obj[key];
-        if (obj != null && typeof obj === 'object') {
-            clone[key] = deepClone(val);
-        }
-        else {
-            clone[key] = val;
-        }
-    }
-    return clone;
-}
-
-const dispatch = (target, type) => {
-    const event = new Event(type);
-    target.dispatchEvent(event);
-};
-/* global ResizeObserver */
-const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-        const element = entry.target;
-        dispatch(element, 'resize');
-    }
-});
-const appendContentToElement = (elt, content) => {
-    if (content != null) {
-        if (typeof content === 'string') {
-            elt.textContent = content;
-        }
-        else if (Array.isArray(content)) {
-            content.forEach(node => {
-                elt.append(node instanceof HTMLElement ? node.cloneNode(true) : node);
-            });
-        }
-        else if (content instanceof HTMLElement) {
-            elt.append(content.cloneNode(true));
-        }
-        else {
-            throw new Error('expect text content or document node');
-        }
-    }
-};
-
 const templates = {};
 function camelToKabob(s) {
     return s.replace(/[A-Z]/g, (c) => {
@@ -1202,9 +1351,12 @@ function kabobToCamel(s) {
         return c.toLocaleUpperCase();
     });
 }
+const makeComponent = (...componentParts) => {
+    return (...args) => elements.div(...args, ...componentParts);
+};
 const create = (tagType, ...contents) => {
     if (templates[tagType] === undefined) {
-        templates[tagType] = document.createElement(tagType);
+        templates[tagType] = globalThis.document.createElement(tagType);
     }
     const elt = templates[tagType].cloneNode();
     for (const item of contents) {
@@ -1240,7 +1392,7 @@ const create = (tagType, ...contents) => {
                 }
                 else if (key.match(/^on[A-Z]/) != null) {
                     const eventType = key.substring(2).toLowerCase();
-                    elt.addEventListener(eventType, value);
+                    on(elt, eventType, value);
                 }
                 else if (key.match(/^bind[A-Z]/) != null) {
                     const bindingType = key.substring(4).toLowerCase();
@@ -1272,7 +1424,7 @@ const create = (tagType, ...contents) => {
     return elt;
 };
 const fragment = (...contents) => {
-    const frag = document.createDocumentFragment();
+    const frag = globalThis.document.createDocumentFragment();
     for (const item of contents) {
         frag.append(item);
     }
@@ -1304,7 +1456,7 @@ const defaultSpec = {
     content: elements.slot()
 };
 const makeWebComponent = (tagName, spec) => {
-    const { superClass, style, methods, eventHandlers, props, attributes, content, role, value, bindValue, childListChange } = Object.assign({}, defaultSpec, spec);
+    const { superClass, style, methods, eventHandlers, props, attributes, content, role, value, childListChange } = Object.assign({}, defaultSpec, spec);
     let styleNode;
     if (style !== undefined) {
         const styleText = css(Object.assign({ ':host([hidden])': { display: 'none !important' } }, style));
@@ -1473,12 +1625,6 @@ const makeWebComponent = (tagName, spec) => {
             if (value !== undefined) {
                 this._value = deepClone(value);
             }
-            if (bindValue !== undefined) {
-                this.bindValue = (path) => {
-                    bind(this, path, bindings.value);
-                    bindValue.call(this, path);
-                };
-            }
         }
         get value() {
             return this._value;
@@ -1559,4 +1705,4 @@ const makeWebComponent = (tagName, spec) => {
     return elements[tagName];
 };
 
-export { bind, bindings, elements, filter, hotReload, makeWebComponent, matchType, observe, observerShouldBeRemoved, settings, touch, typeSafe, unobserve, useXin, xin };
+export { bind, bindings, elements, filter, getListItem, hotReload, makeComponent, makeWebComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, useXin, xin };

@@ -1,5 +1,3 @@
-import { bind } from './bind'
-import { bindings } from './bindings'
 import { css, StyleMap } from './css'
 import { deepClone } from './deep-clone'
 import { appendContentToElement, ContentType, dispatch, resizeObserver } from './dom'
@@ -25,7 +23,6 @@ interface WebComponentSpec {
   style?: StyleMap
   methods?: FunctionMap
   render?: VoidFunction
-  bindValue?: (path: string) => void
   connectedCallback?: VoidFunction
   disconnectedCallback?: VoidFunction
   childListChange?: MutationCallback
@@ -57,7 +54,6 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     content,
     role,
     value,
-    bindValue,
     childListChange
   } = Object.assign({}, defaultSpec, spec)
   let styleNode: HTMLStyleElement
@@ -74,7 +70,6 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     // @ts-expect-error-error
     elementRefs: { [key: string]: HTMLElement }
     _value?: any
-    bindValue?: (path: string) => void
 
     initProps (): void {
       for (const prop of Object.keys(props)) {
@@ -211,12 +206,6 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
     initValue (): void {
       if (value !== undefined) {
         this._value = deepClone(value)
-      }
-      if (bindValue !== undefined) {
-        this.bindValue = (path: string) => {
-          bind(this, path, bindings.value)
-          bindValue.call(this, path)
-        }
       }
     }
 
