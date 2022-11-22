@@ -15,16 +15,13 @@
 - incredibly lightweight
 - works anywhere (browsers, node, bun, electron etc.)
 
-`xinjs` takes the most valuable part of [b8r](https://b8rjs.com), i.e. the `registry`,
-ports it to Typescript (mostly for autocomplete), and implements it 
-with no browser dependencies so it can work just as well on the server as the client.
-
 In particular, this means that you can do your state management *anywhere*,
 including on either side of the "browser" divide in Electron / nwjs and
-similar applications. You can also write stateful-stateless servers by
-sending mutations to complex state to the server.
+similar applications. You can also efficiently implement "stateful-stateless" servers by
+sending mutations to complex state to the server and use GraphQL-like queries to
+"shape" the response from a service.
 
-## What it does
+## What `xinjs` does
 
 ### Observe Object State
 
@@ -253,15 +250,25 @@ it (by overlay) on reload. Because any functions (for example) won't be persiste
 simply call `hotReload` after initializing your app state and you're good to go.
 
 `hotReload` accepts a test function (path => boolean) as a parameter. 
-Only top-level properties in  `xin` that pass the test will be persisted.
+Only top-level properties in `xin` that pass the test will be persisted.
 
 To completely reset the app, run `localStorage.clear()` in the console.
 
 ## Development Notes
 
-I'm using [bun](https://bun.sh/) to develop xinjs. It's insanely fast but
-also kind of bleeding edge. It runs typescript directly. If you want to work
-on xinjs you'll probably want to install the latest version of bun (in addition
-to [nodejs](https://nodejs.org)).
+You'll need to install [bun](https://bun.sh/) and probably [nodejs](https://nodejs.org)).
 
-To run `build` you will need to `chmod +x build.command`.
+To work interactively on the demo code, use `bun dev`.
+
+To build you will need to `chmod +x build.command` before running `bun pack`.
+
+## Credits
+
+`xinjs` is in essence a highly incompatible update to `b8rjs` with the goal
+of removing cruft, supporting more use-cases, and eliminating functionality
+that has been made redundant by improvements to the JavaScript language and
+DOM APIs.
+
+`xinjs` is being developed using [bun](https://bun.sh/) to develop xinjs. 
+It is crazy fast (based on Webkit's JS engine, vs. V8), does a lot of stuff
+natively, and runs TypeScript (with import and require) directly.
