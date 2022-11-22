@@ -1,94 +1,83 @@
-import {elements} from '../src/index'
+import {elements, camelToKabob} from '../src/elements'
+import {initVars, css, vars} from '../src/css'
+const {style} = elements
 
-const {style} = elements 
-
-const css = `/* base-style */
-
-:root {
-  --font-size: 15px;
-  --line-height: 25px;
-  --spacing: 10px;
-  --item-spacing: calc(var(--spacing) * 0.5);
-  --text-color: #222;
-  --background: #eee;
-  --panel-bg: #ddd;
-  --input-bg: #fff;
-  --hover-bg: #eef;
-  --active-bg: #dde;
-  --selected-bg: #ddf;
-  --input-border: 1px solid #0004;
-  --light-border: 1px solid #fff2;
-  --dark-border: 1px solid #0002;
-  --rounded-radius: calc(var(--line-height) * 0.25);
+const rules = {
+  ':root': initVars({
+    font: 'Helvetica Neue, Helvertica, Arial, Sans-serif',
+    codeFont: 'Menlo, Monaco, monospace',
+    fontSize: 15,
+    lineHeight: 25,
+    spacing: 10,
+    textColor: '#222',
+    codeColor: '#eee',
+    itemSpacing: vars.spacing50,
+    background: '#eee',
+    codeBg: '#333',
+    panelBg: '#ddd',
+    inputBg: '#fff',
+    hoverBg: '#eef',
+    activeBg: '#dde',
+    selegedBg: '#ddf',
+    inputBorder: '1px solid #0004',
+    lightBorder: '1px solid #fff4',
+    darkBorder: '1px solid #0002',
+    roundedRadius: vars.lineHeight25
+  }),
+  body: {
+    fontFamily: vars.font,
+    background: vars.background,
+    color: vars.textColor,
+    margin: 0,
+    fontSize: vars.fontSize
+  },
+  'h1, h2, h3': {
+    margin: `${vars.spacing200} 0 ${vars.spacing}`
+  },
+  'p, h4, h5, h6, pre, blockquote': {
+    margin: `0 0 ${vars.spacing}`
+  },
+  'ul, ol': {
+    margin: `0 ${vars.spacing200} ${vars.spacing} 0`
+  },
+  li: {
+    margin: `0 0 ${vars.spacing50}`
+  },
+  'labeled-input, labeled-value': {
+    display: 'block'
+  },
+  'label, input, button, textarea': {
+    fontSize: vars.fontSize,
+    padding: `0 ${vars.spacing}`,
+    lineHeight: vars.lineHeight
+  },
+  'input, button': {
+    background: vars.inputBg,
+    border: vars.inputBorder
+  },
+  button: {
+    borderRadius: vars.roundedRadius
+  },
+  'input, textarea': {
+    borderRadius: vars.roundedRadius50
+  },
+  'button:not(:disabled):hover': {
+    background: vars.hoverBg
+  },
+  'button:not(:disabled):active': {
+    background: vars.activeBg
+  },
+  '[hidden]': {
+    display: 'none !important'
+  },
+  'code, pre': {
+    fontFamily: vars.codeFont
+  },
+  pre: {
+    background: vars.codeBg,
+    color: vars.codeColor,
+    borderRadius: vars.roundedRadius50
+  }
 }
 
-h1, h2, h3 {
-  margin: calc(var(--spacing) * 2) 0 var(--spacing);
-}
-
-p, h4, h5, h6, pre, blockquote {
-  margin: 0 0 var(--spacing);
-}
-
-ul, ol {
-  margin: 0 calc(var(--spacing) * 2) var(--spacing) 0;
-}
-
-li {
-  margin: 0 0 calc(var(--spacing) * 0.5);
-}
-
-body {
-  background: var(--background);
-  color: var(--text-color);
-  margin: 0;
-}
-
-labeled-input,
-labeled-value {
-  display: block;
-}
-
-label, input, button {
-  font-size: var(--font-size);
-  padding: 0 var(--spacing);
-  line-height: var(--line-height);
-}
-
-input, button {
-  background: var(--input-bg);
-  border: var(--input-border);
-}
-
-button:not(:disabled):hover {
-  background: var(--hover-bg);
-}
-
-button:not(:disabled):active {
-  background: var(--active-bg);
-}
-
-button {
-  border-radius: var(--rounded-radius);
-}
-
-input {
-  border-radius: calc(0.5 * var(--rounded-radius));
-}
-
-[hidden] {
-  display: none !important;
-}
-
-code, pre {
-  font-family: Menlo, monaco, monospace;
-}
-
-pre {
-  background: var(--code-bg, #333);
-  color: var(--code-color, #eee);
-  borderRadius: 5px;
-}
-`
-
-document.head.append(style(css)) 
+document.head.append(style({id: 'base-style'}, css(rules))) 
