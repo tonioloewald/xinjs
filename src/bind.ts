@@ -17,6 +17,7 @@ observe(() => true, (changedPath: string) => {
             path = dataBinding.path = `${(dataSource as XinProxy)._xinPath}${path.substring(1)}`
           } else {
             console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list')
+            throw new Error(`Cannot resolve relative binding ${path}`)
           }
         }
         if (path.startsWith(changedPath)) {
@@ -36,7 +37,13 @@ const handleChange = (event: Event): void => {
       const { binding, path } = dataBinding
       const { fromDOM } = binding
       if (fromDOM != null) {
-        const value = fromDOM(target, dataBinding.options)
+        let value
+        try {
+          value = fromDOM(target, dataBinding.options)
+        } catch (e) {
+          console.error('Cannot get value from', target, 'via', dataBinding)
+          throw new Error('Cannot obtain value fromDOM')
+        }
         if (value != null) {
           const existing = xin[path]
           // eslint-disable-next-line

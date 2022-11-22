@@ -1032,6 +1032,7 @@ observe(() => true, (changedPath) => {
                     }
                     else {
                         console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list');
+                        throw new Error(`Cannot resolve relative binding ${path}`);
                     }
                 }
                 if (path.startsWith(changedPath)) {
@@ -1050,7 +1051,14 @@ const handleChange = (event) => {
             const { binding, path } = dataBinding;
             const { fromDOM } = binding;
             if (fromDOM != null) {
-                const value = fromDOM(target, dataBinding.options);
+                let value;
+                try {
+                    value = fromDOM(target, dataBinding.options);
+                }
+                catch (e) {
+                    console.error('Cannot get value from', target, 'via', dataBinding);
+                    throw new Error('Cannot obtain value fromDOM');
+                }
                 if (value != null) {
                     const existing = xin[path];
                     // eslint-disable-next-line
@@ -1216,9 +1224,11 @@ class ListBinding {
         let created = 0;
         for (const element of [...this.boundElement.children]) {
             const proxy = elementToItem.get(element);
-            if ((proxy == null) || !array.includes(proxy._xinValue)) {
+            if (proxy == null) {
                 element.remove();
-                // @ts-expect-error-error
+            }
+            else if (!array.includes(proxy._xinValue)) {
+                element.remove();
                 this.itemToElement.delete(proxy._xinValue);
                 elementToItem.delete(element);
                 removed++;

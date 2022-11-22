@@ -70,9 +70,10 @@ class ListBinding {
 
     for (const element of [...this.boundElement.children]) {
       const proxy = elementToItem.get(element as HTMLElement)
-      if ((proxy == null) || !array.includes(proxy._xinValue)) {
+      if (proxy == null) {
         element.remove()
-        // @ts-expect-error-error
+      } else if (!array.includes(proxy._xinValue)) {
+        element.remove()
         this.itemToElement.delete(proxy._xinValue)
         elementToItem.delete(element as HTMLElement)
         removed++
