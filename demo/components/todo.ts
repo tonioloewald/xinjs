@@ -1,6 +1,6 @@
 import {xin, elements, touch, getListItem, makeComponent, XinProxyObject} from '../../src/index'
 
-const {h1, ul, template, li, form, label, span, input, button, div} = elements
+const {ul, template, li, form, label, span, input, button} = elements
 
 type Reminder = {
   id: number
@@ -45,6 +45,7 @@ export const todo = makeComponent(
         const item = getListItem(event.target as HTMLElement)
         // @ts-ignore-error
         xin.todoApp.deleteItem(item)
+        touch(xin.todoApp)
       }})
     )),
     { bindList: {value: xin.todoApp.list, idPath: 'id'} }

@@ -1,4 +1,4 @@
-import { XinBinding, XinObject, XinProxy } from './xin-types'
+import { XinBinding, XinObject } from './xin-types'
 import { deepClone } from './deep-clone'
 
 export const BOUND_CLASS = '-xin-data'
@@ -47,7 +47,7 @@ export const cloneWithBindings = (element: Node): Node => {
   return cloned
 }
 
-export const elementToItem: WeakMap<HTMLElement, XinProxy> = new WeakMap()
+export const elementToItem: WeakMap<HTMLElement, XinObject> = new WeakMap()
 
 export const getListItem = (element: HTMLElement): any => {
   const html = document.body.parentElement

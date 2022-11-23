@@ -48,7 +48,7 @@ const rules = {
   },
   'label, input, button, textarea': {
     fontSize: vars.fontSize,
-    padding: `0 ${vars.spacing}`,
+    padding: `0 ${vars.spacing75}`,
     lineHeight: vars.lineHeight
   },
   'input, button': {

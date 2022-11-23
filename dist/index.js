@@ -1185,9 +1185,9 @@ class ListBinding {
             if (proxy == null) {
                 element.remove();
             }
-            else if (!array.includes(proxy._xinValue)) {
+            else if (!array.includes(proxy)) {
                 element.remove();
-                this.itemToElement.delete(proxy._xinValue);
+                this.itemToElement.delete(proxy);
                 elementToItem.delete(element);
                 removed++;
             }
@@ -1206,7 +1206,7 @@ class ListBinding {
                 element = cloneWithBindings(this.template);
                 if (typeof item === 'object') {
                     this.itemToElement.set(item._xinValue, element);
-                    elementToItem.set(element, item);
+                    elementToItem.set(element, item._xinValue);
                 }
                 this.boundElement.append(element);
                 if (idPath != null) {
