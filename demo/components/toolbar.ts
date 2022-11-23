@@ -1,22 +1,23 @@
-import {makeWebComponent} from '../../src/index'
+import {makeWebComponent, vars} from '../../src/index'
 
 export const toolBar = makeWebComponent('tool-bar', {
   style: {
     ':host': {
       display: 'flex',
-      gap: 'var(--item-spacing)',
+      gap: vars.itemSpacing,
       alignItems: 'center',
-      background: 'var(--panel-bg)',
-      borderTop: 'var(--light-border)',
-      borderBottom: 'var(--dark-border)',
-      padding: '0 var(--spacing) !important',
+      background: vars.panelBg,
+      borderTop: vars.lightBorder,
+      borderBottom: vars.darkBorder,
+      padding: `0 ${vars.spacing} !important`,
       margin: 0,
-      height: 'calc(var(--line-height) + var(--spacing))',
-      overflow: 'hidden'
+      height: `calc(${vars.lineHeight} + ${vars.spacing})`,
+      overflow: 'hidden',
+      overflowX: 'overlay'
     },
     ':host > *': {
       whiteSpace: 'nowrap',
-      lineHeight: 'var(--line-height)',
+      lineHeight: vars.lineHeight
     }
   }
 })
