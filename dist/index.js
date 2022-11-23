@@ -911,18 +911,6 @@ const hotReload = (test = () => true) => {
     observe(test, saveState);
 };
 
-const hyphenated = (s) => s.replace(/[A-Z]/g, c => '-' + c.toLowerCase());
-const css = (obj) => {
-    const selectors = Object.keys(obj).map((selector) => {
-        const body = obj[selector];
-        const rule = Object.keys(body)
-            .map((prop) => `  ${hyphenated(prop)}: ${body[prop]};`)
-            .join('\n');
-        return `${selector} {\n${rule}\n}`;
-    });
-    return selectors.join('\n\n');
-};
-
 function deepClone(obj) {
     if (obj == null || typeof obj !== 'object') {
         return obj;
@@ -985,36 +973,6 @@ const getListItem = (element) => {
         element = element.parentElement;
     }
     return false;
-};
-
-const dispatch = (target, type) => {
-    const event = new Event(type);
-    target.dispatchEvent(event);
-};
-/* global ResizeObserver */
-const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-        const element = entry.target;
-        dispatch(element, 'resize');
-    }
-});
-const appendContentToElement = (elt, content) => {
-    if (content != null) {
-        if (typeof content === 'string') {
-            elt.textContent = content;
-        }
-        else if (Array.isArray(content)) {
-            content.forEach(node => {
-                elt.append(node instanceof Node ? cloneWithBindings(node) : node);
-            });
-        }
-        else if (content instanceof HTMLElement) {
-            elt.append(cloneWithBindings(content));
-        }
-        else {
-            throw new Error('expect text content or document node');
-        }
-    }
 };
 
 observe(() => true, (changedPath) => {
@@ -1459,6 +1417,66 @@ const elements = new Proxy(_elements, {
     }
 });
 
+const css = (obj) => {
+    const selectors = Object.keys(obj).map((selector) => {
+        const body = obj[selector];
+        const rule = Object.keys(body)
+            .map((prop) => {
+            const value = body[prop];
+            return `  ${camelToKabob(prop)}: ${typeof value === 'number' ? String(value) + 'px' : value};`;
+        })
+            .join('\n');
+        return `${selector} {\n${rule}\n}`;
+    });
+    return selectors.join('\n\n');
+};
+new Proxy({}, {
+    get(target, prop) {
+        if (target[prop] == null) {
+            prop = prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`);
+            const [, varName, isNegative, scaleText] = prop.match(/^([^\d_]*)(_)?(\d+)?$/);
+            if (scaleText != null) {
+                const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100;
+                target[prop] = `calc(var(--${varName}) * ${scale})`;
+            }
+            else {
+                target[prop] = `var(--${varName})`;
+            }
+        }
+        return target[prop];
+    }
+});
+
+const dispatch = (target, type) => {
+    const event = new Event(type);
+    target.dispatchEvent(event);
+};
+/* global ResizeObserver */
+const resizeObserver = new ResizeObserver(entries => {
+    for (const entry of entries) {
+        const element = entry.target;
+        dispatch(element, 'resize');
+    }
+});
+const appendContentToElement = (elt, content) => {
+    if (content != null) {
+        if (typeof content === 'string') {
+            elt.textContent = content;
+        }
+        else if (Array.isArray(content)) {
+            content.forEach(node => {
+                elt.append(node instanceof Node ? cloneWithBindings(node) : node);
+            });
+        }
+        else if (content instanceof HTMLElement) {
+            elt.append(cloneWithBindings(content));
+        }
+        else {
+            throw new Error('expect text content or document node');
+        }
+    }
+};
+
 const defaultSpec = {
     superClass: HTMLElement,
     methods: {},
@@ -1475,26 +1493,6 @@ const makeWebComponent = (tagName, spec) => {
         styleNode = elements.style(styleText);
     }
     const componentClass = class extends superClass {
-        constructor() {
-            super();
-            this._initialized = false;
-            this._changeQueued = false;
-            this._renderQueued = false;
-            this._hydrated = false;
-            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
-                throw new Error('do not define an attribute named "value"; define value directly instead');
-            }
-            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
-                throw new Error('do not define a prop named "value"; define value directly instead');
-            }
-            this.initAttributes();
-            this.initProps();
-            this.initValue();
-            this.initEventHandlers();
-            this.initRefs();
-            this.queueRender();
-            this._initialized = true;
-        }
         initProps() {
             for (const prop of Object.keys(props)) {
                 let propVal = deepClone(props[prop]);
@@ -1637,6 +1635,26 @@ const makeWebComponent = (tagName, spec) => {
             if (value !== undefined) {
                 this._value = deepClone(value);
             }
+        }
+        constructor() {
+            super();
+            this._initialized = false;
+            this._changeQueued = false;
+            this._renderQueued = false;
+            this._hydrated = false;
+            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+                throw new Error('do not define an attribute named "value"; define value directly instead');
+            }
+            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+                throw new Error('do not define a prop named "value"; define value directly instead');
+            }
+            this.initAttributes();
+            this.initProps();
+            this.initValue();
+            this.initEventHandlers();
+            this.initRefs();
+            this.queueRender();
+            this._initialized = true;
         }
         get value() {
             return this._value;
