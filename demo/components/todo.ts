@@ -1,6 +1,6 @@
-import {xin, elements, touch, getListItem, makeComponent, XinProxyObject} from '../../src/index'
+import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars} from '../../src/index'
 
-const {ul, template, li, form, label, span, input, button} = elements
+const {h1, ul, template, li, form, label, span, input, button} = elements
 
 type Reminder = {
   id: number
@@ -38,6 +38,12 @@ class Todo {
 xin.todoApp = new Todo() as unknown as XinProxyObject
 
 export const todo = makeComponent(
+  {
+    style: {
+      padding: `${vars.spacing} ${vars.spacing200}`
+    }
+  },
+  h1('To Do'),
   ul(template(
     li(
       span({ bindText: '^.reminder' }),

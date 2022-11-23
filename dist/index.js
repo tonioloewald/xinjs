@@ -1430,7 +1430,15 @@ const css = (obj) => {
     });
     return selectors.join('\n\n');
 };
-new Proxy({}, {
+const initVars = (obj) => {
+    const rule = {};
+    for (const key of Object.keys(obj)) {
+        const value = obj[key];
+        rule[`--${camelToKabob(key)}`] = typeof value === 'number' ? String(value) + 'px' : value;
+    }
+    return rule;
+};
+const vars = new Proxy({}, {
     get(target, prop) {
         if (target[prop] == null) {
             prop = prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`);
@@ -1737,10 +1745,12 @@ const makeWebComponent = (tagName, spec) => {
 
 exports.bind = bind;
 exports.bindings = bindings;
+exports.css = css;
 exports.elements = elements;
 exports.filter = filter;
 exports.getListItem = getListItem;
 exports.hotReload = hotReload;
+exports.initVars = initVars;
 exports.makeComponent = makeComponent;
 exports.makeWebComponent = makeWebComponent;
 exports.matchType = matchType;
@@ -1752,4 +1762,5 @@ exports.touch = touch;
 exports.typeSafe = typeSafe;
 exports.unobserve = unobserve;
 exports.useXin = useXin;
+exports.vars = vars;
 exports.xin = xin;
