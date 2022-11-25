@@ -1,3 +1,4 @@
+import { Color } from './color'
 import { camelToKabob } from './elements'
 
 export interface StyleRule {
@@ -35,10 +36,41 @@ export const vars = new Proxy<{ [key: string]: string }>({}, {
   get (target, prop: string) {
     if (target[prop] == null) {
       prop = prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`)
-      const [,varName, isNegative, scaleText] = prop.match(/^([^\d_]*)(_)?(\d+)?$/) as string[]
+      const [,varName,, isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/) as string[]
       if (scaleText != null) {
         const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100
-        target[prop] = `calc(var(--${varName}) * ${scale})`
+        switch (method) {
+          case 'b': // brightness
+            {
+              const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
+              target[prop] = Color.fromCss(baseColor).brighten(scale).rgba
+            }
+            break
+          case 's': // saturation
+            {
+              const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
+              target[prop] = Color.fromCss(baseColor).saturate(scale).rgba
+            }
+            break
+          case 'h': // hue
+            {
+              const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
+              target[prop] = Color.fromCss(baseColor).rotate(scale).rgba
+            }
+            break
+          case 'o': // alpha
+            {
+              const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
+              target[prop] = Color.fromCss(baseColor).opacity(scale).rgba
+            }
+            break
+          case '':
+            target[prop] = `calc(var(--${varName}) * ${scale})`
+            break
+          default:
+            console.error(method)
+            throw new Error(`Unrecognized method ${method} for css variable ${varName}`)
+        }
       } else {
         target[prop] = `var(--${varName})`
       }

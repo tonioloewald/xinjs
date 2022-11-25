@@ -23,6 +23,18 @@ export interface XinEventBindings {
 export const elementToHandlers: WeakMap<Element, XinEventBindings> = new WeakMap()
 export const elementToBindings: WeakMap<Element, DataBindings> = new WeakMap()
 
+interface ElementMetadata {
+  eventBindings?: XinEventBindings
+  dataBindings?: DataBindings
+}
+
+export const getElementBindings = (element: Element): ElementMetadata => {
+  return {
+    eventBindings: elementToHandlers.get(element),
+    dataBindings: elementToBindings.get(element)
+  }
+}
+
 export const cloneWithBindings = (element: Node): Node => {
   const cloned = element.cloneNode()
   if (cloned instanceof HTMLElement) {

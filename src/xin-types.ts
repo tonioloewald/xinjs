@@ -10,9 +10,12 @@ export type XinProxyTarget = XinObject | XinArray
 
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined
 
+export const xinPath = Symbol('xin-path')
+export const xinValue = Symbol('xin-value')
+
 export interface XinProps {
-  _xinPath: string
-  _xinValue: XinObject
+  [xinValue]: XinObject | XinObject | XinScalar
+  [xinPath]: string
 }
 
 export type XinProxyObject = XinProps & {

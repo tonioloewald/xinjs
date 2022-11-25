@@ -1,7 +1,9 @@
-import { XinProxyObject, XinProxy, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { XinProxyObject, XinProxy, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction, xinValue, xinPath } from './xin-types'
 import { settings } from './settings'
 import { Listener, touch, observe as _observe, unobserve, updates, observerShouldBeRemoved } from './path-listener'
 import { getByPath, setByPath } from './by-path'
+
+export { xinValue, xinPath }
 
 interface ProxyConstructor {
   revocable: <T extends object, P extends object>(
@@ -43,6 +45,11 @@ const regHandler = (path = ''): XinProxyHandler => ({
   // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
   // as you'd expect
   get (target: XinObject | XinArray, _prop: string | symbol): XinValue {
+    if (_prop === xinPath) {
+      return path
+    } else if (_prop === xinValue) {
+      return target
+    }
     if (typeof _prop === 'symbol') {
       // @ts-expect-error
       return target[_prop]
@@ -57,12 +64,6 @@ const regHandler = (path = ''): XinProxyHandler => ({
       const currentPath = extendPath(path, basePath)
       const value = getByPath(target, basePath)
       return value !== null && typeof value === 'object' ? new Proxy<XinObject, XinProxyObject>(value, regHandler(currentPath))[subPath] : value
-    }
-    if (prop === '_xinPath') {
-      return path
-    }
-    if (prop === '_xinValue') {
-      return target
     }
     if (prop.startsWith('[') && prop.endsWith(']')) {
       prop = prop.substring(1, prop.length - 1)
@@ -108,16 +109,17 @@ const regHandler = (path = ''): XinProxyHandler => ({
   },
   set (_, prop: string, value: any) {
     // eslint-disable-next-line
-    if (value?._xinPath) {
-      value = value._xinValue
+    if (value != null && value[xinPath]) {
+      value = value[xinValue]
     }
     const fullPath = extendPath(path, prop)
     if (debugPaths && !isValidPath(fullPath)) {
       throw new Error(`setting invalid path ${fullPath}`)
     }
-    let existing: any = xin[fullPath]
-    if ((existing as XinProxy)?._xinValue != null) {
-      existing = existing._xinValue
+    let existing = xin[fullPath] as XinProxy
+    // eslint-disable-next-line
+    if (existing != null && existing[xinValue] != null) {
+      existing = existing[xinValue] as XinProxy
     }
     if (existing !== value && setByPath(registry, fullPath, value)) {
       touch(fullPath)

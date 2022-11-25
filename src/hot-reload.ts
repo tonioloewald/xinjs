@@ -1,4 +1,4 @@
-import { xin, observe } from './xin'
+import { xin, observe, xinValue } from './xin'
 import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { debounce } from './throttle'
 
@@ -17,7 +17,7 @@ export const hotReload = (test: PathTestFunction = () => true): void => {
 
   const saveState = debounce(() => {
     const obj: XinObject = {}
-    const state = xin._xinValue
+    const state = xin[xinValue] as XinObject
     for (const key of Object.keys(state).filter(test)) {
       obj[key] = state[key]
     }

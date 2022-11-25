@@ -1,5 +1,5 @@
 import { settings } from './settings'
-import { xin } from './xin'
+import { xin, xinValue, xinPath } from './xin'
 import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding } from './metadata'
 import { XinObject } from './xin-types'
 
@@ -46,7 +46,6 @@ class ListBinding {
       if (template.content.children.length !== 1) {
         throw new Error('ListBinding expects a template with exactly one child element')
       }
-      template.remove()
       this.template = cloneWithBindings(template.content.children[0]) as HTMLElement
     } else {
       this.template = boundElement.children[0] as HTMLElement
@@ -62,7 +61,7 @@ class ListBinding {
 
     const { initInstance, updateInstance } = this.options
     // @ts-expect-error
-    const arrayPath: string = array._xinPath
+    const arrayPath: string = array[xinPath]
 
     let removed = 0
     let moved = 0
@@ -88,13 +87,13 @@ class ListBinding {
       if (item === undefined) {
         continue
       }
-      let element = this.itemToElement.get(item._xinValue)
+      let element = this.itemToElement.get(item[xinValue])
       if (element == null) {
         created++
         element = cloneWithBindings(this.template) as HTMLElement
         if (typeof item === 'object') {
-          this.itemToElement.set(item._xinValue, element)
-          elementToItem.set(element, item._xinValue)
+          this.itemToElement.set(item[xinValue], element)
+          elementToItem.set(element, item[xinValue])
         }
         this.boundElement.append(element)
         if (idPath != null) {

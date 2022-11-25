@@ -1,6 +1,6 @@
 import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars} from '../../src/index'
 
-const {h1, ul, template, li, form, label, span, input, button} = elements
+const {h1, div, template, form, label, span, input, button} = elements
 
 type Reminder = {
   id: number
@@ -37,16 +37,22 @@ class Todo {
 
 xin.todoApp = new Todo() as unknown as XinProxyObject
 
+const flex = { display: 'flex', gap: vars.spacing50 }
+const stack = { ...flex, flexDirection: 'column' }
+const elastic = { flex: '1 1 auto' }
+const padded = { padding: `${vars.spacing} ${vars.spacing200}`  }
+const rounded = { borderRadius: vars.roundedRadius }
+
 export const todo = makeComponent(
   {
-    style: {
-      padding: `${vars.spacing} ${vars.spacing200}`
-    }
+    style: { ...padded, ...stack }
   },
-  h1('To Do'),
-  ul(template(
-    li(
-      span({ bindText: '^.reminder' }),
+  h1('To Do', {style: {color: vars.brandColor}}),
+  div(
+    { style: {...stack} },
+    template(div(
+      { style: {...flex }},
+      span({ bindText: '^.reminder', style: elastic }),
       button(span('✕'), {title: 'delete', onClick(event){
         const item = getListItem(event.target as HTMLElement)
         // @ts-ignore-error
@@ -57,6 +63,7 @@ export const todo = makeComponent(
     { bindList: {value: xin.todoApp.list, idPath: 'id'} }
   ),
   form(
+    { style: flex },
     {
       onSubmit(event){
         // @ts-ignore-error
@@ -65,10 +72,7 @@ export const todo = makeComponent(
         event.preventDefault()
       }
     },
-    label(
-      span('Reminder'),
-      input({ bindValue: 'todoApp.newItem.reminder' })
-    ),
+    input({ style: elastic, placeholder: 'reminder', bindValue: 'todoApp.newItem.reminder' }),
     button('Add Item', { bindEnabled: 'todoApp.newItem.reminder' })
   )
 )

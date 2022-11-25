@@ -1,4 +1,4 @@
-import {xin, elements, touch, makeWebComponent, XinProxyObject, XinArray, XinBindingSpec} from '../src/index'
+import {xin, elements, touch, makeWebComponent, XinProxyObject, XinArray, xinValue} from '../src/index'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
@@ -125,7 +125,7 @@ export const arrayBindingTest = (...args) => div(
       onClick() {
         console.log('modify')
         // @ts-expect-error
-        for(const item of xin.colors.items._xinValue) {
+        for(const item of xin.colors.items[xinValue]) {
           if(Math.random() < 0.1) {
             item.color = randomColor() 
           }
@@ -138,7 +138,7 @@ export const arrayBindingTest = (...args) => div(
       onClick() {
         console.log('scramble and modify')
         // @ts-expect-error
-        for(const item of xin.colors.items._xinValue) {
+        for(const item of xin.colors.items[xinValue]) {
           if(Math.random() < 0.1) {
             item.color = randomColor() 
           }

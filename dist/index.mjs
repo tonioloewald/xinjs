@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 
+const xinPath = Symbol('xin-path');
+const xinValue = Symbol('xin-value');
+
 const settings = {
     debug: false,
     perf: false
@@ -11,7 +14,7 @@ const touchedPaths = [];
 let updateTriggered = false;
 let resolveUpdate;
 const getPath = (what) => {
-    return typeof what === 'object' ? what._xinPath : what;
+    return typeof what === 'object' ? what[xinPath] : what;
 };
 class Listener {
     constructor(test, callback) {
@@ -370,6 +373,12 @@ const regHandler = (path = '') => ({
     // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
     // as you'd expect
     get(target, _prop) {
+        if (_prop === xinPath) {
+            return path;
+        }
+        else if (_prop === xinValue) {
+            return target;
+        }
         if (typeof _prop === 'symbol') {
             // @ts-expect-error
             return target[_prop];
@@ -384,12 +393,6 @@ const regHandler = (path = '') => ({
             const currentPath = extendPath(path, basePath);
             const value = getByPath(target, basePath);
             return value !== null && typeof value === 'object' ? new Proxy(value, regHandler(currentPath))[subPath] : value;
-        }
-        if (prop === '_xinPath') {
-            return path;
-        }
-        if (prop === '_xinValue') {
-            return target;
         }
         if (prop.startsWith('[') && prop.endsWith(']')) {
             prop = prop.substring(1, prop.length - 1);
@@ -436,16 +439,17 @@ const regHandler = (path = '') => ({
     },
     set(_, prop, value) {
         // eslint-disable-next-line
-        if (value?._xinPath) {
-            value = value._xinValue;
+        if (value != null && value[xinPath]) {
+            value = value[xinValue];
         }
         const fullPath = extendPath(path, prop);
         if (!isValidPath(fullPath)) {
             throw new Error(`setting invalid path ${fullPath}`);
         }
         let existing = xin[fullPath];
-        if (existing?._xinValue != null) {
-            existing = existing._xinValue;
+        // eslint-disable-next-line
+        if (existing != null && existing[xinValue] != null) {
+            existing = existing[xinValue];
         }
         if (existing !== value && setByPath(registry, fullPath, value)) {
             touch(fullPath);
@@ -899,7 +903,7 @@ const hotReload = (test = () => true) => {
     }
     const saveState = debounce(() => {
         const obj = {};
-        const state = xin._xinValue;
+        const state = xin[xinValue];
         for (const key of Object.keys(state).filter(test)) {
             obj[key] = state[key];
         }
@@ -908,6 +912,111 @@ const hotReload = (test = () => true) => {
     }, 500);
     observe(test, saveState);
 };
+
+const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
+function clamp(min, v, max) {
+    return v < min ? min : (v > max ? max : v);
+}
+function lerp(a, b, t) {
+    t = clamp(0, t, 1);
+    return t * (b - a) + a;
+}
+const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } };
+class HslColor {
+    constructor(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const l = Math.max(r, g, b);
+        const s = l - Math.min(r, g, b);
+        const h = s !== 0
+            ? l === r
+                ? (g - b) / s
+                : l === g
+                    ? 2 + (b - r) / s
+                    : 4 + (r - g) / s
+            : 0;
+        this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h;
+        this.s = 100 * (s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0);
+        this.l = (100 * (2 * l - s)) / 2;
+    }
+}
+class Color {
+    static fromCss(spec) {
+        span.style.color = spec;
+        const converted = span.style.color;
+        const [r, g, b, a] = converted.match(/[\d.]+/g);
+        return new Color(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
+    }
+    constructor(r, g, b, a = 1) {
+        this.r = clamp(0, r, 255);
+        this.g = clamp(0, g, 255);
+        this.b = clamp(0, b, 255);
+        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
+    }
+    get inverse() {
+        return new Color(255 - this.r, 255 - this.g, 255 - this.b, this.a);
+    }
+    get inverseLuminance() {
+        const { h, s, l } = this._hsl;
+        return Color.fromCss(`hsla(${h}, ${s}, ${1 - l}, ${this.a})`);
+    }
+    get rgb() {
+        const { r, g, b } = this;
+        return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
+    }
+    get rgba() {
+        const { r, g, b, a } = this;
+        return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
+    }
+    get _hsl() {
+        if (this._hslCached == null) {
+            this._hslCached = new HslColor(this.r, this.g, this.b);
+        }
+        return this._hslCached;
+    }
+    get hsl() {
+        const { h, s, l } = this._hsl;
+        return `hsl(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`;
+    }
+    get hsla() {
+        const { h, s, l } = this._hsl;
+        return `hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`;
+    }
+    get mono() {
+        const v = this.brightness * 255;
+        return new Color(v, v, v);
+    }
+    get brightness() {
+        // http://www.itu.int/rec/R-REC-BT.601
+        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
+    }
+    get html() {
+        return this.a === 1 ? '#' + hex2(this.r) + hex2(this.g) + hex2(this.b) : '#' + hex2(this.r) + hex2(this.g) + hex2(this.b) + hex2(Math.floor(255 * this.a));
+    }
+    brighten(amount) {
+        let { h, s, l } = this._hsl;
+        l = clamp(0, l + amount, 1);
+        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`);
+    }
+    saturate(amount) {
+        let { h, s, l } = this._hsl;
+        s = clamp(0, s + amount, 1);
+        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`);
+    }
+    rotate(amount) {
+        let { h, s, l } = this._hsl;
+        h = (h + 360 + amount) % 360;
+        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`);
+    }
+    opacity(alpha) {
+        const { h, s, l } = this._hsl;
+        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${alpha.toFixed(2)})`);
+    }
+    blend(otherColor, t) {
+        return new Color(lerp(this.r, otherColor.r, t), lerp(this.g, otherColor.g, t), lerp(this.b, otherColor.b, t), lerp(this.a, otherColor.a, t));
+    }
+}
 
 function deepClone(obj) {
     if (obj == null || typeof obj !== 'object') {
@@ -983,8 +1092,8 @@ observe(() => true, (changedPath) => {
             if (toDOM != null) {
                 if (path.startsWith('^')) {
                     const dataSource = getListItem(element);
-                    if (dataSource != null && dataSource._xinPath != null) {
-                        path = dataBinding.path = `${dataSource._xinPath}${path.substring(1)}`;
+                    if (dataSource != null && dataSource[xinPath] != null) {
+                        path = dataBinding.path = `${dataSource[xinPath]}${path.substring(1)}`;
                     }
                     else {
                         console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list');
@@ -1018,11 +1127,16 @@ const handleChange = (event) => {
                 if (value != null) {
                     const existing = xin[path];
                     // eslint-disable-next-line
-                    const existingActual = existing?._xinPath || existing;
-                    // eslint-disable-next-line
-                    const valueActual = value?._xinPath || value;
-                    if (valueActual != null && existingActual !== valueActual) {
-                        xin[path] = valueActual;
+                    if (existing == null) {
+                        xin[path] = value;
+                    }
+                    else {
+                        // @ts-expect-error-error
+                        const existingActual = existing[xinPath] != null ? existing[xinValue] : existing;
+                        const valueActual = value[xinPath] != null ? value[xinValue] : value;
+                        if (existingActual !== valueActual) {
+                            xin[path] = valueActual;
+                        }
                     }
                 }
             }
@@ -1039,14 +1153,14 @@ const bind = (element, what, binding, options) => {
         throw new Error('bind cannot bind to a DocumentFragment');
     }
     let path;
-    if (typeof what === 'object' && what._xinPath === undefined && options === undefined) {
+    if (typeof what === 'object' && what[xinPath] === undefined && options === undefined) {
         const { value } = what;
-        path = typeof value === 'string' ? value : value._xinPath;
+        path = typeof value === 'string' ? value : value[xinPath];
         options = what;
         delete options.value;
     }
     else {
-        path = typeof what === 'string' ? what : what._xinPath;
+        path = typeof what === 'string' ? what : what[xinPath];
     }
     if (path == null) {
         throw new Error('bind requires a path or object with xin Proxy');
@@ -1159,7 +1273,6 @@ class ListBinding {
             if (template.content.children.length !== 1) {
                 throw new Error('ListBinding expects a template with exactly one child element');
             }
-            template.remove();
             this.template = cloneWithBindings(template.content.children[0]);
         }
         else {
@@ -1174,7 +1287,7 @@ class ListBinding {
         }
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
-        const arrayPath = array._xinPath;
+        const arrayPath = array[xinPath];
         let removed = 0;
         let moved = 0;
         let created = 0;
@@ -1198,13 +1311,13 @@ class ListBinding {
             if (item === undefined) {
                 continue;
             }
-            let element = this.itemToElement.get(item._xinValue);
+            let element = this.itemToElement.get(item[xinValue]);
             if (element == null) {
                 created++;
                 element = cloneWithBindings(this.template);
                 if (typeof item === 'object') {
-                    this.itemToElement.set(item._xinValue, element);
-                    elementToItem.set(element, item._xinValue);
+                    this.itemToElement.set(item[xinValue], element);
+                    elementToItem.set(element, item[xinValue]);
                 }
                 this.boundElement.append(element);
                 if (idPath != null) {
@@ -1440,10 +1553,41 @@ const vars = new Proxy({}, {
     get(target, prop) {
         if (target[prop] == null) {
             prop = prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`);
-            const [, varName, isNegative, scaleText] = prop.match(/^([^\d_]*)(_)?(\d+)?$/);
+            const [, varName, , isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/);
             if (scaleText != null) {
                 const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100;
-                target[prop] = `calc(var(--${varName}) * ${scale})`;
+                switch (method) {
+                    case 'b': // brightness
+                        {
+                            const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
+                            target[prop] = Color.fromCss(baseColor).brighten(scale).rgba;
+                        }
+                        break;
+                    case 's': // saturation
+                        {
+                            const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
+                            target[prop] = Color.fromCss(baseColor).saturate(scale).rgba;
+                        }
+                        break;
+                    case 'h': // hue
+                        {
+                            const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
+                            target[prop] = Color.fromCss(baseColor).rotate(scale).rgba;
+                        }
+                        break;
+                    case 'o': // alpha
+                        {
+                            const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
+                            target[prop] = Color.fromCss(baseColor).opacity(scale).rgba;
+                        }
+                        break;
+                    case '':
+                        target[prop] = `calc(var(--${varName}) * ${scale})`;
+                        break;
+                    default:
+                        console.error(method);
+                        throw new Error(`Unrecognized method ${method} for css variable ${varName}`);
+                }
             }
             else {
                 target[prop] = `var(--${varName})`;
@@ -1741,4 +1885,4 @@ const makeWebComponent = (tagName, spec) => {
     return elements[tagName];
 };
 
-export { bind, bindings, css, elements, filter, getListItem, hotReload, initVars, makeComponent, makeWebComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, useXin, vars, xin };
+export { bind, bindings, css, elements, filter, getListItem, hotReload, initVars, makeComponent, makeWebComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, useXin, vars, xin, xinPath, xinValue };

@@ -1,4 +1,4 @@
-import {elements, camelToKabob} from '../src/elements'
+import {elements} from '../src/elements'
 import {initVars, css, vars} from '../src/css'
 const {style} = elements
 
@@ -22,6 +22,7 @@ const rules = {
     inputBorder: '1px solid #0004',
     lightBorder: '1px solid #fff4',
     darkBorder: '1px solid #0002',
+    brandColor: 'rgb(55, 0, 251)',
     roundedRadius: vars.lineHeight25
   }),
   body: {

@@ -1,5 +1,3 @@
-/* eslint new-cap: 0 */
-
 const hex2 = (n: number): string => ('00' + Math.round(Number(n)).toString(16)).slice(-2)
 
 function clamp (min: number, v: number, max: number): number {
@@ -12,6 +10,31 @@ function lerp (a: number, b: number, t: number): number {
 }
 
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } }
+
+class HslColor {
+  h: number
+  s: number
+  l: number
+
+  constructor (r: number, g: number, b: number) {
+    r /= 255
+    g /= 255
+    b /= 255
+    const l = Math.max(r, g, b)
+    const s = l - Math.min(r, g, b)
+    const h = s !== 0
+      ? l === r
+        ? (g - b) / s
+        : l === g
+          ? 2 + (b - r) / s
+          : 4 + (r - g) / s
+      : 0
+
+    this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h
+    this.s = 100 * (s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)
+    this.l = (100 * (2 * l - s)) / 2
+  }
+}
 
 export class Color {
   r: number
@@ -33,62 +56,79 @@ export class Color {
     this.a = a !== undefined ? clamp(0, a, 1) : a = 1
   }
 
-  invert (): Color {
+  get inverse (): Color {
     return new Color(255 - this.r, 255 - this.g, 255 - this.b, this.a)
   }
 
-  rgb (): string {
+  get inverseLuminance (): Color {
+    const { h, s, l } = this._hsl
+    return Color.fromCss(`hsla(${h}, ${s}, ${1 - l}, ${this.a})`)
+  }
+
+  get rgb (): string {
     const { r, g, b } = this
     return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`
   }
 
-  rgba (): string {
+  get rgba (): string {
     const { r, g, b, a } = this
     return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`
   }
 
-  _hsl (): number[] {
-    const r = this.r / 255
-    const g = this.g / 255
-    const b = this.b / 255
-    const l = Math.max(r, g, b)
-    const s = l - Math.min(r, g, b)
-    const h = s !== 0
-      ? l === r
-        ? (g - b) / s
-        : l === g
-          ? 2 + (b - r) / s
-          : 4 + (r - g) / s
-      : 0
-    return [
-      60 * h < 0 ? 60 * h + 360 : 60 * h,
-      100 * (s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0),
-      (100 * (2 * l - s)) / 2
-    ]
+  _hslCached?: HslColor
+
+  get _hsl (): HslColor {
+    if (this._hslCached == null) {
+      this._hslCached = new HslColor(this.r, this.g, this.b)
+    }
+    return this._hslCached
   }
 
-  hsl (): string {
-    const [h, s, l] = this._hsl()
-    return `hsl(${h}, ${s}, ${l})`
+  get hsl (): string {
+    const { h, s, l } = this._hsl
+    return `hsl(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`
   }
 
-  hsla (): string {
-    const [h, s, l] = this._hsl()
-    return `hsla(${h}, ${s}, ${l}, ${this.a})`
+  get hsla (): string {
+    const { h, s, l } = this._hsl
+    return `hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`
   }
 
-  mono (): Color {
-    const v = this.brightness() * 255
+  get mono (): Color {
+    const v = this.brightness * 255
     return new Color(v, v, v)
   }
 
-  brightness (): number {
+  get brightness (): number {
     // http://www.itu.int/rec/R-REC-BT.601
     return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255
   }
 
-  html (): string {
+  get html (): string {
     return this.a === 1 ? '#' + hex2(this.r) + hex2(this.g) + hex2(this.b) : '#' + hex2(this.r) + hex2(this.g) + hex2(this.b) + hex2(Math.floor(255 * this.a))
+  }
+
+  brighten (amount: number): Color {
+    let { h, s, l } = this._hsl
+    l = clamp(0, l + amount, 1)
+    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`)
+  }
+
+  saturate (amount: number): Color {
+    let { h, s, l } = this._hsl
+    s = clamp(0, s + amount, 1)
+    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`)
+  }
+
+  rotate (amount: number): Color {
+    let { h, s, l } = this._hsl
+    h = (h + 360 + amount) % 360
+    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`)
+  }
+
+  opacity (alpha: number): Color {
+    const { h, s, l } = this._hsl
+    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${alpha.toFixed(2)})`)
   }
 
   blend (otherColor: Color, t: number): Color {

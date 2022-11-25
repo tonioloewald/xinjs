@@ -1,10 +1,12 @@
 import { xin, touch, elements, hotReload, settings, matchType } from '../src/index'
+import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
 import { b3d, bSphere, bLoader, bButton, bLight, bSun } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
+import { Color } from '../src/color'
 import './style'
 import logo from '../xinjs-logo.svg'
 import readmeMd from '../readme.md'
@@ -37,10 +39,12 @@ hotReload(path => {
   return true
 })
 
-Object.assign(window, {
+Object.assign(globalThis, {
   xin,
   matchType,
-  touch
+  touch,
+  Color,
+  getElementBindings
 })
 
 const routes = ['read-me', 'todo', 'array-binding', 'word-search', 'babylon-3d']
@@ -138,6 +142,7 @@ document.body.append(div(
         }
       },
       markdownViewer({src: readmeMd, style: { padding: '20px 40px'}, dataRoute: 'read-me'}),
+      // todo({dataRoute: 'todo', hidden: true}), // TODO track down bug when same component (with list binding is inserted)
       todo({dataRoute: 'todo', hidden: true}),
       arrayBindingTest({dataRoute: 'array-binding', hidden: true}),
       wordSearch({dataRoute: 'word-search', hidden: true}),

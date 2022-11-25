@@ -2,6 +2,8 @@
 
 Incredibly simple, powerful, and efficient state management for React…
 
+https://codesandbox.io/s/xinjs-react-reminders-demo-kof9tj?file=/src/App.tsx
+
 <div style="text-align: center">
 	<a href="https://twitter.com/dan_abramov/status/1191487232038883332?s=20&t=SNcVBTK1oj45NWI29RO1Dw">
 		<img alt="Dan Abramov dissing Redux on Twitter" style="max-width: 80%" src="dan-redux-tweet.png">
