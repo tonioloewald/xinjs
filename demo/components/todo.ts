@@ -1,6 +1,6 @@
 import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars} from '../../src/index'
 
-const {h1, div, template, form, label, span, input, button} = elements
+const {h1, div, template, form, span, input, button} = elements
 
 type Reminder = {
   id: number
@@ -47,7 +47,7 @@ export const todo = makeComponent(
   {
     style: { ...padded, ...stack }
   },
-  h1('To Do', {style: {color: vars.brandColor}}),
+  h1('To Do'),
   div(
     { style: {...stack} },
     template(div(

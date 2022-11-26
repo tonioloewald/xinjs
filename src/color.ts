@@ -31,8 +31,8 @@ class HslColor {
       : 0
 
     this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h
-    this.s = 100 * (s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0)
-    this.l = (100 * (2 * l - s)) / 2
+    this.s = s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0
+    this.l = (2 * l - s) / 2
   }
 }
 
@@ -49,6 +49,10 @@ export class Color {
     return new Color(Number(r), Number(g), Number(b), a == null ? 1 : Number(a))
   }
 
+  static fromHsl (h: number, s: number, l: number, a = 1): Color {
+    return Color.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`)
+  }
+
   constructor (r: number, g: number, b: number, a = 1) {
     this.r = clamp(0, r, 255)
     this.g = clamp(0, g, 255)
@@ -62,7 +66,7 @@ export class Color {
 
   get inverseLuminance (): Color {
     const { h, s, l } = this._hsl
-    return Color.fromCss(`hsla(${h}, ${s}, ${1 - l}, ${this.a})`)
+    return Color.fromHsl(h, s, 1 - l, this.a)
   }
 
   get rgb (): string {
@@ -86,12 +90,12 @@ export class Color {
 
   get hsl (): string {
     const { h, s, l } = this._hsl
-    return `hsl(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`
+    return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`
   }
 
   get hsla (): string {
     const { h, s, l } = this._hsl
-    return `hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`
+    return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`
   }
 
   get mono (): Color {
@@ -110,25 +114,42 @@ export class Color {
 
   brighten (amount: number): Color {
     let { h, s, l } = this._hsl
-    l = clamp(0, l + amount, 1)
-    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`)
+    l = clamp(0, l + amount * (1 - l), 1)
+    return Color.fromHsl(h, s, l, this.a)
+  }
+
+  darken (amount: number): Color {
+    let { h, s, l } = this._hsl
+    l = clamp(0, l * (1 - amount), 1)
+    return Color.fromHsl(h, s, l, this.a)
   }
 
   saturate (amount: number): Color {
     let { h, s, l } = this._hsl
-    s = clamp(0, s + amount, 1)
-    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`)
+    s = clamp(0, s + amount * (1 - s), 1)
+    return Color.fromHsl(h, s, l, this.a)
+  }
+
+  desaturate (amount: number): Color {
+    let { h, s, l } = this._hsl
+    s = clamp(0, s * (1 - amount), 1)
+    return Color.fromHsl(h, s, l, this.a)
   }
 
   rotate (amount: number): Color {
     let { h, s, l } = this._hsl
     h = (h + 360 + amount) % 360
-    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`)
+    return Color.fromHsl(h, s, l, this.a)
   }
 
   opacity (alpha: number): Color {
     const { h, s, l } = this._hsl
-    return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${alpha.toFixed(2)})`)
+    return Color.fromHsl(h, s, l, alpha)
+  }
+
+  swatch (): void {
+    const { r, g, b, a } = this
+    console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, 'background-color: #eee')
   }
 
   blend (otherColor: Color, t: number): Color {

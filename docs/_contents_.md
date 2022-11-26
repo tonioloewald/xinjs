@@ -24,5 +24,6 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 5. [paths](by-path.md) - querying objects by path
 6. [bind](bind.md) — binding state to the DOM
 7. [elements](elements.md) — conveniently creating DOM elements
-8. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
-9. [react integration](useXin.md) — powering pure components via xin hooks
+8. [css](css.md) — utilities for working with css
+9. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
+10. [react integration](useXin.md) — powering pure components via xin hooks

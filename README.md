@@ -1,8 +1,8 @@
 # xinjs
 
-<div style="text-align: center">
+<div style="text-align: center; margin: 20px">
 	<a href="https://xinjs.net">
-		<img style="width: 256px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
+		<img style="width: 200px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
 	</a>
 </div>
 
@@ -12,7 +12,7 @@
 
 - simple, efficient observer pattern
 - written in TypeScript
-- incredibly lightweight
+- lightweight
 - works anywhere (browsers, node, bun, electron etc.)
 
 In particular, this means that you can do your state management *anywhere*,

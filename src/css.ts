@@ -9,16 +9,34 @@ export interface StyleMap {
   [key: string]: StyleRule
 }
 
-export const css = (obj: StyleMap): string => {
+export interface StyleSheet {
+  [key: string]: StyleRule | StyleMap
+}
+
+const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap']
+const isDimensional = (cssProp: string): boolean => {
+  (cssProp.match(/(width|height|size|margin|padding)/) != null) || dimensionalProps.includes(cssProp)
+  return dimensionalProps.includes(cssProp)
+}
+
+const renderStatement = (key: string, value: string | number | StyleRule, indentation = ''): string => {
+  const cssProp = camelToKabob(key)
+  if (typeof value === 'object') {
+    const renderedRule = Object.keys(value).map(innerKey => renderStatement(innerKey, value[innerKey], `${indentation}  `)).join('\n')
+    return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`
+  } else if (typeof value === 'number' && isDimensional(cssProp)) {
+    return `${indentation}  ${cssProp}: ${value}px;`
+  }
+  return `${indentation}  ${cssProp}: ${value};`
+}
+
+export const css = (obj: StyleSheet | StyleMap, indentation = ''): string => {
   const selectors = Object.keys(obj).map((selector) => {
     const body = obj[selector]
     const rule = Object.keys(body)
-      .map((prop) => {
-        const value = body[prop]
-        return `  ${camelToKabob(prop)}: ${typeof value === 'number' ? String(value) + 'px' : value};`
-      })
+      .map(prop => renderStatement(prop, body[prop]))
       .join('\n')
-    return `${selector} {\n${rule}\n}`
+    return `${indentation}${selector} {\n${rule}\n}`
   })
   return selectors.join('\n\n')
 }
@@ -32,24 +50,37 @@ export const initVars = (obj: StyleRule): StyleRule => {
   return rule
 }
 
+export const darkMode = (obj: StyleRule): StyleRule => {
+  const rule: StyleRule = {}
+  for (const key of Object.keys(obj)) {
+    let value = obj[key]
+    if (typeof value === 'string' && value.match(/^(#|rgb[a]?\(|hsl[a]?\()/) != null) {
+      value = Color.fromCss(value).inverseLuminance.html
+      rule[`--${camelToKabob(key)}`] = value
+    }
+  }
+  return rule
+}
+
 export const vars = new Proxy<{ [key: string]: string }>({}, {
   get (target, prop: string) {
     if (target[prop] == null) {
       prop = prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`)
-      const [,varName,, isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/) as string[]
+      let [,varName,, isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/) as string[]
+      varName = `--${varName}`
       if (scaleText != null) {
         const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100
         switch (method) {
-          case 'b': // brightness
+          case 'b': // brighten
             {
               const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
-              target[prop] = Color.fromCss(baseColor).brighten(scale).rgba
+              target[prop] = scale > 0 ? Color.fromCss(baseColor).brighten(scale).rgba : Color.fromCss(baseColor).darken(-scale).rgba
             }
             break
-          case 's': // saturation
+          case 's': // saturate
             {
               const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
-              target[prop] = Color.fromCss(baseColor).saturate(scale).rgba
+              target[prop] = scale > 0 ? Color.fromCss(baseColor).saturate(scale).rgba : Color.fromCss(baseColor).desaturate(-scale).rgba
             }
             break
           case 'h': // hue
@@ -65,14 +96,14 @@ export const vars = new Proxy<{ [key: string]: string }>({}, {
             }
             break
           case '':
-            target[prop] = `calc(var(--${varName}) * ${scale})`
+            target[prop] = `calc(var(${varName}) * ${scale})`
             break
           default:
             console.error(method)
             throw new Error(`Unrecognized method ${method} for css variable ${varName}`)
         }
       } else {
-        target[prop] = `var(--${varName})`
+        target[prop] = `var(${varName})`
       }
     }
     return target[prop]

@@ -937,8 +937,8 @@ class HslColor {
                     : 4 + (r - g) / s
             : 0;
         this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h;
-        this.s = 100 * (s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0);
-        this.l = (100 * (2 * l - s)) / 2;
+        this.s = s !== 0 ? (l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s))) : 0;
+        this.l = (2 * l - s) / 2;
     }
 }
 class Color {
@@ -947,6 +947,9 @@ class Color {
         const converted = span.style.color;
         const [r, g, b, a] = converted.match(/[\d.]+/g);
         return new Color(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
+    }
+    static fromHsl(h, s, l, a = 1) {
+        return Color.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
     }
     constructor(r, g, b, a = 1) {
         this.r = clamp(0, r, 255);
@@ -959,7 +962,7 @@ class Color {
     }
     get inverseLuminance() {
         const { h, s, l } = this._hsl;
-        return Color.fromCss(`hsla(${h}, ${s}, ${1 - l}, ${this.a})`);
+        return Color.fromHsl(h, s, 1 - l, this.a);
     }
     get rgb() {
         const { r, g, b } = this;
@@ -977,11 +980,11 @@ class Color {
     }
     get hsl() {
         const { h, s, l } = this._hsl;
-        return `hsl(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`;
+        return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`;
     }
     get hsla() {
         const { h, s, l } = this._hsl;
-        return `hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`;
+        return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`;
     }
     get mono() {
         const v = this.brightness * 255;
@@ -996,22 +999,36 @@ class Color {
     }
     brighten(amount) {
         let { h, s, l } = this._hsl;
-        l = clamp(0, l + amount, 1);
-        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`);
+        l = clamp(0, l + amount * (1 - l), 1);
+        return Color.fromHsl(h, s, l, this.a);
+    }
+    darken(amount) {
+        let { h, s, l } = this._hsl;
+        l = clamp(0, l * (1 - amount), 1);
+        return Color.fromHsl(h, s, l, this.a);
     }
     saturate(amount) {
         let { h, s, l } = this._hsl;
-        s = clamp(0, s + amount, 1);
-        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`);
+        s = clamp(0, s + amount * (1 - s), 1);
+        return Color.fromHsl(h, s, l, this.a);
+    }
+    desaturate(amount) {
+        let { h, s, l } = this._hsl;
+        s = clamp(0, s * (1 - amount), 1);
+        return Color.fromHsl(h, s, l, this.a);
     }
     rotate(amount) {
         let { h, s, l } = this._hsl;
         h = (h + 360 + amount) % 360;
-        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${this.a.toFixed(2)})`);
+        return Color.fromHsl(h, s, l, this.a);
     }
     opacity(alpha) {
         const { h, s, l } = this._hsl;
-        return Color.fromCss(`hsla(${h.toFixed(0)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%, ${alpha.toFixed(2)})`);
+        return Color.fromHsl(h, s, l, alpha);
+    }
+    swatch() {
+        const { r, g, b, a } = this;
+        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, 'background-color: #eee');
     }
     blend(otherColor, t) {
         return new Color(lerp(this.r, otherColor.r, t), lerp(this.g, otherColor.g, t), lerp(this.b, otherColor.b, t), lerp(this.a, otherColor.a, t));
@@ -1528,16 +1545,29 @@ const elements = new Proxy(_elements, {
     }
 });
 
-const css = (obj) => {
+const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap'];
+const isDimensional = (cssProp) => {
+    (cssProp.match(/(width|height|size|margin|padding)/) != null) || dimensionalProps.includes(cssProp);
+    return dimensionalProps.includes(cssProp);
+};
+const renderStatement = (key, value, indentation = '') => {
+    const cssProp = camelToKabob(key);
+    if (typeof value === 'object') {
+        const renderedRule = Object.keys(value).map(innerKey => renderStatement(innerKey, value[innerKey], `${indentation}  `)).join('\n');
+        return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
+    }
+    else if (typeof value === 'number' && isDimensional(cssProp)) {
+        return `${indentation}  ${cssProp}: ${value}px;`;
+    }
+    return `${indentation}  ${cssProp}: ${value};`;
+};
+const css = (obj, indentation = '') => {
     const selectors = Object.keys(obj).map((selector) => {
         const body = obj[selector];
         const rule = Object.keys(body)
-            .map((prop) => {
-            const value = body[prop];
-            return `  ${camelToKabob(prop)}: ${typeof value === 'number' ? String(value) + 'px' : value};`;
-        })
+            .map(prop => renderStatement(prop, body[prop]))
             .join('\n');
-        return `${selector} {\n${rule}\n}`;
+        return `${indentation}${selector} {\n${rule}\n}`;
     });
     return selectors.join('\n\n');
 };
@@ -1553,20 +1583,21 @@ const vars = new Proxy({}, {
     get(target, prop) {
         if (target[prop] == null) {
             prop = prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`);
-            const [, varName, , isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/);
+            let [, varName, , isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/);
+            varName = `--${varName}`;
             if (scaleText != null) {
                 const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100;
                 switch (method) {
-                    case 'b': // brightness
+                    case 'b': // brighten
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
-                            target[prop] = Color.fromCss(baseColor).brighten(scale).rgba;
+                            target[prop] = scale > 0 ? Color.fromCss(baseColor).brighten(scale).rgba : Color.fromCss(baseColor).darken(-scale).rgba;
                         }
                         break;
-                    case 's': // saturation
+                    case 's': // saturate
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
-                            target[prop] = Color.fromCss(baseColor).saturate(scale).rgba;
+                            target[prop] = scale > 0 ? Color.fromCss(baseColor).saturate(scale).rgba : Color.fromCss(baseColor).desaturate(-scale).rgba;
                         }
                         break;
                     case 'h': // hue
@@ -1582,7 +1613,7 @@ const vars = new Proxy({}, {
                         }
                         break;
                     case '':
-                        target[prop] = `calc(var(--${varName}) * ${scale})`;
+                        target[prop] = `calc(var(${varName}) * ${scale})`;
                         break;
                     default:
                         console.error(method);
@@ -1590,7 +1621,7 @@ const vars = new Proxy({}, {
                 }
             }
             else {
-                target[prop] = `var(--${varName})`;
+                target[prop] = `var(${varName})`;
             }
         }
         return target[prop];

@@ -1,4 +1,4 @@
-import {elements, makeWebComponent} from '../../src/index'
+import {elements, makeWebComponent, vars} from '../../src/index'
 const {label, slot, input} = elements
 
 export const labeledInput = makeWebComponent('labeled-input', {
@@ -6,23 +6,25 @@ export const labeledInput = makeWebComponent('labeled-input', {
     ':host > label': {
       display: 'inline-flex',
       flexDirection: 'var(--flex-direction, row)',
-      gap: 'calc(0.5 * var(--item-spacing))',
-      lineHeight: 'var(--line-height)',
+      gap: vars.spacing50,
+      lineHeight: vars.lineHeight,
       alignItems: 'center',
     },
     ':host *': {
-      fontSize: 'var(--font-size)',
+      fontSize: vars.fontSize,
       whiteSpace: 'nowrap'
     },
     ':host input': {
-      border: 'var(--input-border)',
-      padding: '0 var(--spacing)',
-      lineHeight: 'var(--lineHeight)',
-      borderRadius: 'calc(0.5 * var(--rounded-radius))',
-      width: 'var(--input-width)'
+      border: 0,
+      padding: `0 ${vars.spacing75}`,
+      background: vars.inputBg,
+      color: vars.textColor,
+      lineHeight: vars.lineHeight,
+      borderRadius: vars.roundedRadius50,
+      width: vars.inputWidth
     },
     ':host input[type="number"]': {
-      paddingRight: 'calc(var(--spacing) * 0.5)'
+      paddingRight: vars.spacing50
     }
   },
   attributes: {

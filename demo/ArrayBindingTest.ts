@@ -1,4 +1,4 @@
-import {xin, elements, touch, makeWebComponent, XinProxyObject, XinArray, xinValue} from '../src/index'
+import {xin, elements, touch, makeWebComponent, XinProxyObject, XinArray, xinValue, vars} from '../src/index'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
@@ -13,7 +13,7 @@ const makeItems = (howMany: number): XinArray => {
       id,
       color: randomColor(),
     })
-  } 
+  }
   return items
 }
 
@@ -36,8 +36,9 @@ const colorSwatch = makeWebComponent('color-swatch', {
       margin: '5px',
       gap: '10px',
       width: '240px',
-      background: 'var(--input-bg)',
-      '--input-width': '140px'
+      background: vars.inputBg,
+      '--input-width': '140px',
+      alignItems: 'center'
     },
     ':host > span': {
       display: 'inline-block',

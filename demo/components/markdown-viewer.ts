@@ -1,4 +1,4 @@
-import { makeWebComponent } from "../../src";
+import { makeWebComponent, vars } from "../../src";
 import { marked } from 'marked'
 
 export const markdownViewer = makeWebComponent('markdown-viewer', {
@@ -6,7 +6,7 @@ export const markdownViewer = makeWebComponent('markdown-viewer', {
     ':host': {
       '--doc-bg': 'white',
       display: 'block',
-      background: 'var(--doc-bg)',
+      background: vars.docBg,
     },
     '::slotted(blockquote), ::slotted(pre)': {
       padding: 'var(--spacing, 20px)'

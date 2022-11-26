@@ -1,4 +1,4 @@
-import { xin, touch, elements, hotReload, settings, matchType } from '../src/index'
+import { xin, touch, elements, hotReload, settings, matchType, vars } from '../src/index'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
@@ -22,7 +22,7 @@ console.time('total')
 
 settings.perf = true
 
-const {img, h1, div, span, style, button} = elements
+const {img, h1, div, span, style, button, a} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
@@ -44,6 +44,7 @@ Object.assign(globalThis, {
   matchType,
   touch,
   Color,
+  vars,
   getElementBindings
 })
 
@@ -55,6 +56,9 @@ function showRoute () {
   for(const element of routedElements) {
     element.toggleAttribute('hidden', element.dataset?.route !== route)
   }
+  [...document.querySelectorAll('a')].forEach((a) => {
+    a.classList.toggle('current-route', a.href === window.location.href)
+  })
 }
 
 window.addEventListener('popstate', showRoute)
@@ -66,8 +70,7 @@ const appBar = () => span(
       height: '44px',
       padding: '0 8px',
       alignItems: 'center',
-      flex: '0 0 60px',
-      borderBottom: 'var(--dark-border)'
+      flex: '0 0 60px'
     }
   },
   img({
@@ -92,7 +95,7 @@ const appBar = () => span(
   span({style: {flex: '1 1 auto'}}),
   button('settings', {
     onClick() {
-      document.querySelector('.settings').showModal()
+      (document.querySelector('.settings') as HTMLDialogElement).showModal()
     }
   })
 )
@@ -116,14 +119,15 @@ document.body.append(div(
         style: {
           display: 'flex',
           flexDirection: 'column',
-          flex: '0 0 180px',
-          borderRight: 'var(--dark-border)'
+          flex: '0 0 180px'
         }
       },
-      ...routes.map(route => button(
+      ...routes.map(route => a(
         route.replace(/\-/g, ' '),
         {
-          onClick() {
+          href: `?${route}`,
+          onClick(event: Event) {
+            event.preventDefault()
             const newUrl = window.location.href.split('?')[0] + '?' + route
             window.history.pushState({}, route, newUrl)
             showRoute()
