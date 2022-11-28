@@ -1,8 +1,9 @@
 import {elements, makeWebComponent, Color} from '../../src/index'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
-import { SkyMaterial } from 'babylonjs-materials'
+import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import { GLTFFileLoader } from 'babylonjs-loaders'
+import waterbump from '../assets/waterbump.png'
 
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
 BABYLON.SceneLoaderFlags.ShowLoadingScreen = false
@@ -31,7 +32,7 @@ export const b3d = makeWebComponent('b-3d', {
   },
   attributes: {
     glowLayerIntensity: 0,
-    frameRate: 90
+    frameRate: 30
   },
   props: {
     BABYLON,
@@ -40,7 +41,8 @@ export const b3d = makeWebComponent('b-3d', {
     camera: null,
     gui: null,
     shadowGenerators: [],
-    renderInterval: null
+    renderInterval: null,
+    lastRender: Date.now()
   },
   content: [
     canvas({dataRef: 'canvas'}),
@@ -61,19 +63,13 @@ export const b3d = makeWebComponent('b-3d', {
     },
     async processMeshes(...meshes: BABYLON.Mesh[]) {
       for (const mesh of meshes) {
-        for(const generator of this.shadowGenerators) {
-          generator.addShadowCaster(mesh)
+        if (!mesh.name.includes('noshadow')) {
+          for(const generator of this.shadowGenerators) {
+            generator.addShadowCaster(mesh)
+          }
         }
       }
     },
-    renderFrame() {
-      if(this.scene) {
-        if (!this.hidden) {
-          this.scene.render()
-        }
-        setTimeout(() => this.renderFrame(), 1000 / this.frameRate)
-      }
-    }
   },
   eventHandlers: {
     resize() {
@@ -89,7 +85,15 @@ export const b3d = makeWebComponent('b-3d', {
     this.camera.setTarget(BABYLON.Vector3.Zero())
     this.camera.attachControl(canvas, false)
     
-    this.renderFrame()  
+    this.engine.runRenderLoop(() => {
+      if (this.scene != null && !this.hidden) {
+        const now = Date.now()
+        if (now - this.lastRender >= 1000/this.frameRate) {
+          this.lastRender = now
+          this.scene.render()
+        }
+      }
+    })
   },
   render() {
     if (this.glowLayerIntensity > 0) {
@@ -154,12 +158,12 @@ export const bGround = makeWebComponent('b-ground', {
     updatable: false,
     x: 0,
     y: 0,
-    z: 0
+    z: 0,
+    receiveShadows: true,
   },
   props: {
     owner: null,
     mesh: null,
-    receiveShadows: true,
   },
   connectedCallback () {
     this.owner = this.closest('b-3d')
@@ -200,7 +204,6 @@ export const bLoader = makeWebComponent('b-loader', {
   props: {
     owner: null,
     meshes: [] as BABYLON.Mesh[],
-    reflective: [],
     probes: [],
     receiveShadows: true
   },
@@ -236,8 +239,10 @@ export const bLoader = makeWebComponent('b-loader', {
         for(const mesh of loaded.meshes) {
           if (!existingMeshes.includes(mesh)) {
             this.meshes.push(mesh)
-            mesh.receiveShadows = this.receiveShadows
-            if (this.reflective.includes(mesh.name)) {
+            if (!mesh.name.includes('noshadow')) {
+              mesh.receiveShadows = this.receiveShadows
+            }
+            if (mesh.name.includes('mirror')) {
               this.makeReflective(mesh)
             }
           }
@@ -419,13 +424,13 @@ export const bSkybox = makeWebComponent('b-skybox', {
     realtimeScale: 100, // rate at which to automatically advance timeOfDay
     sunColor: '#eef',
     duskColor: '#fa2',
-    moonColor: '#88f'
+    moonColor: '#224',
+    moonIntensity: 0.02,
   },
   props: {
     owner: null,
     skybox: null,
-    material: null,
-    raleigh: 2,
+    rayleigh: 2,
     mieDirectionalG: 0.8,
     mieCoefficient: 0.005,
     size: 1000,
@@ -440,9 +445,7 @@ export const bSkybox = makeWebComponent('b-skybox', {
         const axis = new BABYLON.Vector3(Math.sin(latitude), 0, Math.cos(latitude))
         const rotTime = BABYLON.Quaternion.RotationAxis(axis, (this.timeOfDay + 12) * Math.PI / 12)
         sunVector.rotateByQuaternionToRef(rotTime, sunVector)
-        material.sunPosition = sunVector
         material.luminance = this.luminance
-        material.inclination = this.inclination
         material.azimuth = this.azimuth
         material.mieDirectionalG = this.mieDirectionalG
         material.mieCoefficient = this.mieCoefficient
@@ -453,19 +456,21 @@ export const bSkybox = makeWebComponent('b-skybox', {
             if (this.timeOfDay > 6 && this.timeOfDay < 18) {
               const color = Color.fromCss(this.duskColor).blend(Color.fromCss(this.sunColor), intensity)
               const {light} = sun
+              material.sunPosition = sunVector
               light.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
               light.intensity = intensity
-              light.direction.x = -sunVector.x
-              light.direction.y = -sunVector.y
-              light.direction.z = -sunVector.z
+              light.direction = sunVector.scale(-1)
+              material.rayleigh = this.rayleigh
+              material.turbidity = this.turbidity
             } else {
               const color = Color.fromCss(this.moonColor)
               const {light} = sun
+              material.sunPosition = sunVector.scale(-1)
               light.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
-              light.intensity = intensity
-              light.direction.x = sunVector.x
-              light.direction.y = sunVector.y
-              light.direction.z = sunVector.z
+              light.intensity = intensity * this.moonIntensity
+              light.direction = sunVector
+              material.rayleigh = this.rayleigh * this.moonIntensity
+              material.turbidity = this.turbidity * this.moonIntensity
             }
           }
         }
@@ -477,7 +482,7 @@ export const bSkybox = makeWebComponent('b-skybox', {
       this.timeOfDay = (this.timeOfDay + this.realtimeScale / 14400) / 24 % 1 * 24
     }, 100)
     this.owner = this.closest('b-3d')
-    if (this.owner) {
+    if (this.owner != null) {
       const {size} = this
       const material = new SkyMaterial('skybox', this.owner.scene)
       material.backFaceCulling = false
@@ -503,6 +508,87 @@ export const bSkybox = makeWebComponent('b-skybox', {
 export const bWater = makeWebComponent('b-water', {
   attributes: {
     spherical: false,
-    subdivisions: 16,
+    size: 128,
+    subdivisions: 32,
+    textureSize: 1024,
+    x: 0,
+    y: 0,
+    z: 0,
+    twoSided: false,
+    normalMap: waterbump,
+    windForce: -5,
+    waveHeight: 0,
+    bumpHeight: 0.1,
+    waveLength: 0.1,
+    waterColor: '#06c',
+    colorBlendFactor: 0.1,
   },
+  props: {
+    owner: null,
+    mesh: null,
+    material: null,
+    windDirection: {x: 0.6, y: 0.8}
+  },
+  methods: {
+    update() {
+      if (this.material != null) {
+        console.log('updating')
+        const {twoSided, normalMap, windForce, windDirection, waveHeight, bumpHeight, waveLength, waterColor, colorBlendFactor, x, y, z} = this
+        this.material.backFaceCulling = !twoSided
+        this.material.bumpTexture = new BABYLON.Texture(normalMap, this.owner.scene)
+        this.material.windForce = windForce
+        this.material.windDirection = new BABYLON.Vector2(windDirection.x, windDirection.y)
+        this.material.waveHeight = waveHeight
+        this.material.waveLength = waveLength
+        this.material.bumpHeight = bumpHeight
+        if (colorBlendFactor > 0) {
+          const color = Color.fromCss(waterColor)
+          this.material.waterColor = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+        }
+        this.material.colorBlendFactor = colorBlendFactor
+        this.mesh.position.x = x
+        this.mesh.position.y = y
+        this.mesh.position.z = z
+      }
+    },
+  },
+  connectedCallback() {
+    this.owner = this.closest('b-3d')
+    if (this.owner != null) {
+      const {size, subdivisions, textureSize, spherical} = this
+      if (spherical) {
+        this.mesh = BABYLON.CreateSphere('water-noshadow', {segments: this.subdivisions, diameter: this.size}, this.owner.scene)
+      } else {
+        this.mesh = BABYLON.CreateGround('water-noshadow', {width: size, height: size, subdivisions}, this.owner.scene)
+      }
+      this.material = new WaterMaterial('water', this.owner.scene, new BABYLON.Vector2(textureSize, textureSize))
+      this.update()
+      this.mesh.material = this.material
+      setTimeout(() => {
+        const renderMeshes = ['skybox', 'ground']
+        for(const mesh of this.owner.scene.meshes) {
+          if (mesh != this.mesh) {
+            this.material.addToRenderList(mesh)
+          }
+        }
+      }, 250)
+    }
+  },
+  disconnectedCallback() {
+    if (this.mesh != null) {
+      this.mesh.dispose()
+      this.mesh = null
+    }
+    this.owner = null
+  },
+  render() {
+    this.update()
+  }
+})
+
+export const bTerrain = makeWebComponent('b-terrai', {
+  attributes: {
+    spherical: false,
+    polygonCount: 2048, // 32 x 32 x 2
+  }
 })

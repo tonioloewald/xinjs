@@ -4,13 +4,13 @@ import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
-import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox } from './components/babylon3d'
+import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
 import { Color } from '../src/color'
 import './style'
 import logo from '../xinjs-logo.svg'
 import readmeMd from '../readme.md'
-import scene from './b-frame-test.glb'
+import scene from './assets/b-frame-test.glb'
 
 /* global window, document */
 
@@ -156,11 +156,12 @@ document.body.append(div(
         bSkybox(),
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
         bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
-        bLoader({url: scene, scale: 0.5, reflective: ['Cube.001']}),
+        bLoader({url: scene, scale: 0.5}),
         bButton({caption: 'xinjs rules', x: -2, y: 1.5, action: () => {
           alert('yes it does!')
         }}),
         bLight({y: 1, z: 0.5, intensity: 0.05, diffuse: [0.5,0.5,1]}),
+        bWater({y: 0.2, twoSided: true}),
       )
     )
   ),
