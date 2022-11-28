@@ -371,38 +371,38 @@ export const bSun = makeWebComponent('b-sun', {
   },
   props: {
     owner: null,
-    sun: null,
+    light: null,
     shadowGenerator: null
   },
   connectedCallback() {
     this.owner = this.closest('b-3d')
     if (this.owner) {
-      const sun = new BABYLON.DirectionalLight(this.name, new BABYLON.Vector3(this.x, this.y, this.z), this.owner.scene)
-      const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, sun)
-      this.sun = sun
+      const light = new BABYLON.DirectionalLight(this.name, new BABYLON.Vector3(this.x, this.y, this.z), this.owner.scene)
+      const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, light)
+      this.light = light
       this.shadowGenerator = shadowGenerator
       this.owner.addShadowGenerator(this.shadowGenerator)
     }
   },
   disconnectedCallback() {
-    if (this.sun != null) {
-      this.sun.dispose()
+    if (this.light != null) {
+      this.light.dispose()
       this.owner.removeShadowGenerator(this.shadowGenerator)
-      this.sun = null
+      this.light = null
       this.shadowGenerator = null
     }
     this.owner = null
   },
   render () {
-    if (this.sun != null) {
-      const {sun, shadowGenerator} = this
-      sun.direction.x = this.x
-      sun.direction.y = this.y
-      sun.direction.z = this.z
+    if (this.light != null) {
+      const {light, shadowGenerator} = this
+      light.direction.x = this.x
+      light.direction.y = this.y
+      light.direction.z = this.z
       shadowGenerator.bias = this.bias
       shadowGenerator.normalBias = this.normalBias
-      sun.shadowMaxZ = this.shadowMaxZ
-      sun.shadowMinZ = this.shadowMinZ
+      light.shadowMaxZ = this.shadowMaxZ
+      light.shadowMinZ = this.shadowMinZ
       shadowGenerator.useContactHardeningShadow = true
       shadowGenerator.contactHardeningLightSizeUVRatio = 0.05
       shadowGenerator.setDarkness(this.shadowDarkness)
@@ -418,7 +418,7 @@ export const bSkybox = makeWebComponent('b-skybox', {
     latitude: 40, // -90 south pole to 0 equator to 90 north pole
     realtimeScale: 100, // rate at which to automatically advance timeOfDay
     sunColor: '#eef',
-    duskColor: '#ff0',
+    duskColor: '#fa2',
     moonColor: '#88f'
   },
   props: {
@@ -449,20 +449,23 @@ export const bSkybox = makeWebComponent('b-skybox', {
         if (this.owner != null) {
           const sun = this.owner.querySelector('b-sun')
           if (sun != null) {
+            const intensity = Math.min(Math.abs(this.timeOfDay - 6), Math.abs(this.timeOfDay - 18), 1)
             if (this.timeOfDay > 6 && this.timeOfDay < 18) {
-              sun.intensity = this.timeOfDay < 7 ? this.timeOfDay -6 : this.timeOfDay > 17 ? -(this.timeOfDay - 18) : 1
-              const color = Color.fromCss(this.sunColor).blend(Color.fromCss(this.duskColor), 1 - sun.intensity)
-              sun.sun.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
-              sun.sun.direction.x = -sunVector.x
-              sun.sun.direction.y = -sunVector.y
-              sun.sun.direction.z = -sunVector.z
+              const color = Color.fromCss(this.duskColor).blend(Color.fromCss(this.sunColor), intensity)
+              const {light} = sun
+              light.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+              light.intensity = intensity
+              light.direction.x = -sunVector.x
+              light.direction.y = -sunVector.y
+              light.direction.z = -sunVector.z
             } else {
               const color = Color.fromCss(this.moonColor)
-              sun.intensity = (6 - (this.timeOfDay + 6) % 12) / 24
-              sun.sun.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
-              sun.sun.direction.x = sunVector.x
-              sun.sun.direction.y = sunVector.y
-              sun.sun.direction.z = sunVector.z
+              const {light} = sun
+              light.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+              light.intensity = intensity
+              light.direction.x = sunVector.x
+              light.direction.y = sunVector.y
+              light.direction.z = sunVector.z
             }
           }
         }
