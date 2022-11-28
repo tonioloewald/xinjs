@@ -1,6 +1,7 @@
-import {elements, makeWebComponent} from '../../src/index'
+import {elements, makeWebComponent, Color} from '../../src/index'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
+import { SkyMaterial } from 'babylonjs-materials'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
@@ -205,7 +206,7 @@ export const bLoader = makeWebComponent('b-loader', {
   },
   methods: {
     makeReflective(mesh: BABYLON.Mesh) {
-      const material = mesh.material
+      const material = mesh.material as BABYLON.StandardMaterial
       if (material != null) {
         const probe = new BABYLON.ReflectionProbe("main", 512, this.owner.scene)
         try {
@@ -339,9 +340,9 @@ export const bLight = makeWebComponent('b-light', {
   disconnectedCallback() {
     if (this.light) {
       this.light.dispose()
-      this.owner = null
       this.light = null
     }
+    this.owner = null
   },
   render () {
     if (this.light != null) {
@@ -390,6 +391,7 @@ export const bSun = makeWebComponent('b-sun', {
       this.sun = null
       this.shadowGenerator = null
     }
+    this.owner = null
   },
   render () {
     if (this.sun != null) {
@@ -406,4 +408,98 @@ export const bSun = makeWebComponent('b-sun', {
       shadowGenerator.setDarkness(this.shadowDarkness)
     }
   }
+})
+
+export const bSkybox = makeWebComponent('b-skybox', {
+  attributes: {
+    turbidity: 10,
+    luminance: 1,
+    timeOfDay: 10.5, // 24h clock time
+    latitude: 40, // -90 south pole to 0 equator to 90 north pole
+    realtimeScale: 100, // rate at which to automatically advance timeOfDay
+    sunColor: '#eef',
+    duskColor: '#ff0',
+    moonColor: '#88f'
+  },
+  props: {
+    owner: null,
+    skybox: null,
+    material: null,
+    raleigh: 2,
+    mieDirectionalG: 0.8,
+    mieCoefficient: 0.005,
+    size: 1000,
+    interval: null,
+  },
+  methods: {
+    update() {
+      if (this.skybox?.material) {
+        const { material } = this.skybox
+        const latitude = this.latitude * Math.PI / 180
+        const sunVector = new BABYLON.Vector3(0, 100, 0)
+        const axis = new BABYLON.Vector3(Math.sin(latitude), 0, Math.cos(latitude))
+        const rotTime = BABYLON.Quaternion.RotationAxis(axis, (this.timeOfDay + 12) * Math.PI / 12)
+        sunVector.rotateByQuaternionToRef(rotTime, sunVector)
+        material.sunPosition = sunVector
+        material.luminance = this.luminance
+        material.inclination = this.inclination
+        material.azimuth = this.azimuth
+        material.mieDirectionalG = this.mieDirectionalG
+        material.mieCoefficient = this.mieCoefficient
+        if (this.owner != null) {
+          const sun = this.owner.querySelector('b-sun')
+          if (sun != null) {
+            if (this.timeOfDay > 6 && this.timeOfDay < 18) {
+              sun.intensity = this.timeOfDay < 7 ? this.timeOfDay -6 : this.timeOfDay > 17 ? -(this.timeOfDay - 18) : 1
+              const color = Color.fromCss(this.sunColor).blend(Color.fromCss(this.duskColor), 1 - sun.intensity)
+              sun.sun.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+              sun.sun.direction.x = -sunVector.x
+              sun.sun.direction.y = -sunVector.y
+              sun.sun.direction.z = -sunVector.z
+            } else {
+              const color = Color.fromCss(this.moonColor)
+              sun.intensity = (6 - (this.timeOfDay + 6) % 12) / 24
+              sun.sun.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+              sun.sun.direction.x = sunVector.x
+              sun.sun.direction.y = sunVector.y
+              sun.sun.direction.z = sunVector.z
+            }
+          }
+        }
+      }
+    }
+  },
+  connectedCallback() {
+    this.interval = setInterval(() => {
+      this.timeOfDay = (this.timeOfDay + this.realtimeScale / 14400) / 24 % 1 * 24
+    }, 100)
+    this.owner = this.closest('b-3d')
+    if (this.owner) {
+      const {size} = this
+      const material = new SkyMaterial('skybox', this.owner.scene)
+      material.backFaceCulling = false
+      material.useSunPosition = true
+      this.update()
+      this.skybox = BABYLON.CreateBox('skybox', { size, sideOrientation: BABYLON.Mesh.BACKSIDE }, this.owner.scene)
+      this.skybox.material = material
+    }
+  },
+  disconnectedCallback() {
+    if (this.skybox != null) {
+      this.skybox.dispose()
+      this.skybox = null
+    }
+    clearInterval(this.interval)
+    this.owner = null
+  },
+  render() {
+    this.update()
+  }
+})
+
+export const bWater = makeWebComponent('b-water', {
+  attributes: {
+    spherical: false,
+    subdivisions: 16,
+  },
 })

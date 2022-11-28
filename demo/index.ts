@@ -4,7 +4,7 @@ import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
-import { b3d, bSphere, bLoader, bButton, bLight, bSun } from './components/babylon3d'
+import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox } from './components/babylon3d'
 import { wordSearch } from './WordSearch'
 import { Color } from '../src/color'
 import './style'
@@ -152,6 +152,8 @@ document.body.append(div(
       wordSearch({dataRoute: 'word-search', hidden: true}),
       b3d(
         {dataRoute: 'babylon-3d', hidden: true, glowLayerIntensity: 1},
+        bSun({shadowMinZ: 0.1, shadowMaxZ: 100, bias: 0.001, normalBias: 0.1, shadowTextureSize: 2048}),
+        bSkybox(),
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
         bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
         bLoader({url: scene, scale: 0.5, reflective: ['Cube.001']}),
@@ -159,7 +161,6 @@ document.body.append(div(
           alert('yes it does!')
         }}),
         bLight({y: 1, z: 0.5, intensity: 0.05, diffuse: [0.5,0.5,1]}),
-        bSun({shadowMinZ: 0.1, shadowMaxZ: 100, bias: 0.003, normalBias: 0.005, shadowTextureSize: 2048})
       )
     )
   ),

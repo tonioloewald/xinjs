@@ -944,6 +944,12 @@ class HslColor {
     }
 }
 class Color {
+    constructor(r, g, b, a = 1) {
+        this.r = clamp(0, r, 255);
+        this.g = clamp(0, g, 255);
+        this.b = clamp(0, b, 255);
+        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
+    }
     static fromCss(spec) {
         span.style.color = spec;
         const converted = span.style.color;
@@ -952,12 +958,6 @@ class Color {
     }
     static fromHsl(h, s, l, a = 1) {
         return Color.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
-    }
-    constructor(r, g, b, a = 1) {
-        this.r = clamp(0, r, 255);
-        this.g = clamp(0, g, 255);
-        this.b = clamp(0, b, 255);
-        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
     }
     get inverse() {
         return new Color(255 - this.r, 255 - this.g, 255 - this.b, this.a);
@@ -1676,6 +1676,26 @@ const makeWebComponent = (tagName, spec) => {
         styleNode = elements.style(styleText);
     }
     const componentClass = class extends superClass {
+        constructor() {
+            super();
+            this._initialized = false;
+            this._changeQueued = false;
+            this._renderQueued = false;
+            this._hydrated = false;
+            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+                throw new Error('do not define an attribute named "value"; define value directly instead');
+            }
+            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
+                throw new Error('do not define a prop named "value"; define value directly instead');
+            }
+            this.initAttributes();
+            this.initProps();
+            this.initValue();
+            this.initEventHandlers();
+            this.initRefs();
+            this.queueRender();
+            this._initialized = true;
+        }
         initProps() {
             for (const prop of Object.keys(props)) {
                 let propVal = deepClone(props[prop]);
@@ -1819,26 +1839,6 @@ const makeWebComponent = (tagName, spec) => {
                 this._value = deepClone(value);
             }
         }
-        constructor() {
-            super();
-            this._initialized = false;
-            this._changeQueued = false;
-            this._renderQueued = false;
-            this._hydrated = false;
-            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
-                throw new Error('do not define an attribute named "value"; define value directly instead');
-            }
-            if (Object.prototype.hasOwnProperty.call(attributes, 'value')) {
-                throw new Error('do not define a prop named "value"; define value directly instead');
-            }
-            this.initAttributes();
-            this.initProps();
-            this.initValue();
-            this.initEventHandlers();
-            this.initRefs();
-            this.queueRender();
-            this._initialized = true;
-        }
         get value() {
             return this._value;
         }
@@ -1918,6 +1918,7 @@ const makeWebComponent = (tagName, spec) => {
     return elements[tagName];
 };
 
+exports.Color = Color;
 exports.bind = bind;
 exports.bindings = bindings;
 exports.css = css;

@@ -4,9 +4,7 @@ import { marked } from 'marked'
 export const markdownViewer = makeWebComponent('markdown-viewer', {
   style: {
     ':host': {
-      '--doc-bg': 'white',
       display: 'block',
-      background: vars.docBg,
     },
     '::slotted(blockquote), ::slotted(pre)': {
       padding: 'var(--spacing, 20px)'

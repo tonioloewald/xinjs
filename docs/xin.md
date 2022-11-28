@@ -7,6 +7,8 @@ pattern designed to be very simple and straightforward to use.
 
 ## In a nutshell
 
+[sandbox example](https://codesandbox.io/s/xintro-mh4rbj?file=/src/index.ts)
+
 Think of xin as being an `object`, so you can just assign values to it:
 
     import { xin } from 'xinjs'
