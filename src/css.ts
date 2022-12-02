@@ -15,8 +15,7 @@ export interface StyleSheet {
 
 const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap']
 const isDimensional = (cssProp: string): boolean => {
-  (cssProp.match(/(width|height|size|margin|padding)/) != null) || dimensionalProps.includes(cssProp)
-  return dimensionalProps.includes(cssProp)
+  return (cssProp.match(/(width|height|size|margin|padding|radius)/) != null) || dimensionalProps.includes(cssProp)
 }
 
 const renderStatement = (key: string, value: string | number | StyleRule, indentation = ''): string => {
