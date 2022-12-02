@@ -92,7 +92,6 @@ export const gameController = makeWebComponent('game-controller', {
         }
       }
       this.lastUpdate = Date.now()
-      console.log(Object.keys(this.state).map(key => `${key}: ${this.state[key]}`).join(', '))
     }
   },
   connectedCallback() {
