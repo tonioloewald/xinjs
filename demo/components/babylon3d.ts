@@ -5,6 +5,8 @@ import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 import waterbump from '../assets/waterbump.png'
 
+type MeshHandler = (...meshes: BABYLON.Mesh[]) => void
+
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
 BABYLON.SceneLoaderFlags.ShowLoadingScreen = false
 
@@ -40,33 +42,31 @@ export const b3d = makeWebComponent('b-3d', {
     scene: null,
     camera: null,
     gui: null,
-    shadowGenerators: [],
     renderInterval: null,
-    lastRender: Date.now()
+    lastRender: Date.now(),
+    addMeshListeners: [] as MeshHandler[],
   },
   content: [
     canvas({dataRef: 'canvas'}),
     slot()
   ],
   methods: {
-    async addShadowGenerator(generator: BABYLON.ShadowGenerator) {
-      if (!this.shadowGenerators.includes(generator)) {
-        this.shadowGenerators.push(generator)
-        this.processMeshes(...this.scene.meshes)
+    onAddMesh(callback: MeshHandler) {
+      this.addMeshListeners.push(callback)
+      for(const mesh of this.scene.meshes) {
+        callback(mesh)
       }
     },
-    async removeShadowGenerator(generator: BABYLON.ShadowGenerator) {
-      const idx = this.shadowGenerators.findIndex(generator)
+    offAddMesh(callback: MeshHandler) {
+      const idx = this.addMeshListeners.indexOf(callback)
       if (idx > -1) {
-        this.shadowGenerators.splice(idx, 1)
+        this.addMeshListeners.splice(idx, 1)
       }
     },
-    async processMeshes(...meshes: BABYLON.Mesh[]) {
-      for (const mesh of meshes) {
-        if (!mesh.name.includes('noshadow')) {
-          for(const generator of this.shadowGenerators) {
-            generator.addShadowCaster(mesh)
-          }
+    addMesh(...meshes: BABYLON.Mesh[]) {
+      for(const callback of this.addMeshListeners) {
+        for(const mesh of meshes) {
+          callback(mesh)
         }
       }
     },
@@ -80,7 +80,7 @@ export const b3d = makeWebComponent('b-3d', {
     const {canvas} = this.elementRefs
     this.engine = new BABYLON.Engine(canvas, true, {preserveDrawingBuffer: true, stencil: true})
     this.scene = new BABYLON.Scene(this.engine)
-    this.camera = new BABYLON.ArcRotateCamera('camera1', 0, 0.8, 10, new BABYLON.Vector3(-1.5, 1, -1.5), this.scene)
+    this.camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(5, 1.5, 5), this.scene)
     this.gui = new GUI.GUI3DManager(this.scene);
     this.camera.setTarget(BABYLON.Vector3.Zero())
     this.camera.attachControl(canvas, false)
@@ -132,7 +132,7 @@ export const bSphere = makeWebComponent('b-sphere', {
         diameter,
         updatable
       }, this.owner.scene)
-      this.owner.processMeshes(this.mesh)
+      this.owner.addMesh(this.mesh)
     }
   },
   disconnectedCallback () {
@@ -174,7 +174,7 @@ export const bGround = makeWebComponent('b-ground', {
         height,
         updatable
       }, this.owner.scene);
-      this.owner.processMeshes(this.mesh)
+      this.owner.addMesh(this.mesh)
     }
   },
   disconnectedCallback () {
@@ -194,37 +194,48 @@ export const bGround = makeWebComponent('b-ground', {
   }
 })
 
-export const bLoader = makeWebComponent('b-loader', {
-  attributes: {
-    name: 'mesh',
-    url: 'https://b8rjs.com/test/omnidude.glb',
-    updatable: false,
-    scale: 1,
-  },
+export const bReflections = makeWebComponent('b-reflections', {
   props: {
     owner: null,
-    meshes: [] as BABYLON.Mesh[],
     probes: [],
-    receiveShadows: true
+    refreshRate: 4
   },
   methods: {
-    makeReflective(mesh: BABYLON.Mesh) {
-      const material = mesh.material as BABYLON.StandardMaterial
-      if (material != null) {
-        const probe = new BABYLON.ReflectionProbe("main", 512, this.owner.scene)
-        try {
-          probe.attachToMesh(mesh)
-          for(const reflected of this.owner.scene.meshes) {
-            if (reflected !== mesh) {
-              probe.renderList?.push(reflected)
+    makeReflectiveCallback(...meshes: BABYLON.Mesh[]) {
+      for(const mesh of meshes) {
+        if (mesh.name.includes('mirror')) {
+          const material = mesh.material as BABYLON.StandardMaterial
+          if (material != null) {
+            const probe = new BABYLON.ReflectionProbe("main", 512, this.owner.scene)
+            probe.name = mesh.name.replace(/mirror/g, 'probe')
+            probe.refreshRate = this.refreshRate
+            try {
+              probe.attachToMesh(mesh)
+              for(const reflected of this.owner.scene.meshes) {
+                if (reflected !== mesh) {
+                  probe.renderList?.push(reflected)
+                }
+              }
+              material.reflectionTexture = probe.cubeTexture
+              material.reflectionFresnelParameters = new BABYLON.FresnelParameters()
+              material.reflectionFresnelParameters.bias = 0.02
+              this.probes.push(probe)
+            } catch (e) {
+              console.error(`Failed to make "${mesh.name}" reflective:`, e)
+            }
+          } else {
+            console.error(`Cannot make mesh "${mesh.name}" reflective: mesh has no material`)
+          }
+        } else {
+          for(const probe of this.probes) {
+            try {
+              if (probe.addToRenderList != null && !probe.renderList.includes(mesh)) {
+                probe.addToRenderList(mesh)
+              }
+            } catch(e) {
+              console.error(`Cannot add mesh ${mesh.name} to reflection probe ${probe.name}, "${e}`, {probe, mesh})
             }
           }
-          material.reflectionTexture = probe.cubeTexture
-          material.reflectionFresnelParameters = new BABYLON.FresnelParameters()
-          material.reflectionFresnelParameters.bias = 0.02
-          this.probes.push(probe)
-        } catch (e) {
-          console.log(e)
         }
       }
     }
@@ -232,22 +243,45 @@ export const bLoader = makeWebComponent('b-loader', {
   connectedCallback() {
     this.owner = this.closest('b-3d')
     if (this.owner != null) {
+      this._callback = this.makeReflectiveCallback.bind(this)
+      this.owner.onAddMesh(this._callback)
+    }
+  },
+  disconnectedCallback() {
+    if (this.owner != null) {
+      this.owner.offAddMesh(this._callback)
+      for(const probe of this.probes) {
+        probe.dispose()
+      }
+      this.probes.splice(0)
+      this.owner = null
+    }
+  }
+})
+
+export const bLoader = makeWebComponent('b-loader', {
+  attributes: {
+    url: 'https://b8rjs.com/test/omnidude.glb',
+  },
+  props: {
+    owner: null,
+    assetContainer: null,
+    meshes: [] as BABYLON.Mesh[],
+    receiveShadows: true,
+  },
+  connectedCallback() {
+    this.owner = this.closest('b-3d')
+    if (this.owner != null) {
       const {scene} = this.owner
-      const {name, url} = this
+      const {url} = this
       const existingMeshes = [...scene.meshes]
       BABYLON.SceneLoader.Append(url, undefined, scene, (loaded) => {
         for(const mesh of loaded.meshes) {
           if (!existingMeshes.includes(mesh)) {
             this.meshes.push(mesh)
-            if (!mesh.name.includes('noshadow')) {
-              mesh.receiveShadows = this.receiveShadows
-            }
-            if (mesh.name.includes('mirror')) {
-              this.makeReflective(mesh)
-            }
           }
         }
-        this.owner.processMeshes(...this.meshes)
+        this.owner.addMesh(...this.meshes)
       })
     }
   },
@@ -379,6 +413,17 @@ export const bSun = makeWebComponent('b-sun', {
     light: null,
     shadowGenerator: null
   },
+  methods: {
+    shadowCallback(...meshes: BABYLON.Mesh[]) {
+      for(const mesh of meshes) {
+        const hasShadow = !mesh.name.includes('noshadow')
+        mesh.receiveShadows = hasShadow
+        if (hasShadow) {
+          this.shadowGenerator.addShadowCaster(mesh)
+        }
+      }
+    }
+  },
   connectedCallback() {
     this.owner = this.closest('b-3d')
     if (this.owner) {
@@ -386,13 +431,14 @@ export const bSun = makeWebComponent('b-sun', {
       const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, light)
       this.light = light
       this.shadowGenerator = shadowGenerator
-      this.owner.addShadowGenerator(this.shadowGenerator)
+      this._callback = this.shadowCallback.bind(this)
+      this.owner.onAddMesh(this._callback)
     }
   },
   disconnectedCallback() {
     if (this.light != null) {
       this.light.dispose()
-      this.owner.removeShadowGenerator(this.shadowGenerator)
+      this.owner.removeShadowGenerator(this._callback)
       this.light = null
       this.shadowGenerator = null
     }
@@ -419,21 +465,21 @@ export const bSkybox = makeWebComponent('b-skybox', {
   attributes: {
     turbidity: 10,
     luminance: 1,
-    timeOfDay: 10.5, // 24h clock time
     latitude: 40, // -90 south pole to 0 equator to 90 north pole
-    realtimeScale: 100, // rate at which to automatically advance timeOfDay
+    realtimeScale: 10, // rate at which to automatically advance timeOfDay
     sunColor: '#eef',
     duskColor: '#fa2',
     moonColor: '#224',
     moonIntensity: 0.02,
-  },
-  props: {
-    owner: null,
-    skybox: null,
+    timeOfDay: 6.5, // 24h clock time
     rayleigh: 2,
     mieDirectionalG: 0.8,
     mieCoefficient: 0.005,
     size: 1000,
+  },
+  props: {
+    owner: null,
+    skybox: null,
     interval: null,
   },
   methods: {
@@ -530,6 +576,13 @@ export const bWater = makeWebComponent('b-water', {
     windDirection: {x: 0.6, y: 0.8}
   },
   methods: {
+    waterCallback(...meshes: BABYLON.Mesh[]) {
+      for (const mesh of meshes) {
+        if (!mesh.name.includes('water')) {
+          this.material.addToRenderList(mesh)
+        }
+      }
+    },
     update() {
       if (this.material != null) {
         console.log('updating')
@@ -564,20 +617,16 @@ export const bWater = makeWebComponent('b-water', {
       this.material = new WaterMaterial('water', this.owner.scene, new BABYLON.Vector2(textureSize, textureSize))
       this.update()
       this.mesh.material = this.material
-      setTimeout(() => {
-        const renderMeshes = ['skybox', 'ground']
-        for(const mesh of this.owner.scene.meshes) {
-          if (mesh != this.mesh) {
-            this.material.addToRenderList(mesh)
-          }
-        }
-      }, 250)
+      this._callback = this.waterCallback.bind(this)
+      this.owner.onAddMesh(this._callback)
     }
   },
   disconnectedCallback() {
     if (this.mesh != null) {
       this.mesh.dispose()
       this.mesh = null
+      this.material = null
+      this.owner.offAddMesh(this._callback)
     }
     this.owner = null
   },
@@ -586,9 +635,220 @@ export const bWater = makeWebComponent('b-water', {
   }
 })
 
-export const bTerrain = makeWebComponent('b-terrai', {
+export const bTerrain = makeWebComponent('b-terrain', {
   attributes: {
     spherical: false,
     polygonCount: 2048, // 32 x 32 x 2
+  }
+})
+
+export const bBiped = makeWebComponent('b-biped', {
+  attributes: {
+    url: '',
+    player: false,
+    x: 0,
+    y: 0,
+    z: 0,
+    initialState: 'idle'
+  },
+  props: {
+    container: null,
+    owner: null,
+    animationState: null,
+    animationGroupIndex: -1,
+    animationStates: [
+      {
+        animation: 'idle',
+        exitDelay: 0,
+        animationSpeed: 1,
+        loop: true,
+        forward: 'walk',
+        back: 'walkBackwards'
+      },
+      {
+        animation: 'walk',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'sneak',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'run',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'climb',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        name: 'walkBackwards',
+        animation: 'walk',
+        animationSpeed: 0.7,
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'jump',
+        exitDelay: 100,
+        loop: false,
+      },
+      {
+        animation: 'running-jump',
+        exitDelay: 100,
+        loop: false,
+      },
+      {
+        animation: 'salute',
+        exitDelay: 100,
+        loop: false,
+      },
+      {
+        animation: 'wave',
+        exitDelay: 100,
+        loop: false,
+      },
+      {
+        animation: 'tread-water',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'swim',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'talk',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'look',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'dance',
+        exitDelay: 100,
+        loop: true,
+      },
+      {
+        animation: 'pickup',
+        exitDelay: 100,
+        loop: false,
+      },
+      {
+        animation: 'pilot',
+        exitDelay: 100,
+        loop: true,
+      },
+    ]
+  },
+  methods: {
+    setAnimationState(name: string) {
+      if (name == null) {
+        throw new Error (`setAnimationState failed, no animation name specified.`)
+      }
+      if (this.animationState?.name === name) {
+        console.log(`<b-biped> is already in animationState "${this.animationState.name}"`)
+      }
+      if (this.container == null) {
+        return
+      }
+      this.animationState = this.animationStates.find(state => state.name === name) || this.animationStates.find(state => state.animation === name)
+      if (this.animationState != null) {
+        const idx = this.container.animationGroups.findIndex(g => g.name.endsWith(this.animationState.animation))
+        if (idx > -1) {
+          if (Boolean(this.animationState.loop)) {
+            if (this.animationGroupIndex > -1) {
+              this.container.animationGroups[this.animationGroupIndex].stop()
+            }
+            this.animationGroupIndex = idx
+            this.container.animationGroups[idx].start()
+            this.container.animationGroups[idx].loopAnimation = true
+          } else {
+            this.container.animationGroups[idx].start()
+          }
+        } else {
+          console.error(`<b-biped>.setAnimationState failed for animationState "${this.animationState.name}": could not find animationGroup named "${this.animationState.animation}"`)
+        }
+      } else {
+        console.error(`<b-biped>.setAnimationState failed, no animationState named ${name} found.`)
+      }
+    }
+  },
+  connectedCallback() {
+    this.owner = this.closest('b-3d')
+    if (this.owner != null && this.url !== '') {
+      BABYLON.SceneLoader.LoadAssetContainer(this.url, undefined, this.owner.scene, (container) => {
+        this.container = container.instantiateModelsToScene(undefined, false, {doNotInstantiate: true})
+        const meshes = this.container.rootNodes.map(node => node.getChildMeshes()).flat()
+        this.owner.addMesh(...meshes)
+        for(const node of this.container.rootNodes) {
+          node.position.x += this.x
+          node.position.y += this.y
+          node.position.z += this.z
+        }
+        this.setAnimationState(this.initialState)
+      })
+    }
+  },
+  disconnectedCallback() {
+    if (this.owner != null) {
+      if (this.container) {
+        for(const node of this.container.rootNodes) {
+          node.dispose()
+        }
+        for(const skeleton of this.container.skeletons) {
+          skeleton.dispose()
+        }
+        for(const ag of this.container.animationGroups) {
+          ag.dispose()
+        }
+      }
+    }
+  },
+})
+
+export const bXR = makeWebComponent('b-xr', {
+  props: {
+    owner: null,
+    active: false,
+    xr: null,
+  },
+  methods: {
+    async enterVR() {
+      this.xr = await this.owner.scene.createDefaultXRExperienceAsync()
+      this._exitCallback = this.exitXR.bind(this)
+      document.body.addEventListener('keydown', this._exitCallback)
+    },
+    exitXR() {
+      if (this.xr) {
+        this.xr.baseExperience.exitXRAsync()
+        this.xr = null
+        document.body.removeEventListener('keydown', this._exitCallback)
+        this._exitCallback = null
+      }
+    }
+  },
+  connectedCallback() {
+    this.owner = this.closest('b-3d')
+    this.queueRender()
+  },
+  disconnectedCallback() {
+    if (this.owner) {
+      this.exitVR()
+      this.owner = null
+    }
+  },
+  render() {
+    if(this.active) {
+      this.enterVR()
+    }
   }
 })
