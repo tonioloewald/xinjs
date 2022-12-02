@@ -174,18 +174,18 @@ document.body.append(div(
       wordSearch({dataRoute: 'word-search', hidden: true}),
       b3d(
         {dataRoute: 'babylon-3d', hidden: true, glowLayerIntensity: 1},
-        bSun({shadowMinZ: 0.1, shadowMaxZ: 100, bias: 0.001, normalBias: 0.1, shadowTextureSize: 2048}),
-        bSkybox({timeOfDay: 6.5}),
+        bSun(),
+        bSkybox({timeOfDay: 8.5}),
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
         bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
         bLoader({url: scene}),
-        gameController(bBiped({url: omnidude, initialState: 'look'})),
+        gameController(bBiped({url: omnidude, player: true, cameraTarget: true, initialState: 'look'})),
         bBiped({url: omnidude, x: 3, initialState: 'dance'}),
         bButton({caption: 'xinjs rules', x: -2, y: 1.5, action: () => {
           alert('yes it does!')
         }}),
         bLight({y: 1, z: 0.5, intensity: 0.05, diffuse: [0.5,0.5,1]}),
-        bWater({y: 0.2, twoSided: true}),
+        bWater({y: -0.2, twoSided: true}),
         bReflections(),
         bXR(),
       )

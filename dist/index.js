@@ -1805,11 +1805,11 @@ const makeWebComponent = (tagName, spec) => {
                                     // eslint-disable-next-line
                                     if (value) {
                                         this.setAttribute(attributeKabob, '');
-                                        this.queueRender();
                                     }
                                     else {
                                         this.removeAttribute(attributeKabob);
                                     }
+                                    this.queueRender();
                                 }
                             }
                             else if (typeof attributes[attributeName] === 'number') {
@@ -1825,8 +1825,8 @@ const makeWebComponent = (tagName, spec) => {
                                     }
                                     else {
                                         this.setAttribute(attributeKabob, value);
-                                        this.queueRender();
                                     }
+                                    this.queueRender();
                                     // @ts-expect-error
                                     attributeValues[attributeName] = value;
                                 }
