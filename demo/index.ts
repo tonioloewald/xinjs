@@ -4,13 +4,15 @@ import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
-import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater } from './components/babylon3d'
+import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater, bBiped, bReflections, bXR } from './components/babylon3d'
+import { gameController } from './components/game-controller'
 import { wordSearch } from './WordSearch'
 import { Color } from '../src/color'
 import './style'
 import logo from '../xinjs-logo.svg'
 import readmeMd from '../readme.md'
 import scene from './assets/b-frame-test.glb'
+import omnidude from './assets/omnidude.glb'
 
 /* global window, document */
 
@@ -73,6 +75,22 @@ const appBar = () => span(
       flex: '0 0 60px'
     }
   },
+  button('☰', {
+    title: 'toggle menu',
+    class: 'icon-button',
+    style: {
+      fontSize: vars.fontSize150,
+      marginRight: vars.spacing50,
+    },
+    onClick() {
+      const leftSideNav = document.querySelector('.left-side-nav') as HTMLElement
+      if (leftSideNav.style.marginLeft) {
+        leftSideNav.style.marginLeft = ''
+      } else {
+        leftSideNav.style.marginLeft = '-180px'
+      }
+    }
+  }),
   img({
     alt: 'xinjs logo',
     style: {
@@ -93,7 +111,9 @@ const appBar = () => span(
     bindText: 'app.title'
   }),
   span({style: {flex: '1 1 auto'}}),
-  button('settings', {
+  button('⚙', {
+    title: 'settings',
+    class: 'icon-button',
     onClick() {
       (document.querySelector('.settings') as HTMLDialogElement).showModal()
     }
@@ -116,10 +136,12 @@ document.body.append(div(
     { style: { display: 'flex', flex: '1 1 auto', overflow: 'hidden' } },
     div(
       {
+        class: 'left-side-nav',
         style: {
           display: 'flex',
           flexDirection: 'column',
-          flex: '0 0 180px'
+          flex: '0 0 180px',
+          transition: 'margin-left 0.25s ease-out',
         }
       },
       ...routes.map(route => a(
@@ -153,15 +175,19 @@ document.body.append(div(
       b3d(
         {dataRoute: 'babylon-3d', hidden: true, glowLayerIntensity: 1},
         bSun({shadowMinZ: 0.1, shadowMaxZ: 100, bias: 0.001, normalBias: 0.1, shadowTextureSize: 2048}),
-        bSkybox(),
+        bSkybox({timeOfDay: 6.5}),
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
         bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
-        bLoader({url: scene, scale: 0.5}),
+        bLoader({url: scene}),
+        gameController(bBiped({url: omnidude, initialState: 'look'})),
+        bBiped({url: omnidude, x: 3, initialState: 'dance'}),
         bButton({caption: 'xinjs rules', x: -2, y: 1.5, action: () => {
           alert('yes it does!')
         }}),
         bLight({y: 1, z: 0.5, intensity: 0.05, diffuse: [0.5,0.5,1]}),
         bWater({y: 0.2, twoSided: true}),
+        bReflections(),
+        bXR(),
       )
     )
   ),

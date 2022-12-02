@@ -178,6 +178,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
                   // eslint-disable-next-line
                   if (value) {
                     this.setAttribute(attributeKabob, '')
+                    this.queueRender()
                   } else {
                     this.removeAttribute(attributeKabob)
                   }
@@ -185,6 +186,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
               } else if (typeof attributes[attributeName] === 'number') {
                 if (value !== parseFloat(this[attributeName])) {
                   this.setAttribute(attributeKabob, value)
+                  this.queueRender()
                 }
               } else {
                 if (typeof value === 'object' || `${value as string}` !== `${this[attributeName] as string}`) {
@@ -192,6 +194,7 @@ export const makeWebComponent = (tagName: string, spec: WebComponentSpec): Eleme
                     this.removeAttribute(attributeKabob)
                   } else {
                     this.setAttribute(attributeKabob, value)
+                    this.queueRender()
                   }
                   // @ts-expect-error
                   attributeValues[attributeName] = value

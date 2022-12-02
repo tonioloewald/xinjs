@@ -118,6 +118,14 @@ const rules = {
   'code, pre': {
     fontFamily: vars.codeFont
   },
+  '.icon-button': {
+    fontSize: vars.fontSize200,
+    background: 'transparent',
+    lineHeight: vars.lineHeight200,
+    borderRadius: 1000,
+    padding: 0,
+    minWidth: vars.lineHeight200
+  },
   pre: {
     background: vars.codeBg,
     color: vars.codeColor,

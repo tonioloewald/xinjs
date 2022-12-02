@@ -1549,8 +1549,7 @@ const elements = new Proxy(_elements, {
 
 const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap'];
 const isDimensional = (cssProp) => {
-    (cssProp.match(/(width|height|size|margin|padding)/) != null) || dimensionalProps.includes(cssProp);
-    return dimensionalProps.includes(cssProp);
+    return (cssProp.match(/(width|height|size|margin|padding|radius)/) != null) || dimensionalProps.includes(cssProp);
 };
 const renderStatement = (key, value, indentation = '') => {
     const cssProp = camelToKabob(key);
@@ -1806,6 +1805,7 @@ const makeWebComponent = (tagName, spec) => {
                                     // eslint-disable-next-line
                                     if (value) {
                                         this.setAttribute(attributeKabob, '');
+                                        this.queueRender();
                                     }
                                     else {
                                         this.removeAttribute(attributeKabob);
@@ -1815,6 +1815,7 @@ const makeWebComponent = (tagName, spec) => {
                             else if (typeof attributes[attributeName] === 'number') {
                                 if (value !== parseFloat(this[attributeName])) {
                                     this.setAttribute(attributeKabob, value);
+                                    this.queueRender();
                                 }
                             }
                             else {
@@ -1824,6 +1825,7 @@ const makeWebComponent = (tagName, spec) => {
                                     }
                                     else {
                                         this.setAttribute(attributeKabob, value);
+                                        this.queueRender();
                                     }
                                     // @ts-expect-error
                                     attributeValues[attributeName] = value;
