@@ -39,12 +39,11 @@ export const gameController = makeWebComponent('game-controller', {
       },
       {
         name: 'shoot',
-        buttons: [0]
+        keys: ['F']
       },
       {
         name: 'sneak',
-        keys: ['Tab'],
-        buttons: [1],
+        keys: ['G'],
         type: 'toggle'
       },
       {

@@ -4,21 +4,65 @@ import * as GUI from 'babylonjs-gui'
 import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 import waterbump from '../assets/waterbump.png'
-import { mrdlSliderThumbPixelShader } from 'babylonjs-gui/3D/materials/mrdl/shaders/mrdlSliderThumb.fragment'
 
 type MeshHandler = (...meshes: BABYLON.Mesh[]) => void
 
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
 BABYLON.SceneLoaderFlags.ShowLoadingScreen = false
 
-const makeColor = (rgb: BABYLON.Color3 | BABYLON.Color4 | number[]): BABYLON.Color3 | BABYLON.Color4 => {
-  if (Array.isArray(rgb)) {
-    return rgb.length === 3 ? new BABYLON.Color3(...rgb) : new BABYLON.Color4(...rgb)
-  }
-  return rgb
+const {canvas, slot} = elements
+
+type AsyncVoidFunction = () => Promise<void>
+
+type XRParams = {
+  cameraName?: string
+  mode?: XRSessionMode
 }
 
-const {canvas, slot} = elements
+type XRStuff = {
+  camera: BABYLON.FreeCamera
+  xrHelper: BABYLON.WebXRExperienceHelper
+  sessionManager: BABYLON.WebXRSessionManager
+  exitXR: AsyncVoidFunction
+}
+
+export async function enterXR(scene: BABYLON.Scene, options: XRParams = {}): Promise<XRStuff> {
+  const {cameraName, mode} = Object.assign({cameraName: 'xr-camera', mode: 'immersive-vr'}, options)
+  if (navigator.xr == null) {
+    throw new Error('xr is not available')
+  }
+  if (!navigator.xr.isSessionSupported(mode)) {
+    throw new Error(`navigator.xr does not support requested mode "${mode}"`)
+  }
+  const xrHelper = await BABYLON.WebXRExperienceHelper.CreateAsync(scene)
+  const {camera} = xrHelper
+  camera.name = cameraName
+  xrHelper.onStateChangedObservable.add((state) => {
+    switch(state) {
+      case BABYLON.WebXRState.ENTERING_XR:
+        console.log(`entering XR ${mode}`)
+        break
+      case BABYLON.WebXRState.IN_XR:
+        console.log(`XR w${mode} active`)
+        break
+      case BABYLON.WebXRState.EXITING_XR:
+        console.log(`leaving XR ${mode}`)
+        break
+      case BABYLON.WebXRState.NOT_IN_XR:
+      default:
+        console.log(`XR ${mode} inactive`)
+    }
+  })
+  const sessionManager = await xrHelper.enterXRAsync(mode, 'local-floor')
+  return {
+    camera,
+    xrHelper,
+    sessionManager,
+    async exitXR () {
+      await xrHelper.exitXRAsync()
+    }
+  }
+}
 
 export const b3d = makeWebComponent('b-3d', {
   style: {
@@ -38,7 +82,6 @@ export const b3d = makeWebComponent('b-3d', {
     frameRate: 30,
   },
   props: {
-    BABYLON,
     engine: null,
     scene: null,
     camera: null,
@@ -46,6 +89,7 @@ export const b3d = makeWebComponent('b-3d', {
     renderInterval: null,
     lastRender: Date.now(),
     addMeshListeners: [] as MeshHandler[],
+    xrActive: false
   },
   content: [
     canvas({dataRef: 'canvas'}),
@@ -67,17 +111,18 @@ export const b3d = makeWebComponent('b-3d', {
         callback(...meshes.filter(mesh => mesh.geometry != null))
       }
     },
-    setActiveCamera(camera: BABYLON.Camera, attach = false, preventDefault = false) {
+    setActiveCamera(camera: BABYLON.Camera, cameraOptions) {
+      const {attach, preventDefault} = Object.assign({attach: true, preventDefault: false}, cameraOptions)
       const {canvas} = this.elementRefs
       if (this.camera != null) {
         this.camera.dispose()
       }
       this.camera = camera
-      this.camera.useFramingBehavior = true
+      this.scene.activeCamera = camera
       if (attach) {
         camera.attachControl(canvas, preventDefault)
       }
-    }
+    },
   },
   eventHandlers: {
     resize() {
@@ -96,7 +141,7 @@ export const b3d = makeWebComponent('b-3d', {
     this.engine.runRenderLoop(() => {
       if (this.scene != null && !this.hidden) {
         const now = Date.now()
-        if (now - this.lastRender >= 1000/this.frameRate) {
+        if (this.xrActive || (now - this.lastRender >= 1000/this.frameRate)) {
           this.lastRender = now
           this.scene.render()
         }
@@ -368,8 +413,8 @@ export const bLight = makeWebComponent('b-light', {
   props: {
     owner: null,
     light: null,
-    diffuse: new BABYLON.Color3(1, 1, 1),
-    specular: new BABYLON.Color3(0.5, 0.5, 0.5)
+    diffuse: '#ffffff',
+    specular: '#888888'
   },
   connectedCallback() {
     this.owner = this.closest('b-3d')
@@ -390,8 +435,8 @@ export const bLight = makeWebComponent('b-light', {
       this.light.direction.y = this.y
       this.light.direction.z = this.z
       this.light.intensity = this.intensity
-      this.light.diffuse = makeColor(this.diffuse)
-      this.light.specular = makeColor(this.specular)
+      this.light.diffuse = BABYLON.Color3.FromHexString(this.diffuse)
+      this.light.specular = BABYLON.Color3.FromHexString(this.specular)
     }
   }
 })
@@ -440,14 +485,12 @@ export const bSun = makeWebComponent('b-sun', {
         const distance = mesh.getAbsolutePosition().subtract(this.owner.scene.activeCamera.target).length()
         if (distance < this.activeDistance) {
           if (!this.activeShadowCasters.includes(mesh)) {
-            console.log(`${mesh.name} is now casting shadows`)
             this.activeShadowCasters.push(mesh)
             this.shadowGenerator.addShadowCaster(mesh)
           }
         } else {
           const idx = this.activeShadowCasters.indexOf(mesh)
           if (idx > -1) {
-            console.log(`${mesh.name} no longer casting shadows`)
             this.activeShadowCasters.splice(idx, 1)
             this.shadowGenerator.removeShadowCaster(mesh)
           }
@@ -462,7 +505,10 @@ export const bSun = makeWebComponent('b-sun', {
       this.interval = setInterval(this._update, this.updateIntervalMs)
       const light = new BABYLON.DirectionalLight(this.name, new BABYLON.Vector3(this.x, this.y, this.z), this.owner.scene)
       const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, light)
+      /*
       shadowGenerator.useExponentialShadowMap = true
+      shadowGenerator.usePoissonSampling = true
+      */
       this.light = light
       this.shadowGenerator = shadowGenerator
       this._callback = this.shadowCallback.bind(this)
@@ -624,7 +670,6 @@ export const bWater = makeWebComponent('b-water', {
     },
     update() {
       if (this.material != null) {
-        console.log('updating')
         const {twoSided, normalMap, windForce, windDirection, waveHeight, bumpHeight, waveLength, waterColor, colorBlendFactor, x, y, z} = this
         this.material.backFaceCulling = !twoSided
         this.material.bumpTexture = new BABYLON.Texture(normalMap, this.owner.scene)
@@ -685,7 +730,8 @@ export const bBiped = makeWebComponent('b-biped', {
   attributes: {
     url: '',
     player: false,
-    cameraTarget: false,
+    cameraType: 'none', // 'follow' | 'xr'
+    xrStuff: null,
     x: 0,
     y: 0,
     z: 0,
@@ -699,6 +745,7 @@ export const bBiped = makeWebComponent('b-biped', {
   props: {
     container: null,
     owner: null,
+    camera: null,
     animationState: null,
     animationGroup: null,
     gameController: null,
@@ -851,6 +898,41 @@ export const bBiped = makeWebComponent('b-biped', {
         }
       }
     },
+    async setupXRCamera() {
+      console.log('setting up xr')
+      this.xrStuff = await enterXR(this.owner.scene, {cameraName: this.cameraType})
+      const {camera, sessionManager} = this.xrStuff
+      this.camera = camera
+      this.owner.xrActive = true
+      sessionManager.onXRFrameObservable.add(() => {
+        const {x, y, z} = this.container.rootNodes[0].position
+        camera.position.x = x
+        camera.position.y = y + 0.7
+        camera.position.z = z
+      })
+      /*
+      this.camera = camera
+      this.owner.xrActive = true
+      this.owner.camera.dispose()
+      this.owner.camera = camera
+      camera.ignoreParentScaling = true
+      console.log(camera.parent)
+      camera.parent = this.container.rootNodes[0]
+      camera.rotation = this.container.rootNodes[0].rotation.clone()
+      camera.position.y = 0.7
+      camera.position.z = -2
+      */
+    },
+    async setupFollowCamera() {
+      if (this.xrStuff) {
+        await this.xrStuff.exitXR()
+        this.owner.xrActive = false
+        this.xrStuff = null
+      }
+      console.log('setting up follow')
+      this.camera = new BABYLON.ArcRotateCamera(this.cameraType, 0.5, 0.5, 5, this.container.rootNodes[0], this.owner.scene)
+      this.owner.setActiveCamera(this.camera, true)
+    }
   },
   connectedCallback() {
     this.owner = this.closest('b-3d')
@@ -867,9 +949,6 @@ export const bBiped = makeWebComponent('b-biped', {
         }
         this.setAnimationState(this.initialState)
         this.registerUpdate()
-        if (this.cameraTarget) {
-          this.owner.setActiveCamera(new BABYLON.ArcRotateCamera('follow-camera', 0.5, 0.5, 5, this.container.rootNodes[0], this.owner.scene), true)
-        }
       })
     }
   },
@@ -888,42 +967,27 @@ export const bBiped = makeWebComponent('b-biped', {
       }
     }
   },
-})
-
-export const bXR = makeWebComponent('b-xr', {
-  props: {
-    owner: null,
-    active: false,
-    xr: null,
-  },
-  methods: {
-    async enterVR() {
-      this.xr = await this.owner.scene.createDefaultXRExperienceAsync()
-      this._exitCallback = this.exitXR.bind(this)
-      document.body.addEventListener('keydown', this._exitCallback)
-    },
-    exitXR() {
-      if (this.xr) {
-        this.xr.baseExperience.exitXRAsync()
-        this.xr = null
-        document.body.removeEventListener('keydown', this._exitCallback)
-        this._exitCallback = null
-      }
-    }
-  },
-  connectedCallback() {
-    this.owner = this.closest('b-3d')
-    this.queueRender()
-  },
-  disconnectedCallback() {
-    if (this.owner) {
-      this.exitVR()
-      this.owner = null
-    }
-  },
   render() {
-    if(this.active) {
-      this.enterVR()
+    if (this.container == null) {
+      return
+    }
+    if (this.camera == null || this.camera?.name !== this.cameraType) {
+      switch(this.cameraType) {
+        case 'xr':
+          this.setupXRCamera()
+          break;
+        case 'follow':
+          this.setupFollowCamera()
+          break;
+        default:
+          if (this.camera != null) {
+            if (this.owner.camera === this.camera) {
+              this.owner.camera = null
+            }
+            this.camera.dispose()
+            this.camera = null
+          }
+      }
     }
   }
 })
