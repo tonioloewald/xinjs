@@ -12,10 +12,8 @@ const cssVars = {
   lineHeight: 20,
   spacing: 15,
   textColor: '#222',
-  codeColor: '#eee',
   itemSpacing: vars.spacing50,
   background: '#eee',
-  codeBg: '#333',
   panelBg: '#ddd',
   inputBg: '#fff',
   buttonBg: '#fff8',
@@ -34,8 +32,13 @@ const cssVars = {
   inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
 }
 
+const codeVars = {
+  codeColor: '#eee',
+  codeBg: '#333',
+}
+
 const rules = {
-  ':root': initVars(cssVars),
+  ':root': initVars({...cssVars, ...codeVars}),
   '@media (prefers-color-scheme: dark)': {':root': darkMode(cssVars)},
   body: {
     fontFamily: vars.font,
