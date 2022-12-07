@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "path-based state management for javascript",
   "main": "dist/index.js",
   "homepage": "https://xinjs.net",
@@ -14,7 +14,7 @@
   "scripts": {
     "start": "bun dev",
     "lint": "bun ts-standard --fix src/*.ts",
-    "make": "rm -rf build && bun test && bun tsc && ./build.command",
+    "make": "rm -rf dist && bun test && bun tsc && ./build.command",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
     "rerun": "./rerun.command",
     "test": "bun wiptest"
@@ -35,6 +35,13 @@
     "babylonjs-materials": "^5.32.1",
     "marked": "^4.2.2"
   },
+  "files": [
+    "/cdn",
+    "/dist",
+    "/src",
+    "/LICENSE",
+    "/README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/tonioloewald/xinjs.git"
@@ -42,7 +49,7 @@
   "ts-standard": {
     "ignore": [
       "dist",
-      "build",
+      "cdn",
       "public",
       "**/*.js",
       "**/*.mjs",

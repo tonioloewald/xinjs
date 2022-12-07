@@ -70,4 +70,4 @@ export interface ElementProps {
 export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
 export type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
-export type ElementCreator = HTMLElementCreator | FragmentCreator
+export type ElementCreator<T = HTMLElementCreator | FragmentCreator> = (...contents: ElementPart[]) => T

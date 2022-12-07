@@ -80,7 +80,7 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
   return elt
 }
 
-const fragment = (...contents: ElementPart[]): DocumentFragment => {
+const fragment: ElementCreator<DocumentFragment> = (...contents: ElementPart[]) => {
   const frag = globalThis.document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)
@@ -88,7 +88,7 @@ const fragment = (...contents: ElementPart[]): DocumentFragment => {
   return frag
 }
 
-const _elements: { [key: string | symbol]: ElementCreator } = { fragment }
+const _elements: { [key: string | symbol]: ElementCreator<any> } = { fragment }
 
 export const elements = new Proxy(_elements, {
   get (target, tagName: string) {

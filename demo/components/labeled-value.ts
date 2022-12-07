@@ -1,8 +1,8 @@
-import {elements, makeWebComponent} from '../../src/index'
-const {label, slot, span} = elements
+import { Component } from '../../src/components'
+const {label, slot, span} = Component.elements
 
-export const labeledValue = makeWebComponent('labeled-value', {
-  style: {
+class LabeledValue extends Component {
+  styleNode = Component.StyleNode({
     ':host > label': {
       display: 'inline-flex',
       gap: 'calc(0.5 * var(--item-spacing))',
@@ -12,11 +12,14 @@ export const labeledValue = makeWebComponent('labeled-value', {
     ':host *': {
       fontSize: 'var(--font-size)'
     }
-  },
-  value: '',
-  content: label(slot(), span({dataRef: 'field'})),
+  })
+  content = label(slot(), span({dataRef: 'field'}))
+  value = ''
   render() {
-    const {field} = this.elementRefs
+    super.render()
+    const {field} = this.refs
     field.textContent = this.value
   }
-})
+}
+
+export const labeledValue = LabeledValue.elementCreator()

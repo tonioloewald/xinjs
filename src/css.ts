@@ -1,5 +1,5 @@
 import { Color } from './color'
-import { camelToKabob } from './elements'
+import { camelToKabob, elements } from './elements'
 
 export interface StyleRule {
   [key: string]: string | number
@@ -11,6 +11,10 @@ export interface StyleMap {
 
 export interface StyleSheet {
   [key: string]: StyleRule | StyleMap
+}
+
+export function StyleNode (styleSheet: StyleSheet): HTMLStyleElement {
+  return elements.style(css(styleSheet)) as HTMLStyleElement
 }
 
 const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap']

@@ -15,8 +15,8 @@ export const resizeObserver = new ResizeObserver(entries => {
   }
 })
 
-export const appendContentToElement = (elt: Element | ShadowRoot, content: ContentType | null): void => {
-  if (content != null) {
+export const appendContentToElement = (elt: Element | ShadowRoot | null | undefined, content: ContentType | null | undefined): void => {
+  if (elt != null && content != null) {
     if (typeof content === 'string') {
       elt.textContent = content
     } else if (Array.isArray(content)) {

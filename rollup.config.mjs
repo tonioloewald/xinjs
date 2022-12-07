@@ -1,16 +1,16 @@
 export default [
   {
-    input: 'build/index.js',
+    input: 'dist/index.js',
     output: {
-      file: 'dist/index.js',
+      file: 'cdn/index.js',
       format: 'cjs'
     },
     external: ['react']
   },
   {
-    input: 'build/index.js',
+    input: 'dist/index.js',
     output: {
-      file: 'dist/index.mjs',
+      file: 'cdn/index.mjs',
       format: 'esm'
     },
     external: ['react']

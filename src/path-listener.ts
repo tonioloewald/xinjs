@@ -77,7 +77,7 @@ const update = (): void => {
         try {
           outcome = listener.callback(path)
         } catch (e) {
-          throw new Error(`Listener ${listener.description} threw "${e as string}" handling "${path}"`)
+          console.error(`Listener ${listener.description} threw "${e as string}" handling "${path}"`)
         }
         if (outcome === observerShouldBeRemoved) {
           unobserve(listener)
