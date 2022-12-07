@@ -1,8 +1,8 @@
-import {elements, makeWebComponent} from '../../src/index'
+import {elements, Component} from '../../src/index'
 const {slot, div} = elements
 
-export const appLayout = makeWebComponent('app-layout', {
-  style: {
+class AppLayout extends Component {
+  styleNode = Component.StyleNode({
     ':host': {
       display: 'flex',
       flexDirection: 'column'
@@ -15,8 +15,8 @@ export const appLayout = makeWebComponent('app-layout', {
     '::slotted(:not([slot]))': {
       flex: '1 1 auto'
     }
-  },
-  content: [
+  })
+  content = [
     slot({name: 'header'}),
     div(
       { class: 'body' },
@@ -26,4 +26,6 @@ export const appLayout = makeWebComponent('app-layout', {
     ),
     slot({name: 'footer'})
   ]
-})
+}
+
+export const appLayout = AppLayout.elementCreator()

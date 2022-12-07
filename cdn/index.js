@@ -1460,7 +1460,7 @@ const create = (tagType, ...contents) => {
     }
     const elt = templates[tagType].cloneNode();
     for (const item of contents) {
-        if (item instanceof HTMLElement || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
+        if (item instanceof Element || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
             if (elt instanceof HTMLTemplateElement) {
                 elt.content.append(item);
             }

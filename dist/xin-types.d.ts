@@ -50,8 +50,12 @@ export interface ElementProps {
     bindStyle?: XinBindingShortcut;
     [key: string]: any;
 }
-export declare type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number;
-export declare type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement;
+export interface SwissArmyElement extends HTMLElement {
+    value: any;
+    textContent: string;
+}
+export declare type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number;
+export declare type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement;
 export declare type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
 export declare type ElementCreator<T = HTMLElementCreator | FragmentCreator> = (...contents: ElementPart[]) => T;
 export {};

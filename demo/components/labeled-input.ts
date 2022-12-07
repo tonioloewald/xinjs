@@ -1,8 +1,8 @@
-import {elements, makeWebComponent, vars} from '../../src/index'
+import {elements, Component, vars} from '../../src/index'
 const {label, slot, input} = elements
 
-export const labeledInput = makeWebComponent('labeled-input', {
-  style: {
+class LabeledInput extends Component {
+  styleNode = Component.StyleNode({
     ':host > label': {
       display: 'inline-flex',
       flexDirection: 'var(--flex-direction, row)',
@@ -26,17 +26,20 @@ export const labeledInput = makeWebComponent('labeled-input', {
     ':host input[type="number"]': {
       paddingRight: vars.spacing50
     }
-  },
-  attributes: {
-    type: '',
-    placeholder: '',
-    input: false
-  },
-  value: '',
-  content: label({dataRef: 'label'}, slot(), input({dataRef: 'field'})),
+  })
+  content = label({dataRef: 'label'}, slot(), input({dataRef: 'field'}))
+  type = ''
+  placeholder = ''
+  input = false
+  value = ''
+  constructor() {
+    super()
+    this.initAttributes('type', 'placeholder', 'input')
+  }
   connectedCallback() {
+    super.connectedCallback()
     const self = this
-    const {field} = self.elementRefs
+    const {field} = self.refs
     field.addEventListener(this.input ? 'input' : 'change', () => {
       self.value = this.type !== 'checkbox' ? field.value : field.checked
     })
@@ -48,9 +51,10 @@ export const labeledInput = makeWebComponent('labeled-input', {
         }
       }
     })
-  },
+  }
   render() {
-    const {field, label} = this.elementRefs
+    super.render()
+    const {field, label} = this.refs
     if (this.type !== '') {
       field.setAttribute('type', this.type)
     } else {
@@ -72,4 +76,6 @@ export const labeledInput = makeWebComponent('labeled-input', {
       }
     }
   }
-})
+}
+
+export const labeledInput = LabeledInput.elementCreator()

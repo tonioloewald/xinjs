@@ -1,4 +1,4 @@
-import {xin, elements, touch, makeWebComponent, XinProxyObject, XinArray, xinValue, vars} from '../src/index'
+import {xin, touch, XinProxyObject, XinArray, xinValue, Component, elements, vars} from '../src/index'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
@@ -28,8 +28,8 @@ xin.colors = {
 
 const {button, template, div, span} = elements
 
-const colorSwatch = makeWebComponent('color-swatch', {
-  style: {
+class ColorSwatch extends Component {
+  styleNode = Component.StyleNode({
     ':host': {
       display: 'inline-flex',
       padding: '10px',
@@ -46,18 +46,19 @@ const colorSwatch = makeWebComponent('color-swatch', {
       textAlign: 'right',
       lineHeight: '27px'
     }
-  },
-  value: {
+  })
+  value = {
     id: 0,
     color: 'red'
-  },
-  content: [
+  }
+  content = [
     span({dataRef: 'idSpan'}),
     labeledInput(span('color'), { dataRef: 'colorInput' })
-  ],
+  ]
   connectedCallback() {
+    super.connectedCallback()
     const self = this
-    const {colorInput} = self.elementRefs
+    const colorInput = self.refs.colorInput
     colorInput.addEventListener('change', () => {
       if (self.value.color !== colorInput.value) {
         self.value = {
@@ -66,14 +67,19 @@ const colorSwatch = makeWebComponent('color-swatch', {
         }
       }
     })
-  },
-  render() {
-    const {idSpan, colorInput} = this.elementRefs
-    idSpan.textContent = this.value.id
-    colorInput.value = this.value.color
-    this.style.border = `2px solid ${this.value.color}`
   }
-})
+  render() {
+    super.render()
+    const {idSpan, colorInput} = this.refs
+    if (this.value != null) {
+      idSpan.textContent = String(this.value.id)
+      colorInput.value = this.value.color
+      this.style.border = `2px solid ${this.value.color}`
+    }
+  }
+}
+
+const colorSwatch = ColorSwatch.elementCreator()
 
 export const arrayBindingTest = (...args) => div(
   ...args,

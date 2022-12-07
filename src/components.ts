@@ -2,7 +2,7 @@ import { css, StyleSheet } from './css'
 import { deepClone } from './deep-clone'
 import { appendContentToElement, ContentType, dispatch, resizeObserver } from './dom'
 import { elements, camelToKabob, kabobToCamel } from './elements'
-import { XinObject, ElementCreator } from './xin-types'
+import { XinObject, ElementCreator, SwissArmyElement } from './xin-types'
 
 interface FunctionMap {
   [key: string]: Function
@@ -170,18 +170,18 @@ export abstract class Component extends HTMLElement {
     })
   }
 
-  private _refs?: { [key: string]: HTMLElement }
-  get refs (): { [key: string]: HTMLElement } {
+  private _refs?: { [key: string]: SwissArmyElement }
+  get refs (): { [key: string]: SwissArmyElement } {
     const { shadowRoot } = this
     const find = this.querySelector.bind(this)
     if (this._refs == null) {
       this._refs = new Proxy({}, {
-        get (target: { [key: string]: HTMLElement }, ref: string) {
+        get (target: { [key: string]: SwissArmyElement }, ref: string) {
           if (target[ref] === undefined) {
             const element = (shadowRoot != null) ? shadowRoot.querySelector(`[data-ref="${ref}"]`) : find(`[data-ref="${ref}"]`)
             if (element == null) throw new Error(`elementRef "${ref}" does not exist!`)
             element.removeAttribute('data-ref')
-            target[ref] = element as HTMLElement
+            target[ref] = element as SwissArmyElement
           }
           return target[ref]
         }

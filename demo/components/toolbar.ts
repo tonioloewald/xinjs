@@ -1,7 +1,7 @@
-import {makeWebComponent, vars} from '../../src/index'
+import {Component, vars} from '../../src/index'
 
-export const toolBar = makeWebComponent('tool-bar', {
-  style: {
+class ToolBar extends Component {
+  styleNode = Component.StyleNode({
     ':host': {
       display: 'flex',
       gap: vars.itemSpacing,
@@ -17,5 +17,7 @@ export const toolBar = makeWebComponent('tool-bar', {
       whiteSpace: 'nowrap',
       lineHeight: vars.lineHeight
     }
-  }
-})
+  })
+}
+
+export const toolBar = ToolBar.elementCreator()

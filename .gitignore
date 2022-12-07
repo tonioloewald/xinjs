@@ -123,6 +123,3 @@ web_modules/
 
 # bun
 bun.lockb
-
-# build
-build/

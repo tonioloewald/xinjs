@@ -1,6 +1,6 @@
 import { bind, on } from './bind'
 import { bindings } from './bindings'
-import { ElementPart, ElementCreator } from '../src/xin-types'
+import { ElementPart, ElementCreator, SwissArmyElement } from '../src/xin-types'
 
 const templates: { [key: string]: HTMLElement } = {}
 
@@ -20,13 +20,13 @@ export const makeComponent = (...componentParts: ElementPart[]) => {
   return (...args: ElementPart[]) => elements.div(...args, ...componentParts)
 }
 
-export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
+export const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement => {
   if (templates[tagType] === undefined) {
     templates[tagType] = globalThis.document.createElement(tagType)
   }
-  const elt = templates[tagType].cloneNode() as HTMLElement
+  const elt = templates[tagType].cloneNode() as SwissArmyElement
   for (const item of contents) {
-    if (item instanceof HTMLElement || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
+    if (item instanceof Element || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
       if (elt instanceof HTMLTemplateElement) {
         elt.content.append(item as Node)
       } else {
@@ -34,7 +34,7 @@ export const create = (tagType: string, ...contents: ElementPart[]): HTMLElement
       }
     } else {
       for (const key of Object.keys(item)) {
-        const value = (item)[key]
+        const value: any = (item)[key]
         if (key === 'apply') {
           value(elt)
         } else if (key === 'style') {

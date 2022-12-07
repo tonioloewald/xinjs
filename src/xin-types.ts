@@ -67,7 +67,11 @@ export interface ElementProps {
   [key: string]: any
 }
 
-export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
-export type HTMLElementCreator = (...contents: ElementPart[]) => HTMLElement
+export interface SwissArmyElement extends HTMLElement {
+  value: any
+  textContent: string
+}
+export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number
+export type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
 export type ElementCreator<T = HTMLElementCreator | FragmentCreator> = (...contents: ElementPart[]) => T

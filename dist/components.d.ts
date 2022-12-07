@@ -1,6 +1,6 @@
 import { StyleSheet } from './css';
 import { ContentType } from './dom';
-import { ElementCreator } from './xin-types';
+import { ElementCreator, SwissArmyElement } from './xin-types';
 interface FunctionMap {
     [key: string]: Function;
 }
@@ -44,7 +44,7 @@ export declare abstract class Component extends HTMLElement {
     initValue(): void;
     private _refs?;
     get refs(): {
-        [key: string]: HTMLElement;
+        [key: string]: SwissArmyElement;
     };
     constructor();
     connectedCallback(): void;
