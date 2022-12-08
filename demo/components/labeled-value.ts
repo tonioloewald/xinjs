@@ -1,4 +1,4 @@
-import { Component } from '../../src/components'
+import { Component } from '../../src'
 const {label, slot, span} = Component.elements
 
 class LabeledValue extends Component {
