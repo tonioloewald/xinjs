@@ -251,7 +251,7 @@ test('instance changes trigger observers', async () => {
   expect(changes.length).toBe(1)
 
   changes.splice(0)
-  expect(_test.baz[xinValue]).toBe(baz)
+  expect((_test.baz as XinProxyObject)[xinValue]).toBe(baz)
   expect(_test.baz.x).toBe(17)
   expect(_test.baz.y).toBe(17)
   await updates()
@@ -384,7 +384,6 @@ test('parents and children', async () => {
   })
   grandparent.parent = {child: 20}
   await updates()
-  console.log(changes)
   expect(changes.length).toBe(2)
   grandparent.parent.child = 20
   await updates()

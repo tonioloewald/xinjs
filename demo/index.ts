@@ -28,7 +28,7 @@ const {img, h1, div, span, style, button, a} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
-  xin.emoji = await request.json()
+  xin.emoji = await request.json() as any[]
   console.log(xin.emoji.length, 'emoji loaded')
 }
 

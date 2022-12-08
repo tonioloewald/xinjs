@@ -12,7 +12,7 @@ export interface XinProps {
     [xinPath]: string;
 }
 export declare type XinProxyObject = XinProps & {
-    [key: string]: XinProxyObject | XinProxyArray | XinScalar;
+    [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar;
 };
 export declare type XinProxyArray = XinProps & {
     [key: string]: XinProxyObject;
@@ -50,10 +50,7 @@ export interface ElementProps {
     bindStyle?: XinBindingShortcut;
     [key: string]: any;
 }
-export interface SwissArmyElement extends HTMLElement {
-    value: any;
-    textContent: string;
-}
+export declare type SwissArmyElement = HTMLInputElement & HTMLCanvasElement;
 export declare type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number;
 export declare type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement;
 export declare type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
