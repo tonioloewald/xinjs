@@ -21,9 +21,6 @@ export declare abstract class Component extends HTMLElement {
     get refs(): {
         [key: string]: SwissArmyElement;
     };
-    get elementRefs(): {
-        [key: string]: SwissArmyElement;
-    };
     constructor();
     connectedCallback(): void;
     disconnectedCallback(): void;

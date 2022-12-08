@@ -111,7 +111,7 @@ export abstract class Component extends HTMLElement {
     })
   }
 
-  initValue (): void {
+  private initValue (): void {
     const valueDescriptor = Object.getOwnPropertyDescriptor(this, 'value')
     if (valueDescriptor === undefined || valueDescriptor.get !== undefined || valueDescriptor.set !== undefined) {
       return
@@ -152,11 +152,6 @@ export abstract class Component extends HTMLElement {
       })
     }
     return this._refs
-  }
-
-  get elementRefs (): { [key: string]: SwissArmyElement } {
-    console.warn('elementRefs is deprecated, please just use refs instead')
-    return this.refs
   }
 
   constructor () {
@@ -203,7 +198,7 @@ export abstract class Component extends HTMLElement {
   }
 
   private _hydrated = false
-  hydrate (): void {
+  private hydrate (): void {
     if (!this._hydrated) {
       this.initValue()
       if (this.styleNode !== undefined) {

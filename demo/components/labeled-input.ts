@@ -31,7 +31,7 @@ class LabeledInput extends Component {
   type = ''
   placeholder = ''
   input = false
-  value = ''
+  value: string | boolean = ''
   constructor() {
     super()
     this.initAttributes('type', 'placeholder', 'input')
