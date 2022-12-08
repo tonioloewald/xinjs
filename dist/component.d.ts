@@ -16,7 +16,7 @@ export declare abstract class Component extends HTMLElement {
         tag?: string;
     }): ElementCreator;
     initAttributes(...attributeNames: string[]): void;
-    initValue(): void;
+    private initValue;
     private _refs?;
     get refs(): {
         [key: string]: SwissArmyElement;
@@ -28,7 +28,7 @@ export declare abstract class Component extends HTMLElement {
     private _renderQueued;
     queueRender(triggerChangeEvent?: boolean): void;
     private _hydrated;
-    hydrate(): void;
+    private hydrate;
     render(): void;
 }
 //# sourceMappingURL=component.d.ts.map
