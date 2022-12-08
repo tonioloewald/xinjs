@@ -158,10 +158,6 @@ export class Component extends HTMLElement {
         }
         return this._refs;
     }
-    get elementRefs() {
-        console.warn('elementRefs is deprecated, please just use refs instead');
-        return this.refs;
-    }
     connectedCallback() {
         this.hydrate();
         // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
