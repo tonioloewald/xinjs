@@ -19,7 +19,7 @@ export interface XinProps {
 }
 
 export type XinProxyObject = XinProps & {
-  [key: string]: XinProxyObject | XinProxyArray | XinScalar
+  [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar
 }
 
 export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (XinProxyObject[] | XinScalar[])
@@ -67,10 +67,7 @@ export interface ElementProps {
   [key: string]: any
 }
 
-export interface SwissArmyElement extends HTMLElement {
-  value: any
-  textContent: string
-}
+export type SwissArmyElement = HTMLInputElement & HTMLCanvasElement
 export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number
 export type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment

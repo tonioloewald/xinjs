@@ -11,7 +11,6 @@ const CONTROL_DEFAULTS = Object.freeze({
 
 type ControlSpec = {
   name: string,
-  animation?: string
   attack?: number
   decay?: number
   buttons?: string[]
@@ -21,14 +20,14 @@ type ControlSpec = {
 
 class Control {
   name: string
-  animation: string
   attack = 5
   decay = 10
   buttons: string[] = []
   keys: string[] = []
+  type?: string
 
   constructor(spec: ControlSpec) {
-    Object.assign(this, {...CONTROL_DEFAULTS, animation: spec.name, ...spec})
+    Object.assign(this, {...CONTROL_DEFAULTS, ...spec})
   }
 
   static buildList(...specList: ControlSpec[]): Control[] {
@@ -36,7 +35,7 @@ class Control {
   }
 }
 
-class GameController extends Component {
+export class GameController extends Component {
   updateIntervalMs = 33
   constructor() {
     super()
@@ -51,7 +50,6 @@ class GameController extends Component {
     },
     {
       name: 'backward',
-      animation: 'walk',
       keys: ['S', 'ArrowDown']
     },
     {
@@ -80,7 +78,7 @@ class GameController extends Component {
       keys: ['ShiftLeft']
     }
   )
-  state = {}
+  state: {[key: string]: number} = {}
   pressedKeys = new Set()
   pressedButtons = new Set()
   interval = 0

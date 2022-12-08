@@ -341,7 +341,6 @@ test('parents and children', async () => {
     });
     grandparent.parent = { child: 20 };
     await updates();
-    console.log(changes);
     expect(changes.length).toBe(2);
     grandparent.parent.child = 20;
     await updates();

@@ -1,21 +1,36 @@
 # web-components
 
-`xinjs` provides `makeWebComponent`, a convenience function for creating new
-web-components (or "custom elements").
+## Component
 
-    import {elements, makeWebComponent} from 'xinjs'
-    const {slot} = elements
-    const toolBar = makeWebComponent('tool-bar', {
-      style: {
+`xinjs` provides `Component`, an abstract class designed to make creating new
+web-components (or "custom elements") easier.
+
+    import {Component} from 'xinjs'
+
+    class ToolBar extends Component {
+      styleNode = Component.StyleNode({
         ':host': {
           display: 'flex',
           gap: '10px',
         },
-      }
-    })
+      })
+    }
 
-By default, a component will comprise a `<slot>`, so it's possible to create
-a simple structural component very easily.
+    export const toolBar = ToolBar.elementCreator()
+
+The last line defines the `ToolBar` class as the implementation of `<tool-bar>`
+HTML elements (`tool-bar` is derived automatically from the class name) and
+returns an `ElementCreator` function that creates `<tool-bar>` elements.
+
+See [elements](./elements.md) for more information on `ElementCreator` functions.
+
+Note that by default, a component will comprise a `<slot>`, so it's possible to create
+a simple structural component like `ToolBar` very easily.
+
+### Component.StyleNode(styleSpec: StyleSheet)
+
+A static class function that converts a `StyleSheet` object (think a map of CSS selector
+strings to CSS property maps) into a `<style>` element with the CSS in it. 
 
 ## WebComponentSpec
 

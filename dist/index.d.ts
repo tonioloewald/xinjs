@@ -3,7 +3,7 @@ export { useXin } from './xin-react';
 export { matchType, typeSafe } from './type-by-example';
 export { filter } from './filter';
 export { hotReload } from './hot-reload';
-export { makeWebComponent, Component } from './components';
+export { Component } from './component';
 export { elements, makeComponent } from './elements';
 export { settings } from './settings';
 export { bind, on } from './bind';
