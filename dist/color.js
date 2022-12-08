@@ -27,12 +27,6 @@ class HslColor {
     }
 }
 export class Color {
-    constructor(r, g, b, a = 1) {
-        this.r = clamp(0, r, 255);
-        this.g = clamp(0, g, 255);
-        this.b = clamp(0, b, 255);
-        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
-    }
     static fromCss(spec) {
         span.style.color = spec;
         const converted = span.style.color;
@@ -41,6 +35,12 @@ export class Color {
     }
     static fromHsl(h, s, l, a = 1) {
         return Color.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
+    }
+    constructor(r, g, b, a = 1) {
+        this.r = clamp(0, r, 255);
+        this.g = clamp(0, g, 255);
+        this.b = clamp(0, b, 255);
+        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
     }
     get inverse() {
         return new Color(255 - this.r, 255 - this.g, 255 - this.b, this.a);

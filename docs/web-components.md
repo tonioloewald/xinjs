@@ -5,8 +5,10 @@ easier.
 
 ## Component
 
-`xinjs` provides `Component`, an abstract class designed to make creating new
-web-components (or "custom elements") easier.
+To define a custom-element you can subclass `Component`, simply add the properties
+and methods you want, with some help from `Component` itself, and then simply
+export your new class's `elementCreator()` which is a function that defines your
+new component's element and produces instances of it as needed.
 
     import {Component} from 'xinjs'
 
@@ -21,21 +23,24 @@ web-components (or "custom elements") easier.
 
     export const toolBar = ToolBar.elementCreator()
 
+This component is just a structural element. By default a `Component` subclass will
+comprise itself and a `<slot>`. You can change this by giving your subclass its
+own `content` template.
+
 The last line defines the `ToolBar` class as the implementation of `<tool-bar>`
 HTML elements (`tool-bar` is derived automatically from the class name) and
 returns an `ElementCreator` function that creates `<tool-bar>` elements.
 
 See [elements](./elements.md) for more information on `ElementCreator` functions.
 
-Note that by default, a component will comprise a `<slot>`, so it's possible to create
-a simple structural component like `ToolBar` very easily.
-
 ### Component properties
 
 #### content: Element | Element[] | null
 
 Here's a simple example of a custom-element that simply produces a
-`<label>` wrapped around `<span>` and an `<input>`.
+`<label>` wrapped around `<span>` and an `<input>`. Its value is synced
+to that of its `<input>` so the user doesn't need to care about how
+it works internally.
 
     const {label, span, input} = Component.elements
 
@@ -74,6 +79,9 @@ Here's a simple example of a custom-element that simply produces a
 it's a single `<slot>` element. If you explicitly want an element with no content
 you can set your subclass's content to `null` or omit any `<slot>` from its template.
 
+If you'd like to see a more complex example along the same lines, look at
+[labeled-input.ts](../demo/components/labeled-input.ts).
+
 ##### <slot> names and the `slot` attribute
 
     const {slot} = Component.elements
@@ -91,9 +99,12 @@ you can set your subclass's content to `null` or omit any `<slot>` from its temp
 
     export menuBar = MenuBar.elementCreator()
 
-One of the neat things about custom-elements is that you can give them multiple
+One of the neat things about custom-elements is that you can give them *multiple*
 `<slot>`s with different `name` attributes and then have children target a specific
 slot using the `slot` attribute.
+
+[app-layout.ts](../demo/components/app-layout.ts) is a more complex example of a
+structural element utilizing multiple named `<slot>`s.
 
 #### styleNode: HTMLStyleElement
 
@@ -230,8 +241,20 @@ If there's no second bar, then `-elt` is added to the tag. So `class Foo…` imp
 Finally, `elementCreator` is memoized and only generated once (and the arguments are 
 ignored on all subsequent calls).
 
-## `<labeled-input>` Example
+## Examples
 
-[labeled-input.ts](../demo/components/labeled-input.ts) is a more complex example 
-that shows a lot of the deeper functionality provided by `Component`.
+In proving out `Component` I've built a number of examples.
 
+- [app-layout](../demo/components/app-layout.ts) uses multiple named slots to implement
+  a typical app-layout with header, footer, sidebars, etc.
+- [babylon3d](../demo/components/babylon3d.ts) implements a whole family of components
+  (inspired by [a-frame](https://aframe.io)) that lets you assemble interactive 3d scenes.
+  Aside from the core `<b-3d>` element, none of the other elements are actually displayed.
+- [game-controller.ts](../demo/components/game-controller.ts) is an invisible element that
+  implements basic game-controller functions (loosely based on [unity3d](https://unity3d.com)'s
+  game controls).
+- [labeled-input](../demo/components/labeled-input.ts) is what you'd expect.
+- [labeled-value](../demo/components/labeled-input.ts) is like labeled-input but read-only.
+- [markdown-viewer](../demo/components/markdown-viewer.ts) renders markdown.
+- [todo.ts](../demo/components/todo.ts) implements a simple reminder list.
+- [toolbar.ts](../demo/components/toolbar.ts) is a simple toolbar container.

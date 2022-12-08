@@ -1,34 +1,34 @@
-export declare type XinScalar = string | boolean | number | Function;
-export declare type XinArray = XinObject[] | XinScalar[];
+export type XinScalar = string | boolean | number | Function;
+export type XinArray = XinObject[] | XinScalar[];
 export interface XinObject {
     [key: string]: XinObject | XinArray | XinScalar;
 }
-export declare type XinProxyTarget = XinObject | XinArray;
-export declare type XinValue = XinObject | XinArray | XinScalar | null | undefined;
+export type XinProxyTarget = XinObject | XinArray;
+export type XinValue = XinObject | XinArray | XinScalar | null | undefined;
 export declare const xinPath: unique symbol;
 export declare const xinValue: unique symbol;
 export interface XinProps {
     [xinValue]: XinObject | XinObject | XinScalar;
     [xinPath]: string;
 }
-export declare type XinProxyObject = XinProps & {
+export type XinProxyObject = XinProps & {
     [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar;
 };
-export declare type XinProxyArray = XinProps & {
+export type XinProxyArray = XinProps & {
     [key: string]: XinProxyObject;
 } & (XinProxyObject[] | XinScalar[]);
-export declare type XinProxy = XinProps & (XinObject | XinArray);
-export declare type XinProxyValue = XinProxy | XinScalar | null | undefined;
-export declare type XinTouchableType = string | XinProps;
-export declare type XinEventHandler<T = Event> = ((evt: T) => void) | string;
-export declare type XinBindingShortcut = XinTouchableType | XinBindingSpec;
-declare type _BooleanFunction = () => boolean;
-declare type _PathTestFunction = (path: string) => boolean | Symbol;
-export declare type PathTestFunction = _BooleanFunction | _PathTestFunction;
-declare type OptionalSymbol = Symbol | undefined;
-declare type _CallbackFunction = (() => void) | (() => OptionalSymbol);
-declare type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol);
-export declare type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction;
+export type XinProxy = XinProps & (XinObject | XinArray);
+export type XinProxyValue = XinProxy | XinScalar | null | undefined;
+export type XinTouchableType = string | XinProps;
+export type XinEventHandler<T = Event> = ((evt: T) => void) | string;
+export type XinBindingShortcut = XinTouchableType | XinBindingSpec;
+type _BooleanFunction = () => boolean;
+type _PathTestFunction = (path: string) => boolean | Symbol;
+export type PathTestFunction = _BooleanFunction | _PathTestFunction;
+type OptionalSymbol = Symbol | undefined;
+type _CallbackFunction = (() => void) | (() => OptionalSymbol);
+type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol);
+export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction;
 export interface XinBindingSpec {
     value: XinTouchableType;
     [key: string]: any;
@@ -50,10 +50,10 @@ export interface ElementProps {
     bindStyle?: XinBindingShortcut;
     [key: string]: any;
 }
-export declare type SwissArmyElement = HTMLInputElement & HTMLCanvasElement;
-export declare type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number;
-export declare type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement;
-export declare type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
-export declare type ElementCreator<T = HTMLElementCreator | FragmentCreator> = (...contents: ElementPart[]) => T;
+export type SwissArmyElement = HTMLInputElement & HTMLCanvasElement;
+export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number;
+export type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement;
+export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
+export type ElementCreator<T = HTMLElementCreator | FragmentCreator> = (...contents: ElementPart[]) => T;
 export {};
 //# sourceMappingURL=xin-types.d.ts.map

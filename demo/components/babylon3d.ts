@@ -252,7 +252,8 @@ class BReflections extends Component {
   }
   owner?: B3d
   probes: BABYLON.ReflectionProbe[] = []
-  makeReflectiveCallback(...meshes: BABYLON.Mesh[]) {
+  #callback: MeshHandler
+  makeReflectiveCallback(...meshes: BABYLON.Mesh[]): void {
     if (this.owner == null) {
       return
     }
@@ -297,13 +298,13 @@ class BReflections extends Component {
     super.connectedCallback()
     this.owner = this.closest('b-3d') as B3d
     if (this.owner != null) {
-      this._callback = this.makeReflectiveCallback.bind(this)
-      this.owner.onAddMesh(this._callback)
+      this.#callback = this.makeReflectiveCallback.bind(this)
+      this.owner.onAddMesh(this.#callback)
     }
   }
   disconnectedCallback() {
     if (this.owner != null) {
-      this.owner.offAddMesh(this._callback)
+      this.owner.offAddMesh(this.#callback)
       for(const probe of this.probes) {
         probe.dispose()
       }
@@ -480,7 +481,8 @@ class BSun extends Component {
   shadowCasters:BABYLON.Mesh[] = []
   activeShadowCasters: BABYLON.Mesh[] = []
   interval = 0
-  shadowCallback(...meshes: BABYLON.Mesh[]) {
+  #callback: MeshHandler
+  shadowCallback(...meshes: BABYLON.Mesh[]): void {
     for(const mesh of meshes.filter(mesh => mesh.geometry != null) as BABYLON.Mesh[]) {
       if (!mesh.name.includes('nocast') && !this.shadowCasters.includes(mesh)) {
         this.shadowCasters.push(mesh)
@@ -488,6 +490,7 @@ class BSun extends Component {
       mesh.receiveShadows = !mesh.name.includes('noshadow')
     }
   }
+  #update: VoidFunction
   update() {
     if (this.light == null || this.owner!.camera == null) {
       return
@@ -517,8 +520,8 @@ class BSun extends Component {
     super.connectedCallback()
     this.owner = this.closest('b-3d') as B3d
     if (this.owner != null) {
-      this._update = this.update.bind(this)
-      this.interval = setInterval(this._update, this.updateIntervalMs)
+      this.#update = this.update.bind(this)
+      this.interval = setInterval(this.#update, this.updateIntervalMs)
       const light = new BABYLON.DirectionalLight(this.name, new BABYLON.Vector3(this.x, this.y, this.z), this.owner.scene)
       const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, light)
       /*
@@ -527,8 +530,8 @@ class BSun extends Component {
       */
       this.light = light
       this.shadowGenerator = shadowGenerator
-      this._callback = this.shadowCallback.bind(this)
-      this.owner.onAddMesh(this._callback)
+      this.#callback = this.shadowCallback.bind(this)
+      this.owner.onAddMesh(this.#callback)
     }
   }
   disconnectedCallback() {
@@ -670,6 +673,7 @@ class BWater extends AbstractMesh {
 
   material?: WaterMaterial
   windDirection = {x: 0.6, y: 0.8}
+  #callback: MeshHandler
   waterCallback(...meshes: BABYLON.Mesh[]) {
     for (const mesh of meshes) {
       if (!mesh.name.includes('water')) {
@@ -706,13 +710,13 @@ class BWater extends AbstractMesh {
       this.material = new WaterMaterial('water', this.owner.scene, new BABYLON.Vector2(textureSize, textureSize))
       this.update()
       this.mesh.material = this.material
-      this._callback = this.waterCallback.bind(this)
-      this.owner.onAddMesh(this._callback)
+      this.#callback = this.waterCallback.bind(this)
+      this.owner.onAddMesh(this.#callback)
     }
   }
   disconnectedCallback(): void {
     if (this.owner) {
-      this.owner.offAddMesh(this._callback)
+      this.owner.offAddMesh(this.#callback)
     }
     this.material = undefined
     super.disconnectedCallback()
@@ -882,11 +886,7 @@ class BBiped extends AbstractMesh {
       console.error(`<b-biped>.setAnimationState failed, no animationState named ${name} found.`)
     }
   }
-  registerUpdate() {
-    this.lastUpdate = Date.now()
-    this._update = this.update.bind(this)
-    this.owner!.scene.registerBeforeRender(this._update)
-  }
+  #update: VoidFunction
   update() {
     if (this.player && this.gameController != null) {
       const now = Date.now()
@@ -919,6 +919,11 @@ class BBiped extends AbstractMesh {
         }
       }
     }
+  }
+  registerUpdate() {
+    this.lastUpdate = Date.now()
+    this.#update = this.update.bind(this)
+    this.owner!.scene.registerBeforeRender(this.#update)
   }
   async setupXRCamera() {
     console.log('setting up xr')

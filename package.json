@@ -23,17 +23,17 @@
   "license": "BSD-3-CLAUSE",
   "devDependencies": {
     "@types/react": "^18.0.22",
-    "bun-types": "^0.2.0",
-    "react": "^18.2.0",
-    "rollup": "^3.2.3",
-    "ts-standard": "^12.0.1",
-    "typescript": "^4.8.4",
-    "uglify-js": "^3.1.7",
     "babylonjs": "^5.31.2",
     "babylonjs-gui": "^5.32.1",
     "babylonjs-loaders": "^5.32.1",
     "babylonjs-materials": "^5.32.1",
-    "marked": "^4.2.2"
+    "bun-types": "^0.2.0",
+    "marked": "^4.2.2",
+    "react": "^18.2.0",
+    "rollup": "^3.2.3",
+    "ts-standard": "^12.0.1",
+    "typescript": "^4.8.4",
+    "uglify-js": "^3.1.7"
   },
   "files": [
     "/cdn",

@@ -3,15 +3,6 @@ import { deepClone } from './deep-clone';
 import { appendContentToElement, dispatch, resizeObserver } from './dom';
 import { elements, camelToKabob, kabobToCamel } from './elements';
 export class Component extends HTMLElement {
-    constructor() {
-        super();
-        this.content = elements.slot();
-        this._changeQueued = false;
-        this._renderQueued = false;
-        this._hydrated = false;
-        this.initAttributes('hidden');
-        this._value = deepClone(this.defaultValue);
-    }
     static StyleNode(styleSpec) {
         return elements.style(css(styleSpec));
     }
@@ -157,6 +148,15 @@ export class Component extends HTMLElement {
             });
         }
         return this._refs;
+    }
+    constructor() {
+        super();
+        this.content = elements.slot();
+        this._changeQueued = false;
+        this._renderQueued = false;
+        this._hydrated = false;
+        this.initAttributes('hidden');
+        this._value = deepClone(this.defaultValue);
     }
     connectedCallback() {
         this.hydrate();
