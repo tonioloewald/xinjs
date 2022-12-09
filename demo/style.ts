@@ -13,7 +13,7 @@ const cssVars = {
   spacing: 15,
   textColor: '#222',
   itemSpacing: vars.spacing50,
-  background: '#eee',
+  background: '#f0f0f0',
   panelBg: '#ddd',
   inputBg: '#fff',
   buttonBg: '#fff8',

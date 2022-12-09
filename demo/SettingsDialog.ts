@@ -1,12 +1,13 @@
 import {elements} from '../src'
 import {labeledInput} from './components'
 
-const {form, dialog, h2, span, button, label } = elements
+const {form, dialog, h2, span, button } = elements
 
 export const settingsDialog = () => dialog(
     {
       class: 'settings',
       style: {
+        background: 'var(--background)',
         border: 0,
         borderRadius: 'calc(var(--rounded-radius) * 2)',
         boxShadow: '0 10px 20px #0008',
@@ -53,6 +54,7 @@ export const settingsDialog = () => dialog(
           style: {
             marginTop: 'calc(var(--spacing) * 0.5)',
             display: 'flex',
+            alignItems: 'center',
             justifyContent: 'flex-end'
           }
         },
@@ -70,6 +72,7 @@ export const settingsDialog = () => dialog(
           style: {
             marginTop: 'calc(var(--spacing) * 2)',
             display: 'flex',
+            alignItems: 'center',
             justifyContent: 'flex-end'
           }
         },
