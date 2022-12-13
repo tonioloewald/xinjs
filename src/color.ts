@@ -79,6 +79,14 @@ export class Color {
     return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`
   }
 
+  get RGBA (): number[] {
+    return [this.r / 255, this.g / 255, this.b / 255, this.a]
+  }
+
+  get ARGB (): number[] {
+    return [this.a, this.r / 255, this.g / 255, this.b / 255]
+  }
+
   _hslCached?: HslColor
 
   get _hsl (): HslColor {

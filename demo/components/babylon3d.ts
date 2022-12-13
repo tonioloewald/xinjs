@@ -1,30 +1,40 @@
 import {elements, Component, Color} from '../../src/index'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
-import { GameController } from './game-controller'
-import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import { GLTFFileLoader } from 'babylonjs-loaders'
+import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import waterbump from '../assets/waterbump.png'
 
-type MeshHandler = (...meshes: BABYLON.Mesh[]) => void
+export const RADIANS_TO_DEGREES = 180 / Math.PI
+export const DEGREES_TO_RADIANS = Math.PI / 180
+export type SceneAdditionHandler = (additions: SceneAdditions) => void
+
+export type SceneAdditions = {
+  meshes?: BABYLON.AbstractMesh[]
+  lights?: BABYLON.Light[]
+}
 
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
 BABYLON.SceneLoaderFlags.ShowLoadingScreen = false
 
 const {canvas, slot} = elements
 
-type AsyncVoidFunction = () => Promise<void>
+export type AsyncVoidFunction = () => Promise<void>
 
-type XRParams = {
+export type XRParams = {
   cameraName?: string
   mode?: XRSessionMode
 }
 
-type XRStuff = {
+export type XRStuff = {
   camera: BABYLON.FreeCamera
   xrHelper: BABYLON.WebXRExperienceHelper
   sessionManager: BABYLON.WebXRSessionManager
   exitXR: AsyncVoidFunction
+}
+
+export function actualMeshes(meshes: BABYLON.AbstractMesh[]): BABYLON.Mesh[] {
+  return meshes.filter(mesh => (mesh as BABYLON.Mesh).geometry != null) as BABYLON.Mesh[]
 }
 
 export async function enterXR(scene: BABYLON.Scene, options: XRParams = {}): Promise<XRStuff> {
@@ -87,7 +97,7 @@ class B3d extends Component {
   gui?: GUI.GUI3DManager
   renderInterval: number = 0
   lastRender: number
-  addMeshListeners: MeshHandler[] = []
+  sceneListeners: SceneAdditionHandler[] = []
   xrActive = false
   content = [ canvas(), slot() ]
   constructor() {
@@ -95,19 +105,20 @@ class B3d extends Component {
     this.initAttributes('glowLayerIntensity', 'frameRate', 'defaultCamera')
     this.lastRender = Date.now()
   }
-  onAddMesh(callback: MeshHandler): void {
-    this.addMeshListeners.push(callback)
-    callback(...this.scene.meshes.filter(mesh => (mesh as BABYLON.Mesh).geometry != null) as BABYLON.Mesh[])
+  onSceneAddition(callback: SceneAdditionHandler): void {
+    this.sceneListeners.push(callback)
+    callback(this.scene)
   }
-  offAddMesh(callback: MeshHandler): void {
-    const idx = this.addMeshListeners.indexOf(callback)
+  offSceneAddition(callback: SceneAdditionHandler): void {
+    const idx = this.sceneListeners.indexOf(callback)
     if (idx > -1) {
-      this.addMeshListeners.splice(idx, 1)
+      this.sceneListeners.splice(idx, 1)
     }
   }
-  addMesh(...meshes: BABYLON.Mesh[]): void {
-    for(const callback of this.addMeshListeners) {
-      callback(...meshes.filter(mesh => mesh.geometry != null))
+  register(sceneAdditions: SceneAdditions): void {
+    const {meshes, lights} = sceneAdditions
+    for(const callback of this.sceneListeners) {
+      callback(sceneAdditions)
     }
   }
   setActiveCamera(camera: BABYLON.Camera, cameraOptions = {}): void {
@@ -163,17 +174,20 @@ class B3d extends Component {
 
 export const b3d = B3d.elementCreator({tag: 'b-3d'})
 
-class AbstractMesh extends Component {
+export class AbstractMesh extends Component {
   name: string
   x = 0
   y = 0
   z = 0
+  rx = 0
+  ry = 0
+  rz = 0
   owner?: B3d
   mesh?: BABYLON.Mesh
   constructor(name = 'mesh') {
     super()
     this.name = name
-    this.initAttributes('x', 'y', 'z')
+    this.initAttributes('x', 'y', 'z', 'rx', 'ry', 'rz')
   }
   connectedCallback() {
     super.connectedCallback()
@@ -187,12 +201,31 @@ class AbstractMesh extends Component {
     }
     this.owner = undefined
   }
+  get roll() {
+    return this.rz
+  }
+  set roll(rz: number) {
+    this.rz = rz
+  }
+  get pitch() {
+    return this.rx
+  }
+  set pitch(rx: number) {
+    this.rx = rx
+  }
+  get yaw() {
+    return this.ry
+  }
+  set yaw(ry: number) {
+    this.ry = ry
+  }
   render () {
     super.render()
     if (this.mesh?.position) {
       this.mesh.position.x = this.x
       this.mesh.position.y = this.y
       this.mesh.position.z = this.z
+      this.mesh.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(this.yaw * DEGREES_TO_RADIANS, this.pitch * DEGREES_TO_RADIANS, this.roll * DEGREES_TO_RADIANS);
     }
   }
 }
@@ -201,6 +234,8 @@ class BSphere extends AbstractMesh {
   segments = 16
   diameter = 1
   updatable = false
+  color = '#ff0000'
+  material: BABYLON.StandardMaterial
   constructor(name = 'sphere') {
     super(name)
     this.initAttributes('segments', 'diameter', 'updateable')
@@ -209,12 +244,16 @@ class BSphere extends AbstractMesh {
     super.connectedCallback()
     if (this.owner != null) {
       const {name, segments, diameter, updatable} = this
-      this.mesh = BABYLON.CreateSphere(name, {
+      const mesh = BABYLON.CreateSphere(name, {
         segments,
         diameter,
         updatable
       }, this.owner.scene)
-      this.owner.addMesh(this.mesh)
+      const material = new BABYLON.StandardMaterial(this.name + '-mat', this.owner.scene)
+      material.diffuseColor = new BABYLON.Color3(...Color.fromCss(this.color).RGBA)
+      mesh.material = material
+      this.mesh = mesh
+      this.owner.register({meshes: [this.mesh]})
     }
   }
 }
@@ -237,7 +276,7 @@ class BGround extends AbstractMesh {
         height,
         updatable
       }, this.owner.scene);
-      this.owner.addMesh(this.mesh)
+      this.owner.register({meshes: this.mesh})
     }
   }
 }
@@ -245,16 +284,20 @@ class BGround extends AbstractMesh {
 export const bGround = BGround.elementCreator()
 
 class BReflections extends Component {
-  refreshRateMs: 250
+  refreshRate = 5
   constructor() {
     super()
     this.initAttributes('refreshRateMs')
   }
   owner?: B3d
   probes: BABYLON.ReflectionProbe[] = []
-  #callback: MeshHandler
-  makeReflectiveCallback(...meshes: BABYLON.Mesh[]): void {
+  #callback: SceneAdditionHandler
+  makeReflectiveCallback(additions: SceneAdditions): void {
     if (this.owner == null) {
+      return
+    }
+    const { meshes } = additions
+    if ( meshes == null ) {
       return
     }
     for(const mesh of meshes) {
@@ -263,14 +306,10 @@ class BReflections extends Component {
         if (material != null) {
           const probe = new BABYLON.ReflectionProbe("main", 512, this.owner.scene)
           probe.name = mesh.name.replace(/mirror/g, 'probe')
-          probe.refreshRate = this.refreshRate
           try {
             probe.attachToMesh(mesh)
-            for(const reflected of this.owner.scene.meshes) {
-              if (reflected !== mesh) {
-                probe.renderList?.push(reflected)
-              }
-            }
+            probe.refreshRate = this.refreshRate
+            material.backFaceCulling = true
             material.reflectionTexture = probe.cubeTexture
             material.reflectionFresnelParameters = new BABYLON.FresnelParameters()
             material.reflectionFresnelParameters.bias = 0.02
@@ -285,6 +324,7 @@ class BReflections extends Component {
         for(const probe of this.probes) {
           try {
             if (probe.renderList != null && !probe.renderList.includes(mesh)) {
+              console.log(mesh.name, 'is being reflected')
               probe.renderList.push(mesh)
             }
           } catch(e) {
@@ -299,7 +339,7 @@ class BReflections extends Component {
     this.owner = this.closest('b-3d') as B3d
     if (this.owner != null) {
       this.#callback = this.makeReflectiveCallback.bind(this)
-      this.owner.onAddMesh(this.#callback)
+      this.owner.onSceneAddition(this.#callback)
     }
   }
   disconnectedCallback() {
@@ -325,18 +365,38 @@ class BLoader extends Component {
   }
   owner?: B3d
   meshes?: BABYLON.AbstractMesh[]
-  particleSystems = null
-  skeletons = null
-  animationGroups = null
+  particleSystems?: BABYLON.ParticleSystem[]
+  skeletons?: BABYLON.Skeleton[]
+  animationGroups?: BABYLON.AnimationGroup[]
+  lights?: BABYLON.Light[]
+  lightIntensityScale = 0.05
   connectedCallback() {
     super.connectedCallback()
     this.owner = this.closest('b-3d') as B3d
     if (this.owner != null) {
       const {scene} = this.owner
       const {url} = this
-      BABYLON.SceneLoader.ImportMesh('', url, undefined, scene, (meshes, particleSystems, skeletons, animationGroups) => {
-        Object.assign(this, {meshes, particleSystems, skeletons, animationGroups})
-        this.owner!.addMesh(...meshes as BABYLON.Mesh[])
+      BABYLON.SceneLoader.ImportMeshAsync('', url, undefined, scene).then((result) => {
+        const {meshes, particleSystems, skeletons, animationGroups, lights, transformNodes} = result
+        Object.assign(this, {meshes, particleSystems, skeletons, animationGroups, lights})
+        for(const mesh of meshes) {
+          if (mesh.name.includes('-ignore')) {
+            mesh.dispose()
+          }
+        }
+        for (const node of transformNodes) {
+          if (node.name.includes('-ignore')) {
+            node.dispose()
+          }
+        }
+        for(const light of lights) {
+          if (light.name.includes('-ignore')) {
+            light.dispose()
+          } else if (light instanceof BABYLON.PointLight || light instanceof BABYLON.SpotLight) {
+            light.intensity *= this.lightIntensityScale
+          }
+        }
+        this.owner!.register({lights, meshes})
       })
     }
   }
@@ -458,6 +518,7 @@ class BLight extends Component {
 export const bLight = BLight.elementCreator()
 
 class BSun extends Component {
+  name: string
   bias = 0.001
   normalBias = 0.01
   shadowMaxZ = 50
@@ -470,9 +531,10 @@ class BSun extends Component {
   x = 0
   y = -1
   z = -0.5
-  updateIntervalMs = 100
-  constructor() {
+  updateIntervalMs = 1000
+  constructor(name = 'sun') {
     super()
+    this.name = name
     this.initAttributes('bias', 'normalBias', 'shadowMaxZ', 'shadowMinZ', 'shadowDarkness', 'shadowTextureSize', 'activeDistance', 'frustrumEdgeFalloff', 'forceBackFacesOnly')
   }
   owner?: B3d
@@ -481,9 +543,13 @@ class BSun extends Component {
   shadowCasters:BABYLON.Mesh[] = []
   activeShadowCasters: BABYLON.Mesh[] = []
   interval = 0
-  #callback: MeshHandler
-  shadowCallback(...meshes: BABYLON.Mesh[]): void {
-    for(const mesh of meshes.filter(mesh => mesh.geometry != null) as BABYLON.Mesh[]) {
+  #callback: SceneAdditionHandler
+  shadowCallback(additions: SceneAdditions): void {
+    const {meshes} = additions
+    if (meshes == null) {
+      return
+    }
+    for(const mesh of actualMeshes(meshes)) {
       if (!mesh.name.includes('nocast') && !this.shadowCasters.includes(mesh)) {
         this.shadowCasters.push(mesh)
       }
@@ -531,7 +597,7 @@ class BSun extends Component {
       this.light = light
       this.shadowGenerator = shadowGenerator
       this.#callback = this.shadowCallback.bind(this)
-      this.owner.onAddMesh(this.#callback)
+      this.owner.onSceneAddition(this.#callback)
     }
   }
   disconnectedCallback() {
@@ -571,12 +637,14 @@ export const bSun = BSun.elementCreator()
 class BSkybox extends AbstractMesh {
   turbidity = 10
   luminance = 1
+  azimuth = 0
   latitude = 40 // -90 south pole to 0 equator to 90 north pole
   realtimeScale = 10 // rate at which to automatically advance timeOfDay
+  updateFrequencyMs = 250
   sunColor = '#eef'
   duskColor = '#fa2'
-  moonColor = '#224'
-  moonIntensity = 0.02
+  moonColor = '#88f'
+  moonIntensity = 0.05
   timeOfDay = 6.5 // 24h clock time
   rayleigh = 2
   mieDirectionalG = 0.8
@@ -590,10 +658,12 @@ class BSkybox extends AbstractMesh {
   update() {
     if (this.mesh?.material) {
       const material = this.mesh.material as SkyMaterial
-      const latitude = this.latitude * Math.PI / 180
+      const latitude = this.latitude * DEGREES_TO_RADIANS
       const sunVector = new BABYLON.Vector3(0, 100, 0)
       const axis = new BABYLON.Vector3(Math.sin(latitude), 0, Math.cos(latitude))
-      const rotTime = BABYLON.Quaternion.RotationAxis(axis, (this.timeOfDay + 12) * Math.PI / 12)
+      const t =  ((this.timeOfDay + 30) % 12 / 12) * 1.04 - 0.52 // -0.52..0.52 so the sun overshoots the horizon
+      const rotTime = BABYLON.Quaternion.RotationAxis(axis, t * Math.PI)
+      const isDay = this.timeOfDay > 6 && this.timeOfDay < 18
       sunVector.rotateByQuaternionToRef(rotTime, sunVector)
       material.luminance = this.luminance
       material.azimuth = this.azimuth
@@ -601,24 +671,21 @@ class BSkybox extends AbstractMesh {
       material.mieCoefficient = this.mieCoefficient
       if (this.owner != null) {
         const sun = this.owner.querySelector('b-sun') as BSun
-        if (sun != null && sun.light != null) {
+        if (sun?.light != null) {
           const {light} = sun
-          const intensity = Math.min(Math.abs(this.timeOfDay - 6), Math.abs(this.timeOfDay - 18), 1)
-          if (this.timeOfDay > 6 && this.timeOfDay < 18) {
+          material.sunPosition = sunVector
+          light.direction = sunVector.scale(-1)
+          const intensity = Math.min(Math.abs((t + 0.52) * 10), Math.abs((t - 0.52) * 10), 1)
+          if (isDay) {
             const color = Color.fromCss(this.duskColor).blend(Color.fromCss(this.sunColor), intensity)
-            material.sunPosition = sunVector
-            light.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+            light.diffuse = new BABYLON.Color3(...color.RGBA)
             light.intensity = intensity
-            light.direction = sunVector.scale(-1)
             material.rayleigh = this.rayleigh
             material.turbidity = this.turbidity
           } else {
             const color = Color.fromCss(this.moonColor)
-            const {light} = sun
-            material.sunPosition = sunVector.scale(-1)
-            light.diffuse = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+            light.diffuse = new BABYLON.Color3(...color.RGBA)
             light.intensity = intensity * this.moonIntensity
-            light.direction = sunVector
             material.rayleigh = this.rayleigh * this.moonIntensity
             material.turbidity = this.turbidity * this.moonIntensity
           }
@@ -628,10 +695,12 @@ class BSkybox extends AbstractMesh {
   }
   connectedCallback() {
     super.connectedCallback()
+    this.lastUpdate = Date.now()
     if (this.owner != null) {
       this.interval = setInterval(() => {
-        this.timeOfDay = (this.timeOfDay + this.realtimeScale / 14400) / 24 % 1 * 24
-      }, 100)
+        this.timeOfDay = (this.timeOfDay + this.realtimeScale * this.updateFrequencyMs * 1e-6
+          ) / 24 % 1 * 24
+      }, this.updateFrequencyMs)
       const {size} = this
       const material = new SkyMaterial('skybox', this.owner.scene)
       material.backFaceCulling = false
@@ -673,8 +742,12 @@ class BWater extends AbstractMesh {
 
   material?: WaterMaterial
   windDirection = {x: 0.6, y: 0.8}
-  #callback: MeshHandler
-  waterCallback(...meshes: BABYLON.Mesh[]) {
+  #callback: SceneAdditionHandler
+  waterCallback(additions: SceneAdditions) {
+    const {meshes} = additions
+    if (meshes == null) {
+      return
+    }
     for (const mesh of meshes) {
       if (!mesh.name.includes('water')) {
         this.material!.addToRenderList(mesh)
@@ -693,7 +766,7 @@ class BWater extends AbstractMesh {
       this.material.bumpHeight = bumpHeight
       if (colorBlendFactor > 0) {
         const color = Color.fromCss(waterColor)
-        this.material.waterColor = new BABYLON.Color3(color.r/255, color.g/255, color.b/255)
+        this.material.waterColor = new BABYLON.Color3(...color.RGBA)
       }
       this.material.colorBlendFactor = colorBlendFactor
     }
@@ -711,7 +784,7 @@ class BWater extends AbstractMesh {
       this.update()
       this.mesh.material = this.material
       this.#callback = this.waterCallback.bind(this)
-      this.owner.onAddMesh(this.#callback)
+      this.owner.onSceneAddition(this.#callback)
     }
   }
   disconnectedCallback(): void {
@@ -728,284 +801,3 @@ class BWater extends AbstractMesh {
 }
 
 export const bWater = BWater.elementCreator()
-
-type AnimStateSpec = {
-  animation: string
-  name?: string
-  loop?: boolean
-  additive?: boolean
-  backwards?: boolean
-}
-
-class AnimState {
-  animation: string
-  name: string
-  loop: boolean
-  additive: boolean
-  backwards: boolean
-
-  constructor(spec: AnimStateSpec) {
-    this.animation = spec.animation
-    this.name = spec.name || spec.animation
-    this.loop = spec.loop || false
-    this.additive = spec.additive || false
-    this.backwards = spec.backwards || false
-  }
-
-  static buildList(...specs: AnimStateSpec[]): AnimState[] {
-    return specs.map(spec => new AnimState(spec))
-  }
-}
-
-class BBiped extends AbstractMesh {
-  url = ''
-  player = false
-  cameraType = 'none' // 'follow' | 'xr'
-  xrStuff?: XRStuff
-  initialState = 'idle'
-  turnSpeed = 180 // degreesPerSecond
-  forwardSpeed = 2
-  runSpeed = 5
-  backwardSpeed = 1
-  constructor(name = 'biped') {
-    super(name)
-    this.initAttributes('url', 'player', 'cameraType', 'xrStuff', 'initialState', 'turnSpeed', 'forwardSpeed', 'runSpeed', 'backwardSpeed')
-  }
-  lastUpdate = 0
-  entries: BABYLON.InstantiatedEntries
-  camera?: BABYLON.Camera
-  animationState?: AnimState
-  animationGroup?: BABYLON.AnimationGroup
-  gameController?: GameController
-  animationStates = AnimState.buildList(
-    {
-      animation: 'idle',
-      loop: true,
-    },
-    {
-      animation: 'walk',
-      loop: true,
-    },
-    {
-      animation: 'sneak',
-      loop: true,
-    },
-    {
-      animation: 'run',
-      loop: true,
-    },
-    {
-      animation: 'climb',
-      loop: true,
-    },
-    {
-      name: 'walkBackwards',
-      animation: 'walk',
-      backwards: true,
-      loop: true,
-    },
-    {
-      animation: 'jump',
-      loop: false,
-    },
-    {
-      animation: 'running-jump',
-      loop: false,
-    },
-    {
-      animation: 'salute',
-      loop: false,
-    },
-    {
-      animation: 'wave',
-      loop: false,
-      additive: true,
-    },
-    {
-      animation: 'tread-water',
-      loop: true,
-    },
-    {
-      animation: 'swim',
-      loop: true,
-    },
-    {
-      animation: 'talk',
-      loop: true,
-    },
-    {
-      animation: 'look',
-      loop: true,
-    },
-    {
-      animation: 'dance',
-      loop: true,
-    },
-    {
-      animation: 'pickup',
-      loop: false,
-    },
-    {
-      animation: 'pilot',
-      loop: true,
-    },
-  )
-  setAnimationState(name: string, speed = 1) {
-    if (name == null) {
-      throw new Error (`setAnimationState failed, no animation name specified.`)
-    }
-    if (this.animationState?.name === name || this.animationState?.animation === name) {
-      this.animationGroup!.speedRatio = speed
-      return
-    }
-    if (this.container == null) {
-      return
-    }
-    this.animationState = this.animationStates.find(state => (state.name || state.animation) === name)
-    if (this.animationState != null) {
-      const idx = this.container.animationGroups.findIndex(g => g.name.endsWith(this.animationState!.animation))
-      if (idx > -1) {
-        const loop = Boolean(this.animationState.loop)
-        const additive = Boolean(this.animationState.additive)
-        if (loop) {
-          for(const animationGroup of this.container.animationGroups) {
-            animationGroup.stop()
-          }
-        }
-        const animationGroup: BABYLON.AnimationGroup = this.container.animationGroups[idx]
-        if (this.animationState.backwards) {
-          animationGroup.start(loop, speed, animationGroup.from, animationGroup.to, additive)
-        } else {
-          animationGroup.start(loop, speed, animationGroup.to, animationGroup.from, additive)
-        }
-        this.animationGroup = animationGroup
-      } else {
-        console.error(`<b-biped>.setAnimationState failed for animationState "${this.animationState.name}": could not find animationGroup named "${this.animationState.animation}"`)
-      }
-    } else {
-      console.error(`<b-biped>.setAnimationState failed, no animationState named ${name} found.`)
-    }
-  }
-  #update: VoidFunction
-  update() {
-    if (this.player && this.gameController != null) {
-      const now = Date.now()
-      const timeElapsed = (now - this.lastUpdate) * 0.001
-      this.lastUpdate = now
-      const rotation = (this.gameController.state.right - this.gameController.state.left)
-      const speed = (this.gameController.state.forward - this.gameController.state.backward)
-      const sprint = this.gameController.state.sprint
-      const sprintSpeed = speed * sprint
-      const totalSpeed = speed * this.forwardSpeed + sprintSpeed * (this.runSpeed - this.forwardSpeed)
-      for(const node of this.container.rootNodes) {
-        if (speed > 0) {
-          node.moveWithCollisions(node.forward.scaleInPlace(totalSpeed * timeElapsed))
-        } else {
-          node.moveWithCollisions(node.forward.scaleInPlace(speed * timeElapsed * this.backwardSpeed))
-        }
-        node.rotate(BABYLON.Vector3.Up(), rotation * timeElapsed * this.turnSpeed * Math.PI / 180)
-        if (speed > 0.1) {
-          if (sprintSpeed > 0.25) {
-            this.setAnimationState('run', sprintSpeed + 0.25)
-          } else {
-            this.setAnimationState('walk', speed + 0.25)
-          }
-        } else if (speed < -0.1) {
-          this.setAnimationState('walkBackwards', speed + 0.25)
-        } else if (Math.abs(rotation) > 0.1) {
-          this.setAnimationState('walk', Math.abs(rotation * 0.5) + 0.25)
-        } else {
-          this.setAnimationState('idle')
-        }
-      }
-    }
-  }
-  registerUpdate() {
-    this.lastUpdate = Date.now()
-    this.#update = this.update.bind(this)
-    this.owner!.scene.registerBeforeRender(this.#update)
-  }
-  async setupXRCamera() {
-    console.log('setting up xr')
-    this.xrStuff = await enterXR(this.owner!.scene, {cameraName: this.cameraType})
-    const {camera, sessionManager} = this.xrStuff
-    this.camera = camera
-    this.owner!.xrActive = true
-    sessionManager.onXRFrameObservable.add(() => {
-      const {x, y, z} = this.container.rootNodes[0].position
-      camera.position.x = x
-      camera.position.y = y + 0.7
-      camera.position.z = z
-    })
-  }
-  async setupFollowCamera() {
-    if (this.xrStuff) {
-      await this.xrStuff.exitXR()
-      this.owner!.xrActive = false
-      this.xrStuff = undefined
-    }
-    console.log('setting up follow')
-    this.camera = new BABYLON.ArcRotateCamera(this.cameraType, 0.5, 0.5, 5, this.container.rootNodes[0], this.owner.scene)
-    this.owner!.setActiveCamera(this.camera, true)
-  }
-  connectedCallback() {
-    super.connectedCallback()
-    this.gameController = this.player ? this.closest('game-controller') || undefined : undefined
-    if (this.owner != null && this.url !== '') {
-      BABYLON.SceneLoader.LoadAssetContainer(this.url, undefined, this.owner.scene, (container) => {
-        this.container = container.instantiateModelsToScene(undefined, false, {doNotInstantiate: true})
-        if (this.container.rootNodes.length !== 1) {
-          throw new Error('<b-biped> expects a container with exactly one root node')
-        }
-        const meshes = this.container.rootNodes.map(node => node.getChildMeshes()).flat()
-        this.mesh = this.container.rootNodes[0]
-        this.owner!.addMesh(...meshes)
-        this.setAnimationState(this.initialState)
-        this.registerUpdate()
-        this.queueRender()
-      })
-    }
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback()
-    if (this.owner != null) {
-      if (this.container) {
-        for(const node of this.container.rootNodes) {
-          node.dispose()
-        }
-        for(const skeleton of this.container.skeletons) {
-          skeleton.dispose()
-        }
-        for(const ag of this.container.animationGroups) {
-          ag.dispose()
-        }
-      }
-    }
-  }
-  render() {
-    super.render()
-    if (this.container == null) {
-      return
-    }
-    if (this.camera == null || this.camera?.name !== this.cameraType) {
-      switch(this.cameraType) {
-        case 'xr':
-          this.setupXRCamera()
-          break;
-        case 'follow':
-          this.setupFollowCamera()
-          break;
-        default:
-          if (this.camera != null) {
-            if (this.owner!.camera === this.camera) {
-              this.owner!.camera = undefined
-            }
-            this.camera.dispose()
-            this.camera = undefined
-          }
-      }
-    }
-  }
-}
-
-export const bBiped = BBiped.elementCreator()

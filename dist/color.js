@@ -57,6 +57,12 @@ export class Color {
         const { r, g, b, a } = this;
         return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
     }
+    get RGBA() {
+        return [this.r / 255, this.g / 255, this.b / 255, this.a];
+    }
+    get ARGB() {
+        return [this.a, this.r / 255, this.g / 255, this.b / 255];
+    }
     get _hsl() {
         if (this._hslCached == null) {
             this._hslCached = new HslColor(this.r, this.g, this.b);

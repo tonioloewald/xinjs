@@ -4,7 +4,8 @@ import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
-import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater, bBiped, bReflections } from './components/babylon3d'
+import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater, bReflections } from './components/babylon3d'
+import { bBiped } from './components/biped'
 import { gameController } from './components/game-controller'
 import { wordSearch } from './WordSearch'
 import { Color } from '../src/color'
@@ -175,11 +176,11 @@ document.body.append(div(
       b3d(
         {dataRoute: 'babylon-3d', hidden: true, glowLayerIntensity: 1},
         bSun({shadowTextureSize: 2048, activeDistance: 20}),
-        bSkybox({timeOfDay: 8.5}),
+        bSkybox({timeOfDay: 6, realtimeScale: 100}),
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
-        bSphere({name: 'little-sphere', diameter: 0.5, y: 0.25, x: 1.5}),
+        bSphere({name: 'sphere-mirror', diameter: 0.5, y: 0.25, x: 1.5, color: '#444444'}),
         bLoader({url: scene}),
-        gameController(bBiped({url: omnidude, player: true, cameraType: 'follow', initialState: 'look'})),
+        gameController(bBiped({url: omnidude, x: 5, ry: 135, player: true, cameraType: 'follow', initialState: 'look'})),
         bBiped({url: omnidude, x: 3, initialState: 'dance'}),
         bButton({caption: 'Toggle XR', x: -2, y: 1.5, action: () => {
           const biped = document.querySelector('b-biped[player]')
@@ -191,8 +192,8 @@ document.body.append(div(
             window.location.reload()
           }
         }}),
-        bLight({y: 1, z: 0.5, intensity: 0.05, diffuse: '#8080ff'}),
-        bWater({y: -0.2, twoSided: true}),
+        bLight({y: 1, z: 0.5, intensity: 0.2, diffuse: '#8080ff'}),
+        bWater({y: -0.2, twoSided: true, size: 1024}),
         bReflections(),
       )
     )

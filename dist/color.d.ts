@@ -16,6 +16,8 @@ export declare class Color {
     get inverseLuminance(): Color;
     get rgb(): string;
     get rgba(): string;
+    get RGBA(): number[];
+    get ARGB(): number[];
     _hslCached?: HslColor;
     get _hsl(): HslColor;
     get hsl(): string;
