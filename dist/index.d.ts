@@ -11,5 +11,6 @@ export { bindings } from './bindings';
 export { getListItem } from './metadata';
 export { vars, initVars, css } from './css';
 export { Color } from './color';
+export * as MoreMath from './more-math';
 export * from './xin-types';
 //# sourceMappingURL=index.d.ts.map

@@ -69,6 +69,6 @@ export interface ElementProps {
 
 export type SwissArmyElement = HTMLInputElement & HTMLCanvasElement
 export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number
-export type HTMLElementCreator = (...contents: ElementPart[]) => SwissArmyElement
+export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
-export type ElementCreator<T = HTMLElementCreator | FragmentCreator> = (...contents: ElementPart[]) => T
+export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T

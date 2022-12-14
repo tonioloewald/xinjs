@@ -2,6 +2,10 @@ import { Component } from "../../src"
 
 const keycode = evt => evt.code.replace(/Key|Digit/, '')
 
+function clamp(min, x, max) {
+  return x < min ? min : x > max ? max : x
+}
+
 const CONTROL_DEFAULTS = Object.freeze({
   attack: 5,
   decay: 10,
@@ -36,10 +40,12 @@ class Control {
 }
 
 export class GameController extends Component {
+  wheel = 0.5
+  wheelSensitivity = 1
   updateIntervalMs = 33
   constructor() {
     super()
-    this.initAttributes('updateIntervalMs')
+    this.initAttributes('updateIntervalMs', 'wheel', 'wheelSensitivity')
   }
   controls: Control[] = Control.buildList(
     {
@@ -99,6 +105,11 @@ export class GameController extends Component {
     this.pressedButtons.delete(event.button)
     this.updateToggles()
   }
+  handleWheel(event: WheelEvent) {
+    this.wheel = clamp(0, this.wheel + event.deltaY * this.wheelSensitivity * 0.01, 1)
+    console.log(this.wheel)
+    event.preventDefault()
+  }
   updateToggles() {
     for(const control of this.controls.filter(control => control.type === 'toggle')) {
       if (control.keys.find(key => this.pressedKeys.has(key)) || control.buttons.find(button => this.pressedButtons.has(button))) {
@@ -130,6 +141,7 @@ export class GameController extends Component {
     document.body.addEventListener('keyup', this.handleKeyUp.bind(this))
     document.body.addEventListener('mousedown', this.handleMouseDown.bind(this))
     document.body.addEventListener('mouseup', this.handleMouseUp.bind(this))
+    document.body.addEventListener('wheel', this.handleWheel.bind(this), { passive: false })
   }
   disconnectedCallback() {
     super.disconnectedCallback()

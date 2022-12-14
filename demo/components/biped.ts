@@ -2,6 +2,7 @@ import * as BABYLON from 'babylonjs'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 import { GameController } from './game-controller'
 import { AbstractMesh, XRStuff, enterXR } from './babylon3d'
+import  { MoreMath } from '../../src'
 
 BABYLON.SceneLoader.RegisterPlugin(new GLTFFileLoader())
 
@@ -43,10 +44,25 @@ class BBiped extends AbstractMesh {
   forwardSpeed = 2
   runSpeed = 5
   backwardSpeed = 1
-  cameraTargetOffset = [0, 1.5, 0]
+  cameraHeightOffset = 1.5
+  cameraMinFollowDistance = 2
+  cameraMaxFollowDistance = 5
   constructor(name = 'biped') {
     super(name)
-    this.initAttributes('url', 'player', 'cameraType', 'xrStuff', 'initialState', 'turnSpeed', 'forwardSpeed', 'runSpeed', 'backwardSpeed')
+    this.initAttributes(
+      'url',
+      'player',
+      'cameraType',
+      'xrStuff',
+      'initialState',
+      'turnSpeed',
+      'forwardSpeed',
+      'runSpeed',
+      'backwardSpeed', 
+      'cameraHeightOffset', 
+      'cameraMinFollowDistance', 
+      'cameraMaxFollowDistance'
+    )
   }
   lastUpdate = 0
   entries: BABYLON.InstantiatedEntries
@@ -174,6 +190,9 @@ class BBiped extends AbstractMesh {
       const sprint = this.gameController.state.sprint
       const sprintSpeed = speed * sprint
       const totalSpeed = speed * this.forwardSpeed + sprintSpeed * (this.runSpeed - this.forwardSpeed)
+      if (this.camera instanceof BABYLON.FollowCamera) {
+        this.camera.radius = MoreMath.lerp(this.cameraMinFollowDistance, this.cameraMaxFollowDistance, this.gameController.wheel)
+      }
       for(const node of this.entries.rootNodes as BABYLON.Mesh[]) {
         if (speed > 0) {
           node.moveWithCollisions(node.forward.scaleInPlace(totalSpeed * timeElapsed))
@@ -222,9 +241,9 @@ class BBiped extends AbstractMesh {
       this.xrStuff = undefined
     }
     console.log('setting up follow')
-    const followCamera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(...this.cameraTargetOffset), this.owner!.scene)
+    const followCamera = new BABYLON.FollowCamera("FollowCam", BABYLON.Vector3.Zero(), this.owner!.scene)
     followCamera.radius = 5
-    followCamera.heightOffset = 2
+    followCamera.heightOffset = this.cameraHeightOffset
     followCamera.rotationOffset = 180
     followCamera.lockedTarget = this.entries.rootNodes[0] as BABYLON.Mesh
     this.camera = followCamera

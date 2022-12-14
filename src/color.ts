@@ -1,13 +1,6 @@
+import { lerp, clamp } from './more-math'
+
 const hex2 = (n: number): string => ('00' + Math.round(Number(n)).toString(16)).slice(-2)
-
-function clamp (min: number, v: number, max: number): number {
-  return v < min ? min : (v > max ? max : v)
-}
-
-function lerp (a: number, b: number, t: number): number {
-  t = clamp(0, t, 1)
-  return t * (b - a) + a
-}
 
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } }
 

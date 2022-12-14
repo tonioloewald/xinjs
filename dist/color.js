@@ -1,11 +1,5 @@
+import { lerp, clamp } from './more-math';
 const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
-function clamp(min, v, max) {
-    return v < min ? min : (v > max ? max : v);
-}
-function lerp(a, b, t) {
-    t = clamp(0, t, 1);
-    return t * (b - a) + a;
-}
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } };
 class HslColor {
     constructor(r, g, b) {

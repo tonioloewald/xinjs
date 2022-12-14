@@ -915,7 +915,13 @@ const hotReload = (test = () => true) => {
     observe(test, saveState);
 };
 
-const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
+/*
+# more-math
+
+Some simple functions egregiously missing from `Math`
+*/
+const RADIANS_TO_DEGREES = 180 / Math.PI;
+const DEGREES_TO_RADIANS = Math.PI / 180;
 function clamp(min, v, max) {
     return v < min ? min : (v > max ? max : v);
 }
@@ -923,6 +929,16 @@ function lerp(a, b, t) {
     t = clamp(0, t, 1);
     return t * (b - a) + a;
 }
+
+var moreMath = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
+    DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
+    clamp: clamp,
+    lerp: lerp
+});
+
+const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } };
 class HslColor {
     constructor(r, g, b) {
@@ -1878,6 +1894,7 @@ Component.elements = elements;
 
 exports.Color = Color;
 exports.Component = Component;
+exports.MoreMath = moreMath;
 exports.bind = bind;
 exports.bindings = bindings;
 exports.css = css;

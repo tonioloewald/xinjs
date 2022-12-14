@@ -1,12 +1,12 @@
-import {elements, Component, Color} from '../../src/index'
+import {elements, Component, Color, MoreMath} from '../../src/index'
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import waterbump from '../assets/waterbump.png'
 
-export const RADIANS_TO_DEGREES = 180 / Math.PI
-export const DEGREES_TO_RADIANS = Math.PI / 180
+const { DEGREES_TO_RADIANS } = MoreMath
+
 export type SceneAdditionHandler = (additions: SceneAdditions) => void
 
 export type SceneAdditions = {
@@ -324,7 +324,6 @@ class BReflections extends Component {
         for(const probe of this.probes) {
           try {
             if (probe.renderList != null && !probe.renderList.includes(mesh)) {
-              console.log(mesh.name, 'is being reflected')
               probe.renderList.push(mesh)
             }
           } catch(e) {
