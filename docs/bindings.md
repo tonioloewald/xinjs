@@ -45,6 +45,7 @@ The `list` binding accepts as options:
 - `idPath: string`
 - `initInstance: (element, item: any) => void`
 - `updateInstance: (element, item: any) => void` 
+- `virtual: {width?: number, height: number}`
 
 `initInstance` is called once for each element created, and is passed
 that element and the array value that it represents.
@@ -59,3 +60,9 @@ If you list-bind a custom-element with `bindValue` implemented and providing an
 custom-element.
 
 See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
+
+### Virtual List Binding
+
+If you want to bind large lists and maintain performance, you can make a list
+binding `virtual` by passing the `height` (and optionally `width`) of an item.
+Only visible elements will be rendered.

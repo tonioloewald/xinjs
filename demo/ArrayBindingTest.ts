@@ -2,10 +2,6 @@ import {xin, touch, XinProxyObject, XinArray, xinValue, Component, elements, var
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
-const styles = {
-
-}
-
 const INITIAL_ITEMS = 25
 
 type ColorRec = {id: number, color: string}
@@ -180,8 +176,7 @@ export const arrayBindingTest = (...args) => div(
         // @ts-ignore-error
         value: xin.colors.items, 
         idPath: 'id',
-        virtual: 'grid',
-        size: { width: 264, height: 51 }
+        virtual: { width: 274, height: 61 }
       }
     }
   )

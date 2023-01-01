@@ -747,7 +747,7 @@ const matchKeys = (example, subject, errors = [], path = '') => {
     }
     return errors;
 };
-class TypeError {
+let TypeError$1 = class TypeError {
     constructor(config) {
         // initializers are unnecessary but TypeScript is too stupid
         this.functionName = 'anonymous';
@@ -759,7 +759,7 @@ class TypeError {
         const { functionName, isParamFailure, errors } = this;
         return `${functionName}() failed, bad ${isParamFailure ? 'parameter' : 'return'}: ${JSON.stringify(errors)}`;
     }
-}
+};
 const assignReadOnly = (obj, propMap) => {
     propMap = { ...propMap };
     for (const key of Object.keys(propMap)) {
@@ -778,7 +778,7 @@ const assignReadOnly = (obj, propMap) => {
 };
 const matchParamTypes = (types, params) => {
     for (let i = 0; i < params.length; i++) {
-        if (params[i] instanceof TypeError) {
+        if (params[i] instanceof TypeError$1) {
             return params[i];
         }
     }
@@ -787,7 +787,7 @@ const matchParamTypes = (types, params) => {
 };
 const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 'anonymous') => {
     const paramErrors = matchParamTypes(['#function', '#?array', '#?any', '#?string'], [func, paramTypes, resultType, functionName]);
-    if (paramErrors instanceof TypeError) {
+    if (paramErrors instanceof TypeError$1) {
         throw new Error('typeSafe was passed bad parameters');
     }
     if (func.name !== '') {
@@ -798,7 +798,7 @@ const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 
         callCount += 1;
         const paramErrors = matchParamTypes(paramTypes, params);
         // short circuit failures
-        if (paramErrors instanceof TypeError)
+        if (paramErrors instanceof TypeError$1)
             return paramErrors;
         if (paramErrors.length === 0) {
             const result = func(...params);
@@ -807,7 +807,7 @@ const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 
                 return result;
             }
             else {
-                return new TypeError({
+                return new TypeError$1({
                     functionName,
                     isParamFailure: false,
                     expected: resultType,
@@ -816,7 +816,7 @@ const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 
                 });
             }
         }
-        return new TypeError({
+        return new TypeError$1({
             functionName,
             isParamFailure: true,
             expected: paramTypes,
@@ -885,6 +885,28 @@ const debounce = (origFn, minInterval = 250) => {
         debounceId = setTimeout(() => {
             origFn(...args);
         }, minInterval);
+    };
+};
+const throttle = (origFn, minInterval = 250) => {
+    let debounceId;
+    let previousCall = Date.now() - minInterval;
+    let inFlight = false;
+    return (...args) => {
+        clearTimeout(debounceId);
+        debounceId = setTimeout(async () => {
+            origFn(...args);
+            previousCall = Date.now();
+        }, minInterval);
+        if (!inFlight && Date.now() - previousCall >= minInterval) {
+            inFlight = true;
+            try {
+                origFn(...args);
+                previousCall = Date.now();
+            }
+            finally {
+                inFlight = false;
+            }
+        }
     };
 };
 
@@ -1282,7 +1304,56 @@ const on = (element, eventType, eventHandler) => {
     }
 };
 
-const listBindings = new WeakMap();
+const dispatch = (target, type) => {
+    const event = new Event(type);
+    target.dispatchEvent(event);
+};
+/* global ResizeObserver */
+const { ResizeObserver } = globalThis;
+const resizeObserver = ResizeObserver != null
+    ? new ResizeObserver(entries => {
+        for (const entry of entries) {
+            const element = entry.target;
+            dispatch(element, 'resize');
+        }
+    })
+    : {
+        observe() { },
+        unobserve() { }
+    };
+const appendContentToElement = (elt, content) => {
+    if (elt != null && content != null) {
+        if (typeof content === 'string') {
+            elt.textContent = content;
+        }
+        else if (Array.isArray(content)) {
+            content.forEach(node => {
+                elt.append(node instanceof Node ? cloneWithBindings(node) : node);
+            });
+        }
+        else if (content instanceof HTMLElement) {
+            elt.append(cloneWithBindings(content));
+        }
+        else {
+            throw new Error('expect text content or document node');
+        }
+    }
+};
+
+var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var __classPrivateFieldSet = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var _ListBinding_instances, _ListBinding_array, _ListBinding_update, _ListBinding_previouseSlice, _ListBinding_visibleSlice;
+const listBindingRef = Symbol('list-binding');
+const SLICE_INTERVAL_MS = 16; // 60fps
 function updateRelativeBindings(element, path) {
     const boundElements = [...element.querySelectorAll(BOUND_SELECTOR)];
     if (element.matches(BOUND_SELECTOR)) {
@@ -1302,6 +1373,10 @@ function updateRelativeBindings(element, path) {
 }
 class ListBinding {
     constructor(boundElement, options = {}) {
+        _ListBinding_instances.add(this);
+        _ListBinding_array.set(this, []);
+        _ListBinding_update.set(this, void 0);
+        _ListBinding_previouseSlice.set(this, void 0);
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) {
@@ -1318,34 +1393,57 @@ class ListBinding {
             this.template = boundElement.children[0];
             this.template.remove();
         }
+        this.listContainer = document.createElement('div');
+        this.boundElement.append(this.listContainer);
         this.options = options;
+        if (options.virtual != null) {
+            resizeObserver.observe(this.boundElement);
+            __classPrivateFieldSet(this, _ListBinding_update, throttle(() => {
+                this.update(__classPrivateFieldGet(this, _ListBinding_array, "f"), true);
+            }, SLICE_INTERVAL_MS), "f");
+            this.boundElement.addEventListener('scroll', __classPrivateFieldGet(this, _ListBinding_update, "f"));
+            this.boundElement.addEventListener('resize', __classPrivateFieldGet(this, _ListBinding_update, "f"));
+        }
     }
-    update(array) {
+    update(array, isSlice) {
         if (array == null) {
             array = [];
         }
+        __classPrivateFieldSet(this, _ListBinding_array, array, "f");
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
         const arrayPath = array[xinPath];
+        const slice = __classPrivateFieldGet(this, _ListBinding_instances, "m", _ListBinding_visibleSlice).call(this);
+        const previousSlice = __classPrivateFieldGet(this, _ListBinding_previouseSlice, "f");
+        const { firstItem, lastItem, topBuffer, bottomBuffer } = slice;
+        if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
+            return;
+        }
+        __classPrivateFieldSet(this, _ListBinding_previouseSlice, slice, "f");
         let removed = 0;
         let moved = 0;
         let created = 0;
-        for (const element of [...this.boundElement.children]) {
+        for (const element of [...this.listContainer.children]) {
             const proxy = elementToItem.get(element);
             if (proxy == null) {
                 element.remove();
             }
-            else if (!array.includes(proxy)) {
-                element.remove();
-                this.itemToElement.delete(proxy);
-                elementToItem.delete(element);
-                removed++;
+            else {
+                const idx = array.indexOf(proxy);
+                if (idx < firstItem || idx > lastItem) {
+                    element.remove();
+                    this.itemToElement.delete(proxy);
+                    elementToItem.delete(element);
+                    removed++;
+                }
             }
         }
+        this.listContainer.style.marginTop = String(topBuffer) + 'px';
+        this.listContainer.style.marginBottom = String(bottomBuffer) + 'px';
         // build a complete new set of elements in the right order
         const elements = [];
         const { idPath } = this.options;
-        for (let i = 0; i < array.length; i++) {
+        for (let i = firstItem; i <= lastItem; i++) {
             const item = array[i];
             if (item === undefined) {
                 continue;
@@ -1358,7 +1456,7 @@ class ListBinding {
                     this.itemToElement.set(item[xinValue], element);
                     elementToItem.set(element, item[xinValue]);
                 }
-                this.boundElement.append(element);
+                this.listContainer.append(element);
                 if (idPath != null) {
                     const idValue = item[idPath];
                     const itemPath = `${arrayPath}[${idPath}=${idValue}]`;
@@ -1381,10 +1479,10 @@ class ListBinding {
             if (element.previousElementSibling !== insertionPoint) {
                 moved++;
                 if (insertionPoint?.nextElementSibling != null) {
-                    this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
+                    this.listContainer.insertBefore(element, insertionPoint.nextElementSibling);
                 }
                 else {
-                    this.boundElement.append(element);
+                    this.listContainer.append(element);
                 }
             }
             insertionPoint = element;
@@ -1394,11 +1492,41 @@ class ListBinding {
         }
     }
 }
+_ListBinding_array = new WeakMap(), _ListBinding_update = new WeakMap(), _ListBinding_previouseSlice = new WeakMap(), _ListBinding_instances = new WeakSet(), _ListBinding_visibleSlice = function _ListBinding_visibleSlice() {
+    const { virtual } = this.options;
+    let firstItem = 0;
+    let lastItem = __classPrivateFieldGet(this, _ListBinding_array, "f").length - 1;
+    let topBuffer = 0;
+    let bottomBuffer = 0;
+    if (virtual != null) {
+        const width = this.boundElement.offsetWidth;
+        const height = this.boundElement.offsetHeight;
+        const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
+        const visibleRows = Math.ceil(height / virtual.height) + 1;
+        const totalRows = Math.ceil(__classPrivateFieldGet(this, _ListBinding_array, "f").length / visibleColumns);
+        const visibleItems = visibleColumns * visibleRows;
+        let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
+        if (topRow > totalRows - visibleRows + 1) {
+            topRow = Math.max(0, totalRows - visibleRows + 1);
+            this.boundElement.scrollTop = topRow * virtual.height;
+        }
+        firstItem = topRow * visibleColumns;
+        lastItem = firstItem + visibleItems - 1;
+        topBuffer = topRow * virtual.height;
+        bottomBuffer = totalRows * virtual.height - height - topBuffer;
+    }
+    return {
+        firstItem,
+        lastItem,
+        topBuffer,
+        bottomBuffer
+    };
+};
 const getListBinding = (boundElement, options) => {
-    let listBinding = listBindings.get(boundElement);
+    let listBinding = boundElement[listBindingRef];
     if (listBinding == null) {
         listBinding = new ListBinding(boundElement, options);
-        listBindings.set(boundElement, listBinding);
+        boundElement[listBindingRef] = listBinding;
     }
     return listBinding;
 };
@@ -1649,42 +1777,6 @@ const vars = new Proxy({}, {
         return target[prop];
     }
 });
-
-const dispatch = (target, type) => {
-    const event = new Event(type);
-    target.dispatchEvent(event);
-};
-/* global ResizeObserver */
-const { ResizeObserver } = globalThis;
-const resizeObserver = ResizeObserver != null
-    ? new ResizeObserver(entries => {
-        for (const entry of entries) {
-            const element = entry.target;
-            dispatch(element, 'resize');
-        }
-    })
-    : {
-        observe() { },
-        unobserve() { }
-    };
-const appendContentToElement = (elt, content) => {
-    if (elt != null && content != null) {
-        if (typeof content === 'string') {
-            elt.textContent = content;
-        }
-        else if (Array.isArray(content)) {
-            content.forEach(node => {
-                elt.append(node instanceof Node ? cloneWithBindings(node) : node);
-            });
-        }
-        else if (content instanceof HTMLElement) {
-            elt.append(cloneWithBindings(content));
-        }
-        else {
-            throw new Error('expect text content or document node');
-        }
-    }
-};
 
 class Component extends HTMLElement {
     constructor() {
