@@ -1,5 +1,6 @@
 import { Color } from './color';
-import { camelToKabob, elements } from './elements';
+import { elements } from './elements';
+import { camelToKabob } from './string-case';
 export function StyleNode(styleSheet) {
     return elements.style(css(styleSheet));
 }

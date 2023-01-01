@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "path-based state management for javascript",
   "main": "dist/index.js",
   "homepage": "https://xinjs.net",
@@ -12,7 +12,7 @@
     "back-end"
   ],
   "scripts": {
-    "start": "bun dev",
+    "start": "./rerun.command",
     "lint": "bun ts-standard --fix src/*.ts",
     "make": "rm -rf dist && bun test && bun tsc && ./build.command",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
@@ -21,6 +21,9 @@
   },
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",
+  "dependencies": {
+    "react": "^18.0.22"
+  },
   "devDependencies": {
     "@types/react": "^18.0.22",
     "babylonjs": "^5.31.2",

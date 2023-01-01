@@ -1,7 +1,7 @@
 /* eslint-disable */
 // @ts-expect-error
 import { test, expect } from 'bun:test';
-import { camelToKabob, kabobToCamel } from './elements';
+import { camelToKabob, kabobToCamel } from './string-case';
 import { initVars, vars, css } from './css';
 test('camelToKabob works', () => {
     expect(camelToKabob('x')).toBe('x');

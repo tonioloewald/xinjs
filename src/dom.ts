@@ -8,12 +8,18 @@ export const dispatch = (target: Element, type: string): void => {
 }
 
 /* global ResizeObserver */
-export const resizeObserver = new ResizeObserver(entries => {
-  for (const entry of entries) {
-    const element = entry.target
-    dispatch(element, 'resize')
-  }
-})
+const { ResizeObserver } = globalThis
+export const resizeObserver = ResizeObserver != null
+  ? new ResizeObserver(entries => {
+    for (const entry of entries) {
+      const element = entry.target
+      dispatch(element, 'resize')
+    }
+  })
+  : {
+      observe () {},
+      unobserve () {}
+    }
 
 export const appendContentToElement = (elt: Element | ShadowRoot | null | undefined, content: ContentType | null | undefined): void => {
   if (elt != null && content != null) {

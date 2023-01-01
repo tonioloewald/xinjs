@@ -1,5 +1,6 @@
 import { Color } from './color'
-import { camelToKabob, elements } from './elements'
+import { elements } from './elements'
+import { camelToKabob } from './string-case'
 
 export interface StyleRule {
   [key: string]: string | number

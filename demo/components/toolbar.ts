@@ -9,7 +9,8 @@ class ToolBar extends Component {
       background: vars.panelBg,
       padding: `0 ${vars.spacing} !important`,
       margin: 0,
-      height: `calc(${vars.lineHeight} + ${vars.spacing})`,
+      height: vars.toolbarHeight,
+      flex: `0 0 ${vars.toolbarHeight}`,
       overflow: 'hidden',
       overflowX: 'overlay'
     },

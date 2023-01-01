@@ -30,6 +30,7 @@ const cssVars = {
   roundedRadius: vars.lineHeight25,
   borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
   inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
+  toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
 }
 
 const codeVars = {

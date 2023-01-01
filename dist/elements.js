@@ -1,16 +1,7 @@
 import { bind, on } from './bind';
 import { bindings } from './bindings';
+import { camelToKabob } from './string-case';
 const templates = {};
-export function camelToKabob(s) {
-    return s.replace(/[A-Z]/g, (c) => {
-        return `-${c.toLocaleLowerCase()}`;
-    });
-}
-export function kabobToCamel(s) {
-    return s.replace(/-([a-z])/g, (_, c) => {
-        return c.toLocaleUpperCase();
-    });
-}
 export const makeComponent = (...componentParts) => {
     return (...args) => elements.div(...args, ...componentParts);
 };

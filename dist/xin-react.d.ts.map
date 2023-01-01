@@ -1,1 +1,1 @@
-{"version":3,"file":"xin-react.d.ts","sourceRoot":"","sources":["../src/xin-react.ts"],"names":[],"mappings":"AAGA,KAAK,QAAQ,GAAG;IACd,KAAK,EAAE,GAAG;IACV,QAAQ,EAAE,CAAC,QAAQ,EAAE,GAAG,KAAK,IAAI;CAClC,CAAA;AAKD,eAAO,MAAM,MAAM,SAAU,MAAM,iBAAgB,GAAG,aAerD,CAAA"}
+{"version":3,"file":"xin-react.d.ts","sourceRoot":"","sources":["../src/xin-react.ts"],"names":[],"mappings":"AAGA,aAAK,QAAQ,GAAG;IACd,KAAK,EAAE,GAAG;IACV,QAAQ,EAAE,CAAC,QAAQ,EAAE,GAAG,KAAK,IAAI;CAClC,CAAA;AAKD,eAAO,MAAM,MAAM,SAAU,MAAM,iBAAgB,GAAG,aAerD,CAAA"}

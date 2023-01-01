@@ -958,6 +958,12 @@ class HslColor {
     }
 }
 class Color {
+    constructor(r, g, b, a = 1) {
+        this.r = clamp(0, r, 255);
+        this.g = clamp(0, g, 255);
+        this.b = clamp(0, b, 255);
+        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
+    }
     static fromCss(spec) {
         span.style.color = spec;
         const converted = span.style.color;
@@ -966,12 +972,6 @@ class Color {
     }
     static fromHsl(h, s, l, a = 1) {
         return Color.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
-    }
-    constructor(r, g, b, a = 1) {
-        this.r = clamp(0, r, 255);
-        this.g = clamp(0, g, 255);
-        this.b = clamp(0, b, 255);
-        this.a = a !== undefined ? clamp(0, a, 1) : a = 1;
     }
     get inverse() {
         return new Color(255 - this.r, 255 - this.g, 255 - this.b, this.a);
@@ -1460,7 +1460,6 @@ const bindings = {
     }
 };
 
-const templates = {};
 function camelToKabob(s) {
     return s.replace(/[A-Z]/g, (c) => {
         return `-${c.toLocaleLowerCase()}`;
@@ -1471,6 +1470,8 @@ function kabobToCamel(s) {
         return c.toLocaleUpperCase();
     });
 }
+
+const templates = {};
 const makeComponent = (...componentParts) => {
     return (...args) => elements.div(...args, ...componentParts);
 };
@@ -1654,12 +1655,18 @@ const dispatch = (target, type) => {
     target.dispatchEvent(event);
 };
 /* global ResizeObserver */
-const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-        const element = entry.target;
-        dispatch(element, 'resize');
-    }
-});
+const { ResizeObserver } = globalThis;
+const resizeObserver = ResizeObserver != null
+    ? new ResizeObserver(entries => {
+        for (const entry of entries) {
+            const element = entry.target;
+            dispatch(element, 'resize');
+        }
+    })
+    : {
+        observe() { },
+        unobserve() { }
+    };
 const appendContentToElement = (elt, content) => {
     if (elt != null && content != null) {
         if (typeof content === 'string') {
@@ -1680,6 +1687,15 @@ const appendContentToElement = (elt, content) => {
 };
 
 class Component extends HTMLElement {
+    constructor() {
+        super();
+        this.content = elements.slot();
+        this._changeQueued = false;
+        this._renderQueued = false;
+        this._hydrated = false;
+        this.initAttributes('hidden');
+        this._value = deepClone(this.defaultValue);
+    }
     static StyleNode(styleSpec) {
         return elements.style(css(styleSpec));
     }
@@ -1825,15 +1841,6 @@ class Component extends HTMLElement {
             });
         }
         return this._refs;
-    }
-    constructor() {
-        super();
-        this.content = elements.slot();
-        this._changeQueued = false;
-        this._renderQueued = false;
-        this._hydrated = false;
-        this.initAttributes('hidden');
-        this._value = deepClone(this.defaultValue);
     }
     connectedCallback() {
         this.hydrate();

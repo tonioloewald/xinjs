@@ -107,8 +107,6 @@ export class GameController extends Component {
   }
   handleWheel(event: WheelEvent) {
     this.wheel = clamp(0, this.wheel + event.deltaY * this.wheelSensitivity * 0.01, 1)
-    console.log(this.wheel)
-    event.preventDefault()
   }
   updateToggles() {
     for(const control of this.controls.filter(control => control.type === 'toggle')) {

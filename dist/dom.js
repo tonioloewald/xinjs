@@ -4,12 +4,18 @@ export const dispatch = (target, type) => {
     target.dispatchEvent(event);
 };
 /* global ResizeObserver */
-export const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-        const element = entry.target;
-        dispatch(element, 'resize');
-    }
-});
+const { ResizeObserver } = globalThis;
+export const resizeObserver = ResizeObserver != null
+    ? new ResizeObserver(entries => {
+        for (const entry of entries) {
+            const element = entry.target;
+            dispatch(element, 'resize');
+        }
+    })
+    : {
+        observe() { },
+        unobserve() { }
+    };
 export const appendContentToElement = (elt, content) => {
     if (elt != null && content != null) {
         if (typeof content === 'string') {

@@ -1,4 +1,4 @@
-import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProps} from '../../src/index'
+import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProps, XinProxyArray} from '../../src/index'
 
 const {h1, div, template, form, span, input, button} = elements
 
@@ -57,10 +57,10 @@ export const todo = makeComponent(
         const item = getListItem(event.target as HTMLElement)
         // @ts-ignore-error
         xin.todoApp.deleteItem(item)
-        touch(xin.todoApp as XinProps)
+        touch(xin.todoApp as XinProxyObject)
       }})
     )),
-    { bindList: {value: xin.todoApp.list, idPath: 'id'} }
+    { bindList: {value: xin.todoApp.list as XinProxyArray, idPath: 'id'} }
   ),
   form(
     { style: flex },

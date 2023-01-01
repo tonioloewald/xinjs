@@ -2,6 +2,10 @@ import {xin, touch, XinProxyObject, XinArray, xinValue, Component, elements, var
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
+const styles = {
+
+}
+
 const INITIAL_ITEMS = 25
 
 type ColorRec = {id: number, color: string}
@@ -83,6 +87,14 @@ const colorSwatch = ColorSwatch.elementCreator()
 
 export const arrayBindingTest = (...args) => div(
   ...args,
+  {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      height: '100%',
+    }
+  },
   toolBar(
     button('create', {
       onClick() {
@@ -156,12 +168,20 @@ export const arrayBindingTest = (...args) => div(
     })
   ),
   div(
+    {
+      style: {
+        flex: '1 1 auto',
+        overflowY: 'scroll'
+      }
+    },
     template( colorSwatch({bindValue: '^'})), 
     { 
       bindList: {
         // @ts-ignore-error
         value: xin.colors.items, 
-        idPath: 'id'
+        idPath: 'id',
+        virtual: 'grid',
+        size: { width: 264, height: 51 }
       }
     }
   )
