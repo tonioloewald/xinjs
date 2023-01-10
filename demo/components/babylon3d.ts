@@ -4,6 +4,7 @@ import * as GUI from 'babylonjs-gui'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
 import waterbump from '../assets/waterbump.png'
+import { CascadedShadowGenerator } from 'babylonjs'
 
 const { DEGREES_TO_RADIANS } = MoreMath
 
@@ -520,10 +521,11 @@ class BSun extends Component {
   name: string
   bias = 0.001
   normalBias = 0.01
-  shadowMaxZ = 50
+  shadowMaxZ = 100
   shadowMinZ = 0.01
   shadowDarkness = 0.1
   shadowTextureSize = 1024
+  shadowCascading = false
   activeDistance = 10
   frustumEdgeFalloff = 0
   forceBackFacesOnly = true
@@ -534,7 +536,7 @@ class BSun extends Component {
   constructor(name = 'sun') {
     super()
     this.name = name
-    this.initAttributes('bias', 'normalBias', 'shadowMaxZ', 'shadowMinZ', 'shadowDarkness', 'shadowTextureSize', 'activeDistance', 'frustrumEdgeFalloff', 'forceBackFacesOnly')
+    this.initAttributes('bias', 'normalBias', 'shadowMaxZ', 'shadowMinZ', 'shadowCascading' ,'shadowDarkness', 'shadowTextureSize', 'activeDistance', 'frustrumEdgeFalloff', 'forceBackFacesOnly')
   }
   owner?: B3d
   light?: BABYLON.DirectionalLight
@@ -588,13 +590,16 @@ class BSun extends Component {
       this.#update = this.update.bind(this)
       this.interval = setInterval(this.#update, this.updateIntervalMs)
       const light = new BABYLON.DirectionalLight(this.name, new BABYLON.Vector3(this.x, this.y, this.z), this.owner.scene)
-      const shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, light)
+      if (this.shadowCascading) {
+        this.shadowGenerator = new BABYLON.CascadedShadowGenerator(this.shadowTextureSize, light)
+      } else {
+        this.shadowGenerator = new BABYLON.ShadowGenerator(this.shadowTextureSize, light)
+      }
       /*
       shadowGenerator.useExponentialShadowMap = true
       shadowGenerator.usePoissonSampling = true
       */
       this.light = light
-      this.shadowGenerator = shadowGenerator
       this.#callback = this.shadowCallback.bind(this)
       this.owner.onSceneAddition(this.#callback)
     }
@@ -618,15 +623,19 @@ class BSun extends Component {
       light.direction.x = this.x
       light.direction.y = this.y
       light.direction.z = this.z
-      shadowGenerator.bias = this.bias
-      shadowGenerator.normalBias = this.normalBias
-      light.shadowMaxZ = this.shadowMaxZ
-      light.shadowMinZ = this.shadowMinZ
-      shadowGenerator.useContactHardeningShadow = true
-      shadowGenerator.contactHardeningLightSizeUVRatio = 0.05
-      shadowGenerator.frustumEdgeFalloff = this.frustumEdgeFalloff
-      shadowGenerator.forceBackFacesOnly = this.forceBackFacesOnly
-      shadowGenerator.setDarkness(this.shadowDarkness)
+      if (this.shadowCascading) {
+        (shadowGenerator as CascadedShadowGenerator).shadowMaxZ = this.shadowMaxZ
+      } else {
+        shadowGenerator.bias = this.bias
+        shadowGenerator.normalBias = this.normalBias
+        light.shadowMaxZ = this.shadowMaxZ
+        light.shadowMinZ = this.shadowMinZ
+        shadowGenerator.useContactHardeningShadow = true
+        shadowGenerator.contactHardeningLightSizeUVRatio = 0.05
+        shadowGenerator.frustumEdgeFalloff = this.frustumEdgeFalloff
+        shadowGenerator.forceBackFacesOnly = this.forceBackFacesOnly
+        shadowGenerator.setDarkness(this.shadowDarkness)
+      }
     }
   }
 }

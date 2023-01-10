@@ -1,4 +1,4 @@
-declare type HookType = [
+type HookType = [
     value: any,
     setValue: (newValue: any) => void
 ];

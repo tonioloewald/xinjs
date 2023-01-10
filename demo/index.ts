@@ -175,7 +175,7 @@ document.body.append(div(
       wordSearch({dataRoute: 'word-search', hidden: true}),
       b3d(
         {dataRoute: 'babylon-3d', hidden: true, glowLayerIntensity: 1},
-        bSun({shadowTextureSize: 2048, activeDistance: 20}),
+        bSun({shadowCascading: true, shadowTextureSize: 2048, activeDistance: 20}),
         bSkybox({timeOfDay: 6, realtimeScale: 100}),
         bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
         bSphere({name: 'sphere-mirror', diameter: 0.5, y: 0.25, x: 1.5, color: '#444444'}),
