@@ -161,7 +161,7 @@ class ListBinding {
     this.listContainer.style.marginBottom = String(bottomBuffer) + 'px'
 
     // build a complete new set of elements in the right order
-    const elements = []
+    const elements: HTMLElement[] = []
     const { idPath } = this.options
     for (let i = firstItem; i <= lastItem; i++) {
       const item = array[i]

@@ -952,8 +952,8 @@ function lerp(a, b, t) {
 
 var moreMath = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
     RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
+    DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
     clamp: clamp,
     lerp: lerp
 });
@@ -1729,6 +1729,17 @@ const initVars = (obj) => {
     }
     return rule;
 };
+const darkMode = (obj) => {
+    const rule = {};
+    for (const key of Object.keys(obj)) {
+        let value = obj[key];
+        if (typeof value === 'string' && value.match(/^(#|rgb[a]?\(|hsl[a]?\()/) != null) {
+            value = Color.fromCss(value).inverseLuminance.html;
+            rule[`--${camelToKabob(key)}`] = value;
+        }
+    }
+    return rule;
+};
 const vars = new Proxy({}, {
     get(target, prop) {
         if (target[prop] == null) {
@@ -1989,4 +2000,4 @@ class Component extends HTMLElement {
 }
 Component.elements = elements;
 
-export { Color, Component, moreMath as MoreMath, bind, bindings, css, elements, filter, getListItem, hotReload, initVars, makeComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, useXin, vars, xin, xinPath, xinValue };
+export { Color, Component, moreMath as MoreMath, bind, bindings, css, darkMode, elements, filter, getListItem, hotReload, initVars, makeComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, useXin, vars, xin, xinPath, xinValue };
