@@ -53,7 +53,7 @@ it works internally.
         this.initAttributes('caption')
       }
 
-      content: label(span(), input())
+      content = label(span(), input())
 
       connectedCallback() {
         super.connectedCallback()
@@ -256,5 +256,4 @@ In proving out `Component` I've built a number of examples.
 - [labeled-input](../demo/components/labeled-input.ts) is what you'd expect.
 - [labeled-value](../demo/components/labeled-input.ts) is like labeled-input but read-only.
 - [markdown-viewer](../demo/components/markdown-viewer.ts) renders markdown.
-- [todo.ts](../demo/components/todo.ts) implements a simple reminder list.
 - [toolbar.ts](../demo/components/toolbar.ts) is a simple toolbar container.
