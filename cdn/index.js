@@ -55,15 +55,12 @@ const update = () => {
         console.time('xin async update');
     }
     const paths = [...touchedPaths];
-    console.log('update', paths);
-    touchedPaths.splice(0);
     for (const path of paths) {
         listeners
             .filter(listener => {
             let heard;
             try {
                 heard = listener.test(path);
-                console.log({ heard, path });
             }
             catch (e) {
                 throw new Error(`Listener ${listener.description} threw "${e}" at "${path}"`);
@@ -87,6 +84,7 @@ const update = () => {
             }
         });
     }
+    touchedPaths.splice(0);
     updateTriggered = false;
     if (typeof resolveUpdate === 'function') {
         resolveUpdate();
@@ -105,7 +103,6 @@ const touch = (what) => {
     }
     if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
         touchedPaths.push(path);
-        console.log('pushed', path, touchedPaths);
     }
 };
 const observe$1 = (test, callback) => {

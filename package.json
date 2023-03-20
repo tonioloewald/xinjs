@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "path-based state management for javascript",
   "main": "dist/index.js",
   "homepage": "https://xinjs.net",

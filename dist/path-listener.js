@@ -43,7 +43,6 @@ export class Listener {
 }
 export const updates = async () => {
     if (updatePromise === undefined) {
-        console.log('updates, no waiting!');
         return;
     }
     await updatePromise;
@@ -53,15 +52,12 @@ const update = () => {
         console.time('xin async update');
     }
     const paths = [...touchedPaths];
-    console.log('update', paths);
-    touchedPaths.splice(0);
     for (const path of paths) {
         listeners
             .filter(listener => {
             let heard;
             try {
                 heard = listener.test(path);
-                console.log({ heard, path });
             }
             catch (e) {
                 throw new Error(`Listener ${listener.description} threw "${e}" at "${path}"`);
@@ -85,6 +81,7 @@ const update = () => {
             }
         });
     }
+    touchedPaths.splice(0);
     updateTriggered = false;
     if (typeof resolveUpdate === 'function') {
         resolveUpdate();
@@ -103,7 +100,6 @@ export const touch = (what) => {
     }
     if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
         touchedPaths.push(path);
-        console.log('pushed', path, touchedPaths);
     }
 };
 export const observe = (test, callback) => {
