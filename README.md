@@ -262,6 +262,14 @@ To work interactively on the demo code, use `bun dev`.
 
 To build you will need to `chmod +x build.command` before running `bun pack`.
 
+> ## Caution
+> xinjs currently builds against ES2022 because its use of private class properties
+> causes rollup to produce bad code. Super annoying and unnecessary. I don't want
+> to waste time coding around bad intermediate code although there's a simple
+> workaround (WeakMaps are the dual of private symbols and don't cause the problem).
+> Let me know if this is a pain point because, as I said, it's an easy if ugly
+> fix.
+
 ## Credits
 
 `xinjs` is in essence a highly incompatible update to `b8rjs` with the goal

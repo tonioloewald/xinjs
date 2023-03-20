@@ -19,6 +19,9 @@ const getPath = (what) => {
     return typeof what === 'object' ? what[xinPath] : what;
 };
 class Listener {
+    description;
+    test;
+    callback;
     constructor(test, callback) {
         const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`;
         let testDescription;
@@ -52,12 +55,15 @@ const update = () => {
         console.time('xin async update');
     }
     const paths = [...touchedPaths];
+    console.log('update', paths);
+    touchedPaths.splice(0);
     for (const path of paths) {
         listeners
             .filter(listener => {
             let heard;
             try {
                 heard = listener.test(path);
+                console.log({ heard, path });
             }
             catch (e) {
                 throw new Error(`Listener ${listener.description} threw "${e}" at "${path}"`);
@@ -81,7 +87,6 @@ const update = () => {
             }
         });
     }
-    touchedPaths.splice(0);
     updateTriggered = false;
     if (typeof resolveUpdate === 'function') {
         resolveUpdate();
@@ -100,6 +105,7 @@ const touch = (what) => {
     }
     if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
         touchedPaths.push(path);
+        console.log('pushed', path, touchedPaths);
     }
 };
 const observe$1 = (test, callback) => {
@@ -749,19 +755,21 @@ const matchKeys = (example, subject, errors = [], path = '') => {
     }
     return errors;
 };
-let TypeError$1 = class TypeError {
+class TypeError {
+    // initializers are unnecessary but TypeScript is too stupid
+    functionName = 'anonymous';
+    isParamFailure = false;
+    expected;
+    found;
+    errors = [];
     constructor(config) {
-        // initializers are unnecessary but TypeScript is too stupid
-        this.functionName = 'anonymous';
-        this.isParamFailure = false;
-        this.errors = [];
         Object.assign(this, config);
     }
     toString() {
         const { functionName, isParamFailure, errors } = this;
         return `${functionName}() failed, bad ${isParamFailure ? 'parameter' : 'return'}: ${JSON.stringify(errors)}`;
     }
-};
+}
 const assignReadOnly = (obj, propMap) => {
     propMap = { ...propMap };
     for (const key of Object.keys(propMap)) {
@@ -780,7 +788,7 @@ const assignReadOnly = (obj, propMap) => {
 };
 const matchParamTypes = (types, params) => {
     for (let i = 0; i < params.length; i++) {
-        if (params[i] instanceof TypeError$1) {
+        if (params[i] instanceof TypeError) {
             return params[i];
         }
     }
@@ -789,7 +797,7 @@ const matchParamTypes = (types, params) => {
 };
 const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 'anonymous') => {
     const paramErrors = matchParamTypes(['#function', '#?array', '#?any', '#?string'], [func, paramTypes, resultType, functionName]);
-    if (paramErrors instanceof TypeError$1) {
+    if (paramErrors instanceof TypeError) {
         throw new Error('typeSafe was passed bad parameters');
     }
     if (func.name !== '') {
@@ -800,7 +808,7 @@ const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 
         callCount += 1;
         const paramErrors = matchParamTypes(paramTypes, params);
         // short circuit failures
-        if (paramErrors instanceof TypeError$1)
+        if (paramErrors instanceof TypeError)
             return paramErrors;
         if (paramErrors.length === 0) {
             const result = func(...params);
@@ -809,7 +817,7 @@ const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 
                 return result;
             }
             else {
-                return new TypeError$1({
+                return new TypeError({
                     functionName,
                     isParamFailure: false,
                     expected: resultType,
@@ -818,7 +826,7 @@ const typeSafe = (func, paramTypes = [], resultType = undefined, functionName = 
                 });
             }
         }
-        return new TypeError$1({
+        return new TypeError({
             functionName,
             isParamFailure: true,
             expected: paramTypes,
@@ -963,6 +971,9 @@ var moreMath = /*#__PURE__*/Object.freeze({
 const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } };
 class HslColor {
+    h;
+    s;
+    l;
     constructor(r, g, b) {
         r /= 255;
         g /= 255;
@@ -982,6 +993,10 @@ class HslColor {
     }
 }
 class Color {
+    r;
+    g;
+    b;
+    a;
     static fromCss(spec) {
         span.style.color = spec;
         const converted = span.style.color;
@@ -1018,6 +1033,7 @@ class Color {
     get ARGB() {
         return [this.a, this.r / 255, this.g / 255, this.b / 255];
     }
+    _hslCached;
     get _hsl() {
         if (this._hslCached == null) {
             this._hslCached = new HslColor(this.r, this.g, this.b);
@@ -1145,8 +1161,9 @@ const getListItem = (element) => {
     return false;
 };
 
+const { document: document$1 } = globalThis;
 observe(() => true, (changedPath) => {
-    const boundElements = globalThis.document.body.querySelectorAll(BOUND_SELECTOR);
+    const boundElements = document$1.body.querySelectorAll(BOUND_SELECTOR);
     for (const element of boundElements) {
         const dataBindings = elementToBindings.get(element);
         for (const dataBinding of dataBindings) {
@@ -1208,8 +1225,8 @@ const handleChange = (event) => {
     }
 };
 if (globalThis.document != null) {
-    globalThis.document.body.addEventListener('change', handleChange, true);
-    globalThis.document.body.addEventListener('input', handleChange, true);
+    document$1.body.addEventListener('change', handleChange, true);
+    document$1.body.addEventListener('input', handleChange, true);
 }
 const bind = (element, what, binding, options) => {
     if (element instanceof DocumentFragment) {
@@ -1302,7 +1319,7 @@ const on = (element, eventType, eventHandler) => {
     }
     if (!handledEventTypes.has(eventType)) {
         handledEventTypes.add(eventType);
-        document.body.addEventListener(eventType, handleBoundEvent, true);
+        document$1.body.addEventListener(eventType, handleBoundEvent, true);
     }
 };
 
@@ -1342,18 +1359,6 @@ const appendContentToElement = (elt, content) => {
     }
 };
 
-var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var __classPrivateFieldSet = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var _ListBinding_instances, _ListBinding_array, _ListBinding_update, _ListBinding_previouseSlice, _ListBinding_visibleSlice;
 const listBindingRef = Symbol('list-binding');
 const SLICE_INTERVAL_MS = 16; // 60fps
 function updateRelativeBindings(element, path) {
@@ -1374,11 +1379,15 @@ function updateRelativeBindings(element, path) {
     }
 }
 class ListBinding {
+    boundElement;
+    listContainer;
+    template;
+    options;
+    itemToElement;
+    #array = [];
+    #update;
+    #previouseSlice;
     constructor(boundElement, options = {}) {
-        _ListBinding_instances.add(this);
-        _ListBinding_array.set(this, []);
-        _ListBinding_update.set(this, void 0);
-        _ListBinding_previouseSlice.set(this, void 0);
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) {
@@ -1400,28 +1409,58 @@ class ListBinding {
         this.options = options;
         if (options.virtual != null) {
             resizeObserver.observe(this.boundElement);
-            __classPrivateFieldSet(this, _ListBinding_update, throttle(() => {
-                this.update(__classPrivateFieldGet(this, _ListBinding_array, "f"), true);
-            }, SLICE_INTERVAL_MS), "f");
-            this.boundElement.addEventListener('scroll', __classPrivateFieldGet(this, _ListBinding_update, "f"));
-            this.boundElement.addEventListener('resize', __classPrivateFieldGet(this, _ListBinding_update, "f"));
+            this.#update = throttle(() => {
+                this.update(this.#array, true);
+            }, SLICE_INTERVAL_MS);
+            this.boundElement.addEventListener('scroll', this.#update);
+            this.boundElement.addEventListener('resize', this.#update);
         }
+    }
+    #visibleSlice() {
+        const { virtual } = this.options;
+        let firstItem = 0;
+        let lastItem = this.#array.length - 1;
+        let topBuffer = 0;
+        let bottomBuffer = 0;
+        if (virtual != null) {
+            const width = this.boundElement.offsetWidth;
+            const height = this.boundElement.offsetHeight;
+            const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
+            const visibleRows = Math.ceil(height / virtual.height) + 1;
+            const totalRows = Math.ceil(this.#array.length / visibleColumns);
+            const visibleItems = visibleColumns * visibleRows;
+            let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
+            if (topRow > totalRows - visibleRows + 1) {
+                topRow = Math.max(0, totalRows - visibleRows + 1);
+                this.boundElement.scrollTop = topRow * virtual.height;
+            }
+            firstItem = topRow * visibleColumns;
+            lastItem = firstItem + visibleItems - 1;
+            topBuffer = topRow * virtual.height;
+            bottomBuffer = totalRows * virtual.height - height - topBuffer;
+        }
+        return {
+            firstItem,
+            lastItem,
+            topBuffer,
+            bottomBuffer
+        };
     }
     update(array, isSlice) {
         if (array == null) {
             array = [];
         }
-        __classPrivateFieldSet(this, _ListBinding_array, array, "f");
+        this.#array = array;
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
         const arrayPath = array[xinPath];
-        const slice = __classPrivateFieldGet(this, _ListBinding_instances, "m", _ListBinding_visibleSlice).call(this);
-        const previousSlice = __classPrivateFieldGet(this, _ListBinding_previouseSlice, "f");
+        const slice = this.#visibleSlice();
+        const previousSlice = this.#previouseSlice;
         const { firstItem, lastItem, topBuffer, bottomBuffer } = slice;
         if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
             return;
         }
-        __classPrivateFieldSet(this, _ListBinding_previouseSlice, slice, "f");
+        this.#previouseSlice = slice;
         let removed = 0;
         let moved = 0;
         let created = 0;
@@ -1494,36 +1533,6 @@ class ListBinding {
         }
     }
 }
-_ListBinding_array = new WeakMap(), _ListBinding_update = new WeakMap(), _ListBinding_previouseSlice = new WeakMap(), _ListBinding_instances = new WeakSet(), _ListBinding_visibleSlice = function _ListBinding_visibleSlice() {
-    const { virtual } = this.options;
-    let firstItem = 0;
-    let lastItem = __classPrivateFieldGet(this, _ListBinding_array, "f").length - 1;
-    let topBuffer = 0;
-    let bottomBuffer = 0;
-    if (virtual != null) {
-        const width = this.boundElement.offsetWidth;
-        const height = this.boundElement.offsetHeight;
-        const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
-        const visibleRows = Math.ceil(height / virtual.height) + 1;
-        const totalRows = Math.ceil(__classPrivateFieldGet(this, _ListBinding_array, "f").length / visibleColumns);
-        const visibleItems = visibleColumns * visibleRows;
-        let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
-        if (topRow > totalRows - visibleRows + 1) {
-            topRow = Math.max(0, totalRows - visibleRows + 1);
-            this.boundElement.scrollTop = topRow * virtual.height;
-        }
-        firstItem = topRow * visibleColumns;
-        lastItem = firstItem + visibleItems - 1;
-        topBuffer = topRow * virtual.height;
-        bottomBuffer = totalRows * virtual.height - height - topBuffer;
-    }
-    return {
-        firstItem,
-        lastItem,
-        topBuffer,
-        bottomBuffer
-    };
-};
 const getListBinding = (boundElement, options) => {
     let listBinding = boundElement[listBindingRef];
     if (listBinding == null) {
@@ -1792,6 +1801,11 @@ const vars = new Proxy({}, {
 });
 
 class Component extends HTMLElement {
+    static elements = elements;
+    static _elementCreator;
+    styleNode;
+    content = elements.slot();
+    value;
     static StyleNode(styleSpec) {
         return elements.style(css(styleSpec));
     }
@@ -1917,6 +1931,7 @@ class Component extends HTMLElement {
             }
         });
     }
+    _refs;
     get refs() {
         const root = this.shadowRoot != null ? this.shadowRoot : this;
         if (this._refs == null) {
@@ -1940,10 +1955,6 @@ class Component extends HTMLElement {
     }
     constructor() {
         super();
-        this.content = elements.slot();
-        this._changeQueued = false;
-        this._renderQueued = false;
-        this._hydrated = false;
         this.initAttributes('hidden');
         this._value = deepClone(this.defaultValue);
     }
@@ -1966,6 +1977,8 @@ class Component extends HTMLElement {
     disconnectedCallback() {
         resizeObserver.unobserve(this);
     }
+    _changeQueued = false;
+    _renderQueued = false;
     queueRender(triggerChangeEvent = false) {
         if (!this._changeQueued)
             this._changeQueued = triggerChangeEvent;
@@ -1982,6 +1995,7 @@ class Component extends HTMLElement {
             });
         }
     }
+    _hydrated = false;
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
@@ -2000,7 +2014,6 @@ class Component extends HTMLElement {
         this.hydrate();
     }
 }
-Component.elements = elements;
 
 exports.Color = Color;
 exports.Component = Component;

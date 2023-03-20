@@ -1,7 +1,8 @@
 import { xin, touch, observe, xinPath, xinValue } from './xin';
 import { getListItem, elementToBindings, elementToHandlers, BOUND_CLASS, BOUND_SELECTOR, EVENT_CLASS, EVENT_SELECTOR } from './metadata';
+const { document } = globalThis;
 observe(() => true, (changedPath) => {
-    const boundElements = globalThis.document.body.querySelectorAll(BOUND_SELECTOR);
+    const boundElements = document.body.querySelectorAll(BOUND_SELECTOR);
     for (const element of boundElements) {
         const dataBindings = elementToBindings.get(element);
         for (const dataBinding of dataBindings) {
@@ -63,8 +64,8 @@ const handleChange = (event) => {
     }
 };
 if (globalThis.document != null) {
-    globalThis.document.body.addEventListener('change', handleChange, true);
-    globalThis.document.body.addEventListener('input', handleChange, true);
+    document.body.addEventListener('change', handleChange, true);
+    document.body.addEventListener('input', handleChange, true);
 }
 export const bind = (element, what, binding, options) => {
     if (element instanceof DocumentFragment) {

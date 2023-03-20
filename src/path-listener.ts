@@ -45,7 +45,7 @@ export class Listener {
 }
 
 export const updates = async (): Promise<void> => {
-  if (updatePromise !== undefined) {
+  if (updatePromise === undefined) {
     return
   }
   await updatePromise

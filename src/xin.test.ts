@@ -6,6 +6,9 @@ import { xin, observe, unobserve, touch, updates, isValidPath, xinValue, xinPath
 
 type Change = { path: string, value: any, observed?: any }
 const changes: Change[] = []
+const recordChange = (change: Change) => {
+  changes.push(change)
+}
 
 const obj = {
   message: 'hello xin',
@@ -18,7 +21,7 @@ const obj = {
   ],
   cb(path: string) {
     if(path !== 'test.changes')
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   },
   sub: {
     foo: 'bar'
@@ -88,7 +91,7 @@ test('isValidPath', () => {
 test('triggers listeners', async () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   const test = xin.test as XinProxyObject
   test.value = Math.PI
@@ -121,7 +124,7 @@ test('triggers listeners', async () => {
 test('listener paths are selective', async () => {
   changes.splice(0)
   const listener = observe('test.value', (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   const test = xin.test as XinProxyObject
   test.message = 'ignore this'
@@ -134,7 +137,7 @@ test('listener paths are selective', async () => {
 test('listener tests are selective', async () => {
   changes.splice(0)
   const listener = observe(/message/, (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   const _test = xin.test as XinProxyObject
   _test.value = Math.random()
@@ -148,7 +151,7 @@ test('listener tests are selective', async () => {
 test('async updates skip multiple updates to the same path', async () => {
   changes.splice(0)
   const listener = observe('test.value', (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   const test = xin.test as XinProxyObject
   test.value = test.value as number - 1
@@ -178,7 +181,7 @@ test('listener callback paths work', async () => {
 test('you can touch objects', async () => {
   changes.splice(0)
   const listener = observe('test', path => {
-    changes.push({ path, value: xin[path] })
+    recordChange({ path, value: xin[path] })
   })
 
   const test = xin.test as XinProxyObject
@@ -244,7 +247,7 @@ test('instance changes trigger observers', async () => {
   _test.baz = baz as unknown as XinProxyObject
 
   const listener = observe(() => true, (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   
   await updates()
@@ -289,7 +292,7 @@ test('instance changes trigger observers', async () => {
 test('handles array changes', async () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   const _test = xin.test as XinProxyObject
   const people = _test.people as XinArray
@@ -319,7 +322,7 @@ test('objects are replaced', () => {
 test('unobserve works', async () => {
   changes.splice(0)
   const listener = observe('test', (path) => {
-    changes.push({ path, value: xin[path]})
+    recordChange({ path, value: xin[path]})
   })
   const _test = xin.test as XinProxyObject
   const things = _test.things as XinProxyArray
@@ -377,10 +380,10 @@ test('parents and children', async () => {
   const grandparent = xin.grandparent as XinObject
   changes.splice(0)
   observe('grandparent.parent', path => {
-    changes.push({path, value: xin[path], observed: 'parent'})
+    recordChange({path, value: xin[path], observed: 'parent'})
   })
   observe('grandparent.parent.child', path => {
-    changes.push({path, value: xin[path], observed: 'parent.child'})
+    recordChange({path, value: xin[path], observed: 'parent.child'})
   })
   grandparent.parent = {child: 20}
   await updates()

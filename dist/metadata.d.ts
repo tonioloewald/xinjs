@@ -8,8 +8,8 @@ export interface DataBinding {
     binding: XinBinding;
     options?: XinObject;
 }
-export type XinEventHandler = ((event: Event) => void) | string;
-export type DataBindings = DataBinding[];
+export declare type XinEventHandler = ((event: Event) => void) | string;
+export declare type DataBindings = DataBinding[];
 export interface XinEventBindings {
     [eventType: string]: XinEventHandler[];
 }

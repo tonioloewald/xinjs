@@ -1,15 +1,3 @@
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-};
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
-};
-var _ListBinding_instances, _ListBinding_array, _ListBinding_update, _ListBinding_previouseSlice, _ListBinding_visibleSlice;
 import { settings } from './settings';
 import { resizeObserver } from './dom';
 import { throttle } from './throttle';
@@ -35,11 +23,15 @@ function updateRelativeBindings(element, path) {
     }
 }
 class ListBinding {
+    boundElement;
+    listContainer;
+    template;
+    options;
+    itemToElement;
+    #array = [];
+    #update;
+    #previouseSlice;
     constructor(boundElement, options = {}) {
-        _ListBinding_instances.add(this);
-        _ListBinding_array.set(this, []);
-        _ListBinding_update.set(this, void 0);
-        _ListBinding_previouseSlice.set(this, void 0);
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) {
@@ -61,28 +53,58 @@ class ListBinding {
         this.options = options;
         if (options.virtual != null) {
             resizeObserver.observe(this.boundElement);
-            __classPrivateFieldSet(this, _ListBinding_update, throttle(() => {
-                this.update(__classPrivateFieldGet(this, _ListBinding_array, "f"), true);
-            }, SLICE_INTERVAL_MS), "f");
-            this.boundElement.addEventListener('scroll', __classPrivateFieldGet(this, _ListBinding_update, "f"));
-            this.boundElement.addEventListener('resize', __classPrivateFieldGet(this, _ListBinding_update, "f"));
+            this.#update = throttle(() => {
+                this.update(this.#array, true);
+            }, SLICE_INTERVAL_MS);
+            this.boundElement.addEventListener('scroll', this.#update);
+            this.boundElement.addEventListener('resize', this.#update);
         }
+    }
+    #visibleSlice() {
+        const { virtual } = this.options;
+        let firstItem = 0;
+        let lastItem = this.#array.length - 1;
+        let topBuffer = 0;
+        let bottomBuffer = 0;
+        if (virtual != null) {
+            const width = this.boundElement.offsetWidth;
+            const height = this.boundElement.offsetHeight;
+            const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
+            const visibleRows = Math.ceil(height / virtual.height) + 1;
+            const totalRows = Math.ceil(this.#array.length / visibleColumns);
+            const visibleItems = visibleColumns * visibleRows;
+            let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
+            if (topRow > totalRows - visibleRows + 1) {
+                topRow = Math.max(0, totalRows - visibleRows + 1);
+                this.boundElement.scrollTop = topRow * virtual.height;
+            }
+            firstItem = topRow * visibleColumns;
+            lastItem = firstItem + visibleItems - 1;
+            topBuffer = topRow * virtual.height;
+            bottomBuffer = totalRows * virtual.height - height - topBuffer;
+        }
+        return {
+            firstItem,
+            lastItem,
+            topBuffer,
+            bottomBuffer
+        };
     }
     update(array, isSlice) {
         if (array == null) {
             array = [];
         }
-        __classPrivateFieldSet(this, _ListBinding_array, array, "f");
+        this.#array = array;
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
         const arrayPath = array[xinPath];
-        const slice = __classPrivateFieldGet(this, _ListBinding_instances, "m", _ListBinding_visibleSlice).call(this);
-        const previousSlice = __classPrivateFieldGet(this, _ListBinding_previouseSlice, "f");
+        const slice = this.#visibleSlice();
+        const previousSlice = this.#previouseSlice;
         const { firstItem, lastItem, topBuffer, bottomBuffer } = slice;
         if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
             return;
         }
-        __classPrivateFieldSet(this, _ListBinding_previouseSlice, slice, "f");
+        this.#previouseSlice = slice;
         let removed = 0;
         let moved = 0;
         let created = 0;
@@ -155,36 +177,6 @@ class ListBinding {
         }
     }
 }
-_ListBinding_array = new WeakMap(), _ListBinding_update = new WeakMap(), _ListBinding_previouseSlice = new WeakMap(), _ListBinding_instances = new WeakSet(), _ListBinding_visibleSlice = function _ListBinding_visibleSlice() {
-    const { virtual } = this.options;
-    let firstItem = 0;
-    let lastItem = __classPrivateFieldGet(this, _ListBinding_array, "f").length - 1;
-    let topBuffer = 0;
-    let bottomBuffer = 0;
-    if (virtual != null) {
-        const width = this.boundElement.offsetWidth;
-        const height = this.boundElement.offsetHeight;
-        const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
-        const visibleRows = Math.ceil(height / virtual.height) + 1;
-        const totalRows = Math.ceil(__classPrivateFieldGet(this, _ListBinding_array, "f").length / visibleColumns);
-        const visibleItems = visibleColumns * visibleRows;
-        let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
-        if (topRow > totalRows - visibleRows + 1) {
-            topRow = Math.max(0, totalRows - visibleRows + 1);
-            this.boundElement.scrollTop = topRow * virtual.height;
-        }
-        firstItem = topRow * visibleColumns;
-        lastItem = firstItem + visibleItems - 1;
-        topBuffer = topRow * virtual.height;
-        bottomBuffer = totalRows * virtual.height - height - topBuffer;
-    }
-    return {
-        firstItem,
-        lastItem,
-        topBuffer,
-        bottomBuffer
-    };
-};
 export const getListBinding = (boundElement, options) => {
     let listBinding = boundElement[listBindingRef];
     if (listBinding == null) {

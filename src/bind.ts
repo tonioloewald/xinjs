@@ -2,8 +2,10 @@ import { xin, touch, observe, xinPath, xinValue } from './xin'
 import { getListItem, elementToBindings, elementToHandlers, DataBindings, BOUND_CLASS, BOUND_SELECTOR, EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XinEventHandler } from './metadata'
 import { XinObject, XinTouchableType, XinBinding, XinProxy, XinBindingSpec } from './xin-types'
 
+const { document } = globalThis
+
 observe(() => true, (changedPath: string) => {
-  const boundElements = globalThis.document.body.querySelectorAll(BOUND_SELECTOR)
+  const boundElements = document.body.querySelectorAll(BOUND_SELECTOR)
 
   for (const element of boundElements) {
     const dataBindings = elementToBindings.get(element) as DataBindings
@@ -65,8 +67,8 @@ const handleChange = (event: Event): void => {
 }
 
 if (globalThis.document != null) {
-  globalThis.document.body.addEventListener('change', handleChange, true)
-  globalThis.document.body.addEventListener('input', handleChange, true)
+  document.body.addEventListener('change', handleChange, true)
+  document.body.addEventListener('input', handleChange, true)
 }
 
 export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject): HTMLElement => {

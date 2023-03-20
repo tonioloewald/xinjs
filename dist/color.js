@@ -2,6 +2,9 @@ import { lerp, clamp } from './more-math';
 const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } };
 class HslColor {
+    h;
+    s;
+    l;
     constructor(r, g, b) {
         r /= 255;
         g /= 255;
@@ -21,6 +24,10 @@ class HslColor {
     }
 }
 export class Color {
+    r;
+    g;
+    b;
+    a;
     static fromCss(spec) {
         span.style.color = spec;
         const converted = span.style.color;
@@ -57,6 +64,7 @@ export class Color {
     get ARGB() {
         return [this.a, this.r / 255, this.g / 255, this.b / 255];
     }
+    _hslCached;
     get _hsl() {
         if (this._hslCached == null) {
             this._hslCached = new HslColor(this.r, this.g, this.b);

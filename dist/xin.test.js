@@ -3,6 +3,9 @@
 import { test, expect } from 'bun:test';
 import { xin, observe, unobserve, touch, updates, isValidPath, xinValue, xinPath } from './xin';
 const changes = [];
+const recordChange = (change) => {
+    changes.push(change);
+};
 const obj = {
     message: 'hello xin',
     value: 17,
@@ -14,7 +17,7 @@ const obj = {
     ],
     cb(path) {
         if (path !== 'test.changes')
-            changes.push({ path, value: xin[path] });
+            recordChange({ path, value: xin[path] });
     },
     sub: {
         foo: 'bar'
@@ -77,7 +80,7 @@ test('isValidPath', () => {
 test('triggers listeners', async () => {
     changes.splice(0);
     const listener = observe('test', (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const test = xin.test;
     test.value = Math.PI;
@@ -109,7 +112,7 @@ test('triggers listeners', async () => {
 test('listener paths are selective', async () => {
     changes.splice(0);
     const listener = observe('test.value', (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const test = xin.test;
     test.message = 'ignore this';
@@ -121,7 +124,7 @@ test('listener paths are selective', async () => {
 test('listener tests are selective', async () => {
     changes.splice(0);
     const listener = observe(/message/, (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const _test = xin.test;
     _test.value = Math.random();
@@ -134,7 +137,7 @@ test('listener tests are selective', async () => {
 test('async updates skip multiple updates to the same path', async () => {
     changes.splice(0);
     const listener = observe('test.value', (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const test = xin.test;
     test.value = test.value - 1;
@@ -162,7 +165,7 @@ test('listener callback paths work', async () => {
 test('you can touch objects', async () => {
     changes.splice(0);
     const listener = observe('test', path => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const test = xin.test;
     test[xinValue].message = 'wham-o';
@@ -187,6 +190,7 @@ test('you can touch objects', async () => {
 test('instance changes trigger observers', async () => {
     changes.splice(0);
     class Bar {
+        parent;
         constructor(parent) {
             this.parent = parent;
         }
@@ -195,8 +199,9 @@ test('instance changes trigger observers', async () => {
         }
     }
     class Baz {
+        x = 0;
+        child;
         constructor(x = 0) {
-            this.x = 0;
             this.x = x;
             this.child = new Bar(this);
         }
@@ -214,7 +219,7 @@ test('instance changes trigger observers', async () => {
     const _test = xin.test;
     _test.baz = baz;
     const listener = observe(() => true, (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     await updates();
     expect(changes.length).toBe(1);
@@ -255,7 +260,7 @@ test('instance changes trigger observers', async () => {
 test('handles array changes', async () => {
     changes.splice(0);
     const listener = observe('test', (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const _test = xin.test;
     const people = _test.people;
@@ -283,7 +288,7 @@ test('objects are replaced', () => {
 test('unobserve works', async () => {
     changes.splice(0);
     const listener = observe('test', (path) => {
-        changes.push({ path, value: xin[path] });
+        recordChange({ path, value: xin[path] });
     });
     const _test = xin.test;
     const things = _test.things;
@@ -314,8 +319,8 @@ test('xinValue works, xin does not corrupt content', () => {
 });
 test('instance properties, computed properties', () => {
     class Foo {
+        x = '';
         constructor(x) {
-            this.x = '';
             this.x = x;
         }
         get computedX() {
@@ -334,10 +339,10 @@ test('parents and children', async () => {
     const grandparent = xin.grandparent;
     changes.splice(0);
     observe('grandparent.parent', path => {
-        changes.push({ path, value: xin[path], observed: 'parent' });
+        recordChange({ path, value: xin[path], observed: 'parent' });
     });
     observe('grandparent.parent.child', path => {
-        changes.push({ path, value: xin[path], observed: 'parent.child' });
+        recordChange({ path, value: xin[path], observed: 'parent.child' });
     });
     grandparent.parent = { child: 20 };
     await updates();
