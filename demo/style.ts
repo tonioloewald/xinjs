@@ -31,6 +31,7 @@ const cssVars = {
   borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
   inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
   toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
+  vh: '100vh',
 }
 
 const codeVars = {
@@ -138,3 +139,10 @@ const rules = {
 }
 
 document.head.append(style({id: 'base-style'}, css(rules))) 
+
+// adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
+const setTrueHeight = () => {
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`)
+}
+setTrueHeight()
+window.addEventListener('resize', setTrueHeight)
