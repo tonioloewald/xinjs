@@ -209,7 +209,7 @@ input or would produce the wrong output.
 
     import {typeSafe} from 'xinjs'
     const unsafeAdd(a, b) => a + b
-    const saveAdd = typeSafe(unsafeAdd, [0, 0], 0)
+    const safeAdd = typeSafe(unsafeAdd, [0, 0], 0)
 
 ### Filter
 
@@ -277,6 +277,6 @@ of removing cruft, supporting more use-cases, and eliminating functionality
 that has been made redundant by improvements to the JavaScript language and
 DOM APIs.
 
-`xinjs` is being developed using [bun](https://bun.sh/) to develop xinjs. 
-It is crazy fast (based on Webkit's JS engine, vs. V8), does a lot of stuff
+`xinjs` is being developed using [bun](https://bun.sh/). 
+`bun` is crazy fast (based on Webkit's JS engine, vs. V8), does a lot of stuff
 natively, and runs TypeScript (with import and require) directly.
