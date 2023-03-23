@@ -957,8 +957,8 @@ function lerp(a, b, t) {
 
 var moreMath = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
     DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
+    RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
     clamp: clamp,
     lerp: lerp
 });
@@ -1650,7 +1650,7 @@ const create = (tagType, ...contents) => {
                     on(elt, eventType, value);
                 }
                 else if (key.match(/^bind[A-Z]/) != null) {
-                    const bindingType = key.substring(4).toLowerCase();
+                    const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5);
                     const binding = bindings[bindingType];
                     if (binding !== undefined) {
                         bind(elt, value, binding);
@@ -1661,8 +1661,13 @@ const create = (tagType, ...contents) => {
                 }
                 else {
                     const attr = camelToKabob(key);
-                    // @ts-expect-error-error
-                    if (elt[attr] !== undefined) {
+                    if (attr === 'class') {
+                        value.split(' ').forEach((className) => {
+                            elt.classList.add(className);
+                        });
+                        // @ts-expect-error-error
+                    }
+                    else if (elt[attr] !== undefined) {
                         // @ts-expect-error-error
                         elt[attr] = value;
                     }

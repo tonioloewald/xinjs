@@ -1,5 +1,5 @@
-export declare type ContentPart = HTMLElement | DocumentFragment | string;
-export declare type ContentType = ContentPart | ContentPart[];
+export type ContentPart = HTMLElement | DocumentFragment | string;
+export type ContentType = ContentPart | ContentPart[];
 export declare const dispatch: (target: Element, type: string) => void;
 export declare const resizeObserver: ResizeObserver | {
     observe(): void;

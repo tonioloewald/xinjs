@@ -43,7 +43,7 @@ export const create = (tagType: string, ...contents: ElementPart[]): SwissArmyEl
           const eventType = key.substring(2).toLowerCase()
           on(elt, eventType, value)
         } else if (key.match(/^bind[A-Z]/) != null) {
-          const bindingType = key.substring(4).toLowerCase()
+          const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5)
           const binding = bindings[bindingType]
           if (binding !== undefined) {
             bind(elt, value, binding)
@@ -53,8 +53,12 @@ export const create = (tagType: string, ...contents: ElementPart[]): SwissArmyEl
         } else {
           const attr = camelToKabob(key)
 
+          if (attr === 'class') {
+            value.split(' ').forEach((className: string) => {
+              elt.classList.add(className)
+            })
           // @ts-expect-error-error
-          if (elt[attr] !== undefined) {
+          } else if (elt[attr] !== undefined) {
             // @ts-expect-error-error
             elt[attr] = value
           } else if (typeof value === 'boolean') {
