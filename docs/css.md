@@ -25,7 +25,7 @@ to it automatically.
 
 `css` should render nested rules, such as `@keyframes` and `@media` correctly.
 
-## initVars()
+## initVars({[key: string]: any}) => {[key: string]: any}
 
 Given a map of CSS properties (in camelCase) form emit a map of css-variables to
 the values, with `px` suffixed to bare numbers where appropriate.
@@ -40,10 +40,10 @@ the values, with `px` suffixed to bare numbers where appropriate.
       ':root': initVars(cssVars)
     }
 
-## darkMode()
+## darkMode({[key: string]: any}) => {[key: string]: string}
 
 Given a map of CSS properties (in camelCase) emit a map of those properties that
-had color values with their luminance inverted.
+has color values with their luminance inverted.
 
     const myStyleMap = {
       ':root': cssVars,               // includes --font-size
@@ -64,8 +64,8 @@ a camelCase property, e.g.
 More importantly, vars allows you to conveniently perform calculations
 on css (dimensional) variables by a percentage:
 
-    vars.camelSize50    // 'calc(var(--camel-size) * 0.5)
-    vars.camelSize_50   // 'calc(var(--camel-size) * -0.5)
+    vars.camelSize50    // 'calc(var(--camel-size) * 0.5)'
+    vars.camelSize_50   // 'calc(var(--camel-size) * -0.5)'
 
 ### Computed Colors
 

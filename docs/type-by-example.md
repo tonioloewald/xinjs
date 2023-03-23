@@ -146,9 +146,9 @@ And:
       'foo?': 17
     }
 
-ÔøΩare equivalent.
+These two declarations are equivalent.
 
-But, I hear you cry, what if I actually want a property named 'foo?' Well, I pity you,
+But, I hear you cry, what if I *actually want* a property named 'foo?' Well, I pity you,
 but it's possible to do this using the syntax for declaring maps:
 
     const definitelyHasFooQueryType = {
