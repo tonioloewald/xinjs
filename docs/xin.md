@@ -126,5 +126,5 @@ or even buried deeper…
     ]
 
 Instead of referring to the first item in `messages` as `messages[0]` it can be referred to 
-as `messages[id=1234abcd]`, and this will retrieve the item regardless of its possition in messages.
+as `messages[id=1234abcd]`, and this will retrieve the item regardless of its position in messages.
 
