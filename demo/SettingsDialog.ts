@@ -81,6 +81,7 @@ export const settingsDialog = () => dialog(
       ),
       {
         onSubmit(evt: Event){
+          // @ts-expect-error
           evt.target.closest('dialog').close()
           evt.preventDefault()
         }

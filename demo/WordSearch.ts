@@ -1,13 +1,13 @@
 import { labeledInput, toolBar } from './components'
-import { xin, elements, touch, bind, bindings, ElementPart } from '../src'
+import { xin, elements, touch, bind, bindings, ElementPart, XinObject } from '../src'
 import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
 import words from './words'
 
 const {b, span, div, a} = elements
 
-xin.words = new WordList(words)
-console.log(xin.words.wordCount, 'words loaded')
+xin.words = new WordList(words) as unknown as XinObject
+console.log((xin.words as unknown as WordList).wordCount, 'words loaded')
 
 export const wordSearch = (...args: ElementPart[]) => div(
   ...args,
