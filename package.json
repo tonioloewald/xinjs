@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "path-based state management for javascript",
   "main": "dist/index.js",
   "homepage": "https://xinjs.net",
@@ -21,7 +21,7 @@
   },
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.2.0"
   },
   "devDependencies": {
