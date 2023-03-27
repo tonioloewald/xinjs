@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 const xinPath = Symbol('xin-path');
 const xinValue = Symbol('xin-value');
 
@@ -468,25 +466,6 @@ const observe = (test, callback) => {
     return observe$1(test, func);
 };
 const xin = new Proxy(registry, regHandler());
-
-// TODO declare type the way it's declated for useState so that TypeScript
-// passes through type of initialValue to the right thing
-const useXin = (path, initialValue = '') => {
-    const [value, update] = useState(xin[path] !== undefined ? xin[path] : initialValue);
-    useEffect(() => {
-        const observer = () => {
-            update(xin[path]);
-        };
-        const listener = observe(path, observer);
-        return () => {
-            unobserve(listener);
-        };
-    });
-    const setValue = (value) => {
-        xin[path] = value;
-    };
-    return [value, setValue];
-};
 
 const asyncFunc = async () => { };
 const isAsync = (func) => func.constructor === (asyncFunc).constructor;
@@ -2015,4 +1994,4 @@ class Component extends HTMLElement {
     }
 }
 
-export { Color, Component, moreMath as MoreMath, bind, bindings, css, darkMode, elements, filter, getListItem, hotReload, initVars, makeComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, useXin, vars, xin, xinPath, xinValue };
+export { Color, Component, moreMath as MoreMath, bind, bindings, css, darkMode, elements, filter, getListItem, hotReload, initVars, makeComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, vars, xin, xinPath, xinValue };

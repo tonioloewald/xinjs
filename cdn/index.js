@@ -1,7 +1,5 @@
 'use strict';
 
-var react = require('react');
-
 const xinPath = Symbol('xin-path');
 const xinValue = Symbol('xin-value');
 
@@ -470,25 +468,6 @@ const observe = (test, callback) => {
     return observe$1(test, func);
 };
 const xin = new Proxy(registry, regHandler());
-
-// TODO declare type the way it's declated for useState so that TypeScript
-// passes through type of initialValue to the right thing
-const useXin = (path, initialValue = '') => {
-    const [value, update] = react.useState(xin[path] !== undefined ? xin[path] : initialValue);
-    react.useEffect(() => {
-        const observer = () => {
-            update(xin[path]);
-        };
-        const listener = observe(path, observer);
-        return () => {
-            unobserve(listener);
-        };
-    });
-    const setValue = (value) => {
-        xin[path] = value;
-    };
-    return [value, setValue];
-};
 
 const asyncFunc = async () => { };
 const isAsync = (func) => func.constructor === (asyncFunc).constructor;
@@ -2038,7 +2017,6 @@ exports.settings = settings;
 exports.touch = touch;
 exports.typeSafe = typeSafe;
 exports.unobserve = unobserve;
-exports.useXin = useXin;
 exports.vars = vars;
 exports.xin = xin;
 exports.xinPath = xinPath;

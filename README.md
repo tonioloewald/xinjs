@@ -6,7 +6,11 @@
 	</a>
 </div>
 
-[xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs)
+[xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme)
+
+> ## Note
+> `useXin` has been moved to its own library, [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme). This
+> is a simple change, just add `react-xinjs` to your project and import `useXin` from it.
 
 ### Path-based State for JS Apps
 
