@@ -1,9 +1,9 @@
 # xinjs
 
 <div style="text-align: center; margin: 20px">
-	<a href="https://xinjs.net">
-		<img style="width: 200px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
-	</a>
+  <a href="https://xinjs.net">
+    <img style="width: 200px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
+  </a>
 </div>
 
 [xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme)
@@ -59,72 +59,72 @@ and direct updates to application state.
 with a `Proxy` and then if you use `xin` to make changes to those objects,
 `xinjs` will notify any interested observers.
 
-	import {xin, observe} from 'xinjs'
-	xin.foo = {bar: 17}
-	observe('foo.bar', v => {
-		console.log('foo.bar was changed to', xin.foo.bar)
-	})
-	
-	xin.foo.bar = 17        // does not trigger the observer
-	xin.foo.bar = Math.PI   // triggers the observer
+  import {xin, observe} from 'xinjs'
+  xin.foo = {bar: 17}
+  observe('foo.bar', v => {
+    console.log('foo.bar was changed to', xin.foo.bar)
+  })
+  
+  xin.foo.bar = 17        // does not trigger the observer
+  xin.foo.bar = Math.PI   // triggers the observer
 
 ### Paths are like JavaScript
 
 `xin` is designed to behave just like a JavaScript `Object`. What you put
 into it is what you get out of it:
 
-	import {xin} from 'xinjs'
-	
-	const foo = {bar: 'baz'}
-	xin.foo = foo
-	
-	// xin.foo returns a Proxy wrapped around foo (without touching foo)
-	xin.foo._xinValue === foo
-	
-	// really, it's just the original object
-	xin.foo.bar = 'lurman'
-	foo.bar === 'lurman' // true
-	
-	// seriously, it's just the original object
-	foo.bar = 'luhrman'
-	xin.foo.bar === 'luhrman' // true
+  import {xin} from 'xinjs'
+  
+  const foo = {bar: 'baz'}
+  xin.foo = foo
+  
+  // xin.foo returns a Proxy wrapped around foo (without touching foo)
+  xin.foo._xinValue === foo
+  
+  // really, it's just the original object
+  xin.foo.bar = 'lurman'
+  foo.bar === 'lurman' // true
+  
+  // seriously, it's just the original object
+  foo.bar = 'luhrman'
+  xin.foo.bar === 'luhrman' // true
 
 ### …but better!
 
 It's very common to deal with arrays of objects that have unique id values,
 so xin supports the idea of id-paths
 
-	const app = {
-		list: [
-			{
-				id: '1234abcd',
-				text: 'hello world'
-			},
-			{
-				id: '5678efgh',
-				text: 'so long, redux'
+  const app = {
+    list: [
+      {
+        id: '1234abcd',
+        text: 'hello world'
+      },
+      {
+        id: '5678efgh',
+        text: 'so long, redux'
       }
-		]
-	}
-	xin.app = app
-	console.log(xin.app.list[0].text)          // hello world
-	console.log(xin.app.list['id=5678efgh']    // so long, redux
-	console.log(xin['app.list[id=1234abcd]')   // hello world
+    ]
+  }
+  xin.app = app
+  console.log(xin.app.list[0].text)          // hello world
+  console.log(xin.app.list['id=5678efgh']    // so long, redux
+  console.log(xin['app.list[id=1234abcd]')   // hello world
 
 ### Telling `xin` about changes using `touch()`
 
 Sometimes you will modify an object behind `xin`'s back (e.g. for efficiency).
 When you want to trigger updates, simply touch the path.
 
-	import {xin, observe, touch} from 'xinjs'
-	
-	const foo = {bar: 17}
-	xin.foo = foo
-	observe('foo.bar', path => console.log(path, '->', xin[path])
-	xin.foo.bar = -2              // console will show: foo.bar -> -2
-	
-	foo.bar = 100                 // nothing happens
-	touch('foo.bar')              // console will show: foo.bar -> 100
+  import {xin, observe, touch} from 'xinjs'
+  
+  const foo = {bar: 17}
+  xin.foo = foo
+  observe('foo.bar', path => console.log(path, '->', xin[path])
+  xin.foo.bar = -2              // console will show: foo.bar -> -2
+  
+  foo.bar = 100                 // nothing happens
+  touch('foo.bar')              // console will show: foo.bar -> 100
 
 ### Types
 
@@ -152,6 +152,14 @@ wrong with a given value:
       }
     }) // returns a list of problems...
 
+The exact response from `matchType` in this example is:
+
+    [
+      '.age was "17", expected number',
+      '.address.city was undefined, expected string',
+      '.address.zipcode was 10001, expected string'
+    ]
+
 > The ultimate goal of `xinjs`'s type system is to allow for a single source
 > of truth for types, so that one simple *JavaScript* declaration gives you:
 > 
@@ -163,16 +171,8 @@ wrong with a given value:
 > - filtering of objects (see *Filter* below) based on types
 > 
 > Because all types are serializable JavaScript, this also allows for self-documenting
-> services, service requests cab easuky specify a "shape filter" for responses, and service
+> services, service requests can easily specify a "shape filter" for responses, and service
 > versioning.
-
-The exact response from `matchType` in this example is:
-
-    [
-      '.age was "17", expected number',
-      '.address.city was undefined, expected string',
-      '.address.zipcode was 10001, expected string'
-    ]
 
 ### Specific numeric and string types, unions, optionals, etc.
 
@@ -214,6 +214,12 @@ input or would produce the wrong output.
     const unsafeAdd(a, b) => a + b
     const safeAdd = typeSafe(unsafeAdd, [0, 0], 0)
 
+If the function receives the wrong input or produces the wrong output, it throws a
+type error (specifying exactly what went wrong). If it receives an error, it passes
+it straight through (like a [monad](https://en.wikipedia.org/wiki/Monad_(functional_programming))).
+Basically, if you chain typesafe functions and there's an error somewhere in the chain,
+you'll receive *that* error at the far end, and no further work will be done.
+
 ### Filter
 
 If you want to pare down an object to a specific shape, e.g. to optimize bandwidth-usage,
@@ -240,13 +246,13 @@ One of the nice things about working with the React toolchain is hot reloading.
 `xinjs` supports hot reloading (and not just in development!) via the `hotReload()`
 function:
 
-	import {xin, hotReload} from 'xinjs'
-	
-	xin.app = {
-	  ...
-	}
-	
-	hotReload() 
+  import {xin, hotReload} from 'xinjs'
+  
+  xin.app = {
+    ...
+  }
+  
+  hotReload() 
 
 `hotReload` stores serializable state managed by `xin` in localStorage and restores
 it (by overlay) on reload. Because any functions (for example) won't be persisted,
@@ -264,14 +270,6 @@ You'll need to install [bun](https://bun.sh/) and probably [nodejs](https://node
 To work interactively on the demo code, use `bun dev`.
 
 To build you will need to `chmod +x build.command` before running `bun pack`.
-
-> ## Caution
-> xinjs currently builds against ES2022 because its use of private class properties
-> causes rollup to produce bad code. Super annoying and unnecessary. I don't want
-> to waste time coding around bad intermediate code although there's a simple
-> workaround (WeakMaps are the dual of private symbols and don't cause the problem).
-> Let me know if this is a pain point because, as I said, it's an easy if ugly
-> fix.
 
 ## Credits
 

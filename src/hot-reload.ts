@@ -2,6 +2,8 @@ import { xin, observe, xinValue } from './xin'
 import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { debounce } from './throttle'
 
+// TODO reimplement using IndexedDB
+
 export const hotReload = (test: PathTestFunction = () => true): void => {
   const savedState = localStorage.getItem('xin-state')
   if (savedState != null) {
