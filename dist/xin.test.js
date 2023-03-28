@@ -190,7 +190,6 @@ test('you can touch objects', async () => {
 test('instance changes trigger observers', async () => {
     changes.splice(0);
     class Bar {
-        parent;
         constructor(parent) {
             this.parent = parent;
         }
@@ -199,9 +198,8 @@ test('instance changes trigger observers', async () => {
         }
     }
     class Baz {
-        x = 0;
-        child;
         constructor(x = 0) {
+            this.x = 0;
             this.x = x;
             this.child = new Bar(this);
         }
@@ -319,8 +317,8 @@ test('xinValue works, xin does not corrupt content', () => {
 });
 test('instance properties, computed properties', () => {
     class Foo {
-        x = '';
         constructor(x) {
+            this.x = '';
             this.x = x;
         }
         get computedX() {

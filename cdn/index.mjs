@@ -15,9 +15,6 @@ const getPath = (what) => {
     return typeof what === 'object' ? what[xinPath] : what;
 };
 class Listener {
-    description;
-    test;
-    callback;
     constructor(test, callback) {
         const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`;
         let testDescription;
@@ -730,13 +727,11 @@ const matchKeys = (example, subject, errors = [], path = '') => {
     return errors;
 };
 class TypeError {
-    // initializers are unnecessary but TypeScript is too stupid
-    functionName = 'anonymous';
-    isParamFailure = false;
-    expected;
-    found;
-    errors = [];
     constructor(config) {
+        // initializers are unnecessary but TypeScript is too stupid
+        this.functionName = 'anonymous';
+        this.isParamFailure = false;
+        this.errors = [];
         Object.assign(this, config);
     }
     toString() {
@@ -945,9 +940,6 @@ var moreMath = /*#__PURE__*/Object.freeze({
 const hex2 = (n) => ('00' + Math.round(Number(n)).toString(16)).slice(-2);
 const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } };
 class HslColor {
-    h;
-    s;
-    l;
     constructor(r, g, b) {
         r /= 255;
         g /= 255;
@@ -967,10 +959,6 @@ class HslColor {
     }
 }
 class Color {
-    r;
-    g;
-    b;
-    a;
     static fromCss(spec) {
         span.style.color = spec;
         const converted = span.style.color;
@@ -1007,7 +995,6 @@ class Color {
     get ARGB() {
         return [this.a, this.r / 255, this.g / 255, this.b / 255];
     }
-    _hslCached;
     get _hsl() {
         if (this._hslCached == null) {
             this._hslCached = new HslColor(this.r, this.g, this.b);
@@ -1353,15 +1340,8 @@ function updateRelativeBindings(element, path) {
     }
 }
 class ListBinding {
-    boundElement;
-    listContainer;
-    template;
-    options;
-    itemToElement;
-    #array = [];
-    #update;
-    #previouseSlice;
     constructor(boundElement, options = {}) {
+        this._array = [];
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) {
@@ -1383,17 +1363,17 @@ class ListBinding {
         this.options = options;
         if (options.virtual != null) {
             resizeObserver.observe(this.boundElement);
-            this.#update = throttle(() => {
-                this.update(this.#array, true);
+            this._update = throttle(() => {
+                this.update(this._array, true);
             }, SLICE_INTERVAL_MS);
-            this.boundElement.addEventListener('scroll', this.#update);
-            this.boundElement.addEventListener('resize', this.#update);
+            this.boundElement.addEventListener('scroll', this._update);
+            this.boundElement.addEventListener('resize', this._update);
         }
     }
-    #visibleSlice() {
+    visibleSlice() {
         const { virtual } = this.options;
         let firstItem = 0;
-        let lastItem = this.#array.length - 1;
+        let lastItem = this._array.length - 1;
         let topBuffer = 0;
         let bottomBuffer = 0;
         if (virtual != null) {
@@ -1401,7 +1381,7 @@ class ListBinding {
             const height = this.boundElement.offsetHeight;
             const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
             const visibleRows = Math.ceil(height / virtual.height) + 1;
-            const totalRows = Math.ceil(this.#array.length / visibleColumns);
+            const totalRows = Math.ceil(this._array.length / visibleColumns);
             const visibleItems = visibleColumns * visibleRows;
             let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
             if (topRow > totalRows - visibleRows + 1) {
@@ -1424,17 +1404,17 @@ class ListBinding {
         if (array == null) {
             array = [];
         }
-        this.#array = array;
+        this._array = array;
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
         const arrayPath = array[xinPath];
-        const slice = this.#visibleSlice();
-        const previousSlice = this.#previouseSlice;
+        const slice = this.visibleSlice();
+        const previousSlice = this._previousSlice;
         const { firstItem, lastItem, topBuffer, bottomBuffer } = slice;
         if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
             return;
         }
-        this.#previouseSlice = slice;
+        this._previousSlice = slice;
         let removed = 0;
         let moved = 0;
         let created = 0;
@@ -1780,11 +1760,6 @@ const vars = new Proxy({}, {
 });
 
 class Component extends HTMLElement {
-    static elements = elements;
-    static _elementCreator;
-    styleNode;
-    content = elements.slot();
-    value;
     static StyleNode(styleSpec) {
         return elements.style(css(styleSpec));
     }
@@ -1910,7 +1885,6 @@ class Component extends HTMLElement {
             }
         });
     }
-    _refs;
     get refs() {
         const root = this.shadowRoot != null ? this.shadowRoot : this;
         if (this._refs == null) {
@@ -1934,6 +1908,10 @@ class Component extends HTMLElement {
     }
     constructor() {
         super();
+        this.content = elements.slot();
+        this._changeQueued = false;
+        this._renderQueued = false;
+        this._hydrated = false;
         this.initAttributes('hidden');
         this._value = deepClone(this.defaultValue);
     }
@@ -1956,8 +1934,6 @@ class Component extends HTMLElement {
     disconnectedCallback() {
         resizeObserver.unobserve(this);
     }
-    _changeQueued = false;
-    _renderQueued = false;
     queueRender(triggerChangeEvent = false) {
         if (!this._changeQueued)
             this._changeQueued = triggerChangeEvent;
@@ -1974,7 +1950,6 @@ class Component extends HTMLElement {
             });
         }
     }
-    _hydrated = false;
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
@@ -1993,5 +1968,6 @@ class Component extends HTMLElement {
         this.hydrate();
     }
 }
+Component.elements = elements;
 
 export { Color, Component, moreMath as MoreMath, bind, bindings, css, darkMode, elements, filter, getListItem, hotReload, initVars, makeComponent, matchType, observe, observerShouldBeRemoved, on, settings, touch, typeSafe, unobserve, vars, xin, xinPath, xinValue };

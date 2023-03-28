@@ -333,13 +333,11 @@ const matchKeys = (example, subject, errors = [], path = '') => {
     return errors;
 };
 export class TypeError {
-    // initializers are unnecessary but TypeScript is too stupid
-    functionName = 'anonymous';
-    isParamFailure = false;
-    expected;
-    found;
-    errors = [];
     constructor(config) {
+        // initializers are unnecessary but TypeScript is too stupid
+        this.functionName = 'anonymous';
+        this.isParamFailure = false;
+        this.errors = [];
         Object.assign(this, config);
     }
     toString() {

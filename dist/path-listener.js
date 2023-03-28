@@ -10,9 +10,6 @@ const getPath = (what) => {
     return typeof what === 'object' ? what[xinPath] : what;
 };
 export class Listener {
-    description;
-    test;
-    callback;
     constructor(test, callback) {
         const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`;
         let testDescription;

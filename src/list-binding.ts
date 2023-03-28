@@ -52,9 +52,9 @@ class ListBinding {
   template: HTMLElement
   options: ListBindingOptions
   itemToElement: WeakMap<XinObject, HTMLElement>
-  #array: any[] = []
-  #update?: VoidFunction
-  #previouseSlice?: VirtualListSlice
+  private _array: any[] = []
+  private readonly _update?: VoidFunction
+  private _previousSlice?: VirtualListSlice
 
   constructor (boundElement: HTMLElement, options: ListBindingOptions = {}) {
     this.boundElement = boundElement
@@ -77,18 +77,18 @@ class ListBinding {
     this.options = options
     if (options.virtual != null) {
       resizeObserver.observe(this.boundElement)
-      this.#update = throttle(() => {
-        this.update(this.#array, true)
+      this._update = throttle(() => {
+        this.update(this._array, true)
       }, SLICE_INTERVAL_MS)
-      this.boundElement.addEventListener('scroll', this.#update)
-      this.boundElement.addEventListener('resize', this.#update)
+      this.boundElement.addEventListener('scroll', this._update)
+      this.boundElement.addEventListener('resize', this._update)
     }
   }
 
-  #visibleSlice (): VirtualListSlice {
+  private visibleSlice (): VirtualListSlice {
     const { virtual } = this.options
     let firstItem = 0
-    let lastItem = this.#array.length - 1
+    let lastItem = this._array.length - 1
     let topBuffer = 0
     let bottomBuffer = 0
 
@@ -98,7 +98,7 @@ class ListBinding {
 
       const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1
       const visibleRows = Math.ceil(height / virtual.height) + 1
-      const totalRows = Math.ceil(this.#array.length / visibleColumns)
+      const totalRows = Math.ceil(this._array.length / visibleColumns)
       const visibleItems = visibleColumns * visibleRows
       let topRow = Math.floor(this.boundElement.scrollTop / virtual.height)
       if (topRow > totalRows - visibleRows + 1) {
@@ -124,19 +124,19 @@ class ListBinding {
     if (array == null) {
       array = []
     }
-    this.#array = array
+    this._array = array
 
     const { initInstance, updateInstance } = this.options
     // @ts-expect-error
     const arrayPath: string = array[xinPath]
 
-    const slice = this.#visibleSlice()
-    const previousSlice = this.#previouseSlice
+    const slice = this.visibleSlice()
+    const previousSlice = this._previousSlice
     const { firstItem, lastItem, topBuffer, bottomBuffer } = slice
     if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
       return
     }
-    this.#previouseSlice = slice
+    this._previousSlice = slice
 
     let removed = 0
     let moved = 0

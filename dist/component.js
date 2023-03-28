@@ -4,11 +4,6 @@ import { appendContentToElement, dispatch, resizeObserver } from './dom';
 import { elements } from './elements';
 import { camelToKabob, kabobToCamel } from './string-case';
 export class Component extends HTMLElement {
-    static elements = elements;
-    static _elementCreator;
-    styleNode;
-    content = elements.slot();
-    value;
     static StyleNode(styleSpec) {
         return elements.style(css(styleSpec));
     }
@@ -134,7 +129,6 @@ export class Component extends HTMLElement {
             }
         });
     }
-    _refs;
     get refs() {
         const root = this.shadowRoot != null ? this.shadowRoot : this;
         if (this._refs == null) {
@@ -158,6 +152,10 @@ export class Component extends HTMLElement {
     }
     constructor() {
         super();
+        this.content = elements.slot();
+        this._changeQueued = false;
+        this._renderQueued = false;
+        this._hydrated = false;
         this.initAttributes('hidden');
         this._value = deepClone(this.defaultValue);
     }
@@ -180,8 +178,6 @@ export class Component extends HTMLElement {
     disconnectedCallback() {
         resizeObserver.unobserve(this);
     }
-    _changeQueued = false;
-    _renderQueued = false;
     queueRender(triggerChangeEvent = false) {
         if (!this._changeQueued)
             this._changeQueued = triggerChangeEvent;
@@ -198,7 +194,6 @@ export class Component extends HTMLElement {
             });
         }
     }
-    _hydrated = false;
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
@@ -217,3 +212,4 @@ export class Component extends HTMLElement {
         this.hydrate();
     }
 }
+Component.elements = elements;

@@ -8,11 +8,9 @@
 
 [xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme)
 
-> ## Note
-> `useXin` has been moved to its own library, [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme). This
-> is a simple change, just add `react-xinjs` to your project and import `useXin` from it.
+![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)
 
-### Path-based State for JS Apps
+### Path-based State for Web Apps
 
 - simple, efficient observer pattern
 - written in TypeScript
@@ -105,6 +103,7 @@ so xin supports the idea of id-paths
 			{
 				id: '5678efgh',
 				text: 'so long, redux'
+      }
 		]
 	}
 	xin.app = app

@@ -23,15 +23,8 @@ function updateRelativeBindings(element, path) {
     }
 }
 class ListBinding {
-    boundElement;
-    listContainer;
-    template;
-    options;
-    itemToElement;
-    #array = [];
-    #update;
-    #previouseSlice;
     constructor(boundElement, options = {}) {
+        this._array = [];
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) {
@@ -53,17 +46,17 @@ class ListBinding {
         this.options = options;
         if (options.virtual != null) {
             resizeObserver.observe(this.boundElement);
-            this.#update = throttle(() => {
-                this.update(this.#array, true);
+            this._update = throttle(() => {
+                this.update(this._array, true);
             }, SLICE_INTERVAL_MS);
-            this.boundElement.addEventListener('scroll', this.#update);
-            this.boundElement.addEventListener('resize', this.#update);
+            this.boundElement.addEventListener('scroll', this._update);
+            this.boundElement.addEventListener('resize', this._update);
         }
     }
-    #visibleSlice() {
+    visibleSlice() {
         const { virtual } = this.options;
         let firstItem = 0;
-        let lastItem = this.#array.length - 1;
+        let lastItem = this._array.length - 1;
         let topBuffer = 0;
         let bottomBuffer = 0;
         if (virtual != null) {
@@ -71,7 +64,7 @@ class ListBinding {
             const height = this.boundElement.offsetHeight;
             const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
             const visibleRows = Math.ceil(height / virtual.height) + 1;
-            const totalRows = Math.ceil(this.#array.length / visibleColumns);
+            const totalRows = Math.ceil(this._array.length / visibleColumns);
             const visibleItems = visibleColumns * visibleRows;
             let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
             if (topRow > totalRows - visibleRows + 1) {
@@ -94,17 +87,17 @@ class ListBinding {
         if (array == null) {
             array = [];
         }
-        this.#array = array;
+        this._array = array;
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
         const arrayPath = array[xinPath];
-        const slice = this.#visibleSlice();
-        const previousSlice = this.#previouseSlice;
+        const slice = this.visibleSlice();
+        const previousSlice = this._previousSlice;
         const { firstItem, lastItem, topBuffer, bottomBuffer } = slice;
         if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
             return;
         }
-        this.#previouseSlice = slice;
+        this._previousSlice = slice;
         let removed = 0;
         let moved = 0;
         let created = 0;

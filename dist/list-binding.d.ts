@@ -15,13 +15,16 @@ interface ListBindingOptions {
     };
 }
 declare class ListBinding {
-    #private;
     boundElement: HTMLElement;
     listContainer: HTMLElement;
     template: HTMLElement;
     options: ListBindingOptions;
     itemToElement: WeakMap<XinObject, HTMLElement>;
+    private _array;
+    private readonly _update?;
+    private _previousSlice?;
     constructor(boundElement: HTMLElement, options?: ListBindingOptions);
+    private visibleSlice;
     update(array?: any[], isSlice?: boolean): void;
 }
 export declare const getListBinding: (boundElement: HTMLElement, options?: ListBindingOptions) => ListBinding;
