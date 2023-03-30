@@ -891,6 +891,7 @@ const throttle = (origFn, minInterval = 250) => {
     };
 };
 
+// TODO reimplement using IndexedDB
 const hotReload = (test = () => true) => {
     const savedState = localStorage.getItem('xin-state');
     if (savedState != null) {
@@ -933,8 +934,8 @@ function lerp(a, b, t) {
 
 var moreMath = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
     RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
+    DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
     clamp: clamp,
     lerp: lerp
 });

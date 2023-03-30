@@ -26,12 +26,21 @@ const cssVars = {
   inputBorder: '1px solid var(--border-color)',
   lightBorder: '1px solid var(--light-border-color)',
   darkBorder: '1px solid var(--dark-border-color)',
-  brandColor: brandColor.html,
   roundedRadius: vars.lineHeight25,
   borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
   inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
   toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
   vh: '100vh',
+}
+
+const brandColors = {
+  brandColor: brandColor.html,
+  brandTextColor: '#ECF3DD',
+  textHeadingColor: vars.brandColor,
+}
+
+const darkBrandColors = {
+  textHeadingColor: vars.brandTextColor,
 }
 
 const codeVars = {
@@ -40,8 +49,8 @@ const codeVars = {
 }
 
 const rules = {
-  ':root': initVars({...cssVars, ...codeVars}),
-  '@media (prefers-color-scheme: dark)': {':root': darkMode(cssVars)},
+  ':root': initVars({...cssVars, ...brandColors, ...codeVars}),
+  '@media (prefers-color-scheme: dark)': {':root': {...darkMode(cssVars), ...initVars(darkBrandColors)}},
   body: {
     fontFamily: vars.font,
     background: vars.background,
@@ -52,7 +61,7 @@ const rules = {
   },
   'h1, h2, h3': {
     margin: `${vars.spacing200} 0 ${vars.spacing}`,
-    color: vars.brandColor
+    color: vars.textHeadingColor
   },
   'p, h4, h5, h6, pre, blockquote': {
     margin: `0 0 ${vars.spacing}`,
@@ -85,7 +94,7 @@ const rules = {
     borderBottom: `1px solid ${brandColor.opacity(0.2).html}`
   },
   a: {
-    color: vars.brandColor,
+    color: vars.textHeadingColor,
     textDecoration: 'none',
     padding: `${vars.spacing25} ${vars.spacing75}`,
   },

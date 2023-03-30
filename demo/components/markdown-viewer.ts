@@ -11,7 +11,7 @@ class MarkdownViewer extends Component {
     }
   })
   src = ''
-  value = '# markdown viewer\n\nI render my value (in markdown) as HTML.'
+  value = ''
   constructor() {
     super()
     this.initAttributes('src')
@@ -23,6 +23,8 @@ class MarkdownViewer extends Component {
         const request = await fetch(this.src)
         this.value = await request.text()
       })()
+    } else {
+      this.value = this.textContent != null ? this.textContent : ''
     }
   }
   render() {

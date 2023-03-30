@@ -18,7 +18,7 @@ import omnidude from './assets/omnidude.glb'
 /* global window, document */
 
 xin.app = {
-  title: 'xinjs docs & tests',
+  title: 'docs & tests',
 }
 
 console.time('total')
@@ -73,7 +73,10 @@ const appBar = () => span(
       height: '44px',
       padding: '0 8px',
       alignItems: 'center',
-      flex: '0 0 60px'
+      flex: '0 0 60px',
+      background: vars.brandColor,
+      '--text-color': vars.brandTextColor,
+      '--text-heading-color': vars.brandTextColor,
     }
   },
   button('☰', {
@@ -92,25 +95,29 @@ const appBar = () => span(
       }
     }
   }),
-  img({
-    alt: 'xinjs logo',
-    style: {
-      width: '44px',
-      height: '44px',
-      marginRight: '10px'
+  span({style: {flex: '1 1 auto'}}),
+  h1(
+    {
+      style: {
+        lineHeight: '44px',
+        fontSize: '24px',
+        fontWeight: '200',
+        padding: 0,
+        margin: 0,
+        display: 'flex'
+      }
     },
-    src: logo
-  }),
-  h1({
-    style: {
-      lineHeight: '44px',
-      fontSize: '24px',
-      fontWeight: '200',
-      padding: 0,
-      margin: 0,
-    },
-    bindText: 'app.title'
-  }),
+    img({
+      alt: 'xinjs',
+      style: {
+        width: '44px',
+        height: '44px',
+        marginRight: '10px'
+      },
+      src: logo
+    }),
+    span({bindText: 'app.title'})
+  ),
   span({style: {flex: '1 1 auto'}}),
   button('⚙', {
     title: 'settings',
@@ -143,6 +150,7 @@ document.body.append(div(
           flexDirection: 'column',
           flex: '0 0 180px',
           transition: 'margin-left 0.25s ease-out',
+          padding: '10px 0',
         }
       },
       ...routes.map(route => a(
