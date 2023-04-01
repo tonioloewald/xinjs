@@ -44,8 +44,8 @@ const darkBrandColors = {
 }
 
 const codeVars = {
-  codeColor: '#eee',
-  codeBg: '#333',
+  codeColor: vars.textColor,
+  codeBg: brandColor.opacity(0.15).html,
 }
 
 const rules = {
