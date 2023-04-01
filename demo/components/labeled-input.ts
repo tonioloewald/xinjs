@@ -9,10 +9,11 @@ class LabeledInput extends Component {
       gap: vars.spacing50,
       lineHeight: vars.lineHeight,
       alignItems: 'center',
+      color: vars.textColor,
     },
     ':host *': {
       fontSize: vars.fontSize,
-      whiteSpace: 'nowrap'
+      whiteSpace: 'nowrap',
     },
     ':host input': {
       border: 0,

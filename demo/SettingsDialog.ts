@@ -1,4 +1,4 @@
-import {elements} from '../src'
+import {elements, vars} from '../src'
 import {labeledInput} from './components'
 
 const {form, dialog, h2, span, button } = elements
@@ -7,7 +7,8 @@ export const settingsDialog = () => dialog(
     {
       class: 'settings',
       style: {
-        background: 'var(--background)',
+        background: vars.background,
+        color: vars.textColor,
         border: 0,
         borderRadius: 'calc(var(--rounded-radius) * 2)',
         boxShadow: '0 10px 20px #0008',

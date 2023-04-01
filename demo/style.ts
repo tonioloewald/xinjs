@@ -144,6 +144,10 @@ const rules = {
     background: vars.codeBg,
     color: vars.codeColor,
     borderRadius: vars.roundedRadius50
+  },
+  'dialog::backdrop': {
+    backgroundColor: '#0004',
+    backdropFilter: 'blur(2px)'
   }
 }
 
