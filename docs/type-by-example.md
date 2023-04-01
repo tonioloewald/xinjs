@@ -311,3 +311,19 @@ typeSafe functions are intended to operate like
 so if you call `safe_f(safe_g(...))` and `safe_g` fails, `safe_f` will _short-circuit_ execution and
 return the error directly -- which should help with debugging and prevent code executing
 on data known to be bad.
+
+## Long-Term Objective
+
+The ultimate goal of `xinjs`'s type system is to allow for a single source
+of truth for types, so that one simple *JavaScript* declaration gives you:
+
+- auto-completion when writing code
+- mock data —
+  E.g. `mock("# int(0,10]")` would produce a whole number >0 and <= 10
+  (This may require extra syntax to provide possible values for some types.)
+- run-time type-checking
+- filtering of objects (see *Filter* below) based on types
+
+Because all types are serializable JavaScript, this also allows for self-documenting
+services, service requests can easily specify a "shape filter" for responses, and service
+versioning.
