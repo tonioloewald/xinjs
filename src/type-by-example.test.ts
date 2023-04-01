@@ -3,7 +3,6 @@
 import { test, expect } from 'bun:test'
 import {
   matchType,
-  describe,
   exampleAtPath, 
   matchParamTypes,
   typeSafe,
