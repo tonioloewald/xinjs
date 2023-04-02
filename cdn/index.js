@@ -934,8 +934,8 @@ function lerp(a, b, t) {
 
 var moreMath = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
     DEGREES_TO_RADIANS: DEGREES_TO_RADIANS,
+    RADIANS_TO_DEGREES: RADIANS_TO_DEGREES,
     clamp: clamp,
     lerp: lerp
 });
