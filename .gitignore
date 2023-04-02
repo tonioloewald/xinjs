@@ -123,3 +123,6 @@ web_modules/
 
 # bun
 bun.lockb
+
+# parcel
+www

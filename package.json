@@ -12,11 +12,10 @@
     "back-end"
   ],
   "scripts": {
-    "start": "./rerun.command",
+    "start": "rm -rf www && mkdir -p www/assets && cp readme.md xinjs-logo.svg www/assets && cp -r demo/assets/* www/assets && bun parcel --dist-dir www",
     "lint": "bun ts-standard --fix src/*.ts",
     "make": "rm -rf dist && bun test && bun tsc && ./build.command",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
-    "rerun": "./rerun.command",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",
@@ -28,6 +27,7 @@
     "babylonjs-materials": "^5.32.1",
     "bun-types": "^0.2.0",
     "marked": "^4.2.2",
+    "parcel": "^2.8.3",
     "rollup": "^3.2.3",
     "ts-standard": "^12.0.1",
     "typescript": "^4.8.4",
@@ -49,9 +49,18 @@
       "dist",
       "cdn",
       "public",
+      "www",
       "**/*.js",
       "**/*.mjs",
       "**/*.d.ts"
     ]
+  },
+  "targets": {
+    "default": {
+      "source": "demo/index.html",
+      "distDir": "www",
+      "outputFormat": "esmodule",
+      "scopeHoist": false
+    }
   }
 }

@@ -1,3 +1,5 @@
+# this builds the library (not the demo site)
+
 rm -rf ./cdn
 
 echo rolling up

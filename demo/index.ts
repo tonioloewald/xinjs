@@ -10,10 +10,10 @@ import { gameController } from './components/game-controller'
 import { wordSearch } from './WordSearch'
 import { Color } from '../src/color'
 import './style'
-import logo from '../xinjs-logo.svg'
-import readmeMd from '../readme.md'
-import scene from './assets/b-frame-test.glb'
-import omnidude from './assets/omnidude.glb'
+const logo = './assets/xinjs-logo.svg'
+const readmeMd = './assets/readme.md'
+const scene = './assets/b-frame-test.glb'
+const omnidude = './assets/omnidude.glb'
 
 /* global window, document */
 

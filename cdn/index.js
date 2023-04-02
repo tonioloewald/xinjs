@@ -1389,7 +1389,6 @@ class ListBinding {
             let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
             if (topRow > totalRows - visibleRows + 1) {
                 topRow = Math.max(0, totalRows - visibleRows + 1);
-                this.boundElement.scrollTop = topRow * virtual.height;
             }
             firstItem = topRow * visibleColumns;
             lastItem = firstItem + visibleItems - 1;

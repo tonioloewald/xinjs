@@ -253,9 +253,13 @@ To completely reset the app, run `localStorage.clear()` in the console.
 
 You'll need to install [bun](https://bun.sh/) and probably [nodejs](https://nodejs.org)).
 
-To work interactively on the demo code, use `bun dev`.
+To work interactively on the demo code, use `bun start`.
 
 To build you will need to `chmod +x build.command` before running `bun pack`.
+
+> `xinjs` is currently built using a bespoke script (`build.command`) rather than
+> `parceljs` which is used to build the demo site. This is becasue parceljs 
+> produces markedly less efficient code.
 
 ## Credits
 

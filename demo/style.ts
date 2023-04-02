@@ -96,7 +96,7 @@ const rules = {
   a: {
     color: vars.textHeadingColor,
     textDecoration: 'none',
-    padding: `${vars.spacing25} ${vars.spacing75}`,
+    padding: `${vars.spacing25} ${vars.spacing75}`
   },
   '.current-route': {
     background: vars.inputBg,
