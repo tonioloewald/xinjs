@@ -226,7 +226,49 @@ Note that you can filter heterogeneous arrays to only include the specified elem
     filter([{x: 0, y: 0}], [{x: 1, y: 2}, {lat: 10, long: -30}])
                                                 // [{x: 1, y: 2}]
 
-### Hot Reload
+### CSS
+
+`xinjs` includes utilities for working with css.
+
+    import {css, vars, initVars, darkMode} from 'xinjs'
+    const cssVars = {
+      textFont: 'sans-serif'
+      color: '#111'
+    }
+
+`initVars()` processes an object changing its keys from camelCase to --kabob-case:
+
+    initVars(cssVars) // emits { --text-font: "sans-serif", --color: "#111" }
+
+`darkMode()` processes an object, taking only the color properties and inverting their luminance values:
+    darkMode(cssVars) // emits { color: '#ededed' }
+
+The `vars` simply converts its camelCase properties into css variable references
+    
+    vars.fooBar // emits 'var(--foo-bar)'
+    calc(`${vars.width} + 2 * ${vars.spacing}`) // emits 'calc(var(--width) + 2 * var(--spacing))'
+
+`css()` processes an object, rendering it as CSS
+
+    css({
+      '.container': {
+        'position', 'relative'
+      }
+    }) // emits .container { position: relative; }
+
+## Color
+
+`xinjs` includes a powerful `Color` class for manipulating colors.
+
+    import {Color} from 'xinjs
+    const translucentBlue = new Color(0, 0, 255, 0.5) // r, g, b, a parameters
+    const postItBackground = Color.fromCss('#e7e79d')
+    const darkGrey = Color.fromHsl(0, 0, 0.2)
+
+The color objects have computed properties for rendering the color in different ways,
+making adjustments, blending colors, and so forth.
+
+## Hot Reload
 
 One of the nice things about working with the React toolchain is hot reloading.
 `xinjs` supports hot reloading (and not just in development!) via the `hotReload()`
