@@ -1,4 +1,4 @@
-import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProps, XinProxyArray} from '../../src/index'
+import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray} from '../../src/index'
 
 const {h1, div, template, form, span, input, button} = elements
 
@@ -40,39 +40,42 @@ xin.todoApp = new Todo() as unknown as XinProxyObject
 const flex = { display: 'flex', gap: vars.spacing50 }
 const stack = { ...flex, flexDirection: 'column' }
 const elastic = { flex: '1 1 auto' }
-const padded = { padding: `${vars.spacing} ${vars.spacing200}`  }
-const rounded = { borderRadius: vars.roundedRadius }
+const padded = { padding: `${vars.spacing} ${vars.spacing200}` }
 
 export const todo = makeComponent(
-  {
-    style: { ...padded, ...stack }
-  },
-  h1('To Do'),
-  div(
-    { style: {...stack} },
-    template(div(
-      { style: {...flex }},
-      span({ bindText: '^.reminder', style: elastic }),
-      button(span('✕'), {title: 'delete', onClick(event){
-        const item = getListItem(event.target as HTMLElement)
-        // @ts-ignore-error
-        xin.todoApp.deleteItem(item)
-        touch(xin.todoApp as XinProxyObject)
-      }})
-    )),
-    { bindList: {value: xin.todoApp.list as XinProxyArray, idPath: 'id'} }
-  ),
-  form(
-    { style: flex },
     {
-      onSubmit(event){
-        // @ts-ignore-error
-        xin.todoApp.addItem()
+      style: { ...padded, ...stack },
+      // TODO figure out how to make this automatic
+      apply() {
         touch('todoApp')
-        event.preventDefault()
       }
     },
-    input({ style: elastic, placeholder: 'reminder', bindValue: 'todoApp.newItem.reminder' }),
-    button('Add Item', { bindEnabled: 'todoApp.newItem.reminder' })
+    h1('To Do'),
+    div(
+      { style: {...stack} },
+      template(div(
+        { style: {...flex }},
+        span({ bindText: '^.reminder', style: elastic }),
+        button(span('✕'), {title: 'delete', onClick(event){
+          const item = getListItem(event.target as HTMLElement)
+          // @ts-ignore-error
+          xin.todoApp.deleteItem(item)
+          touch(xin.todoApp as XinProxyObject)
+        }})
+      )),
+      { bindList: {value: xin.todoApp.list as XinProxyArray, idPath: 'id'} }
+    ),
+    form(
+      { style: flex },
+      {
+        onSubmit(event){
+          // @ts-ignore-error
+          xin.todoApp.addItem()
+          touch('todoApp')
+          event.preventDefault()
+        }
+      },
+      input({ style: elastic, placeholder: 'reminder', bindValue: 'todoApp.newItem.reminder' }),
+      button('Add Item', { bindEnabled: 'todoApp.newItem.reminder' })
+    )
   )
-)

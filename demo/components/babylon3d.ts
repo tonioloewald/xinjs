@@ -3,7 +3,7 @@ import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
 import { GLTFFileLoader } from 'babylonjs-loaders'
 import { SkyMaterial, WaterMaterial } from 'babylonjs-materials'
-import waterbump from '../assets/waterbump.png'
+const waterbump = '../assets/waterbump.png'
 import { CascadedShadowGenerator } from 'babylonjs'
 
 const { DEGREES_TO_RADIANS } = MoreMath
@@ -344,7 +344,7 @@ class BReflections extends Component {
   }
   disconnectedCallback() {
     if (this.owner != null) {
-      this.owner.offAddMesh(this.#callback)
+      this.owner.offSceneAddition(this.#callback)
       for(const probe of this.probes) {
         probe.dispose()
       }
@@ -606,12 +606,11 @@ class BSun extends Component {
   }
   disconnectedCallback() {
     if (this.light != null) {
-      this.clearInterval(this.interval)
+      clearInterval(this.interval)
       this.interval = 0
       this.light.dispose()
       this.light = undefined
       this.shadowGenerator = undefined
-      this.potentialShadowCasters.splice(0)
     }
     this.owner = undefined
     super.disconnectedCallback()
@@ -797,7 +796,7 @@ class BWater extends AbstractMesh {
   }
   disconnectedCallback(): void {
     if (this.owner) {
-      this.owner.offAddMesh(this.#callback)
+      this.owner.offSceneAddition(this.#callback)
     }
     this.material = undefined
     super.disconnectedCallback()

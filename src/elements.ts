@@ -1,6 +1,6 @@
 import { bind, on } from './bind'
 import { bindings } from './bindings'
-import { ElementPart, ElementCreator, SwissArmyElement } from '../src/xin-types'
+import { ElementPart, ElementCreator, SwissArmyElement, XinTouchableType } from '../src/xin-types'
 import { camelToKabob } from './string-case'
 
 const templates: { [key: string]: HTMLElement } = {}

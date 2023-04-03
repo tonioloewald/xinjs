@@ -117,7 +117,7 @@ class ListBinding {
       topBuffer,
       bottomBuffer
     }
-  }
+}
 
   update (array?: any[], isSlice?: boolean): void {
     if (array == null) {

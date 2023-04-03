@@ -72,3 +72,5 @@ export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | s
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
 export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
+export type ContentPart = HTMLElement | DocumentFragment | string
+export type ContentType = ContentPart | ContentPart[]

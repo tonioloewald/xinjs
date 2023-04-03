@@ -69,11 +69,11 @@ class LabeledInput extends Component {
     }
     if (this.type === 'checkbox') {
       if(field.checked !== this.value) {
-        field.checked = this.value
+        field.checked = this.value as boolean
       }
     } else {
       if (field.value !== this.value) {
-        field.value = this.value 
+        field.value = this.value as string
       }
     }
   }

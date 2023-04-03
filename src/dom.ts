@@ -1,6 +1,5 @@
 import { cloneWithBindings } from './metadata'
-export type ContentPart = HTMLElement | DocumentFragment | string
-export type ContentType = ContentPart | ContentPart[]
+import { ContentPart, ContentType } from './xin-types'
 
 export const dispatch = (target: Element, type: string): void => {
   const event = new Event(type)
