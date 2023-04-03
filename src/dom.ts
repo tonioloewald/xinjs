@@ -1,5 +1,5 @@
 import { cloneWithBindings } from './metadata'
-import { ContentPart, ContentType } from './xin-types'
+import { ContentType } from './xin-types'
 
 export const dispatch = (target: Element, type: string): void => {
   const event = new Event(type)

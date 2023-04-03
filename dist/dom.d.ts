@@ -1,5 +1,4 @@
-export type ContentPart = HTMLElement | DocumentFragment | string;
-export type ContentType = ContentPart | ContentPart[];
+import { ContentType } from './xin-types';
 export declare const dispatch: (target: Element, type: string) => void;
 export declare const resizeObserver: ResizeObserver | {
     observe(): void;

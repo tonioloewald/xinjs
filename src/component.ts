@@ -1,9 +1,9 @@
 import { css, StyleSheet } from './css'
 import { deepClone } from './deep-clone'
-import { appendContentToElement, ContentType, dispatch, resizeObserver } from './dom'
+import { appendContentToElement, dispatch, resizeObserver } from './dom'
 import { elements } from './elements'
 import { camelToKabob, kabobToCamel } from './string-case'
-import { ElementCreator, SwissArmyElement } from './xin-types'
+import { ElementCreator, SwissArmyElement, ContentType } from './xin-types'
 
 export abstract class Component extends HTMLElement {
   static elements = elements

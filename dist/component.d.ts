@@ -1,6 +1,5 @@
 import { StyleSheet } from './css';
-import { ContentType } from './dom';
-import { ElementCreator, SwissArmyElement } from './xin-types';
+import { ElementCreator, SwissArmyElement, ContentType } from './xin-types';
 export declare abstract class Component extends HTMLElement {
     static elements: {
         [key: string]: ElementCreator<any>;
