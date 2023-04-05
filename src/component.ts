@@ -175,6 +175,7 @@ export abstract class Component extends HTMLElement {
     if (this.value != null && this.getAttribute('value') != null) {
       this._value = this.getAttribute('value')
     }
+    this.queueRender()
   }
 
   disconnectedCallback (): void {
@@ -213,7 +214,5 @@ export abstract class Component extends HTMLElement {
     }
   }
 
-  render (): void {
-    this.hydrate()
-  }
+  render (): void {}
 }
