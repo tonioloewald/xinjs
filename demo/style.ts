@@ -1,9 +1,26 @@
+import {bind} from '../src'
 import {elements} from '../src/elements'
 import {initVars, darkMode, css, vars} from '../src/css'
 import { Color } from '../src/color'
 const {style} = elements
 
 const brandColor = Color.fromCss('rgb(8, 131, 88)')
+
+bind(document.body, 'app.darkmode', {
+  toDOM(elt, value) {
+    switch(value) {
+      case 'dark':
+        elt.classList.add('darkmode')
+        break
+      case 'light':
+        elt.classList.remove('darkmode')
+        break
+      default:
+        const autoSetting = getComputedStyle(document.body).getPropertyValue('--darkmode')
+        elt.classList.toggle('darkmode', autoSetting === 'true')
+    }
+  }
+})
 
 const cssVars = {
   font: 'Helvetica Neue, Helvertica, Arial, Sans-serif',
@@ -49,9 +66,8 @@ const codeVars = {
 }
 
 const rules = {
-  ':root': initVars({...cssVars, ...brandColors, ...codeVars}),
-  '@media (prefers-color-scheme: dark)': {':root': {...darkMode(cssVars), ...initVars(darkBrandColors)}},
   body: {
+    ...initVars({...cssVars, ...brandColors, ...codeVars}),
     fontFamily: vars.font,
     background: vars.background,
     color: vars.textColor,
@@ -59,6 +75,8 @@ const rules = {
     fontSize: vars.fontSize,
     lineHeight: vars.lineHeight
   },
+  '@media (prefers-color-scheme: dark)': {'body': initVars({darkmode: 'true'})},
+  '.darkmode': {...darkMode(cssVars), ...initVars(darkBrandColors)},
   'h1, h2, h3': {
     margin: `${vars.spacing200} 0 ${vars.spacing}`,
     color: vars.textHeadingColor

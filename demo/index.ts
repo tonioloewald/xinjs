@@ -19,6 +19,7 @@ const omnidude = './assets/omnidude.glb'
 
 xin.app = {
   title: 'docs & tests',
+  darkmode: 'auto'
 }
 
 console.time('total')

@@ -1,7 +1,7 @@
 import {elements, vars} from '../src'
 import {labeledInput} from './components'
 
-const {form, dialog, h2, span, button } = elements
+const {form, dialog, h2, span, button, label, select, option } = elements
 
 export const settingsDialog = () => dialog(
     {
@@ -13,7 +13,7 @@ export const settingsDialog = () => dialog(
         borderRadius: 'calc(var(--rounded-radius) * 2)',
         boxShadow: '0 10px 20px #0008',
         padding: 'calc(var(--spacing) * 2)',
-        zIndex: 1 // Safari rendering bug
+        zIndex: 1, // Safari rendering bug
       }
     },
     h2(
@@ -50,6 +50,15 @@ export const settingsDialog = () => dialog(
         placeholder: 'enter title',
         bindValue: 'app.title'
       }),
+      label(
+        span('Theme'),
+        select(
+          { bindValue: 'app.darkmode' },
+          option('Light', {value: 'light'}),
+          option('Dark', {value: 'dark'}),
+          option('Auto', {value: 'auto'})
+        )
+      ),
       span(
         {
           style: {
