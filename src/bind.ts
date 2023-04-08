@@ -5,7 +5,7 @@ import { XinObject, XinTouchableType, XinBinding, XinProxy, XinBindingSpec } fro
 const { document } = globalThis
 
 observe(() => true, (changedPath: string) => {
-  const boundElements = document.body.querySelectorAll(BOUND_SELECTOR)
+  const boundElements = document.querySelectorAll(BOUND_SELECTOR)
 
   for (const element of boundElements) {
     const dataBindings = elementToBindings.get(element) as DataBindings
