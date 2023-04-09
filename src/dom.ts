@@ -1,9 +1,69 @@
 import { cloneWithBindings } from './metadata'
-import { ContentType } from './xin-types'
+import { ContentType, ValueElement } from './xin-types'
 
 export const dispatch = (target: Element, type: string): void => {
   const event = new Event(type)
   target.dispatchEvent(event)
+}
+
+const valueType = (element: HTMLElement): string => {
+  if (element instanceof HTMLInputElement) {
+    return element.type
+  } else if (element instanceof HTMLSelectElement && element.hasAttribute('multiple')) {
+    return 'multi-select'
+  } else {
+    return 'other'
+  }
+}
+
+export const setValue = (element: HTMLElement, newValue: any): void => {
+  switch(valueType(element)) {
+    case 'radio':
+      // @ts-expect-error
+      element.checked = element.value === newValue
+      break
+    case 'checkbox':
+      // @ts-expect-error
+      element.checked = newValue
+      break
+    case 'date':
+      // @ts-expect-error
+      element.valueAsDate = new Date(newValue)
+      break
+    case 'multi-select':
+      for(const option of [...element.querySelectorAll('option')] as HTMLOptionElement[]) {
+        option.selected = newValue[option.value]
+      }
+      break
+    default:
+      // @ts-expect-error
+      element.value = newValue
+  }
+}
+
+type PickMap = {
+  [key: string]: boolean
+}
+export const getValue = (element: ValueElement): any => {
+  switch(valueType(element)) {
+    case 'radio':
+      const radio = element.parentElement?.querySelector(`[name="${element.name}"]:checked`) as HTMLInputElement
+      return radio ? radio.value : null
+    case 'checkbox':
+      // @ts-expect-error
+      return element.checked
+    case 'date':
+      // @ts-expect-error
+      return element.valueAsDate.toISOString()
+    case 'multi-select': 
+      return [...element.querySelectorAll('option')]
+          .reduce((map: PickMap, option: HTMLOptionElement): PickMap => {
+            map[option.value] = option.selected
+            return map
+          }, {})
+    default:
+      return element.value
+  }
 }
 
 /* global ResizeObserver */

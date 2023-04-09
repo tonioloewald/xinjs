@@ -1,21 +1,15 @@
-import { XinObject, XinBinding } from './xin-types'
+import { XinObject, XinBinding, ValueElement } from './xin-types'
 import { getListBinding } from './list-binding'
+import { getValue, setValue } from './dom'
 
 export const bindings: { [key: string | symbol]: XinBinding } = {
   value: {
     toDOM (element: HTMLElement, value: any) {
-      // @ts-expect-error
-      if (element.value !== undefined) {
-        // @ts-expect-error
-        element.value = value
-      } else {
-        throw new Error(`cannot set value of <${element.tagName}>`)
-      }
+      setValue(element, value)
     },
 
     fromDOM (element: HTMLElement) {
-      // @ts-expect-error
-      return element.value
+      return getValue(element as ValueElement)
     }
   },
 

@@ -1,7 +1,6 @@
 import {elements, vars} from '../src'
-import {labeledInput} from './components'
 
-const {form, dialog, h2, span, button, label, select, option } = elements
+const {form, dialog, h2, span, button, label, input, select, option } = elements
 
 export const settingsDialog = () => dialog(
     {
@@ -46,10 +45,10 @@ export const settingsDialog = () => dialog(
         },
         '⨉'
       ),
-      labeledInput('App Title', {
-        placeholder: 'enter title',
-        bindValue: 'app.title'
-      }),
+      label(
+        span('App Title'),
+        input({bindValue: 'app.title'})
+      ),
       label(
         span('Theme'),
         select(
@@ -59,17 +58,8 @@ export const settingsDialog = () => dialog(
           option('Auto', {value: 'auto'})
         )
       ),
-      span(
-        {
-          style: {
-            marginTop: 'calc(var(--spacing) * 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end'
-          }
-        },
+      label(
         span('Local Storage'),
-        span(' ', { style: {flex: '1 1 auto'}}),
         button('Clear and Reload', {
           onClick() {
             localStorage.clear()
@@ -80,14 +70,14 @@ export const settingsDialog = () => dialog(
       span(
         {
           style: {
-            marginTop: 'calc(var(--spacing) * 2)',
+            marginTop: vars.spacing,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end'
           }
         },
         span(' ', { style: {flex: '1 1 auto'}}),
-        button('OK')
+        button('OK', { class: 'primary' })
       ),
       {
         onSubmit(evt: Event){

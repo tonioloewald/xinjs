@@ -233,8 +233,9 @@ strings to CSS property maps) into a `<style>` element with the CSS in it.
     export const toolBar = ToolBar.elementCreator()
 
 Returns a function that creates the custom-element. You can specify the tag and the
-pre-existing element it extends if you like. By default, the tag is produced by
-kabob-casing the class name (so `class FooBar…` implements `<foo-bar>`).
+pre-existing element it extends if you like (this is crucial if you're using scope-hoisting name-mangling
+minifiers). By default, the tag is produced by kabob-casing the class name (so `class FooBar…` 
+implements `<foo-bar>`).
 
 If there's no second bar, then `-elt` is added to the tag. So `class Foo…` implements `<foo-elt>`.
 

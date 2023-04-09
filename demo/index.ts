@@ -4,6 +4,7 @@ import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
+import { kitchenSink } from './components/kitchen-sink'
 import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater, bReflections } from './components/babylon3d'
 import { bBiped } from './components/biped'
 import { gameController } from './components/game-controller'
@@ -26,7 +27,7 @@ console.time('total')
 
 settings.perf = true
 
-const {img, h1, div, span, style, button, a} = elements
+const {img, h1, div, span, style, button, a, main} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
@@ -59,19 +60,23 @@ type Route = {
 const routes: Route[] = [
   {
     path: 'read-me',
-    content: () => markdownViewer({src: readmeMd, style: { padding: '20px 40px'}}),
+    content: () => div({class: 'page-padded'}, markdownViewer({src: readmeMd})),
   },
   {
     path: 'todo',
-    content: () => todo(),
+    content: todo,
   },
   {
     path: 'array-binding', 
-    content: () => arrayBindingTest(),
+    content: arrayBindingTest,
   },
   {
     path: 'word-search',
-    content: () => wordSearch(),
+    content: wordSearch,
+  },
+  {
+    path: 'kitchen-sink',
+    content: () => div({class: 'page-padded'}, kitchenSink()),
   },
   {
     path: 'babylon-3d',
@@ -102,7 +107,7 @@ const routes: Route[] = [
 ]
 
 function showRoute () {
-  const main = document.getElementById('main')
+  const main = document.querySelector('main')
   const path = location.search.substring(1).split('&').shift()
   let route = routes.find(route => route.path === path)
   if (route == null) {
@@ -224,9 +229,8 @@ document.body.append(div(
         }
       ))
     ),
-    div(
-      { 
-        id: 'main',
+    main(
+      {
         style: {
           overflowY: 'overlay',
           flex: '1 1 auto',

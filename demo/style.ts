@@ -25,9 +25,9 @@ bind(document.body, 'app.darkmode', {
 const cssVars = {
   font: 'Helvetica Neue, Helvertica, Arial, Sans-serif',
   codeFont: 'Menlo, Monaco, monospace',
-  fontSize: 14,
-  lineHeight: 20,
-  spacing: 15,
+  fontSize: 16,
+  lineHeight: 24,
+  spacing: 16,
   textColor: '#222',
   itemSpacing: vars.spacing50,
   background: '#f0f0f0',
@@ -36,6 +36,7 @@ const cssVars = {
   buttonBg: '#fff8',
   hoverBg: brandColor.opacity(0.25).html,
   activeBg: brandColor.opacity(0.5).html,
+  primaryColor: '#ccf8',
   selectedBg: '#ddf',
   borderColor: '#0002',
   darkBorderColor: '#0004',
@@ -84,8 +85,12 @@ const rules = {
   'p, h4, h5, h6, pre, blockquote': {
     margin: `0 0 ${vars.spacing}`,
   },
-  'pre, blockquote': {
+  pre: {
     fontSize: vars.fontSize80,
+    background: vars.codeBg,
+    color: vars.codeColor,
+    borderRadius: vars.roundedRadius50,
+    padding: vars.spacing
   },
   'ul, ol': {
     margin: `0 ${vars.spacing200} ${vars.spacing} 0`
@@ -96,12 +101,23 @@ const rules = {
   'labeled-input, labeled-value': {
     display: 'block'
   },
-  'label, input, button, textarea': {
+  label: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: vars.spacing50,
+    marginTop: vars.spacing
+  },
+  'label label': {
+    marginTop: 0,
+  },
+  'label, input, button, textarea, select': {
     fontSize: vars.fontSize,
-    padding: `${vars.spacing25} ${vars.spacing75}`,
     lineHeight: vars.lineHeight,
     color: vars.textColor,
     border: 0,
+  },
+  'input, button, textarea, select': {
+    padding: `${vars.spacing75} ${vars.spacing}`,
   },
   button: {
     borderRadius: vars.roundedRadius,
@@ -130,10 +146,26 @@ const rules = {
   'tr:nth-child(2n+2)': {
     background: brandColor.opacity(0.05).html,
   },
+  'input, textarea, select': {
+    background: vars.inputBg,
+  },
+  'input, textarea, select, button': {
+    boxShadow: vars.inputBorderShadow
+  },
   'input, textarea': {
     borderRadius: vars.roundedRadius50,
-    background: vars.inputBg,
-    boxShadow: vars.inputBorderShadow
+  },
+  'select, button': {
+    borderRadius: vars.roundedRadius
+  },
+  'select[multiple]': {
+    padding: `${vars.spacing50} 0`
+  },
+  'select[multiple] option': {
+    padding: `${vars.spacing50} ${vars.spacing}`
+  },
+  'input[type="range"], input[type="checkbox"], input[type="radio"]': {
+    boxShadow: 'none'
   },
   'button:not(:disabled):hover, a:not(:disabled):hover': {
     background: vars.hoverBg
@@ -156,17 +188,23 @@ const rules = {
     lineHeight: vars.lineHeight200,
     borderRadius: 1000,
     padding: 0,
-    minWidth: vars.lineHeight200
-  },
-  pre: {
-    background: vars.codeBg,
-    color: vars.codeColor,
-    borderRadius: vars.roundedRadius50
+    minWidth: vars.lineHeight200,
+    boxShadow: 'none'
   },
   'dialog::backdrop': {
     backgroundColor: '#0004',
     backdropFilter: 'blur(2px)'
-  }
+  },
+  form: {
+    minWidth: '300px',
+    padding: 0,
+  },
+  '.primary': {
+    backgroundColor: vars.primaryColor,
+  },
+  '.page-padded': {
+    padding: `${vars.spacing} ${vars.spacing200}`
+  },
 }
 
 document.head.append(style({id: 'base-style'}, css(rules))) 

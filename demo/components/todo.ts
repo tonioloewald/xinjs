@@ -44,7 +44,7 @@ const padded = { padding: `${vars.spacing} ${vars.spacing200}` }
 
 export const todo = makeComponent(
     {
-      style: { ...padded, ...stack },
+      style: {...padded, ...stack},
       // TODO figure out how to make this automatic
       apply() {
         touch('todoApp')
@@ -52,7 +52,7 @@ export const todo = makeComponent(
     },
     h1('To Do'),
     div(
-      { style: {...stack} },
+      { style: stack },
       template(div(
         { style: {...flex }},
         span({ bindText: '^.reminder', style: elastic }),
