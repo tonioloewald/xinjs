@@ -1,5 +1,7 @@
-import { ContentType } from './xin-types';
+import { ContentType, ValueElement } from './xin-types';
 export declare const dispatch: (target: Element, type: string) => void;
+export declare const setValue: (element: HTMLElement, newValue: any) => void;
+export declare const getValue: (element: ValueElement) => any;
 export declare const resizeObserver: ResizeObserver | {
     observe(): void;
     unobserve(): void;

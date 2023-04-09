@@ -2,7 +2,7 @@ import { xin, touch, observe, xinPath, xinValue } from './xin';
 import { getListItem, elementToBindings, elementToHandlers, BOUND_CLASS, BOUND_SELECTOR, EVENT_CLASS, EVENT_SELECTOR } from './metadata';
 const { document } = globalThis;
 observe(() => true, (changedPath) => {
-    const boundElements = document.body.querySelectorAll(BOUND_SELECTOR);
+    const boundElements = document.querySelectorAll(BOUND_SELECTOR);
     for (const element of boundElements) {
         const dataBindings = elementToBindings.get(element);
         for (const dataBinding of dataBindings) {

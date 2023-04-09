@@ -1,19 +1,12 @@
 import { getListBinding } from './list-binding';
+import { getValue, setValue } from './dom';
 export const bindings = {
     value: {
         toDOM(element, value) {
-            // @ts-expect-error
-            if (element.value !== undefined) {
-                // @ts-expect-error
-                element.value = value;
-            }
-            else {
-                throw new Error(`cannot set value of <${element.tagName}>`);
-            }
+            setValue(element, value);
         },
         fromDOM(element) {
-            // @ts-expect-error
-            return element.value;
+            return getValue(element);
         }
     },
     text: {

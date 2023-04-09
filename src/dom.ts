@@ -17,7 +17,7 @@ const valueType = (element: HTMLElement): string => {
 }
 
 export const setValue = (element: HTMLElement, newValue: any): void => {
-  switch(valueType(element)) {
+  switch (valueType(element)) {
     case 'radio':
       // @ts-expect-error
       element.checked = element.value === newValue
@@ -31,7 +31,7 @@ export const setValue = (element: HTMLElement, newValue: any): void => {
       element.valueAsDate = new Date(newValue)
       break
     case 'multi-select':
-      for(const option of [...element.querySelectorAll('option')] as HTMLOptionElement[]) {
+      for (const option of [...element.querySelectorAll('option')] as HTMLOptionElement[]) {
         option.selected = newValue[option.value]
       }
       break
@@ -41,26 +41,28 @@ export const setValue = (element: HTMLElement, newValue: any): void => {
   }
 }
 
-type PickMap = {
+interface PickMap {
   [key: string]: boolean
 }
 export const getValue = (element: ValueElement): any => {
-  switch(valueType(element)) {
+  switch (valueType(element)) {
     case 'radio':
+    {
       const radio = element.parentElement?.querySelector(`[name="${element.name}"]:checked`) as HTMLInputElement
-      return radio ? radio.value : null
+      return radio != null ? radio.value : null
+    }
     case 'checkbox':
       // @ts-expect-error
       return element.checked
     case 'date':
       // @ts-expect-error
       return element.valueAsDate.toISOString()
-    case 'multi-select': 
+    case 'multi-select':
       return [...element.querySelectorAll('option')]
-          .reduce((map: PickMap, option: HTMLOptionElement): PickMap => {
-            map[option.value] = option.selected
-            return map
-          }, {})
+        .reduce((map: PickMap, option: HTMLOptionElement): PickMap => {
+          map[option.value] = option.selected
+          return map
+        }, {})
     default:
       return element.value
   }

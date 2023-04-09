@@ -50,6 +50,7 @@ export interface ElementProps {
     bindStyle?: XinBindingShortcut;
     [key: string]: any;
 }
+export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 export type SwissArmyElement = HTMLInputElement & HTMLCanvasElement;
 export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number;
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T;

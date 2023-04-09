@@ -1125,7 +1125,7 @@ const getListItem = (element) => {
 
 const { document: document$1 } = globalThis;
 observe(() => true, (changedPath) => {
-    const boundElements = document$1.body.querySelectorAll(BOUND_SELECTOR);
+    const boundElements = document$1.querySelectorAll(BOUND_SELECTOR);
     for (const element of boundElements) {
         const dataBindings = elementToBindings.get(element);
         for (const dataBinding of dataBindings) {
@@ -1288,6 +1288,64 @@ const on = (element, eventType, eventHandler) => {
 const dispatch = (target, type) => {
     const event = new Event(type);
     target.dispatchEvent(event);
+};
+const valueType = (element) => {
+    if (element instanceof HTMLInputElement) {
+        return element.type;
+    }
+    else if (element instanceof HTMLSelectElement && element.hasAttribute('multiple')) {
+        return 'multi-select';
+    }
+    else {
+        return 'other';
+    }
+};
+const setValue = (element, newValue) => {
+    switch (valueType(element)) {
+        case 'radio':
+            // @ts-expect-error
+            element.checked = element.value === newValue;
+            break;
+        case 'checkbox':
+            // @ts-expect-error
+            element.checked = newValue;
+            break;
+        case 'date':
+            // @ts-expect-error
+            element.valueAsDate = new Date(newValue);
+            break;
+        case 'multi-select':
+            for (const option of [...element.querySelectorAll('option')]) {
+                option.selected = newValue[option.value];
+            }
+            break;
+        default:
+            // @ts-expect-error
+            element.value = newValue;
+    }
+};
+const getValue = (element) => {
+    switch (valueType(element)) {
+        case 'radio':
+            {
+                const radio = element.parentElement?.querySelector(`[name="${element.name}"]:checked`);
+                return radio != null ? radio.value : null;
+            }
+        case 'checkbox':
+            // @ts-expect-error
+            return element.checked;
+        case 'date':
+            // @ts-expect-error
+            return element.valueAsDate.toISOString();
+        case 'multi-select':
+            return [...element.querySelectorAll('option')]
+                .reduce((map, option) => {
+                map[option.value] = option.selected;
+                return map;
+            }, {});
+        default:
+            return element.value;
+    }
 };
 /* global ResizeObserver */
 const { ResizeObserver } = globalThis;
@@ -1499,18 +1557,10 @@ const getListBinding = (boundElement, options) => {
 const bindings = {
     value: {
         toDOM(element, value) {
-            // @ts-expect-error
-            if (element.value !== undefined) {
-                // @ts-expect-error
-                element.value = value;
-            }
-            else {
-                throw new Error(`cannot set value of <${element.tagName}>`);
-            }
+            setValue(element, value);
         },
         fromDOM(element) {
-            // @ts-expect-error
-            return element.value;
+            return getValue(element);
         }
     },
     text: {
@@ -1573,6 +1623,7 @@ const create = (tagType, ...contents) => {
         templates[tagType] = globalThis.document.createElement(tagType);
     }
     const elt = templates[tagType].cloneNode();
+    const elementProps = {};
     for (const item of contents) {
         if (item instanceof Element || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
             if (elt instanceof HTMLTemplateElement) {
@@ -1583,60 +1634,61 @@ const create = (tagType, ...contents) => {
             }
         }
         else {
-            for (const key of Object.keys(item)) {
-                const value = (item)[key];
-                if (key === 'apply') {
-                    value(elt);
-                }
-                else if (key === 'style') {
-                    if (typeof value === 'object') {
-                        for (const prop of Object.keys(value)) {
-                            if (prop.startsWith('--')) {
-                                elt.style.setProperty(prop, value[prop]);
-                            }
-                            else {
-                                // @ts-expect-error
-                                elt.style[prop] = value[prop];
-                            }
-                        }
+            Object.assign(elementProps, item);
+        }
+    }
+    for (const key of Object.keys(elementProps)) {
+        const value = elementProps[key];
+        if (key === 'apply') {
+            value(elt);
+        }
+        else if (key === 'style') {
+            if (typeof value === 'object') {
+                for (const prop of Object.keys(value)) {
+                    if (prop.startsWith('--')) {
+                        elt.style.setProperty(prop, value[prop]);
                     }
                     else {
-                        elt.setAttribute('style', value);
+                        // @ts-expect-error
+                        elt.style[prop] = value[prop];
                     }
                 }
-                else if (key.match(/^on[A-Z]/) != null) {
-                    const eventType = key.substring(2).toLowerCase();
-                    on(elt, eventType, value);
-                }
-                else if (key.match(/^bind[A-Z]/) != null) {
-                    const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5);
-                    const binding = bindings[bindingType];
-                    if (binding !== undefined) {
-                        bind(elt, value, binding);
-                    }
-                    else {
-                        throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
-                    }
-                }
-                else {
-                    const attr = camelToKabob(key);
-                    if (attr === 'class') {
-                        value.split(' ').forEach((className) => {
-                            elt.classList.add(className);
-                        });
-                        // @ts-expect-error-error
-                    }
-                    else if (elt[attr] !== undefined) {
-                        // @ts-expect-error-error
-                        elt[attr] = value;
-                    }
-                    else if (typeof value === 'boolean') {
-                        value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr);
-                    }
-                    else {
-                        elt.setAttribute(attr, value);
-                    }
-                }
+            }
+            else {
+                elt.setAttribute('style', value);
+            }
+        }
+        else if (key.match(/^on[A-Z]/) != null) {
+            const eventType = key.substring(2).toLowerCase();
+            on(elt, eventType, value);
+        }
+        else if (key.match(/^bind[A-Z]/) != null) {
+            const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5);
+            const binding = bindings[bindingType];
+            if (binding !== undefined) {
+                bind(elt, value, binding);
+            }
+            else {
+                throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
+            }
+        }
+        else {
+            const attr = camelToKabob(key);
+            if (attr === 'class') {
+                value.split(' ').forEach((className) => {
+                    elt.classList.add(className);
+                });
+                // @ts-expect-error-error
+            }
+            else if (elt[attr] !== undefined) {
+                // @ts-expect-error-error
+                elt[attr] = value;
+            }
+            else if (typeof value === 'boolean') {
+                value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr);
+            }
+            else {
+                elt.setAttribute(attr, value);
             }
         }
     }
