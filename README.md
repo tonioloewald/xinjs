@@ -208,26 +208,6 @@ it straight through (like a [monad](https://en.wikipedia.org/wiki/Monad_(functio
 Basically, if you chain typesafe functions and there's an error somewhere in the chain,
 you'll receive *that* error at the far end, and no further work will be done.
 
-### Filter
-
-If you want to pare down an object to a specific shape, e.g. to optimize bandwidth-usage,
-the `filter` function lets you use a `type` object to extract exactly what you want, and
-the way you specify what you want is with the same type objects used by matchType:
-
-    filter(1, 17)                               // 17
-    filter(1, 'hello')                          // undefined
-    filter({x: 0, y: 0}, {x: 1, y: 2, z: 17})   // {x: 1, y: 2}
-    filter({x: 0, y: 0}, {y: 1, z: 2})          // undefined
-
-Note that you can filter heterogeneous arrays to only include the specified elements.
-
-
-    filter([1], ['this', 4, 'that', 17])        // [4, 17]
-    filter([], ['this', true, 17])              // ['this', true, 17]
-    filter(['', 0], ['this', true, 17])         // ['this', 17]
-    filter([{x: 0, y: 0}], [{x: 1, y: 2}, {lat: 10, long: -30}])
-                                                // [{x: 1, y: 2}]
-
 ### CSS
 
 `xinjs` includes utilities for working with css.
