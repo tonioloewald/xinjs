@@ -9,9 +9,9 @@ export const settingsDialog = () => dialog(
         background: vars.background,
         color: vars.textColor,
         border: 0,
-        borderRadius: 'calc(var(--rounded-radius) * 2)',
+        borderRadius: vars.roundedRadius200,
         boxShadow: '0 10px 20px #0008',
-        padding: 'calc(var(--spacing) * 2)',
+        padding: vars.spacing200,
         zIndex: 1, // Safari rendering bug
       }
     },
@@ -20,10 +20,12 @@ export const settingsDialog = () => dialog(
       {
         style: {
           textAlign: 'center',
-          padding: 'var(--spacing)',
-          margin: 'calc(var(--spacing) * -2)',
-          borderBottom: 'var(--dark-border)',
-          marginBottom: 'calc(var(--spacing) * 2)'
+          padding: vars.spacing,
+          margin: vars.spacing_200,
+          borderBottom: vars.brandColor_50b,
+          marginBottom: vars.spacing200,
+          background: vars.brandColor_15b,
+          color: vars.brandTextColor
         }
       }
     ),
@@ -32,8 +34,8 @@ export const settingsDialog = () => dialog(
         { 
           style: {
             position: 'absolute',
-            top: 'calc(var(--spacing) * 0.5)',
-            right: 'calc(var(--spacing) * 0.5)',
+            top: vars.spacing50,
+            right: vars.spacing50,
             width: '32px',
             height: '32px',
             lineHeight: '32px',
