@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "path-based state management for web apps",
   "main": "dist/index.js",
   "homepage": "https://xinjs.net",
@@ -33,7 +33,8 @@
     "typescript": "^4.8.4",
     "uglify-js": "^3.1.7"
   },
-  "files": [    "/cdn",
+  "files": [
+    "/cdn",
     "/dist",
     "/src",
     "/LICENSE",
