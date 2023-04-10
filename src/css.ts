@@ -93,7 +93,8 @@ export const vars = new Proxy<{ [key: string]: string }>({}, {
           case 'h': // hue
             {
               const baseColor = getComputedStyle(document.body).getPropertyValue(varName)
-              target[prop] = Color.fromCss(baseColor).rotate(scale).rgba
+              target[prop] = Color.fromCss(baseColor).rotate(scale * 100).rgba
+              console.log(Color.fromCss(baseColor).hsla, Color.fromCss(baseColor).rotate(scale).hsla)
             }
             break
           case 'o': // alpha

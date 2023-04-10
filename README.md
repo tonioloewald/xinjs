@@ -8,7 +8,9 @@
 
 [xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme) | [discord](https://discord.gg/ramJ9rgky5)
 
-![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)
+[![xinjs is on NPM](https://badge.fury.io/js/xinjs.svg)](https://www.npmjs.com/package/xinjs)
+[![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
+[![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
 
 ### Path-based State for Web Apps
 
@@ -205,26 +207,6 @@ type error (specifying exactly what went wrong). If it receives an error, it pas
 it straight through (like a [monad](https://en.wikipedia.org/wiki/Monad_(functional_programming))).
 Basically, if you chain typesafe functions and there's an error somewhere in the chain,
 you'll receive *that* error at the far end, and no further work will be done.
-
-### Filter
-
-If you want to pare down an object to a specific shape, e.g. to optimize bandwidth-usage,
-the `filter` function lets you use a `type` object to extract exactly what you want, and
-the way you specify what you want is with the same type objects used by matchType:
-
-    filter(1, 17)                               // 17
-    filter(1, 'hello')                          // undefined
-    filter({x: 0, y: 0}, {x: 1, y: 2, z: 17})   // {x: 1, y: 2}
-    filter({x: 0, y: 0}, {y: 1, z: 2})          // undefined
-
-Note that you can filter heterogeneous arrays to only include the specified elements.
-
-
-    filter([1], ['this', 4, 'that', 17])        // [4, 17]
-    filter([], ['this', true, 17])              // ['this', true, 17]
-    filter(['', 0], ['this', true, 17])         // ['this', 17]
-    filter([{x: 0, y: 0}], [{x: 1, y: 2}, {lat: 10, long: -30}])
-                                                // [{x: 1, y: 2}]
 
 ### CSS
 

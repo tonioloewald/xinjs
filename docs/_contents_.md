@@ -19,11 +19,17 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 
 1. [overview](../README.md) — "read me" overview of xinjs
 2. [xin](xin.md) — path-based observer
-3. [types](type-by-example.md) — dynamic type-checking using pure JavaScript
-4. [filter](filter.md) — filtering objects using types
-5. [paths](by-path.md) - querying objects by path
-6. [bind](bind.md) — binding state to the DOM
-7. [elements](elements.md) — conveniently creating DOM elements
-8. [css](css.md) — utilities for working with css
-9. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
-10. [react integration](useXin.md) — powering pure components via xin hooks
+3. [paths](by-path.md) - querying objects by path
+4. [bind](bind.md) — binding state to the DOM
+5. [elements](elements.md) — conveniently creating DOM elements
+6. [css](css.md) — utilities for working with css
+7. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
+
+### Related Libraries
+- [react-xinjs](https://www.npmjs.com/package/react-xinjs) allows you to manage state within
+  React applications, allowing clean separation of logic and presentation.
+- [type-by-example](https://www.npmjs.com/package/type-by-example) supports runtime type
+  checking using serializable types, and creation of **typeSafe** functions that detect
+  type errors.
+- [filter-shapes](https://www.npmjs.com/package/filter-shapes) allows you to filter and 
+  pare down objects to save bandwidth and catch errors.

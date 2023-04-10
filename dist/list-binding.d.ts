@@ -16,7 +16,8 @@ interface ListBindingOptions {
 }
 declare class ListBinding {
     boundElement: HTMLElement;
-    listContainer: HTMLElement;
+    listTop: HTMLElement;
+    listBottom: HTMLElement;
     template: HTMLElement;
     options: ListBindingOptions;
     itemToElement: WeakMap<XinObject, HTMLElement>;

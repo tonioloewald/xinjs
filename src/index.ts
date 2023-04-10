@@ -1,6 +1,4 @@
 export { xin, observe, unobserve, touch, observerShouldBeRemoved, xinValue, xinPath } from './xin'
-export { matchType, typeSafe } from './type-by-example'
-export { filter } from './filter'
 export { hotReload } from './hot-reload'
 export { Component } from './component'
 export { elements, makeComponent } from './elements'

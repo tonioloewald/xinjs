@@ -75,7 +75,8 @@ const rules = {
     color: vars.textColor,
     margin: 0,
     fontSize: vars.fontSize,
-    lineHeight: vars.lineHeight
+    lineHeight: vars.lineHeight,
+    accentColor: vars.brandColor
   },
   '@media (prefers-color-scheme: dark)': {'body': initVars({darkmode: 'true'})},
   '.darkmode': {...darkMode(cssVars), ...initVars(darkBrandColors)},
@@ -131,7 +132,8 @@ const rules = {
   a: {
     color: vars.textHeadingColor,
     textDecoration: 'none',
-    padding: `${vars.spacing25} ${vars.spacing75}`
+    borderRadius: vars.roundedRadius50,
+    padding: `${vars.spacing25} ${vars.spacing50}`
   },
   '.current-route': {
     background: vars.inputBg,
@@ -206,6 +208,10 @@ const rules = {
   '.page-padded': {
     padding: `${vars.spacing} ${vars.spacing200}`
   },
+  'option:checked': {
+    background: vars.brandColor,
+    color: vars.brandTextColor
+  }
 }
 
 document.head.append(style({id: 'base-style'}, css(rules))) 
