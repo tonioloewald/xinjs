@@ -24,8 +24,9 @@ bind(document.body, 'app.darkmode', {
 
 const cssVars = {
   font: '\'Roboto Slab\', Serif',
-  codeFont: 'Menlo, Monaco, monospace',
+  codeFont: '\'Space Mono\', monospace',
   fontSize: 16,
+  codeFontSize: 16,
   lineHeight: 24,
   spacing: 16,
   textColor: '#222',
@@ -67,7 +68,7 @@ const codeVars = {
 }
 
 const rules = {
-  '@import': 'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;700;800;900&display=swap',
+  '@import': 'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
   body: {
     ...initVars({...cssVars, ...brandColors, ...codeVars}),
     fontFamily: vars.font,
@@ -88,7 +89,7 @@ const rules = {
     margin: `0 0 ${vars.spacing}`,
   },
   pre: {
-    fontSize: vars.fontSize80,
+    fontSize: vars.codeFontSize,
     background: vars.codeBg,
     color: vars.codeColor,
     borderRadius: vars.roundedRadius50,
