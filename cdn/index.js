@@ -1419,8 +1419,10 @@ class ListBinding {
             this.template = boundElement.children[0];
             this.template.remove();
         }
-        this.listContainer = document.createElement('div');
-        this.boundElement.append(this.listContainer);
+        this.listTop = document.createElement('div');
+        this.listBottom = document.createElement('div');
+        this.boundElement.append(this.listTop);
+        this.boundElement.append(this.listBottom);
         this.options = options;
         if (options.virtual != null) {
             resizeObserver.observe(this.boundElement);
@@ -1478,7 +1480,10 @@ class ListBinding {
         let removed = 0;
         let moved = 0;
         let created = 0;
-        for (const element of [...this.listContainer.children]) {
+        for (const element of [...this.boundElement.children]) {
+            if (element === this.listTop || element === this.listBottom) {
+                continue;
+            }
             const proxy = elementToItem.get(element);
             if (proxy == null) {
                 element.remove();
@@ -1493,8 +1498,8 @@ class ListBinding {
                 }
             }
         }
-        this.listContainer.style.marginTop = String(topBuffer) + 'px';
-        this.listContainer.style.marginBottom = String(bottomBuffer) + 'px';
+        this.listTop.style.height = String(topBuffer) + 'px';
+        this.listBottom.style.height = String(bottomBuffer) + 'px';
         // build a complete new set of elements in the right order
         const elements = [];
         const { idPath } = this.options;
@@ -1511,7 +1516,7 @@ class ListBinding {
                     this.itemToElement.set(item[xinValue], element);
                     elementToItem.set(element, item[xinValue]);
                 }
-                this.listContainer.append(element);
+                this.boundElement.insertBefore(element, this.listBottom);
                 if (idPath != null) {
                     const idValue = item[idPath];
                     const itemPath = `${arrayPath}[${idPath}=${idValue}]`;
@@ -1534,10 +1539,10 @@ class ListBinding {
             if (element.previousElementSibling !== insertionPoint) {
                 moved++;
                 if (insertionPoint?.nextElementSibling != null) {
-                    this.listContainer.insertBefore(element, insertionPoint.nextElementSibling);
+                    this.boundElement.insertBefore(element, insertionPoint.nextElementSibling);
                 }
                 else {
-                    this.listContainer.append(element);
+                    this.boundElement.insertBefore(element, this.listBottom);
                 }
             }
             insertionPoint = element;
@@ -1788,7 +1793,8 @@ const vars = new Proxy({}, {
                     case 'h': // hue
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
-                            target[prop] = Color.fromCss(baseColor).rotate(scale).rgba;
+                            target[prop] = Color.fromCss(baseColor).rotate(scale * 100).rgba;
+                            console.log(Color.fromCss(baseColor).hsla, Color.fromCss(baseColor).rotate(scale).hsla);
                         }
                         break;
                     case 'o': // alpha
