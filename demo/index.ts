@@ -190,8 +190,6 @@ const appBar = () => span(
   })
 )
 
-document.head.append(style('body { font-family: Sans-serif }'))
-
 document.body.append(div(
   {
     style: {

@@ -23,7 +23,7 @@ bind(document.body, 'app.darkmode', {
 })
 
 const cssVars = {
-  font: 'Helvetica Neue, Helvertica, Arial, Sans-serif',
+  font: '\'Roboto Slab\', Serif',
   codeFont: 'Menlo, Monaco, monospace',
   fontSize: 16,
   lineHeight: 24,
@@ -67,6 +67,7 @@ const codeVars = {
 }
 
 const rules = {
+  '@import': 'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;700;800;900&display=swap',
   body: {
     ...initVars({...cssVars, ...brandColors, ...codeVars}),
     fontFamily: vars.font,

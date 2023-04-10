@@ -37,6 +37,9 @@ const renderStatement = (key: string, value: string | number | StyleRule, indent
 export const css = (obj: StyleSheet | StyleMap, indentation = ''): string => {
   const selectors = Object.keys(obj).map((selector) => {
     const body = obj[selector]
+    if (selector === '@import' && typeof body === 'string') {
+      return `@import url('${body}');`
+    }
     const rule = Object.keys(body)
       .map(prop => renderStatement(prop, body[prop]))
       .join('\n')
