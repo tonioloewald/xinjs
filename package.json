@@ -34,9 +34,7 @@
     "uglify-js": "^3.1.7"
   },
   "files": [
-    "/cdn",
     "/dist",
-    "/src",
     "/LICENSE",
     "/README.md"
   ],
