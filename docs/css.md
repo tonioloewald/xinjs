@@ -20,8 +20,9 @@ A function that, given a `styleMap` renders CSS code.
 
     document.head.append(style(css(myStyleMap)))
 
-If a **number** is assigned to a dimensional CSS property it will have 'px' suffixed
-to it automatically.
+If a **number** is assigned to a *dimensional* CSS property it will have 'px' suffixed
+to it automatically. A property is considered dimensional if its name contains:
+"width", "height", "size", "margin" "padding" "radius" "spacing" "top" "left", "right" or "bottom".
 
 `css` should render nested rules, such as `@keyframes` and `@media` correctly.
 

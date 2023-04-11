@@ -23,7 +23,8 @@ In particular, this means that you can do your state management *anywhere*,
 including on either side of the "browser" divide in Electron / nwjs and
 similar applications. You can also efficiently implement "stateful-stateless" servers by
 sending mutations to complex state to the server and use GraphQL-like queries to
-"shape" the response from a service.
+[filter the shape](https://github.com/tonioloewald/filter-shapes) of the response from a service
+or the data you save to a service.
 
 ## What `xinjs` does
 
@@ -275,15 +276,17 @@ To completely reset the app, run `localStorage.clear()` in the console.
 
 ## Development Notes
 
-You'll need to install [bun](https://bun.sh/) and probably [nodejs](https://nodejs.org)).
+You'll need to install [bun](https://bun.sh/) and [nodejs](https://nodejs.org)),
+and then run `npm install` and `bun install`. `bun` is used because it's 
+**fast** and is a really nice test-runner.
 
-To work interactively on the demo code, use `bun start`.
+To work interactively on the demo code, use `bun start`. This runs the demo
+site on localhost.
 
-To build you will need to `chmod +x build.command` before running `bun pack`.
+To build everything run `bun run make` which builds production versions of the
+demo site (in `www`) and the `dist` and `cdn` directories.
 
-> `xinjs` is currently built using a bespoke script (`build.command`) rather than
-> `parceljs` which is used to build the demo site. This is becasue parceljs 
-> produces markedly less efficient code.
+To create a local package (for experimenting with a build) run `bun pack`.
 
 ## Credits
 

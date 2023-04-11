@@ -24,6 +24,9 @@ class LabeledInput extends Component {
       borderRadius: vars.roundedRadius50,
       width: vars.inputWidth
     },
+    '::placeholder': {
+      opacity: vars.placeHolderOpacity
+    },
     ':host input[type="number"]': {
       paddingRight: vars.spacing50
     }

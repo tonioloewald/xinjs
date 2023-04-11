@@ -2,7 +2,10 @@
   "name": "xinjs",
   "version": "0.2.5",
   "description": "path-based state management for web apps",
-  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
   "homepage": "https://xinjs.net",
   "keywords": [
     "javascript",
@@ -12,28 +15,31 @@
     "back-end"
   ],
   "scripts": {
-    "start": "rm -rf www && mkdir -p www/assets && cp readme.md xinjs-logo.svg www/assets && cp -r demo/assets/* www/assets && bun parcel --dist-dir www",
+    "start": "bun clear-targets && bun copy-assets && bun parcel --dist-dir www",
+    "clear-targets": "rm -rf www dist && mkdir -p www/assets",
+    "copy-assets": "cp readme.md docs/*.md xinjs-logo.svg www/assets && cp -r demo/assets/* www/assets",
     "lint": "bun ts-standard --fix src/*.ts",
-    "make": "rm -rf dist && bun test && bun tsc && ./build.command",
+    "make": "bun clear-targets && bun copy-assets && bun test && bun parcel build",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
     "test": "bun wiptest"
   },
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",
   "devDependencies": {
+    "@parcel/packager-ts": "^2.8.3",
+    "@parcel/transformer-typescript-types": "^2.8.3",
     "babylonjs": "^5.31.2",
     "babylonjs-gui": "^5.32.1",
     "babylonjs-loaders": "^5.32.1",
     "babylonjs-materials": "^5.32.1",
     "bun-types": "^0.2.0",
     "marked": "^4.2.2",
-    "parcel": "^2.8.3",
-    "rollup": "^3.2.3",
+    "parcel": "latest",
     "ts-standard": "^12.0.1",
-    "typescript": "^4.8.4",
-    "uglify-js": "^3.1.7"
+    "typescript": "^5.0.4"
   },
   "files": [
+    "/cdn",
     "/dist",
     "/LICENSE",
     "/README.md"
@@ -54,11 +60,21 @@
     ]
   },
   "targets": {
-    "default": {
+    "dist": {
+      "isLibrary": true,
+      "distDir": "dist",
+      "outputFormat": "esmodule"
+    },
+    "www": {
       "source": "demo/index.html",
       "distDir": "www",
-      "outputFormat": "esmodule",
-      "scopeHoist": false
+      "outputFormat": "esmodule"
+    },
+    "cdn": {
+      "distDir": "cdn",
+      "optimize": true,
+      "isLibrary": true,
+      "outputFormat": "esmodule"
     }
   }
 }

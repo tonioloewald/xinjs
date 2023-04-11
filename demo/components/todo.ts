@@ -1,4 +1,4 @@
-import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray} from '../../src/index'
+import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray, initVars} from '../../src/index'
 
 const {h1, div, template, form, span, input, button} = elements
 

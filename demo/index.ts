@@ -1,4 +1,4 @@
-import { xin, touch, elements, hotReload, settings, matchType, vars, ContentType } from '../src/index'
+import { xin, touch, elements, hotReload, settings, vars, ContentType } from '../src/index'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
@@ -46,7 +46,6 @@ hotReload(path => {
 
 Object.assign(globalThis, {
   xin,
-  matchType,
   touch,
   Color,
   vars,

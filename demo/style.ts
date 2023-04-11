@@ -49,6 +49,7 @@ const cssVars = {
   borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
   inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
   toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
+  placeHolderOpacity: 0.5,
   vh: '100vh',
 }
 
@@ -218,6 +219,9 @@ const rules = {
     padding: `${vars.spacing25} ${vars.spacing50}`,
     boxShadow: 'none',
     color: vars.brandColor
+  },
+  '::placeholder': {
+    opacity: vars.placeholderOpacity
   }
 }
 

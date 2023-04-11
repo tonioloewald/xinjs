@@ -33,11 +33,15 @@ test('vars works', () => {
 test('initVars works', () => {
   expect(initVars({
     foo: 17
-  })['--foo']).toBe('17px') 
+  })['--foo']).toBe(17) 
+  expect(initVars({
+    fooSize: 17
+  })['--foo-size']).toBe('17px') 
 })
 
 const cssText = `:root {
-  --foo: 17px;
+  --foo: 17;
+  --foo-width: 666px;
 }
 
 bar {
@@ -49,6 +53,7 @@ test('css works', () => {
   expect(css({
     ':root': initVars({
       foo: 17,
+      fooWidth: 666,
     }),
     'bar': {
       bazLurman: vars.fooBar75,

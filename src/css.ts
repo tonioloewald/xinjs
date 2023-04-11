@@ -11,7 +11,7 @@ export interface StyleMap {
 }
 
 export interface StyleSheet {
-  [key: string]: StyleRule | StyleMap
+  [key: string]: StyleRule | StyleMap | string
 }
 
 export function StyleNode (styleSheet: StyleSheet): HTMLStyleElement {
@@ -20,7 +20,7 @@ export function StyleNode (styleSheet: StyleSheet): HTMLStyleElement {
 
 const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap']
 const isDimensional = (cssProp: string): boolean => {
-  return (cssProp.match(/(width|height|size|margin|padding|radius)/) != null) || dimensionalProps.includes(cssProp)
+  return (cssProp.match(/(width|height|size|margin|padding|radius|spacing|top|left|right|bottom)/) != null) || dimensionalProps.includes(cssProp)
 }
 
 const renderStatement = (key: string, value: string | number | StyleRule, indentation = ''): string => {
@@ -37,8 +37,11 @@ const renderStatement = (key: string, value: string | number | StyleRule, indent
 export const css = (obj: StyleSheet | StyleMap, indentation = ''): string => {
   const selectors = Object.keys(obj).map((selector) => {
     const body = obj[selector]
-    if (selector === '@import' && typeof body === 'string') {
-      return `@import url('${body}');`
+    if (typeof body === 'string') {
+      if (selector === '@import') {
+        return `@import url('${body}');`
+      }
+      throw new Error('top-level string value only allowed for `@import`')
     }
     const rule = Object.keys(body)
       .map(prop => renderStatement(prop, body[prop]))
@@ -52,7 +55,8 @@ export const initVars = (obj: StyleRule): StyleRule => {
   const rule: StyleRule = {}
   for (const key of Object.keys(obj)) {
     const value = obj[key]
-    rule[`--${camelToKabob(key)}`] = typeof value === 'number' ? String(value) + 'px' : value
+    const kabobKey = camelToKabob(key)
+    rule[`--${kabobKey}`] = typeof value === 'number' && isDimensional(kabobKey) ? String(value) + 'px' : value
   }
   return rule
 }
