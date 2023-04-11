@@ -212,6 +212,12 @@ const rules = {
   'option:checked': {
     background: vars.brandColor,
     color: vars.brandTextColor
+  },
+  'tool-bar button': {
+    background: 'transparent',
+    padding: `${vars.spacing25} ${vars.spacing50}`,
+    boxShadow: 'none',
+    color: vars.brandColor
   }
 }
 
