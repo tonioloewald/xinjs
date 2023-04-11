@@ -1,7 +1,7 @@
 // workaround for https://github.com/parcel-bundler/parcel/issues/5911
 import * as _MoreMath from './more-math'
 
-export { xin, observe, unobserve, touch, observerShouldBeRemoved, xinValue, xinPath } from './xin'
+export { xin, observe, unobserve, touch, observerShouldBeRemoved } from './xin'
 export { hotReload } from './hot-reload'
 export { Component } from './component'
 export { elements, makeComponent } from './elements'
