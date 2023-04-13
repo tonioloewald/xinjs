@@ -356,7 +356,12 @@ const $3c20fb09d41b8da8$var$extendPath = (path = "", prop = "")=>{
         else return `${path}.${prop}`;
     }
 };
-const $3c20fb09d41b8da8$var$regHandler = (path = "")=>({
+/*
+interface XinProxyHandler {
+  get: (target: XinObject | XinArray, prop: string) => XinValue
+  set: (target: XinObject | XinArray, prop: string, newValue: XinValue) => boolean
+}
+*/ const $3c20fb09d41b8da8$var$regHandler = (path = "")=>({
         // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
         // as you'd expect
         get (target, _prop) {

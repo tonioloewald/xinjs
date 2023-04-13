@@ -27,7 +27,7 @@ console.time('total')
 
 settings.perf = true
 
-const {img, h1, div, span, style, button, a, main} = elements
+const {img, h1, div, span, button, a, main} = elements
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
