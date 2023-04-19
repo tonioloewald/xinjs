@@ -15,13 +15,14 @@
     "back-end"
   ],
   "scripts": {
-    "start": "bun clear-targets && bun copy-assets && bun parcel --dist-dir www",
+    "start": "bun clear-targets && bun static-assets && bun parcel demo/index.html --dist-dir www",
     "clear-targets": "rm -rf www dist && mkdir -p www/assets",
-    "copy-assets": "cp readme.md docs/*.md xinjs-logo.svg www/assets && cp -r demo/assets/* www/assets",
+    "static-assets": "cp readme.md docs/*.md xinjs-logo.svg www/assets && cp -r demo/assets/* www/assets",
     "lint": "bun ts-standard --fix src/*.ts",
-    "make": "bun clear-targets && bun copy-assets && bun test && bun parcel build",
+    "make": "bun clear-targets && bun static-assets && bun test && bun parcel build",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
-    "test": "bun wiptest"
+    "test": "bun wiptest",
+    "make-icons": "rm -rf static/icons && mkdir static/icons && npx fantasticon"
   },
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",

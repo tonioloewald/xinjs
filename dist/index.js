@@ -734,7 +734,7 @@ const $5258c5e951c26004$var$handleBoundEvent = (event)=>{
             }
             if (propagationStopped) continue;
         }
-        target = target.parentElement.closest((0, $2f9efd8dbae277cd$export$21d9322c3477441b));
+        target = target.parentElement != null ? target.parentElement.closest((0, $2f9efd8dbae277cd$export$21d9322c3477441b)) : null;
     }
 };
 const $5258c5e951c26004$export$af631764ddc44097 = (element, eventType, eventHandler)=>{
