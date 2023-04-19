@@ -145,7 +145,7 @@ const handleBoundEvent = (event: Event): void => {
         continue
       }
     }
-    target = target.parentElement.closest(EVENT_SELECTOR)
+    target = target.parentElement != null ? target.parentElement.closest(EVENT_SELECTOR) : null
   }
 }
 
