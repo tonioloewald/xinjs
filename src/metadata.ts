@@ -35,7 +35,7 @@ export const getElementBindings = (element: Element): ElementMetadata => {
   }
 }
 
-export const cloneWithBindings = (element: Node): Node => {
+export const  cloneWithBindings = (element: Node): Node => {
   const cloned = element.cloneNode()
   if (cloned instanceof HTMLElement) {
     const dataBindings = elementToBindings.get(element as HTMLElement)
@@ -49,7 +49,7 @@ export const cloneWithBindings = (element: Node): Node => {
       elementToHandlers.set(cloned, deepClone(eventHandlers))
     }
   }
-  for (const node of element.childNodes) {
+  for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes) {
     if (node instanceof HTMLElement || node instanceof DocumentFragment) {
       cloned.appendChild(cloneWithBindings(node))
     } else {
