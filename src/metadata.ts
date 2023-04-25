@@ -35,7 +35,7 @@ export const getElementBindings = (element: Element): ElementMetadata => {
   }
 }
 
-export const  cloneWithBindings = (element: Node): Node => {
+export const cloneWithBindings = (element: Node): Node => {
   const cloned = element.cloneNode()
   if (cloned instanceof HTMLElement) {
     const dataBindings = elementToBindings.get(element as HTMLElement)
