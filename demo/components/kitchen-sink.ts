@@ -1,11 +1,32 @@
-import {xin, touch, elements, makeComponent, vars} from '../../src'
+import {xin, touch, elements, makeComponent, Component, vars} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
-const {div, span, form, button, label, input, select, option, datalist} = elements
+const {div, span, form, button, label, input, select, option, datalist, h4, template} = elements
 
 const wordsToCamelCase = string => string.split(/\s+/)
   .map((word, idx) => idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1): word)
   .join('')
+
+const fleet = {
+  name: 'Starfleet',
+  vessels: [
+    {id: 'ncc-1701', name: 'Enterprise'},
+    {id: 'ncc-1031', name: 'Discovery'},
+    {id: 'ncc-74656', name: 'Voyager'},
+  ]
+}
+
+class SimpleComponent extends Component {
+  styleNode = Component.StyleNode({
+    ':host': {
+      display: 'block',
+      border: `2px solid ${vars.brandColor}`,
+      padding: vars.spacing
+    }
+  })
+}
+
+const simpleComponent = SimpleComponent.elementCreator({tag: 'simple-component'})
 
 xin.formTest = {
   string: 'hello xin',
@@ -17,7 +38,8 @@ xin.formTest = {
   pickAny: {theOther: true, andThat: true},
   phone: '+1 (666) 555-4321',
   email: 'anne.example@foobar.baz',
-  autocomplete: 'this'
+  autocomplete: 'this',
+  fleet,
 }
 
 const options = [
@@ -50,6 +72,32 @@ This is an in-browser test of key functionality including:
       }
     },
     label(span('name'), input({bindValue: 'formTest.string'})),
+    div(
+      h4({bindText: 'formTest.fleet.name'}),
+      div(
+        {
+          bindList: { value: 'formTest.fleet.vessels', idPath: 'id' }
+        },
+        template(
+          div({ bindText: '^.name'})
+        )
+      )
+    ),
+    simpleComponent(
+      h4('this is a simple component'),
+      div({class: 'field readonly', bindText: 'formTest.string'}),
+      div(
+        h4({bindText: 'formTest.fleet.name'}),
+        div(
+          {
+            bindList: { value: 'formTest.fleet.vessels', idPath: 'id' }
+          },
+          template(
+            div({ bindText: '^.name'})
+          )
+        )
+      )
+    ),
     label(span('number'), input({type: "number", bindValue: 'formTest.number'})),
     label(span('range input'), input({type: "range", value: 0, min: -5, max: 5, bindValue: 'formTest.number'})),
     label(span('date input'), input({type: "date", bindValue: 'formTest.date'})),

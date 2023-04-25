@@ -35,7 +35,7 @@ See [elements](./elements.md) for more information on `ElementCreator` functions
 
 ### Component properties
 
-#### content: Element | Element[] | null
+#### content: Element | Element[] | () => Element | () => Element[] | null
 
 Here's a simple example of a custom-element that simply produces a
 `<label>` wrapped around `<span>` and an `<input>`. Its value is synced
@@ -78,6 +78,14 @@ it works internally.
 `content` is, in essence, a template for the internals of the element. By default
 it's a single `<slot>` element. If you explicitly want an element with no content
 you can set your subclass's content to `null` or omit any `<slot>` from its template.
+
+By setting content to be a function that returns elements instead of a collection
+of elements you can take customize elements based on the component's properties.
+In particular, you can use `onXxxx` syntax sugar to bind events.
+
+(Note that you cannot bind to xin paths reliably if your component uses a `shadowDOM`
+because `xin` cannot "see" elements there. As a general rule, you need to take care
+of anything in the `shadowDOM` yourself.)
 
 If you'd like to see a more complex example along the same lines, look at
 [labeled-input.ts](../demo/components/labeled-input.ts).
@@ -193,6 +201,8 @@ events on the element when its size changes and `onResize` will be set up to res
 to `resize` events.
 
 Also, if the subclass has defined `value`, calls `initValue()`.
+
+`connectedCallback` is a great place to attach **event-handlers** to elements in your component.
 
 Be sure to call `super.connectedCallback()` if you implement `connectedCallback` in the subclass.
 

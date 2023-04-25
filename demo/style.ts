@@ -207,6 +207,12 @@ const rules = {
   form: {
     minWidth: '300px',
     padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: vars.spacing
+  },
+  'form *': {
+    margin: 0
   },
   '.primary': {
     backgroundColor: vars.primaryColor,
