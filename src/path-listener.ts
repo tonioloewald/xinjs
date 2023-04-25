@@ -11,7 +11,6 @@ let resolveUpdate: Function
 const getPath = (what: string | XinTouchableType): string => {
   return typeof what === 'object' ? what[xinPath] : what
 }
-
 export class Listener {
   description: string
   test: PathTestFunction

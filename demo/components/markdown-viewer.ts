@@ -15,7 +15,7 @@ class MarkdownViewer extends Component {
         const request = await fetch(this.src)
         this.value = await request.text()
       })()
-    } else {
+    } else if (this.value === '') {
       this.value = this.textContent != null ? this.textContent : ''
     }
   }

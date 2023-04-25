@@ -37,7 +37,7 @@ class Todo {
 
 xin.todoApp = new Todo() as unknown as XinProxyObject
 
-const flex = { display: 'flex', gap: vars.spacing50 }
+const flex = { display: 'flex', gap: vars.spacing50, flexDirection: 'row' }
 const stack = { ...flex, flexDirection: 'column' }
 const elastic = { flex: '1 1 auto' }
 const padded = { padding: `${vars.spacing} ${vars.spacing200}` }

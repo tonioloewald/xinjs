@@ -2,31 +2,49 @@ import { xin, touch, observe, xinPath, xinValue } from './xin'
 import { getListItem, elementToBindings, elementToHandlers, DataBindings, BOUND_CLASS, BOUND_SELECTOR, EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XinEventHandler } from './metadata'
 import { XinObject, XinTouchableType, XinBinding, XinProxy, XinBindingSpec } from './xin-types'
 
-const { document } = globalThis
+const { document, MutationObserver } = globalThis
+
+export const touchElement = (element: HTMLElement, changedPath?: string): void => {
+  const dataBindings = elementToBindings.get(element) as DataBindings
+  for (const dataBinding of dataBindings) {
+    let { path, binding, options } = dataBinding
+    const { toDOM } = binding
+    if (toDOM != null) {
+      if (path.startsWith('^')) {
+        const dataSource = getListItem(element)
+        if (dataSource != null && (dataSource as XinProxy)[xinPath] != null) {
+          path = dataBinding.path = `${(dataSource as XinProxy)[xinPath]}${path.substring(1)}`
+        } else {
+          console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list')
+          throw new Error(`Cannot resolve relative binding ${path}`)
+        }
+      }
+      if (changedPath == null || path.startsWith(changedPath)) {
+        toDOM(element, xin[path], options)
+      }
+    }
+  }
+}
+
+// this is just to allow bind to be testable in node
+if (MutationObserver != null) {
+  const observer = new MutationObserver((mutationsList) => {
+    mutationsList.forEach((mutation) => {
+      [...mutation.addedNodes].forEach(node => {
+        if (node instanceof HTMLElement) {
+          [...node.querySelectorAll(BOUND_SELECTOR)].forEach(element => touchElement(element as HTMLElement))
+        }
+      })
+    })
+  })
+  observer.observe(document.body, { subtree: true, childList: true })
+}
 
 observe(() => true, (changedPath: string) => {
   const boundElements = document.querySelectorAll(BOUND_SELECTOR)
 
   for (const element of boundElements) {
-    const dataBindings = elementToBindings.get(element) as DataBindings
-    for (const dataBinding of dataBindings) {
-      let { path, binding, options } = dataBinding
-      const { toDOM } = binding
-      if (toDOM != null) {
-        if (path.startsWith('^')) {
-          const dataSource = getListItem(element as HTMLElement)
-          if (dataSource != null && (dataSource as XinProxy)[xinPath] != null) {
-            path = dataBinding.path = `${(dataSource as XinProxy)[xinPath]}${path.substring(1)}`
-          } else {
-            console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list')
-            throw new Error(`Cannot resolve relative binding ${path}`)
-          }
-        }
-        if (path.startsWith(changedPath)) {
-          toDOM(element as HTMLElement, xin[path], options)
-        }
-      }
-    }
+    touchElement(element as HTMLElement, changedPath)
   }
 })
 

@@ -619,27 +619,45 @@ const $2f9efd8dbae277cd$export$4c309843c07ce679 = (element)=>{
 };
 
 
-const { document: $5258c5e951c26004$var$document  } = globalThis;
-(0, $b3e4d800ba46b430$export$d1203567a167490e)(()=>true, (changedPath)=>{
-    const boundElements = $5258c5e951c26004$var$document.querySelectorAll((0, $2f9efd8dbae277cd$export$4c0223f67078aeac));
-    for (const element of boundElements){
-        const dataBindings = (0, $2f9efd8dbae277cd$export$1f922de8d0ecbb7e).get(element);
-        for (const dataBinding of dataBindings){
-            let { path: path , binding: binding , options: options  } = dataBinding;
-            const { toDOM: toDOM  } = binding;
-            if (toDOM != null) {
-                if (path.startsWith("^")) {
-                    const dataSource = (0, $2f9efd8dbae277cd$export$4c309843c07ce679)(element);
-                    if (dataSource != null && dataSource[0, $29ed5e5434553132$export$40700dafb97c3799] != null) path = dataBinding.path = `${dataSource[0, $29ed5e5434553132$export$40700dafb97c3799]}${path.substring(1)}`;
-                    else {
-                        console.error(`Cannot resolve relative binding ${path}`, element, "is not part of a list");
-                        throw new Error(`Cannot resolve relative binding ${path}`);
-                    }
+const { document: $5258c5e951c26004$var$document , MutationObserver: $5258c5e951c26004$var$MutationObserver  } = globalThis;
+const $5258c5e951c26004$export$80bf2f765c31be6a = (element, changedPath)=>{
+    const dataBindings = (0, $2f9efd8dbae277cd$export$1f922de8d0ecbb7e).get(element);
+    for (const dataBinding of dataBindings){
+        let { path: path , binding: binding , options: options  } = dataBinding;
+        const { toDOM: toDOM  } = binding;
+        if (toDOM != null) {
+            if (path.startsWith("^")) {
+                const dataSource = (0, $2f9efd8dbae277cd$export$4c309843c07ce679)(element);
+                if (dataSource != null && dataSource[0, $29ed5e5434553132$export$40700dafb97c3799] != null) path = dataBinding.path = `${dataSource[0, $29ed5e5434553132$export$40700dafb97c3799]}${path.substring(1)}`;
+                else {
+                    console.error(`Cannot resolve relative binding ${path}`, element, "is not part of a list");
+                    throw new Error(`Cannot resolve relative binding ${path}`);
                 }
-                if (path.startsWith(changedPath)) toDOM(element, (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[path], options);
             }
+            if (changedPath == null || path.startsWith(changedPath)) toDOM(element, (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[path], options);
         }
     }
+};
+if ($5258c5e951c26004$var$MutationObserver != null) {
+    const observer = new $5258c5e951c26004$var$MutationObserver((mutationsList)=>{
+        mutationsList.forEach((mutation)=>{
+            [
+                ...mutation.addedNodes
+            ].forEach((node)=>{
+                if (node instanceof HTMLElement) [
+                    ...node.querySelectorAll((0, $2f9efd8dbae277cd$export$4c0223f67078aeac))
+                ].forEach((element)=>$5258c5e951c26004$export$80bf2f765c31be6a(element));
+            });
+        });
+    });
+    observer.observe($5258c5e951c26004$var$document.body, {
+        subtree: true,
+        childList: true
+    });
+}
+(0, $b3e4d800ba46b430$export$d1203567a167490e)(()=>true, (changedPath)=>{
+    const boundElements = $5258c5e951c26004$var$document.querySelectorAll((0, $2f9efd8dbae277cd$export$4c0223f67078aeac));
+    for (const element of boundElements)$5258c5e951c26004$export$80bf2f765c31be6a(element, changedPath);
 });
 const $5258c5e951c26004$var$handleChange = (event)=>{
     // @ts-expect-error-error

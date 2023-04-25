@@ -7,15 +7,6 @@ const wordsToCamelCase = string => string.split(/\s+/)
   .map((word, idx) => idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1): word)
   .join('')
 
-const fleet = {
-  name: 'Starfleet',
-  vessels: [
-    {id: 'ncc-1701', name: 'Enterprise'},
-    {id: 'ncc-1031', name: 'Discovery'},
-    {id: 'ncc-74656', name: 'Voyager'},
-  ]
-}
-
 class SimpleComponent extends Component {
   styleNode = Component.StyleNode({
     ':host': {
@@ -39,7 +30,14 @@ xin.formTest = {
   phone: '+1 (666) 555-4321',
   email: 'anne.example@foobar.baz',
   autocomplete: 'this',
-  fleet,
+  fleet: {
+    name: 'Starfleet',
+    vessels: [
+      {id: 'ncc-1701', name: 'Enterprise'},
+      {id: 'ncc-1031', name: 'Discovery'},
+      {id: 'ncc-74656', name: 'Voyager'},
+    ]
+  }
 }
 
 const options = [
