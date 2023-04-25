@@ -147,8 +147,9 @@ export abstract class Component extends HTMLElement {
         [key: string]: ElementCreator<any>;
         [key: symbol]: ElementCreator<any>;
     };
+    instanceId: string;
     styleNode?: HTMLStyleElement;
-    content: ContentType | null;
+    content: ContentType | (() => ContentType) | null;
     value?: any;
     [key: string]: any;
     static StyleNode(styleSpec: StyleSheet): HTMLStyleElement;

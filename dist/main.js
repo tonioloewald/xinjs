@@ -640,7 +640,7 @@ const $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f = (element)=>{
         if (eventHandlers != null) // @ts-expect-error-error
         $3f1d78706f6d8212$export$fe712848e6e66613.set(cloned, (0, $a97d692bd2382352$export$b7d58db314e0ac27)(eventHandlers));
     }
-    for (const node of element.childNodes)if (node instanceof HTMLElement || node instanceof DocumentFragment) cloned.appendChild($3f1d78706f6d8212$export$fa8cc6a36b1ccd7f(node));
+    for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes)if (node instanceof HTMLElement || node instanceof DocumentFragment) cloned.appendChild($3f1d78706f6d8212$export$fa8cc6a36b1ccd7f(node));
     else cloned.appendChild(node.cloneNode());
     return cloned;
 };
@@ -1256,6 +1256,7 @@ const $db77bb2de3733b56$export$3cb96c9f6c8d16a4 = new Proxy({}, {
 
 
 
+let $8c7b36581a3597bc$var$instanceCount = 0;
 class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     static elements = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
     content = (0, $c004c420133596e3$export$7a5d735b2ab6389d).slot();
@@ -1373,7 +1374,9 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     }
     constructor(){
         super();
+        $8c7b36581a3597bc$var$instanceCount += 1;
         this.initAttributes("hidden");
+        this.instanceId = `${this.tagName.toLocaleLowerCase()}-${$8c7b36581a3597bc$var$instanceCount}`;
         this._value = (0, $a97d692bd2382352$export$b7d58db314e0ac27)(this.defaultValue);
     }
     connectedCallback() {
@@ -1412,13 +1415,14 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
+            const _content = typeof this.content === "function" ? this.content() : this.content;
             if (this.styleNode !== undefined) {
                 const shadow = this.attachShadow({
                     mode: "open"
                 });
                 shadow.appendChild(this.styleNode);
-                (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(shadow, this.content);
-            } else (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(this, this.content);
+                (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(shadow, _content);
+            } else (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(this, _content);
             this._hydrated = true;
         }
     }

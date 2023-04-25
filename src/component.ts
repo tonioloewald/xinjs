@@ -5,11 +5,14 @@ import { elements } from './elements'
 import { camelToKabob, kabobToCamel } from './string-case'
 import { ElementCreator, SwissArmyElement, ContentType } from './xin-types'
 
+let instanceCount = 0
+
 export abstract class Component extends HTMLElement {
   static elements = elements
   private static _elementCreator?: ElementCreator
+  instanceId: string
   styleNode?: HTMLStyleElement
-  content: ContentType | null = elements.slot()
+  content: ContentType | (() => ContentType) | null = elements.slot()
   value?: any
   [key: string]: any
 
@@ -157,7 +160,9 @@ export abstract class Component extends HTMLElement {
 
   constructor () {
     super()
+    instanceCount += 1
     this.initAttributes('hidden')
+    this.instanceId = `${this.tagName.toLocaleLowerCase()}-${instanceCount}`
     this._value = deepClone(this.defaultValue)
   }
 
@@ -204,12 +209,13 @@ export abstract class Component extends HTMLElement {
   private hydrate (): void {
     if (!this._hydrated) {
       this.initValue()
+      const _content: ContentType | null = typeof this.content === 'function' ? this.content() : this.content
       if (this.styleNode !== undefined) {
         const shadow = this.attachShadow({ mode: 'open' })
         shadow.appendChild(this.styleNode)
-        appendContentToElement(shadow, this.content)
+        appendContentToElement(shadow, _content)
       } else {
-        appendContentToElement(this as HTMLElement, this.content)
+        appendContentToElement(this as HTMLElement, _content)
       }
       this._hydrated = true
     }

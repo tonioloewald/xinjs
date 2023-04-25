@@ -114,13 +114,14 @@ const rules = {
   'label label': {
     marginTop: 0,
   },
-  'label, input, button, textarea, select': {
+  'label, input, button, textarea, select, .field': {
+    fontFamily: vars.font,
     fontSize: vars.fontSize,
     lineHeight: vars.lineHeight,
     color: vars.textColor,
     border: 0,
   },
-  'input, button, textarea, select': {
+  'input, button, textarea, select, .field': {
     padding: `${vars.spacing75} ${vars.spacing}`,
   },
   button: {
@@ -151,13 +152,13 @@ const rules = {
   'tr:nth-child(2n+2)': {
     background: brandColor.opacity(0.05).html,
   },
-  'input, textarea, select': {
+  'input, textarea, select, .field': {
     background: vars.inputBg,
   },
-  'input, textarea, select, button': {
+  'input, textarea, select, button, .field': {
     boxShadow: vars.inputBorderShadow
   },
-  'input, textarea': {
+  'input, textarea, .field': {
     borderRadius: vars.roundedRadius50,
   },
   'select, button': {
@@ -171,6 +172,9 @@ const rules = {
   },
   'input[type="range"], input[type="checkbox"], input[type="radio"]': {
     boxShadow: 'none'
+  },
+  'input:disabled, .field.readonly': {
+    opacity: 0.75
   },
   'button:not(:disabled):hover, a:not(:disabled):hover': {
     background: vars.hoverBg
@@ -203,6 +207,12 @@ const rules = {
   form: {
     minWidth: '300px',
     padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: vars.spacing
+  },
+  'form *': {
+    margin: 0
   },
   '.primary': {
     backgroundColor: vars.primaryColor,
