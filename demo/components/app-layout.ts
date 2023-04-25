@@ -1,5 +1,5 @@
 import {elements, Component} from '../../src/index'
-const {slot, div} = elements
+const {fragment, slot, div} = elements
 
 class AppLayout extends Component {
   styleNode = Component.StyleNode({
@@ -16,7 +16,7 @@ class AppLayout extends Component {
       flex: '1 1 auto'
     }
   })
-  content = [
+  content = fragment(
     slot({name: 'header'}),
     div(
       { class: 'body' },
@@ -25,7 +25,7 @@ class AppLayout extends Component {
       slot({name: 'right'})
     ),
     slot({name: 'footer'})
-  ]
+  )
 }
 
 export const appLayout = AppLayout.elementCreator()

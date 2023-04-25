@@ -1352,6 +1352,7 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
             this.addEventListener("resize", this._onResize);
         }
         if (this.value != null && this.getAttribute("value") != null) this._value = this.getAttribute("value");
+        this.queueRender();
     }
     disconnectedCallback() {
         (0, $937ce97164a17ff0$export$b13421f1ae71d316).unobserve(this);
@@ -1359,6 +1360,7 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
     _changeQueued = false;
     _renderQueued = false;
     queueRender(triggerChangeEvent = false) {
+        if (!this._hydrated) return;
         if (!this._changeQueued) this._changeQueued = triggerChangeEvent;
         if (!this._renderQueued) {
             this._renderQueued = true;
@@ -1387,9 +1389,7 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
             this._hydrated = true;
         }
     }
-    render() {
-        this.hydrate();
-    }
+    render() {}
 }
 
 
