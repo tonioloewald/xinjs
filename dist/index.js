@@ -638,6 +638,7 @@ const $5258c5e951c26004$export$80bf2f765c31be6a = (element, changedPath)=>{
         }
     }
 };
+// this is just to allow bind to be testable in node
 if ($5258c5e951c26004$var$MutationObserver != null) {
     const observer = new $5258c5e951c26004$var$MutationObserver((mutationsList)=>{
         mutationsList.forEach((mutation)=>{
