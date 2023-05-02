@@ -3,6 +3,7 @@ import * as _MoreMath from './more-math'
 
 export { xin, observe, unobserve, touch, observerShouldBeRemoved } from './xin'
 export { hotReload } from './hot-reload'
+export { throttle, debounce } from './throttle'
 export { Component } from './component'
 export { elements, makeComponent } from './elements'
 export { settings } from './settings'
