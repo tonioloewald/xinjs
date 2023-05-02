@@ -73,6 +73,9 @@ export const touch: (what: XinTouchableType) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
+type VoidFunc = (...args: any[]) => void;
+export const debounce: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
+export const throttle: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
 export const hotReload: (test?: PathTestFunction) => void;
 declare class HslColor {
     h: number;

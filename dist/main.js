@@ -25,6 +25,8 @@ $parcel$export(module.exports, "unobserve", () => $287d4a4db165612d$export$23a22
 $parcel$export(module.exports, "touch", () => $287d4a4db165612d$export$d0b7ea69ab6056df);
 $parcel$export(module.exports, "observerShouldBeRemoved", () => $287d4a4db165612d$export$253d09664e30b967);
 $parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87f7746612069);
+$parcel$export(module.exports, "throttle", () => $a948014a44fcb9ad$export$de363e709c412c8a);
+$parcel$export(module.exports, "debounce", () => $a948014a44fcb9ad$export$61fc7d43ac8f84b0);
 $parcel$export(module.exports, "Component", () => $8c7b36581a3597bc$export$16fa2f45be04daa8);
 $parcel$export(module.exports, "elements", () => $c004c420133596e3$export$7a5d735b2ab6389d);
 $parcel$export(module.exports, "makeComponent", () => $c004c420133596e3$export$3bc26eec1cc2439f);
@@ -472,6 +474,7 @@ const $04b008a736a73fbf$export$93b87f7746612069 = (test = ()=>true)=>{
     }, 500);
     (0, $3c20fb09d41b8da8$export$d1203567a167490e)(test, saveState);
 };
+
 
 
 
