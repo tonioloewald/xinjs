@@ -1154,7 +1154,7 @@ const $5ce3d7bba914ef8e$var$renderStatement = (key, value, indentation = "")=>{
         const renderedRule = Object.keys(value).map((innerKey)=>$5ce3d7bba914ef8e$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
     } else if (typeof value === "number" && $5ce3d7bba914ef8e$var$isDimensional(cssProp)) return `${indentation}  ${cssProp}: ${value}px;`;
-    return `${indentation}  ${cssProp}: ${value};`;
+    return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : "";
 };
 const $5ce3d7bba914ef8e$export$dbf350e5966cf602 = (obj, indentation = "")=>{
     const selectors = Object.keys(obj).map((selector)=>{

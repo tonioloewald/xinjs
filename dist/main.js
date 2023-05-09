@@ -1193,7 +1193,7 @@ const $db77bb2de3733b56$var$renderStatement = (key, value, indentation = "")=>{
         const renderedRule = Object.keys(value).map((innerKey)=>$db77bb2de3733b56$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
     } else if (typeof value === "number" && $db77bb2de3733b56$var$isDimensional(cssProp)) return `${indentation}  ${cssProp}: ${value}px;`;
-    return `${indentation}  ${cssProp}: ${value};`;
+    return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : "";
 };
 const $db77bb2de3733b56$export$dbf350e5966cf602 = (obj, indentation = "")=>{
     const selectors = Object.keys(obj).map((selector)=>{
