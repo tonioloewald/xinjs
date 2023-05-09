@@ -1156,14 +1156,15 @@ const $c004c420133596e3$var$fragment = (...contents)=>{
     for (const item of contents)frag.append(item);
     return frag;
 };
-const $c004c420133596e3$var$_elements = {
+const $c004c420133596e3$export$7a5d735b2ab6389d = new Proxy({
     fragment: $c004c420133596e3$var$fragment
-};
-const $c004c420133596e3$export$7a5d735b2ab6389d = new Proxy($c004c420133596e3$var$_elements, {
+}, {
     get (target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
         if (tagName.match(/^\w+(-\w+)*$/) == null) throw new Error(`${tagName} does not appear to be a valid element tagName`);
-        else if (target[tagName] === undefined) target[tagName] = (...contents)=>$c004c420133596e3$export$185802fd694ee1f5(tagName, ...contents);
+        else if (target[tagName] === undefined) // @ts-expect-error
+        target[tagName] = (...contents)=>$c004c420133596e3$export$185802fd694ee1f5(tagName, ...contents);
+        // @ts-expect-error
         return target[tagName];
     },
     set () {

@@ -1117,14 +1117,15 @@ const $a20b878345862077$var$fragment = (...contents)=>{
     for (const item of contents)frag.append(item);
     return frag;
 };
-const $a20b878345862077$var$_elements = {
+const $a20b878345862077$export$7a5d735b2ab6389d = new Proxy({
     fragment: $a20b878345862077$var$fragment
-};
-const $a20b878345862077$export$7a5d735b2ab6389d = new Proxy($a20b878345862077$var$_elements, {
+}, {
     get (target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
         if (tagName.match(/^\w+(-\w+)*$/) == null) throw new Error(`${tagName} does not appear to be a valid element tagName`);
-        else if (target[tagName] === undefined) target[tagName] = (...contents)=>$a20b878345862077$export$185802fd694ee1f5(tagName, ...contents);
+        else if (target[tagName] === undefined) // @ts-expect-error
+        target[tagName] = (...contents)=>$a20b878345862077$export$185802fd694ee1f5(tagName, ...contents);
+        // @ts-expect-error
         return target[tagName];
     },
     set () {

@@ -1,14 +1,14 @@
 import { css, StyleSheet } from './css'
 import { deepClone } from './deep-clone'
 import { appendContentToElement, dispatch, resizeObserver } from './dom'
-import { elements } from './elements'
+import { elements, ElementsProxy } from './elements'
 import { camelToKabob, kabobToCamel } from './string-case'
 import { ElementCreator, SwissArmyElement, ContentType } from './xin-types'
 
 let instanceCount = 0
 
 export abstract class Component extends HTMLElement {
-  static elements = elements
+  static elements: ElementsProxy = elements
   private static _elementCreator?: ElementCreator
   instanceId: string
   styleNode?: HTMLStyleElement
@@ -17,7 +17,7 @@ export abstract class Component extends HTMLElement {
   [key: string]: any
 
   static StyleNode (styleSpec: StyleSheet): HTMLStyleElement {
-    return elements.style(css(styleSpec)) as HTMLStyleElement
+    return elements.style(css(styleSpec))
   }
 
   static elementCreator (options?: ElementDefinitionOptions & { tag?: string }): ElementCreator {
