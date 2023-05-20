@@ -1,13 +1,13 @@
 import { Color } from './color'
 import { elements } from './elements'
 import { camelToKabob } from './string-case'
-import { StyleRule, StyleMap } from './xin-types'
+import { XinStyleRule, XinStyleMap } from './xin-types'
 
-export interface StyleSheet {
-  [key: string]: StyleRule | StyleMap | string
+export interface XinStyleSheet {
+  [key: string]: XinStyleRule | XinStyleMap | string
 }
 
-export function StyleNode (styleSheet: StyleSheet): HTMLStyleElement {
+export function StyleNode (styleSheet: XinStyleSheet): HTMLStyleElement {
   return elements.style(css(styleSheet))
 }
 
@@ -16,7 +16,7 @@ const isDimensional = (cssProp: string): boolean => {
   return (cssProp.match(/(width|height|size|margin|padding|radius|spacing|top|left|right|bottom)/) != null) || dimensionalProps.includes(cssProp)
 }
 
-const renderStatement = (key: string, value: string | number | StyleRule | undefined, indentation = ''): string => {
+const renderStatement = (key: string, value: string | number | XinStyleRule | undefined, indentation = ''): string => {
   const cssProp = camelToKabob(key)
   if (typeof value === 'object') {
     const renderedRule = Object.keys(value).map(innerKey => renderStatement(innerKey, value[innerKey], `${indentation}  `)).join('\n')
@@ -27,7 +27,7 @@ const renderStatement = (key: string, value: string | number | StyleRule | undef
   return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : ''
 }
 
-export const css = (obj: StyleSheet | StyleMap, indentation = ''): string => {
+export const css = (obj: XinStyleSheet | XinStyleMap, indentation = ''): string => {
   const selectors = Object.keys(obj).map((selector) => {
     const body = obj[selector]
     if (typeof body === 'string') {
@@ -44,8 +44,8 @@ export const css = (obj: StyleSheet | StyleMap, indentation = ''): string => {
   return selectors.join('\n\n')
 }
 
-export const initVars = (obj: StyleRule): StyleRule => {
-  const rule: StyleRule = {}
+export const initVars = (obj: XinStyleRule): XinStyleRule => {
+  const rule: XinStyleRule = {}
   for (const key of Object.keys(obj)) {
     const value = obj[key]
     const kabobKey = camelToKabob(key)
@@ -54,8 +54,8 @@ export const initVars = (obj: StyleRule): StyleRule => {
   return rule
 }
 
-export const darkMode = (obj: StyleRule): StyleRule => {
-  const rule: StyleRule = {}
+export const darkMode = (obj: XinStyleRule): XinStyleRule => {
+  const rule: XinStyleRule = {}
   for (const key of Object.keys(obj)) {
     let value = obj[key]
     if (typeof value === 'string' && value.match(/^(#|rgb[a]?\(|hsl[a]?\()/) != null) {

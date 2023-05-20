@@ -53,7 +53,7 @@ export interface XinBinding {
   fromDOM?: (element: HTMLElement, options?: XinObject) => any
 }
 
-export interface StyleRule {
+export interface XinStyleRule {
   alignContent?: string | number
   alignItems?: string | number
   alignSelf?: string | number
@@ -252,8 +252,8 @@ export interface StyleRule {
   zIndex?: string | number
   [key: string]: string | number | undefined
 }
-export interface StyleMap {
-  [key: string]: StyleRule
+export interface XinStyleMap {
+  [key: string]: XinStyleRule
 }
 export interface ElementProps {
   onClick?: XinEventHandler<MouseEvent>
@@ -266,13 +266,13 @@ export interface ElementProps {
   bindEnabled?: XinBindingShortcut
   bindDisabled?: XinBindingShortcut
   bindStyle?: XinBindingShortcut
-  style?: StyleMap
+  style?: XinStyleRule
   [key: string]: any
 }
 
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 export type SwissArmyElement = HTMLElement & HTMLInputElement & HTMLCanvasElement
-export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number
+export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
 export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T

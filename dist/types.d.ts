@@ -37,7 +37,7 @@ export interface XinBinding {
     toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void;
     fromDOM?: (element: HTMLElement, options?: XinObject) => any;
 }
-export interface StyleRule {
+export interface XinStyleRule {
     alignContent?: string | number;
     alignItems?: string | number;
     alignSelf?: string | number;
@@ -236,8 +236,8 @@ export interface StyleRule {
     zIndex?: string | number;
     [key: string]: string | number | undefined;
 }
-export interface StyleMap {
-    [key: string]: StyleRule;
+export interface XinStyleMap {
+    [key: string]: XinStyleRule;
 }
 export interface ElementProps {
     onClick?: XinEventHandler<MouseEvent>;
@@ -250,12 +250,12 @@ export interface ElementProps {
     bindEnabled?: XinBindingShortcut;
     bindDisabled?: XinBindingShortcut;
     bindStyle?: XinBindingShortcut;
-    style?: StyleMap;
+    style?: XinStyleRule;
     [key: string]: any;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 export type SwissArmyElement = HTMLElement & HTMLInputElement & HTMLCanvasElement;
-export type ElementPart = SwissArmyElement | DocumentFragment | ElementProps | string | number;
+export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number;
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T;
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
 export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T;
@@ -457,12 +457,12 @@ interface ElementsProxy {
     [key: string | symbol]: ElementCreator<any>;
 }
 export const elements: ElementsProxy;
-interface StyleSheet {
-    [key: string]: StyleRule | StyleMap | string;
+interface XinStyleSheet {
+    [key: string]: XinStyleRule | XinStyleMap | string;
 }
-export const css: (obj: StyleSheet | StyleMap, indentation?: string) => string;
-export const initVars: (obj: StyleRule) => StyleRule;
-export const darkMode: (obj: StyleRule) => StyleRule;
+export const css: (obj: XinStyleSheet | XinStyleMap, indentation?: string) => string;
+export const initVars: (obj: XinStyleRule) => XinStyleRule;
+export const darkMode: (obj: XinStyleRule) => XinStyleRule;
 export const vars: {
     [key: string]: string;
 };
@@ -473,7 +473,7 @@ export abstract class Component extends HTMLElement {
     content: ContentType | (() => ContentType) | null;
     value?: any;
     [key: string]: any;
-    static StyleNode(styleSpec: StyleSheet): HTMLStyleElement;
+    static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement;
     static elementCreator(options?: ElementDefinitionOptions & {
         tag?: string;
     }): ElementCreator;
