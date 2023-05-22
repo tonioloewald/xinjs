@@ -1,4 +1,4 @@
-import { css, StyleSheet } from './css'
+import { css, XinStyleSheet } from './css'
 import { deepClone } from './deep-clone'
 import { appendContentToElement, dispatch, resizeObserver } from './dom'
 import { elements, ElementsProxy } from './elements'
@@ -16,7 +16,7 @@ export abstract class Component extends HTMLElement {
   value?: any
   [key: string]: any
 
-  static StyleNode (styleSpec: StyleSheet): HTMLStyleElement {
+  static StyleNode (styleSpec: XinStyleSheet): HTMLStyleElement {
     return elements.style(css(styleSpec))
   }
 

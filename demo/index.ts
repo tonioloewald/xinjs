@@ -1,4 +1,4 @@
-import { xin, touch, elements, hotReload, settings, vars, ContentType } from '../src/index'
+import { xin, touch, elements, hotReload, settings, vars, ContentType, ElementPart, ElementProps } from '../src/index'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'

@@ -1,6 +1,6 @@
-import {bind} from '../src'
+import {XinStyleRule, bind} from '../src'
 import {elements} from '../src/elements'
-import {initVars, darkMode, css, vars} from '../src/css'
+import {initVars, darkMode, css, vars, XinStyleSheet} from '../src/css'
 import { Color } from '../src/color'
 const {style} = elements
 
@@ -22,7 +22,7 @@ bind(document.body, 'app.darkmode', {
   }
 })
 
-const cssVars = {
+const cssVars: XinStyleRule = {
   font: '\'Roboto Slab\', Serif',
   codeFont: '\'Space Mono\', monospace',
   fontSize: 16,
@@ -68,7 +68,7 @@ const codeVars = {
   codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1).html,
 }
 
-const rules = {
+const rules: XinStyleSheet = {
   '@import': 'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
   body: {
     ...initVars({...cssVars, ...brandColors, ...codeVars}),
@@ -80,7 +80,11 @@ const rules = {
     lineHeight: vars.lineHeight,
     accentColor: vars.brandColor
   },
-  '@media (prefers-color-scheme: dark)': {'body': initVars({darkmode: 'true'})},
+  '@media (prefers-color-scheme: dark)': {
+    body: initVars({
+      darkmode: 'true'
+    })
+  },
   '.darkmode': {...darkMode(cssVars), ...initVars(darkBrandColors)},
   'h1, h2, h3': {
     margin: `${vars.spacing200} 0 ${vars.spacing}`,
@@ -94,7 +98,7 @@ const rules = {
     background: vars.codeBg,
     color: vars.codeColor,
     borderRadius: vars.roundedRadius50,
-    padding: vars.spacing
+    padding: vars.spacing,
   },
   'ul, ol': {
     margin: `0 ${vars.spacing200} ${vars.spacing} 0`
