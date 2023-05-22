@@ -2,7 +2,7 @@
 
 <div style="text-align: center; margin: 20px">
   <a href="https://xinjs.net">
-    <img style="width: 200px; max-width: 80%" alt="xinjs logo" src="/assets/xinjs-logo.svg">
+    <img style="width: 200px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
   </a>
 </div>
 
