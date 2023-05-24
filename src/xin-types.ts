@@ -30,7 +30,7 @@ export type XinProxyValue = XinProxy | XinScalar | null | undefined
 
 export type XinTouchableType = string | XinProps
 
-export type XinEventHandler<T=Event> = ((evt: T) => void) | string | Promise<void> | Promise<string>
+export type XinEventHandler<T=Event> = ((evt: T) => void) | ((evt: T) => Promise<void> | string | Promise<string>)
 
 export type XinBindingShortcut = XinTouchableType | XinBindingSpec
 
