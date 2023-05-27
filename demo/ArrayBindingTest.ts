@@ -1,5 +1,5 @@
-import {xin, touch, XinArray, Component, elements, vars} from '../src/index'
-import { XIN_VALUE } from '../src/metadata'
+import { register, touch, Component, elements, vars} from '../src/index'
+import { xinValue } from '../src/metadata'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
 
@@ -7,7 +7,7 @@ const INITIAL_ITEMS = 25
 
 type ColorRec = {id: number, color: string}
 
-const makeItems = (howMany: number): XinArray => {
+const makeItems = (howMany: number) => {
   const items: ColorRec[] = []
   for(let id = 1; id <= howMany; id++) {
     items.push({
@@ -18,14 +18,15 @@ const makeItems = (howMany: number): XinArray => {
   return items
 }
 
-xin.colors = {
-  itemsToCreate: INITIAL_ITEMS,
-  items: makeItems(INITIAL_ITEMS),
-  reset() {
-    // @ts-expect-error
-    xin.colors.items = makeItems(xin.colors.itemsToCreate)
+const {colors} = register({
+  colors: {
+    itemsToCreate: INITIAL_ITEMS,
+    items: makeItems(INITIAL_ITEMS),
+    reset() {
+      colors.items = makeItems(colors.itemsToCreate)
+    }
   }
-}
+})
 
 const {button, template, div, span} = elements
 
@@ -96,8 +97,7 @@ export const arrayBindingTest = (...args) => div(
     button('create', {
       onClick() {
         console.log('create')
-        // @ts-expect-error
-        xin.colors.reset()
+        colors.reset()
       }
     }),
     labeledInput('items', {
@@ -120,47 +120,40 @@ export const arrayBindingTest = (...args) => div(
     button('scramble', {
       onClick() {
         console.log('scramble')
-        // @ts-expect-error
-        xin.colors.items.sort(() => Math.random() - 0.5)
+        colors.items.sort(() => Math.random() - 0.5)
       }
     }),
     button('swap [4] and [7]', {
       onClick(){
         console.log('swap')
+        let item4 = colors.items[4]
+        colors.items[4] = colors.items[7]
+        colors.items[7] = item4
         // @ts-expect-error
-        let item4 = xin.colors.items[4]
-        // @ts-expect-error
-        xin.colors.items[4] = xin.colors.items[7]
-        // @ts-expect-error
-        xin.colors.items[7] = item4
-        // @ts-expect-error
-        touch(xin.colors.items)
+        touch(colors.items)
       }
     }),
     button('modify ~10%', {
       onClick() {
         console.log('modify')
-        // @ts-expect-error
-        for(const item of xin.colors.items[XIN_VALUE]) {
+        for(const item of xinValue(colors.items)) {
           if(Math.random() < 0.1) {
             item.color = randomColor() 
           }
         }
         // @ts-expect-error
-        touch(xin.colors.items)
+        touch(colors.items)
       }
     }),
     button('modify & scramble', {
       onClick() {
         console.log('scramble and modify')
-        // @ts-expect-error
-        for(const item of xin.colors.items[XIN_VALUE]) {
+        for(const item of xinValue(colors.items)) {
           if(Math.random() < 0.1) {
             item.color = randomColor() 
           }
         }
-        // @ts-expect-error
-        xin.colors.items.sort(() => Math.random() - 0.5)
+        colors.items.sort(() => Math.random() - 0.5)
       }
     })
   ),
@@ -174,8 +167,8 @@ export const arrayBindingTest = (...args) => div(
     template( colorSwatch({bindValue: '^'})), 
     { 
       bindList: {
-        // @ts-ignore-error
-        value: xin.colors.items, 
+        // @ts-expect-error
+        value: colors.items, 
         idPath: 'id',
         virtual: { width: 274, height: 61 }
       }

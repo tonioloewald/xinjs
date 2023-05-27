@@ -9,6 +9,15 @@ export const EVENT_SELECTOR = `.${EVENT_CLASS}`
 export const XIN_PATH = Symbol('xin-path')
 export const XIN_VALUE = Symbol('xin-value')
 
+export const xinPath = (x: any): string | undefined => {
+  return x[XIN_PATH]
+}
+
+export function xinValue<T extends {}> (x: T): T {
+  // eslint-disable-next-line
+  return (typeof x === 'object' && x !== null ? x[XIN_VALUE] || x : x) as T
+}
+
 export interface DataBinding {
   path: string
   binding: XinBinding
