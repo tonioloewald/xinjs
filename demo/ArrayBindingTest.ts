@@ -24,7 +24,7 @@ xin.colors = {
     // @ts-expect-error
     xin.colors.items = makeItems(xin.colors.itemsToCreate)
   }
-} as unknown as XinProxyObject
+}
 
 const {button, template, div, span} = elements
 
