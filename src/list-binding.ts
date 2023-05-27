@@ -1,8 +1,8 @@
 import { settings } from './settings'
 import { resizeObserver } from './dom'
 import { throttle } from './throttle'
-import { xin, xinValue, xinPath } from './xin'
-import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding } from './metadata'
+import { xin } from './xin'
+import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding, XIN_VALUE, XIN_PATH } from './metadata'
 import { XinObject } from './xin-types'
 
 const listBindingRef = Symbol('list-binding')
@@ -130,7 +130,7 @@ class ListBinding {
 
     const { initInstance, updateInstance } = this.options
     // @ts-expect-error
-    const arrayPath: string = array[xinPath]
+    const arrayPath: string = array[XIN_PATH]
 
     const slice = this.visibleSlice()
     const previousSlice = this._previousSlice
@@ -173,13 +173,13 @@ class ListBinding {
       if (item === undefined) {
         continue
       }
-      let element = this.itemToElement.get(item[xinValue])
+      let element = this.itemToElement.get(item[XIN_VALUE])
       if (element == null) {
         created++
         element = cloneWithBindings(this.template) as HTMLElement
         if (typeof item === 'object') {
-          this.itemToElement.set(item[xinValue], element)
-          elementToItem.set(element, item[xinValue])
+          this.itemToElement.set(item[XIN_VALUE], element)
+          elementToItem.set(element, item[XIN_VALUE])
         }
         this.boundElement.insertBefore(element, this.listBottom)
         if (idPath != null) {

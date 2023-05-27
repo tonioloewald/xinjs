@@ -1,5 +1,8 @@
-import { xin, touch, observe, xinPath, xinValue } from './xin'
-import { getListItem, elementToBindings, elementToHandlers, DataBindings, BOUND_CLASS, BOUND_SELECTOR, EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XinEventHandler } from './metadata'
+import { xin, touch, observe } from './xin'
+import {
+  getListItem, elementToBindings, elementToHandlers, DataBindings, BOUND_CLASS, BOUND_SELECTOR,
+  EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XinEventHandler, XIN_PATH, XIN_VALUE
+} from './metadata'
 import { XinObject, XinTouchableType, XinBinding, XinProxy, XinBindingSpec } from './xin-types'
 
 const { document, MutationObserver } = globalThis
@@ -12,8 +15,8 @@ export const touchElement = (element: HTMLElement, changedPath?: string): void =
     if (toDOM != null) {
       if (path.startsWith('^')) {
         const dataSource = getListItem(element)
-        if (dataSource != null && (dataSource as XinProxy)[xinPath] != null) {
-          path = dataBinding.path = `${(dataSource as XinProxy)[xinPath]}${path.substring(1)}`
+        if (dataSource != null && (dataSource as XinProxy)[XIN_PATH] != null) {
+          path = dataBinding.path = `${(dataSource as XinProxy)[XIN_PATH]}${path.substring(1)}`
         } else {
           console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list')
           throw new Error(`Cannot resolve relative binding ${path}`)
@@ -71,8 +74,8 @@ const handleChange = (event: Event): void => {
             xin[path] = value
           } else {
             // @ts-expect-error-error
-            const existingActual = existing[xinPath] != null ? (existing as XinProxy)[xinValue] : existing
-            const valueActual = value[xinPath] != null ? value[xinValue] : value
+            const existingActual = existing[XIN_PATH] != null ? (existing as XinProxy)[XIN_VALUE] : existing
+            const valueActual = value[XIN_PATH] != null ? value[XIN_VALUE] : value
             if (existingActual !== valueActual) {
               xin[path] = valueActual
             }
@@ -94,13 +97,13 @@ export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchable
     throw new Error('bind cannot bind to a DocumentFragment')
   }
   let path: string
-  if (typeof what === 'object' && (what as XinProxy)[xinPath] === undefined && options === undefined) {
+  if (typeof what === 'object' && (what as XinProxy)[XIN_PATH] === undefined && options === undefined) {
     const { value } = what as XinBindingSpec
-    path = typeof value === 'string' ? value : value[xinPath]
+    path = typeof value === 'string' ? value : value[XIN_PATH]
     options = what as XinObject
     delete options.value
   } else {
-    path = typeof what === 'string' ? what : (what as XinProxy)[xinPath]
+    path = typeof what === 'string' ? what : (what as XinProxy)[XIN_PATH]
   }
   if (path == null) {
     throw new Error('bind requires a path or object with xin Proxy')

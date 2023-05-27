@@ -2,7 +2,8 @@
 // @ts-expect-error
 import { test, expect } from 'bun:test'
 import { XinObject, XinProxyArray, XinProxyObject, XinArray } from './xin-types'
-import { xin, observe, unobserve, touch, updates, isValidPath, xinValue, xinPath } from './xin'
+import { xin, observe, unobserve, touch, updates, isValidPath } from './xin'
+import { XIN_VALUE, XIN_PATH } from './metadata'
 
 type Change = { path: string, value: any, observed?: any }
 const changes: Change[] = []
@@ -185,7 +186,7 @@ test('you can touch objects', async () => {
   })
 
   const test = xin.test as XinProxyObject
-  (test[xinValue] as XinObject).message = 'wham-o'
+  (test[XIN_VALUE] as XinObject).message = 'wham-o'
   expect(test.message).toBe('wham-o')
   await updates()
   expect(changes.length).toBe(0)
@@ -195,7 +196,7 @@ test('you can touch objects', async () => {
   test.message = 'because'
   await updates()
   expect(changes.length).toBe(2)
-  ;(test[xinValue] as XinObject).message = 'i said so'
+  ;(test[XIN_VALUE] as XinObject).message = 'i said so'
   await updates()
   expect(changes.length).toBe(2)
   touch('test.message')
@@ -254,7 +255,7 @@ test('instance changes trigger observers', async () => {
   expect(changes.length).toBe(1)
 
   changes.splice(0)
-  expect((_test.baz as XinProxyObject)[xinValue]).toBe(baz)
+  expect((_test.baz as XinProxyObject)[XIN_VALUE]).toBe(baz)
   expect(_test.baz.x).toBe(17)
   expect(_test.baz.y).toBe(17)
   await updates()
@@ -336,22 +337,22 @@ test('unobserve works', async () => {
   expect(changes.length).toBe(1)
 })
 
-test('xinPath works', () => {
+test('XIN_PATH works', () => {
   const _test = xin.test as XinProxyObject
   const things = _test.things as XinProxyArray
   const people = _test.people as XinProxyArray
-  expect(_test[xinPath]).toBe('test')
-  expect(people[xinPath]).toBe('test.people')
-  expect(things['id=666'][xinPath]).toBe('test.things[id=666]')
+  expect(_test[XIN_PATH]).toBe('test')
+  expect(people[XIN_PATH]).toBe('test.people')
+  expect(things['id=666'][XIN_PATH]).toBe('test.things[id=666]')
 })
 
-test('xinValue works, xin does not corrupt content', () => {
+test('XIN_VALUE works, xin does not corrupt content', () => {
   const _test = xin.test as XinProxyObject
   const things = _test.things as XinProxyArray
   const people = _test.people as XinProxyArray
-  expect(_test[xinValue]).toBe(obj)
-  expect(people[xinValue]).toBe(obj.people)
-  expect((things['id=666'] as XinProxyObject)[xinValue]).toBe((things[1] as XinProxyObject)[xinValue])
+  expect(_test[XIN_VALUE]).toBe(obj)
+  expect(people[XIN_VALUE]).toBe(obj.people)
+  expect((things['id=666'] as XinProxyObject)[XIN_VALUE]).toBe((things[1] as XinProxyObject)[XIN_VALUE])
 })
 
 test('instance properties, computed properties', () => {

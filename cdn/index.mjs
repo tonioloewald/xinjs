@@ -1,5 +1,5 @@
-const xinPath = Symbol('xin-path');
-const xinValue = Symbol('xin-value');
+const XIN_PATH = Symbol('xin-path');
+const XIN_VALUE = Symbol('xin-value');
 
 const settings = {
     debug: false,
@@ -12,7 +12,7 @@ const touchedPaths = [];
 let updateTriggered = false;
 let resolveUpdate;
 const getPath = (what) => {
-    return typeof what === 'object' ? what[xinPath] : what;
+    return typeof what === 'object' ? what[XIN_PATH] : what;
 };
 class Listener {
     constructor(test, callback) {
@@ -371,10 +371,10 @@ const regHandler = (path = '') => ({
     // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
     // as you'd expect
     get(target, _prop) {
-        if (_prop === xinPath) {
+        if (_prop === XIN_PATH) {
             return path;
         }
-        else if (_prop === xinValue) {
+        else if (_prop === XIN_VALUE) {
             return target;
         }
         if (typeof _prop === 'symbol') {
@@ -437,8 +437,8 @@ const regHandler = (path = '') => ({
     },
     set(_, prop, value) {
         // eslint-disable-next-line
-        if (value != null && value[xinPath]) {
-            value = value[xinValue];
+        if (value != null && value[XIN_PATH]) {
+            value = value[XIN_VALUE];
         }
         const fullPath = extendPath(path, prop);
         if (!isValidPath(fullPath)) {
@@ -446,8 +446,8 @@ const regHandler = (path = '') => ({
         }
         let existing = xin[fullPath];
         // eslint-disable-next-line
-        if (existing != null && existing[xinValue] != null) {
-            existing = existing[xinValue];
+        if (existing != null && existing[XIN_VALUE] != null) {
+            existing = existing[XIN_VALUE];
         }
         if (existing !== value && setByPath(registry, fullPath, value)) {
             touch(fullPath);
@@ -513,7 +513,7 @@ const hotReload = (test = () => true) => {
     }
     const saveState = debounce(() => {
         const obj = {};
-        const state = xin[xinValue];
+        const state = xin[XIN_VALUE];
         for (const key of Object.keys(state).filter(test)) {
             obj[key] = state[key];
         }
@@ -742,8 +742,8 @@ observe(() => true, (changedPath) => {
             if (toDOM != null) {
                 if (path.startsWith('^')) {
                     const dataSource = getListItem(element);
-                    if (dataSource != null && dataSource[xinPath] != null) {
-                        path = dataBinding.path = `${dataSource[xinPath]}${path.substring(1)}`;
+                    if (dataSource != null && dataSource[XIN_PATH] != null) {
+                        path = dataBinding.path = `${dataSource[XIN_PATH]}${path.substring(1)}`;
                     }
                     else {
                         console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list');
@@ -782,8 +782,8 @@ const handleChange = (event) => {
                     }
                     else {
                         // @ts-expect-error-error
-                        const existingActual = existing[xinPath] != null ? existing[xinValue] : existing;
-                        const valueActual = value[xinPath] != null ? value[xinValue] : value;
+                        const existingActual = existing[XIN_PATH] != null ? existing[XIN_VALUE] : existing;
+                        const valueActual = value[XIN_PATH] != null ? value[XIN_VALUE] : value;
                         if (existingActual !== valueActual) {
                             xin[path] = valueActual;
                         }
@@ -803,14 +803,14 @@ const bind = (element, what, binding, options) => {
         throw new Error('bind cannot bind to a DocumentFragment');
     }
     let path;
-    if (typeof what === 'object' && what[xinPath] === undefined && options === undefined) {
+    if (typeof what === 'object' && what[XIN_PATH] === undefined && options === undefined) {
         const { value } = what;
-        path = typeof value === 'string' ? value : value[xinPath];
+        path = typeof value === 'string' ? value : value[XIN_PATH];
         options = what;
         delete options.value;
     }
     else {
-        path = typeof what === 'string' ? what : what[xinPath];
+        path = typeof what === 'string' ? what : what[XIN_PATH];
     }
     if (path == null) {
         throw new Error('bind requires a path or object with xin Proxy');
@@ -1075,7 +1075,7 @@ class ListBinding {
         this._array = array;
         const { initInstance, updateInstance } = this.options;
         // @ts-expect-error
-        const arrayPath = array[xinPath];
+        const arrayPath = array[XIN_PATH];
         const slice = this.visibleSlice();
         const previousSlice = this._previousSlice;
         const { firstItem, lastItem, topBuffer, bottomBuffer } = slice;
@@ -1114,13 +1114,13 @@ class ListBinding {
             if (item === undefined) {
                 continue;
             }
-            let element = this.itemToElement.get(item[xinValue]);
+            let element = this.itemToElement.get(item[XIN_VALUE]);
             if (element == null) {
                 created++;
                 element = cloneWithBindings(this.template);
                 if (typeof item === 'object') {
-                    this.itemToElement.set(item[xinValue], element);
-                    elementToItem.set(element, item[xinValue]);
+                    this.itemToElement.set(item[XIN_VALUE], element);
+                    elementToItem.set(element, item[XIN_VALUE]);
                 }
                 this.boundElement.insertBefore(element, this.listBottom);
                 if (idPath != null) {
@@ -1636,4 +1636,4 @@ class Component extends HTMLElement {
 }
 Component.elements = elements;
 
-export { Color, Component, moreMath as MoreMath, bind, bindings, css, darkMode, elements, getListItem, hotReload, initVars, makeComponent, observe, observerShouldBeRemoved, on, settings, touch, unobserve, vars, xin, xinPath, xinValue };
+export { Color, Component, moreMath as MoreMath, bind, bindings, css, darkMode, elements, getListItem, hotReload, initVars, makeComponent, observe, observerShouldBeRemoved, on, settings, touch, unobserve, vars, xin, XIN_PATH, XIN_VALUE };

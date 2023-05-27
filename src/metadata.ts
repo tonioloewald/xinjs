@@ -6,6 +6,9 @@ export const BOUND_SELECTOR = `.${BOUND_CLASS}`
 export const EVENT_CLASS = '-xin-event'
 export const EVENT_SELECTOR = `.${EVENT_CLASS}`
 
+export const XIN_PATH = Symbol('xin-path')
+export const XIN_VALUE = Symbol('xin-value')
+
 export interface DataBinding {
   path: string
   binding: XinBinding

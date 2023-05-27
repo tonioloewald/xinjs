@@ -1,9 +1,8 @@
-import { XinProxyObject, XinProxy, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction, xinValue, xinPath } from './xin-types'
+import { XinProxyObject, XinProxy, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { settings } from './settings'
 import { Listener, touch, observe as _observe, unobserve, updates, observerShouldBeRemoved } from './path-listener'
 import { getByPath, setByPath } from './by-path'
-
-export { xinValue, xinPath }
+import { XIN_VALUE, XIN_PATH } from './metadata'
 
 interface ProxyConstructor {
   revocable: <T extends object, P extends object>(
@@ -47,9 +46,9 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
   // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
   // as you'd expect
   get (target: XinObject | XinArray, _prop: string | symbol): XinValue {
-    if (_prop === xinPath) {
+    if (_prop === XIN_PATH) {
       return path
-    } else if (_prop === xinValue) {
+    } else if (_prop === XIN_VALUE) {
       return target
     }
     if (typeof _prop === 'symbol') {
@@ -111,8 +110,8 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
   },
   set (_, prop: string, value: any) {
     // eslint-disable-next-line
-    if (value != null && value[xinPath]) {
-      value = value[xinValue]
+    if (value != null && value[XIN_PATH]) {
+      value = value[XIN_VALUE]
     }
     const fullPath = extendPath(path, prop)
     if (debugPaths && !isValidPath(fullPath)) {
@@ -120,8 +119,8 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
     }
     let existing = xin[fullPath] as XinProxy
     // eslint-disable-next-line
-    if (existing != null && existing[xinValue] != null) {
-      existing = existing[xinValue] as XinProxy
+    if (existing != null && existing[XIN_VALUE] != null) {
+      existing = existing[XIN_VALUE] as XinProxy
     }
     if (existing !== value && setByPath(registry, fullPath, value)) {
       touch(fullPath)

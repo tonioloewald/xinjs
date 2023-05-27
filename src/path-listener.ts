@@ -1,4 +1,5 @@
-import { PathTestFunction, ObserverCallbackFunction, XinTouchableType, xinPath } from './xin-types'
+import { PathTestFunction, ObserverCallbackFunction, XinTouchableType } from './xin-types'
+import { XIN_PATH } from './metadata'
 import { settings } from './settings'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -9,7 +10,7 @@ let updatePromise: Promise<undefined>
 let resolveUpdate: Function
 
 const getPath = (what: string | XinTouchableType): string => {
-  return typeof what === 'object' ? what[xinPath] : what
+  return typeof what === 'object' ? what[XIN_PATH] : what
 }
 export class Listener {
   description: string

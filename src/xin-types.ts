@@ -1,3 +1,5 @@
+import { XIN_PATH, XIN_VALUE } from './metadata'
+
 export type XinScalar = string | boolean | number | Function
 
 export type XinArray = XinObject[] | XinScalar[]
@@ -10,12 +12,9 @@ export type XinProxyTarget = XinObject | XinArray
 
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined
 
-export const xinPath = Symbol('xin-path')
-export const xinValue = Symbol('xin-value')
-
 export interface XinProps {
-  [xinValue]: XinObject | XinObject | XinScalar
-  [xinPath]: string
+  [XIN_VALUE]: XinObject | XinObject | XinScalar
+  [XIN_PATH]: string
 }
 
 export type XinProxyObject = XinProps & {
