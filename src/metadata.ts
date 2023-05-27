@@ -1,4 +1,4 @@
-import { XinBinding, XinObject } from './xin-types'
+import { XinBinding, XinObject, XinProxy } from './xin-types'
 import { deepClone } from './deep-clone'
 
 export const BOUND_CLASS = '-xin-data'
@@ -15,7 +15,7 @@ export const xinPath = (x: any): string | undefined => {
 
 export function xinValue<T extends {}> (x: T): T {
   // eslint-disable-next-line
-  return (typeof x === 'object' && x !== null ? x[XIN_VALUE] || x : x) as T
+  return (typeof x === 'object' && x !== null ? (x as unknown as XinProxy)[XIN_VALUE] || x : x) as T
 }
 
 export interface DataBinding {

@@ -35,13 +35,6 @@ const extendPath = (path = '', prop = ''): string => {
   }
 }
 
-/*
-interface XinProxyHandler {
-  get: (target: XinObject | XinArray, prop: string) => XinValue
-  set: (target: XinObject | XinArray, prop: string, newValue: XinValue) => boolean
-}
-*/
-
 const regHandler = (path = ''): ProxyHandler<XinObject> => ({
   // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
   // as you'd expect

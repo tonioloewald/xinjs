@@ -147,11 +147,9 @@ const appBar = () => span(
       const leftSideNav = document.querySelector('.left-side-nav') as HTMLElement
       if (leftSideNav.style.marginLeft) {
         leftSideNav.style.marginLeft = ''
-        // @ts-expect-error
         event.target.style.transform = 'rotateZ(180deg)'
       } else {
         leftSideNav.style.marginLeft = '-180px'
-        // @ts-expect-error
         event.target.style.transform = ''
       }
     }

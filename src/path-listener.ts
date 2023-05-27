@@ -1,5 +1,5 @@
-import { PathTestFunction, ObserverCallbackFunction, XinTouchableType } from './xin-types'
-import { XIN_PATH } from './metadata'
+import { PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { xinPath } from './metadata'
 import { settings } from './settings'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -9,9 +9,6 @@ let updateTriggered: number | boolean = false
 let updatePromise: Promise<undefined>
 let resolveUpdate: Function
 
-const getPath = (what: string | XinTouchableType): string => {
-  return typeof what === 'object' ? what[XIN_PATH] : what
-}
 export class Listener {
   description: string
   test: PathTestFunction
@@ -95,8 +92,13 @@ const update = (): void => {
   }
 }
 
-export const touch = (what: XinTouchableType): void => {
-  const path = getPath(what)
+export const touch = (touchable: any): void => {
+  const path = typeof touchable === 'string' ? touchable : xinPath(touchable)
+
+  if (path === undefined) {
+    console.error('touch was called on an invalid target', touchable)
+    throw new Error('touch was called on an invalid target')
+  }
 
   if (updateTriggered === false) {
     updatePromise = new Promise(resolve => {

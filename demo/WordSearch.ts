@@ -1,13 +1,15 @@
 import { labeledInput, toolBar } from './components'
-import { xin, elements, touch, bind, bindings, ElementPart, XinObject } from '../src'
+import { register, elements, touch, bind, bindings, ElementPart } from '../src'
 import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
-import words from './words'
+import wordList from './words'
 
 const {b, span, div, a} = elements
 
-xin.words = new WordList(words) as unknown as XinObject
-console.log((xin.words as unknown as WordList).wordCount, 'words loaded')
+const { words } = register({
+  words: new WordList(wordList)
+})
+console.log(words.wordCount, 'words loaded')
 
 export const wordSearch = (...args: ElementPart[]) => div(
   ...args,
@@ -53,7 +55,7 @@ export const wordSearch = (...args: ElementPart[]) => div(
     }),
     {
       onInput: debounce(() => {
-        if (xin.words) {
+        if (words) {
           touch('words.list')
           touch('words.filterCount')
         }

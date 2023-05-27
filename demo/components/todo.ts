@@ -1,4 +1,4 @@
-import {xin, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray, initVars} from '../../src/index'
+import {register, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray} from '../../src/index'
 
 const {h1, div, template, form, span, input, button} = elements
 
@@ -35,7 +35,7 @@ class Todo {
   }
 }
 
-xin.todoApp = new Todo() as unknown as XinProxyObject
+const { todoApp } = register({todoApp: new Todo()})
 
 const flex = { display: 'flex', gap: vars.spacing50, flexDirection: 'row' }
 const stack = { ...flex, flexDirection: 'column' }
@@ -58,20 +58,20 @@ export const todo = makeComponent(
         span({ bindText: '^.reminder', style: elastic }),
         button(span('✕'), {title: 'delete', onClick(event){
           const item = getListItem(event.target as HTMLElement)
+          todoApp.deleteItem(item)
           // @ts-ignore-error
-          xin.todoApp.deleteItem(item)
-          touch(xin.todoApp as XinProxyObject)
+          touch(todoApp)
         }})
       )),
-      { bindList: {value: xin.todoApp.list as XinProxyArray, idPath: 'id'} }
+      { bindList: {value: todoApp.list as unknown as XinProxyArray, idPath: 'id'} }
     ),
     form(
       { style: flex },
       {
         onSubmit(event){
+          todoApp.addItem()
           // @ts-ignore-error
-          xin.todoApp.addItem()
-          touch('todoApp')
+          touch(todoApp)
           event.preventDefault()
         }
       },

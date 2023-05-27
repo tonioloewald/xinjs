@@ -274,11 +274,11 @@ declare class Listener {
     callback: ObserverCallbackFunction;
     constructor(test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction);
 }
-export const touch: (what: XinTouchableType) => void;
+export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
-export function register<T extends {}>(obj: T): XinProxy & T;
+export function register<T extends {}>(obj: T): T;
 type VoidFunc = (...args: any[]) => void;
 export const debounce: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
 export const throttle: (origFn: VoidFunc, minInterval?: number) => VoidFunc;

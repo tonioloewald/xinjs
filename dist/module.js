@@ -49,6 +49,13 @@ const $e921b0bd4f6415ab$export$6a7099543a9795c7 = "-xin-event";
 const $e921b0bd4f6415ab$export$21d9322c3477441b = `.${$e921b0bd4f6415ab$export$6a7099543a9795c7}`;
 const $e921b0bd4f6415ab$export$a3622eb3b5dd592a = Symbol("xin-path");
 const $e921b0bd4f6415ab$export$bdd0d039ad781534 = Symbol("xin-value");
+const $e921b0bd4f6415ab$export$40700dafb97c3799 = (x)=>{
+    return x[$e921b0bd4f6415ab$export$a3622eb3b5dd592a];
+};
+function $e921b0bd4f6415ab$export$5dcba2d45033d435(x) {
+    // eslint-disable-next-line
+    return typeof x === "object" && x !== null ? x[$e921b0bd4f6415ab$export$bdd0d039ad781534] || x : x;
+}
 const $e921b0bd4f6415ab$export$fe712848e6e66613 = new WeakMap();
 const $e921b0bd4f6415ab$export$1f922de8d0ecbb7e = new WeakMap();
 const $e921b0bd4f6415ab$export$4cac8128ba61a55f = (element)=>{
@@ -91,9 +98,6 @@ const $f0b099915f91bd21$var$touchedPaths = [];
 let $f0b099915f91bd21$var$updateTriggered = false;
 let $f0b099915f91bd21$var$updatePromise;
 let $f0b099915f91bd21$var$resolveUpdate;
-const $f0b099915f91bd21$var$getPath = (what)=>{
-    return typeof what === "object" ? what[0, $e921b0bd4f6415ab$export$a3622eb3b5dd592a] : what;
-};
 class $f0b099915f91bd21$export$c92b1d5f43586026 {
     constructor(test, callback){
         const callbackDescription = typeof callback === "string" ? `"${callback}"` : `function ${callback.name}`;
@@ -149,8 +153,12 @@ const $f0b099915f91bd21$var$update = ()=>{
     if (typeof $f0b099915f91bd21$var$resolveUpdate === "function") $f0b099915f91bd21$var$resolveUpdate();
     if ((0, $34b63e9d5b96494c$export$a5a6e0b888b2c992).perf) console.timeEnd("xin async update");
 };
-const $f0b099915f91bd21$export$d0b7ea69ab6056df = (what)=>{
-    const path = $f0b099915f91bd21$var$getPath(what);
+const $f0b099915f91bd21$export$d0b7ea69ab6056df = (touchable)=>{
+    const path = typeof touchable === "string" ? touchable : (0, $e921b0bd4f6415ab$export$40700dafb97c3799)(touchable);
+    if (path === undefined) {
+        console.error("touch was called on an invalid target", touchable);
+        throw new Error("touch was called on an invalid target");
+    }
     if ($f0b099915f91bd21$var$updateTriggered === false) {
         $f0b099915f91bd21$var$updatePromise = new Promise((resolve)=>{
             $f0b099915f91bd21$var$resolveUpdate = resolve;
@@ -365,12 +373,7 @@ const $547f11326d897190$var$extendPath = (path = "", prop = "")=>{
         else return `${path}.${prop}`;
     }
 };
-/*
-interface XinProxyHandler {
-  get: (target: XinObject | XinArray, prop: string) => XinValue
-  set: (target: XinObject | XinArray, prop: string, newValue: XinValue) => boolean
-}
-*/ const $547f11326d897190$var$regHandler = (path = "")=>({
+const $547f11326d897190$var$regHandler = (path = "")=>({
         // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
         // as you'd expect
         get (target, _prop) {
@@ -436,7 +439,7 @@ const $547f11326d897190$export$966034e6c6823eb0 = new Proxy($547f11326d897190$va
 function $3796f5f5e32fce03$export$6503ec6e8aabbaf(obj) {
     const registered = {};
     Object.keys(obj).forEach((key)=>{
-        // @ts-expect-error-error
+        // eslint-disable-next-line
         (0, $547f11326d897190$export$966034e6c6823eb0)[key] = obj[key];
         registered[key] = (0, $547f11326d897190$export$966034e6c6823eb0)[key];
     });

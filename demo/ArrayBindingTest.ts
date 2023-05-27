@@ -129,7 +129,6 @@ export const arrayBindingTest = (...args) => div(
         let item4 = colors.items[4]
         colors.items[4] = colors.items[7]
         colors.items[7] = item4
-        // @ts-expect-error
         touch(colors.items)
       }
     }),
@@ -141,7 +140,6 @@ export const arrayBindingTest = (...args) => div(
             item.color = randomColor() 
           }
         }
-        // @ts-expect-error
         touch(colors.items)
       }
     }),

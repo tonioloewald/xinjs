@@ -13,8 +13,11 @@ Think of xin as being an `object`, so you can just assign values to it:
 
     import { xin } from 'xinjs'
 
+    // typically you won't set a "root-level" property to a simple scalar value like this
     xin.x = 17
 
+    // more commonly you'll assign large chunks of your application state, if not its
+    // entire state to a "root-level" property.
     xin.app = {
       prefs: {
         darkMode: false
@@ -31,7 +34,7 @@ Think of xin as being an `object`, so you can just assign values to it:
       ]
     }
 
-Once an object is assigned to xin, changing it within xin is simple:
+Once an object is assigned to  `xin`, changing it within `xin` is simple:
 
     xin.x = Math.PI
 
@@ -61,6 +64,28 @@ impacted:
 
     import { touch } from 'xinjs'
     touch('emails')
+
+## register()
+
+After working with `xin` and using `Typescript` for an extended period, I've tried to
+improve the type declarations to minimize the amount of casting and `// @ts-ignore-error`
+directives needed. This has led to the addition of the `register` utility function.
+
+`register(foo)` is simply declared as an identify function that operates on objects,
+in fact it assigns each property of the object passed to `xin` and returns its proxy, so:
+
+    const {foo, bar} = register({
+      foo: { /* stuff in foo */ }, 
+      bar: { /* stuff in bar */ }
+    })
+
+…is syntax sugar for:
+
+    const foo = xin.foo = { /* stuff in foo */ }
+    const bar = xin.bar = { /* stuff in bar */ }
+
+The difference is that now Typescript automatically understands the types of `foo` and
+`bar` (except for the fact that they're now actually `XinProxyObject`s).
 
 ## How it works
 
@@ -93,21 +118,24 @@ Then it will trigger any observers looking for relevant changes. And each change
 and tell it the `path` that was changed. E.g. an observer watching `lurman` will be fired if `lurman`
 or one of `lurman`'s properties is changed.
 
-## If you need the thing itself
+## If you need the thing itself or the path to the thing…
 
-`Proxy`s returned by `xin` have two properties you may find helpful in a pinch: `_xinValue` gives you the
-underlying (unwrapped) object and `_xinPath` gives you the path to that object.
+`Proxy`s returned by `xin` are typically indistinguishable from the original object, but
+in a pinch `xinPath()` will give you the path (`string`) of a `XinProxy` while `xinValue`
+will give its "bare" value. `xinPath()` can also be used to test if something is actually
+a proxy, as it will return `undefined` for regular objects.
 
 E.g.
 
-    luhrman._xinPath === 'foo.luhrman'     // true
-    const bareLurhman = luhrman._xinValue  // not wrapped
+    xinPath(luhrman) === 'foo.luhrman'     // true
+    const bareLurhman = xinValue(luhrman)  // not wrapped
 
-You may want the thing itself to, for example, efficiently perform a large number of changes to an
+You may want the thing itself to, for example, perform a large number of changes to an
 object without firing observers. You can let `xin` know you've made changes behind its back using
 `touch`, e.g.
 
-    doTerribleThings(lurhman._xinValue)
+    doTerribleThings(xinValue(luhrman))
+    // eslint-disable-next-line
     touch(luhrman)
 
 ## id-paths

@@ -33,23 +33,25 @@ or the data you save to a service.
 `xinjs` tracks the state of objects you assign to it using `paths` allowing economical 
 and direct updates to application state.
 
-    import {xin, observe} from 'xinjs'
+    import { register, observe } from 'xinjs'
 
-    xin.app = {
-      prefs: {
-        darkmode: false
-      },
-      docs: [
-        {
-          id: 1234,
-          title: 'title',
-          body: 'markdown goes here'
-        }
-      ]
-    }
+    const { app } = register({
+      app: {
+        prefs: {
+          darkmode: false
+        },
+        docs: [
+          {
+            id: 1234,
+            title: 'title',
+            body: 'markdown goes here'
+          }
+        ]
+      }
+    })
 
     observe('app.prefs.darkmode', () => {
-      document.body.classList.toggle('dark-mode', xin.app.prefs.darkmode)
+      document.body.classList.toggle('dark-mode', app.prefs.darkmode)
     })
 
     observe('app.docs', () => {
@@ -62,27 +64,34 @@ and direct updates to application state.
 with a `Proxy` and then if you use `xin` to make changes to those objects,
 `xinjs` will notify any interested observers.
 
-    import {xin, observe} from 'xinjs'
-    xin.foo = {bar: 17}
+**Note** `register({foo: {...}})` is syntax sugar for `xin.foo = {...}`.
+
+    import { register, observe } from 'xinjs'
+    const { foo } = register({
+      foo: {
+        bar: 17
+      }
+    })
+
     observe('foo.bar', v => {
       console.log('foo.bar was changed to', xin.foo.bar)
     })
     
-    xin.foo.bar = 17        // does not trigger the observer
-    xin.foo.bar = Math.PI   // triggers the observer
+    foo.bar = 17        // does not trigger the observer
+    foo.bar = Math.PI   // triggers the observer
 
 ### Paths are like JavaScript
 
 `xin` is designed to behave just like a JavaScript `Object`. What you put
 into it is what you get out of it:
 
-    import {xin} from 'xinjs'
+    import { xin, xinValue } from 'xinjs'
     
     const foo = {bar: 'baz'}
     xin.foo = foo
     
     // xin.foo returns a Proxy wrapped around foo (without touching foo)
-    xin.foo._xinValue === foo
+    xinValue(xin.foo) === foo
     
     // really, it's just the original object
     xin.foo.bar = 'lurman'
@@ -95,33 +104,37 @@ into it is what you get out of it:
 ### …but better!
 
 It's very common to deal with arrays of objects that have unique id values,
-so xin supports the idea of id-paths
+so `xinjs` supports the idea of id-paths
 
-    const app = {
-      list: [
-        {
-          id: '1234abcd',
-          text: 'hello world'
-        },
-        {
-          id: '5678efgh',
-          text: 'so long, redux'
-        }
-      ]
-    }
-    xin.app = app
-    console.log(xin.app.list[0].text)          // hello world
-    console.log(xin.app.list['id=5678efgh']    // so long, redux
-    console.log(xin['app.list[id=1234abcd]')   // hello world
+    import { register, xin } from 'xinjs
+
+    const { app } = register ({
+      app: {
+        list: [
+          {
+            id: '1234abcd',
+            text: 'hello world'
+          },
+          {
+            id: '5678efgh',
+            text: 'so long, redux'
+          }
+        ]
+      }
+    })
+    
+    console.log(app.list[0].text)              // hello world
+    console.log(app.list['id=5678efgh'])       // so long, redux
+    console.log(xin['app.list[id=1234abcd'])   // hello world
 
 ### Telling `xin` about changes using `touch()`
 
 Sometimes you will modify an object behind `xin`'s back (e.g. for efficiency).
 When you want to trigger updates, simply touch the path.
 
-    import {xin, observe, touch} from 'xinjs'
+    import { xin, observe, touch } from 'xinjs'
     
-    const foo = {bar: 17}
+    const foo = { bar: 17 }
     xin.foo = foo
     observe('foo.bar', path => console.log(path, '->', xin[path])
     xin.foo.bar = -2              // console will show: foo.bar -> -2
