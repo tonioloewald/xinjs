@@ -129,86 +129,6 @@ When you want to trigger updates, simply touch the path.
     foo.bar = 100                 // nothing happens
     touch('foo.bar')              // console will show: foo.bar -> 100
 
-### Types
-
-`xinjs` provides a type system that allows you to efficiently check types
-at runtime. Types are *just javascript* and can be *serialized* as JSON, used
-as mock data, and so on. The `matchType` function tells you exactly what's
-wrong with a given value:
-
-    const userType = {
-      name: 'name',
-      age: 17,
-      address: {
-        street: 'somewhere',
-        city: 'city',
-        zipcode: '12345'
-      }
-    }
-
-    matchType(userType, {
-      name: 'Juanita Citizen',
-      age: '17',
-      address: {
-        street: '123 Sesame',
-        zipcode: 10001
-      }
-    }) // returns a list of problems...
-
-The exact response from `matchType` in this example is:
-
-    [
-      '.age was "17", expected number',
-      '.address.city was undefined, expected string',
-      '.address.zipcode was 10001, expected string'
-    ]
-
-### Specific numeric and string types, unions, optionals, etc.
-
-`matchType` supports very specific types, including optional values, and despite this
-all types are "just javascript" and serializable as JSON.
-
-E.g. object properties can be specified as optional:
-
-    const positionType = {
-      lat: 0,
-      long: 0,
-      'altitude?': 0
-    }
-
-And numeric values can be restricted to whole numbers or ranges:
-
-    const positionType = {
-      lat: '#number [-90,90]',
-      long: '#number [-180,180]',
-      'altitude?': 0
-    }
-
-    const arrayIndexType = '#int [0,∞)'
-
-Enumerations can be specified:
-
-    const method = '#enum "HEAD"|"INFO"|"GET"|"POST"|"PUT"|"DELETE"'
-
-And strings can be restricted to regular expressions:
-
-    const zipcodeType = '#regexp ^\\d{5,5}(-\\d{4,4})?$'
-
-### TypeSafe functions
-
-You can build hardened functions that will throw an error if they receive the wrong
-input or would produce the wrong output.
-
-    import {typeSafe} from 'xinjs'
-    const unsafeAdd(a, b) => a + b
-    const safeAdd = typeSafe(unsafeAdd, [0, 0], 0)
-
-If the function receives the wrong input or produces the wrong output, it throws a
-type error (specifying exactly what went wrong). If it receives an error, it passes
-it straight through (like a [monad](https://en.wikipedia.org/wiki/Monad_(functional_programming))).
-Basically, if you chain typesafe functions and there's an error somewhere in the chain,
-you'll receive *that* error at the far end, and no further work will be done.
-
 ### CSS
 
 `xinjs` includes utilities for working with css.
@@ -273,6 +193,12 @@ simply call `hotReload` after initializing your app state and you're good to go.
 Only top-level properties in `xin` that pass the test will be persisted.
 
 To completely reset the app, run `localStorage.clear()` in the console.
+
+### Types
+
+`xinjs` [type-by-example](https://www.npmjs.com/package/type-by-example) has been
+broken out into a separate standalone library. (Naturally it works very well with
+xinjs but they are completely independent.)
 
 ## Development Notes
 
