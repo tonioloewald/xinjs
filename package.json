@@ -21,7 +21,7 @@
     "lint": "bun ts-standard --fix src/*.ts",
     "make": "bun clear-targets && bun static-assets && bun test && bun parcel build",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
-    "test": "bun wiptest",
+    "test": "bun test",
     "make-icons": "rm -rf static/icons && mkdir static/icons && npx fantasticon"
   },
   "author": "Tonio Loewald",
