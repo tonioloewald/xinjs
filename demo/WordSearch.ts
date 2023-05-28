@@ -1,12 +1,12 @@
 import { labeledInput, toolBar } from './components'
-import { register, elements, touch, bind, bindings, ElementPart } from '../src'
+import { xinProxy, elements, touch, bind, bindings, ElementPart } from '../src'
 import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
 import wordList from './words'
 
 const {b, span, div, a} = elements
 
-const { words } = register({
+const { words } = xinProxy({
   words: new WordList(wordList)
 })
 console.log(words.wordCount, 'words loaded')

@@ -24,7 +24,7 @@ $parcel$export(module.exports, "observe", () => $3c20fb09d41b8da8$export$d120356
 $parcel$export(module.exports, "unobserve", () => $287d4a4db165612d$export$23a2283368c55ea2);
 $parcel$export(module.exports, "touch", () => $287d4a4db165612d$export$d0b7ea69ab6056df);
 $parcel$export(module.exports, "observerShouldBeRemoved", () => $287d4a4db165612d$export$253d09664e30b967);
-$parcel$export(module.exports, "register", () => $9fb946d475604ebe$export$6503ec6e8aabbaf);
+$parcel$export(module.exports, "xinProxy", () => $fce641fe9ed990db$export$95a552d2395ab4c4);
 $parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87f7746612069);
 $parcel$export(module.exports, "throttle", () => $a948014a44fcb9ad$export$de363e709c412c8a);
 $parcel$export(module.exports, "debounce", () => $a948014a44fcb9ad$export$61fc7d43ac8f84b0);
@@ -476,7 +476,7 @@ const $3c20fb09d41b8da8$export$966034e6c6823eb0 = new Proxy($3c20fb09d41b8da8$va
 
 
 
-function $9fb946d475604ebe$export$6503ec6e8aabbaf(obj) {
+function $fce641fe9ed990db$export$95a552d2395ab4c4(obj) {
     const registered = {};
     Object.keys(obj).forEach((key)=>{
         // eslint-disable-next-line

@@ -1,4 +1,4 @@
-import { register, touch, Component, elements, vars} from '../src/index'
+import { xinProxy, touch, Component, elements, vars} from '../src/index'
 import { xinValue } from '../src/metadata'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
@@ -18,7 +18,7 @@ const makeItems = (howMany: number) => {
   return items
 }
 
-const {colors} = register({
+const {colors} = xinProxy({
   colors: {
     itemsToCreate: INITIAL_ITEMS,
     items: makeItems(INITIAL_ITEMS),
@@ -165,7 +165,6 @@ export const arrayBindingTest = (...args) => div(
     template( colorSwatch({bindValue: '^'})), 
     { 
       bindList: {
-        // @ts-expect-error
         value: colors.items, 
         idPath: 'id',
         virtual: { width: 274, height: 61 }

@@ -1,7 +1,7 @@
 import { XinProxyObject } from './xin-types'
 import { xin } from './xin'
 
-export function register<T extends {}> (obj: T): T {
+export function xinProxy<T extends {}> (obj: T): T {
   const registered: { [key: string]: any } = {}
   Object.keys(obj).forEach((key: string) => {
     // eslint-disable-next-line

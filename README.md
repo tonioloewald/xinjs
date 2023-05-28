@@ -33,9 +33,9 @@ or the data you save to a service.
 `xinjs` tracks the state of objects you assign to it using `paths` allowing economical 
 and direct updates to application state.
 
-    import { register, observe } from 'xinjs'
+    import { xinProxy, observe } from 'xinjs'
 
-    const { app } = register({
+    const { app } = xinProxy({
       app: {
         prefs: {
           darkmode: false
@@ -58,16 +58,34 @@ and direct updates to application state.
       // render docs
     })
 
+> #### What does `xinProxy` do, and what is a `XinProxy`?
+>
+> `xinProxy` is syntax sugar for assigning something to `xin` (which is a `XinProxyObject`)
+> and then getting it back out again.
+>
+> A `XinProxy` is an [ES Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) 
+> wrapped around an `object` (which in Javascript means anything
+> that has a `constructor` which in particular includes `Array`s, `class` instances, `function`s
+> and so on, but not "scalars" like `number`s, `string`s and `boolean`s.) Also for some crazy
+> reason `null` is a special case and then there are `Symbol`s.
+>
+> All you need to know about a `XinProxy` is that it's a nearly invisible wrapper around an
+> object that allows you to interact with the object normally, but which allows `xinjs` to
+> **observe** changes made to the wrapped object and tell interested parties about the changes.
+>
+> If you want to original object back you can just hold on to a reference or use `xinValue(someProxy)`
+> to unwrap it.
+
 ### No Tax, No Packaging
 
 `xinjs` does not modify the stuff you hand over to it… it just wraps objects 
 with a `Proxy` and then if you use `xin` to make changes to those objects,
 `xinjs` will notify any interested observers.
 
-**Note** `register({foo: {...}})` is syntax sugar for `xin.foo = {...}`.
+**Note** `xinProxy({foo: {...}})` is syntax sugar for `xin.foo = {...}`.
 
-    import { register, observe } from 'xinjs'
-    const { foo } = register({
+    import { xinProxy, observe } from 'xinjs'
+    const { foo } = xinProxy({
       foo: {
         bar: 17
       }
@@ -106,9 +124,9 @@ into it is what you get out of it:
 It's very common to deal with arrays of objects that have unique id values,
 so `xinjs` supports the idea of id-paths
 
-    import { register, xin } from 'xinjs
+    import { xinProxy, xin } from 'xinjs
 
-    const { app } = register ({
+    const { app } = xinProxy ({
       app: {
         list: [
           {

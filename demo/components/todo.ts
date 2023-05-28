@@ -1,4 +1,4 @@
-import {register, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray} from '../../src/index'
+import {xinProxy, elements, touch, getListItem, makeComponent, XinProxyObject, vars, XinProxyArray} from '../../src/index'
 
 const {h1, div, template, form, span, input, button} = elements
 
@@ -35,7 +35,7 @@ class Todo {
   }
 }
 
-const { todoApp } = register({todoApp: new Todo()})
+const { todoApp } = xinProxy({todoApp: new Todo()})
 
 const flex = { display: 'flex', gap: vars.spacing50, flexDirection: 'row' }
 const stack = { ...flex, flexDirection: 'column' }
