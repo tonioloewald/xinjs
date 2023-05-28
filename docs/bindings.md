@@ -30,7 +30,7 @@ for every item in the bound `Array`.
 
 It uses the existing **single** child element it finds inside the bound element
 as its `template`. If the child is a `<template>` (which is a good idea) then it
-expects that `template` to have a single child element.
+expects that `template` to have a *single child element*.
 
 E.g. if you have a simple unordered list:
 

@@ -19,12 +19,44 @@
 - lightweight
 - works anywhere (browsers, node, bun, electron etc.)
 
-In particular, this means that you can do your state management *anywhere*,
-including on either side of the "browser" divide in Electron / nwjs and
-similar applications. You can also efficiently implement "stateful-stateless" servers by
-sending mutations to complex state to the server and use GraphQL-like queries to
-[filter the shape](https://github.com/tonioloewald/filter-shapes) of the response from a service
-or the data you save to a service.
+If you want to build a web-application that's performant, robust, and maintainable, 
+`xinjs` lets you write your business  logic however you like (or reuse existing logic) 
+build your UI with pure `React` components (using `useXin`) and/or `web-component`, 
+and neatly *bind* the state of your business objects to the user-interface *directly*.
+
+In general, `xinjs` is able to accomplish the same or better compactness, expressiveness,
+and simplicity as you get with highly-refined React-centric toolchains without transpilation,
+domain-specific-languages, or other tricks that provide convenience at the cost of lock-in.
+
+Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts).
+
+The standard [React Todo List Example](https://codesandbox.io/s/xinjs-react-reminders-demo-v0-4-2-l46k52?file=/src/App.tsx)
+is shorter and simpler with `xinjs` and *cleanly separates* business logic from presentation.
+
+`xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't 
+bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
+me.
+
+If you want to build your own `web-components` versus use something off-the-rack,
+`xinjs` offers a `Component` base class that, along with its `elements` and `css` libraries
+allows you to implement component views in pure Javascript more compactly than with `jsx`
+(and without a virtual DOM).
+
+    import { Component, elements, css } from 'xinjs'
+
+    const { style, h1, slot } = elements
+    export class MyComponent extends Component {
+      styleNode = style(css({
+        h1: {
+          color: 'blue'
+        }
+      }))
+      content = [ h1('hello world'), slot() ]
+    }
+
+The difference is that `web-components` are drop-in replacements for standard HTML elements
+and interoperate happily with one-another and other libraries, load asynchronously, 
+and are natively supported by all modern browsers.
 
 ## What `xinjs` does
 

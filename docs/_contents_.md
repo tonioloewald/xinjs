@@ -21,10 +21,11 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 2. [xin](xin.md) — path-based observer
 3. [paths](by-path.md) - querying objects by path
 4. [bind](bind.md) — binding state to the DOM
-5. [elements](elements.md) — conveniently creating DOM elements
-6. [css](css.md) — utilities for working with css
-7. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
-8. [throttle and debounce](throttle.md) — useful function wrappers
+5. [bindings](bindings.md) — the standard bindings provided out-of-the-box, and how to add your own
+6. [elements](elements.md) — conveniently creating DOM elements
+7. [css](css.md) — utilities for working with css
+8. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
+9. [throttle and debounce](throttle.md) — useful function wrappers
 
 ### Related Libraries
 - [react-xinjs](https://www.npmjs.com/package/react-xinjs) allows you to manage state within

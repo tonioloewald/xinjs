@@ -12,7 +12,9 @@
     "typescript",
     "bun",
     "front-end",
-    "back-end"
+    "back-end",
+    "web-components",
+    "css-variables"
   ],
   "scripts": {
     "start": "bun clear-targets && bun static-assets && bun parcel demo/index.html --dist-dir www -p 8018",

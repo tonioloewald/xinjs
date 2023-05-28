@@ -63,7 +63,7 @@ export const todo = makeComponent(
           touch(todoApp)
         }})
       )),
-      { bindList: {value: todoApp.list as unknown as XinProxyArray, idPath: 'id'} }
+      { bindList: {value: todoApp.list, idPath: 'id'} }
     ),
     form(
       { style: flex },
