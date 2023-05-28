@@ -1,4 +1,4 @@
-import { xin, touch, elements, hotReload, settings, vars, ContentType, ElementPart, ElementProps } from '../src/index'
+import { xin, touch, xinProxy, elements, hotReload, settings, vars, ContentType } from '../src/index'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
@@ -15,8 +15,6 @@ const logo = './assets/xinjs-logo.svg'
 const readmeMd = './assets/readme.md'
 const scene = './assets/b-frame-test.glb'
 const omnidude = './assets/omnidude.glb'
-
-/* global window, document */
 
 xin.app = {
   title: 'docs & tests',
@@ -46,9 +44,10 @@ hotReload(path => {
 
 Object.assign(globalThis, {
   xin,
+  vars,
+  xinProxy,
   touch,
   Color,
-  vars,
   getElementBindings
 })
 
