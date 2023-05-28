@@ -11,17 +11,12 @@ export function StyleNode (styleSheet: XinStyleSheet): HTMLStyleElement {
   return elements.style(css(styleSheet))
 }
 
-const dimensionalProps = ['left', 'right', 'top', 'bottom', 'gap']
-const isDimensional = (cssProp: string): boolean => {
-  return (cssProp.match(/(width|height|size|margin|padding|radius|spacing|top|left|right|bottom)/) != null) || dimensionalProps.includes(cssProp)
-}
-
 const renderStatement = (key: string, value: string | number | XinStyleRule | undefined, indentation = ''): string => {
   const cssProp = camelToKabob(key)
   if (typeof value === 'object') {
     const renderedRule = Object.keys(value).map(innerKey => renderStatement(innerKey, value[innerKey], `${indentation}  `)).join('\n')
     return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`
-  } else if (typeof value === 'number' && isDimensional(cssProp)) {
+  } else if (typeof value === 'number' && value !== 0) {
     return `${indentation}  ${cssProp}: ${value}px;`
   }
   return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : ''
@@ -49,7 +44,7 @@ export const initVars = (obj: XinStyleRule): XinStyleRule => {
   for (const key of Object.keys(obj)) {
     const value = obj[key]
     const kabobKey = camelToKabob(key)
-    rule[`--${kabobKey}`] = typeof value === 'number' && isDimensional(kabobKey) ? String(value) + 'px' : value
+    rule[`--${kabobKey}`] = typeof value === 'number' && value !== 0 ? String(value) + 'px' : value
   }
   return rule
 }

@@ -1149,22 +1149,12 @@ const $9e0c0b8784c80412$export$7a5d735b2ab6389d = new Proxy({
 function $49cee7f7f866c751$export$bc59121b0a0fcbd3(styleSheet) {
     return (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d).style($49cee7f7f866c751$export$dbf350e5966cf602(styleSheet));
 }
-const $49cee7f7f866c751$var$dimensionalProps = [
-    "left",
-    "right",
-    "top",
-    "bottom",
-    "gap"
-];
-const $49cee7f7f866c751$var$isDimensional = (cssProp)=>{
-    return cssProp.match(/(width|height|size|margin|padding|radius|spacing|top|left|right|bottom)/) != null || $49cee7f7f866c751$var$dimensionalProps.includes(cssProp);
-};
 const $49cee7f7f866c751$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(key);
     if (typeof value === "object") {
         const renderedRule = Object.keys(value).map((innerKey)=>$49cee7f7f866c751$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
-    } else if (typeof value === "number" && $49cee7f7f866c751$var$isDimensional(cssProp)) return `${indentation}  ${cssProp}: ${value}px;`;
+    } else if (typeof value === "number" && value !== 0) return `${indentation}  ${cssProp}: ${value}px;`;
     return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : "";
 };
 const $49cee7f7f866c751$export$dbf350e5966cf602 = (obj, indentation = "")=>{
@@ -1184,7 +1174,7 @@ const $49cee7f7f866c751$export$90d0ea046136e3ed = (obj)=>{
     for (const key of Object.keys(obj)){
         const value = obj[key];
         const kabobKey = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(key);
-        rule[`--${kabobKey}`] = typeof value === "number" && $49cee7f7f866c751$var$isDimensional(kabobKey) ? String(value) + "px" : value;
+        rule[`--${kabobKey}`] = typeof value === "number" && value !== 0 ? String(value) + "px" : value;
     }
     return rule;
 };
@@ -1438,5 +1428,5 @@ var $526cc5d62ff194fb$exports = {};
 const $149c1bd638913645$export$5e0dd9fd5d74e0c5 = $0e50e8a626908591$exports;
 
 
-export {$149c1bd638913645$export$5e0dd9fd5d74e0c5 as MoreMath, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $4c651860c5272284$export$93b87f7746612069 as hotReload, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$3bc26eec1cc2439f as makeComponent, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $72989831e95a2bab$export$892596cec99bc70e as Color};
+export {$149c1bd638913645$export$5e0dd9fd5d74e0c5 as MoreMath, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $4c651860c5272284$export$93b87f7746612069 as hotReload, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$3bc26eec1cc2439f as makeComponent, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $72989831e95a2bab$export$892596cec99bc70e as Color};
 //# sourceMappingURL=module.js.map

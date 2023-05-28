@@ -1,5 +1,7 @@
 declare const XIN_PATH: unique symbol;
 declare const XIN_VALUE: unique symbol;
+export const xinPath: (x: any) => string | undefined;
+export function xinValue<T extends {}>(x: T): T;
 type _XinEventHandler1 = ((event: Event) => void) | string;
 export const getListItem: (element: HTMLElement) => any;
 export type XinScalar = string | boolean | number | Function;

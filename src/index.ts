@@ -10,7 +10,7 @@ export { elements, makeComponent } from './elements'
 export { settings } from './settings'
 export { bind, on } from './bind'
 export { bindings } from './bindings'
-export { getListItem } from './metadata'
+export { getListItem, xinPath, xinValue } from './metadata'
 export { vars, initVars, css, darkMode } from './css'
 export { Color } from './color'
 export const MoreMath = _MoreMath

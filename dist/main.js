@@ -36,6 +36,8 @@ $parcel$export(module.exports, "bind", () => $fc64c421299f5d54$export$2385a24977
 $parcel$export(module.exports, "on", () => $fc64c421299f5d54$export$af631764ddc44097);
 $parcel$export(module.exports, "bindings", () => $e49806807158e47d$export$97a1a3e6f39778d2);
 $parcel$export(module.exports, "getListItem", () => $3f1d78706f6d8212$export$4c309843c07ce679);
+$parcel$export(module.exports, "xinPath", () => $3f1d78706f6d8212$export$40700dafb97c3799);
+$parcel$export(module.exports, "xinValue", () => $3f1d78706f6d8212$export$5dcba2d45033d435);
 $parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
 $parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
 $parcel$export(module.exports, "css", () => $db77bb2de3733b56$export$dbf350e5966cf602);
@@ -1189,22 +1191,12 @@ const $c004c420133596e3$export$7a5d735b2ab6389d = new Proxy({
 function $db77bb2de3733b56$export$bc59121b0a0fcbd3(styleSheet) {
     return (0, $c004c420133596e3$export$7a5d735b2ab6389d).style($db77bb2de3733b56$export$dbf350e5966cf602(styleSheet));
 }
-const $db77bb2de3733b56$var$dimensionalProps = [
-    "left",
-    "right",
-    "top",
-    "bottom",
-    "gap"
-];
-const $db77bb2de3733b56$var$isDimensional = (cssProp)=>{
-    return cssProp.match(/(width|height|size|margin|padding|radius|spacing|top|left|right|bottom)/) != null || $db77bb2de3733b56$var$dimensionalProps.includes(cssProp);
-};
 const $db77bb2de3733b56$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
     if (typeof value === "object") {
         const renderedRule = Object.keys(value).map((innerKey)=>$db77bb2de3733b56$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
-    } else if (typeof value === "number" && $db77bb2de3733b56$var$isDimensional(cssProp)) return `${indentation}  ${cssProp}: ${value}px;`;
+    } else if (typeof value === "number" && value !== 0) return `${indentation}  ${cssProp}: ${value}px;`;
     return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : "";
 };
 const $db77bb2de3733b56$export$dbf350e5966cf602 = (obj, indentation = "")=>{
@@ -1224,7 +1216,7 @@ const $db77bb2de3733b56$export$90d0ea046136e3ed = (obj)=>{
     for (const key of Object.keys(obj)){
         const value = obj[key];
         const kabobKey = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
-        rule[`--${kabobKey}`] = typeof value === "number" && $db77bb2de3733b56$var$isDimensional(kabobKey) ? String(value) + "px" : value;
+        rule[`--${kabobKey}`] = typeof value === "number" && value !== 0 ? String(value) + "px" : value;
     }
     return rule;
 };

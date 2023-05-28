@@ -38,9 +38,11 @@ can remind you that it's `whiteSpace` and not `whitespace`.
 
     document.head.append(style(css(myStyleMap)))
 
-If a bare **number** is assigned to a *dimensional* CSS property it will have 'px' suffixed
-to it automatically. A property is considered dimensional if its name contains:
-"width", "height", "size", "margin" "padding" "radius" "spacing" "top" "left", "right" or "bottom".
+If a bare, non-zero **number** is assigned to a CSS property it will have 'px' suffixed
+to it automatically. There are *no bare numeric*ele properties in CSS except `0`.
+
+Why `px`? Well the other obvious options would be `rem` and `em` but `px` seems the
+least surprising option.
 
 `css` should render nested rules, such as `@keyframes` and `@media` correctly.
 
