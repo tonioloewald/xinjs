@@ -65,27 +65,31 @@ impacted:
     import { touch } from 'xinjs'
     touch('emails')
 
-## register()
+## xinProxy()
 
 After working with `xin` and using `Typescript` for an extended period, I've tried to
 improve the type declarations to minimize the amount of casting and `// @ts-ignore-error`
-directives needed. This has led to the addition of the `register` utility function.
+directives needed. This has led to the addition of the `xinProxy` utility function.
 
-`register(foo)` is simply declared as an identify function that operates on objects,
+`xinProxy(foo)` is simply declared as an identify function that operates on objects,
 in fact it assigns each property of the object passed to `xin` and returns its proxy, so:
 
-    const {foo, bar} = register({
+    import { xinProxy } from 'xinjs'
+
+    const { foo, bar } = xinProxy({
       foo: { /* stuff in foo */ }, 
       bar: { /* stuff in bar */ }
     })
 
 …is syntax sugar for:
 
+    import { xin } from 'xinjs'
+
     const foo = xin.foo = { /* stuff in foo */ }
     const bar = xin.bar = { /* stuff in bar */ }
 
 The difference is that now Typescript automatically understands the types of `foo` and
-`bar` (except for the fact that they're now actually `XinProxyObject`s).
+`bar` (except for the fact that they're now actually `XinProxys`s, but shhhhh).
 
 ## How it works
 
