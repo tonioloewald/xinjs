@@ -1,4 +1,4 @@
-import { xin, touch, xinProxy, elements, hotReload, settings, vars, ContentType } from '../src/index'
+import { xin, touch, xinProxy, elements, hotReload, settings, vars, ContentType } from '../src/'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
