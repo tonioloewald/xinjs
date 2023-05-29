@@ -524,6 +524,7 @@ class $16008b2efdc923f4$export$892596cec99bc70e {
     static fromCss(spec) {
         $16008b2efdc923f4$var$span.style.color = spec;
         const converted = $16008b2efdc923f4$var$span.style.color;
+        console.log(spec, converted);
         const [r, g, b, a] = converted.match(/[\d.]+/g);
         return new $16008b2efdc923f4$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
     }
@@ -757,7 +758,8 @@ const $5258c5e951c26004$var$handleBoundEvent = (event)=>{
         // eslint-disable-next-line
         const handlers = eventBindings[event.type] || [];
         for (const handler of handlers){
-            if (typeof handler === "function") handler(wrappedEvent);
+            if (typeof handler === "function") // eslint-disable-next-line
+            handler(wrappedEvent);
             else {
                 const func = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[handler];
                 if (typeof func === "function") func(wrappedEvent);
@@ -1085,7 +1087,7 @@ const $a20b878345862077$var$templates = {};
 const $a20b878345862077$export$3bc26eec1cc2439f = (...componentParts)=>{
     return (...args)=>$a20b878345862077$export$7a5d735b2ab6389d.div(...args, ...componentParts);
 };
-const $a20b878345862077$export$185802fd694ee1f5 = (tagType, ...contents)=>{
+const $a20b878345862077$var$create = (tagType, ...contents)=>{
     if ($a20b878345862077$var$templates[tagType] === undefined) $a20b878345862077$var$templates[tagType] = globalThis.document.createElement(tagType);
     const elt = $a20b878345862077$var$templates[tagType].cloneNode();
     const elementProps = {};
@@ -1135,7 +1137,7 @@ const $a20b878345862077$export$7a5d735b2ab6389d = new Proxy({
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
         if (tagName.match(/^\w+(-\w+)*$/) == null) throw new Error(`${tagName} does not appear to be a valid element tagName`);
         else if (target[tagName] === undefined) // @ts-expect-error
-        target[tagName] = (...contents)=>$a20b878345862077$export$185802fd694ee1f5(tagName, ...contents);
+        target[tagName] = (...contents)=>$a20b878345862077$var$create(tagName, ...contents);
         // @ts-expect-error
         return target[tagName];
     },

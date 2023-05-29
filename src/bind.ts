@@ -1,9 +1,9 @@
 import { xin, touch, observe } from './xin'
 import {
   getListItem, elementToBindings, elementToHandlers, DataBindings, BOUND_CLASS, BOUND_SELECTOR,
-  EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XinEventHandler, XIN_PATH, XIN_VALUE
+  EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XIN_PATH, XIN_VALUE
 } from './metadata'
-import { XinObject, XinTouchableType, XinBinding, XinProxy, XinBindingSpec } from './xin-types'
+import { XinObject, XinProxy, XinEventHandler, XinTouchableType, XinBinding, XinBindingSpec } from './xin-types'
 
 const { document, MutationObserver } = globalThis
 
@@ -153,6 +153,7 @@ const handleBoundEvent = (event: Event): void => {
     const handlers = eventBindings[event.type] || [] as XinEventHandler[]
     for (const handler of handlers) {
       if (typeof handler === 'function') {
+        // eslint-disable-next-line
         handler(wrappedEvent)
       } else {
         const func = xin[handler]

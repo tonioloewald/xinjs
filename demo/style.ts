@@ -1,6 +1,6 @@
-import {XinStyleRule, bind} from '../src'
+import {XinStyleSheet, bind} from '../src'
+import {initVars, darkMode, css, vars} from '../src/css'
 import {elements} from '../src/elements'
-import {initVars, darkMode, css, vars, XinStyleSheet} from '../src/css'
 import { Color } from '../src/color'
 const {style} = elements
 
@@ -22,7 +22,7 @@ bind(document.body, 'app.darkmode', {
   }
 })
 
-const cssVars: XinStyleRule = {
+const cssVars = {
   font: '\'Roboto Slab\', Serif',
   codeFont: '\'Space Mono\', monospace',
   fontSize: 16,
@@ -88,7 +88,7 @@ const rules: XinStyleSheet = {
   '.darkmode': {...darkMode(cssVars), ...initVars(darkBrandColors)},
   'h1, h2, h3': {
     margin: `${vars.spacing200} 0 ${vars.spacing}`,
-    color: vars.textHeadingColor
+    color: vars.textHeadingColor,
   },
   'p, h4, h5, h6, pre, blockquote': {
     margin: `0 0 ${vars.spacing}`,
@@ -190,6 +190,7 @@ const rules: XinStyleSheet = {
     opacity: 0.8
   },
   '[hidden]': {
+    // @ts-expect-error
     display: 'none !important'
   },
   'code, pre': {
@@ -202,7 +203,7 @@ const rules: XinStyleSheet = {
     borderRadius: 1000,
     padding: 0,
     minWidth: vars.lineHeight200,
-    boxShadow: 'none'
+    boxShadow: 'none',
   },
   'dialog::backdrop': {
     backgroundColor: '#0004',
@@ -239,6 +240,7 @@ const rules: XinStyleSheet = {
   }
 }
 
+console.log(css(rules))
 document.head.append(style({id: 'base-style'}, css(rules))) 
 
 // adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
