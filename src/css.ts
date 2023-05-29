@@ -1,14 +1,28 @@
 import { Color } from './color'
 import { elements } from './elements'
 import { camelToKabob } from './string-case'
-import { XinStyleRule, XinStyleMap } from './xin-types'
+import { XinStyleSheet as _XinStyleSheet, XinStyleRule as _XinStyleRule, XinStyleMap as _XinStyleMap } from './css-types'
 
-export interface XinStyleSheet {
-  [key: string]: XinStyleRule | XinStyleMap | string
-}
+export type XinStyleSheet = _XinStyleSheet
+export type XinStyleRule = _XinStyleRule
+export type XinStyleMap = _XinStyleMap
 
 export function StyleNode (styleSheet: XinStyleSheet): HTMLStyleElement {
   return elements.style(css(styleSheet))
+}
+
+const numericProps = [
+  'animation-iteration-count', 'flex', 'flex-base', 'flex-grow', 'flex-shrink', 'gap', 'opacity', 'order',
+  'tab-size', 'widows', 'z-index', 'zoom'
+]
+const renderProp = (indentation: string, cssProp: string, value: string | number | undefined): string => {
+  if (value === undefined) {
+    return ''
+  } else if (typeof value === 'string' || numericProps.includes(cssProp)) {
+    return `${indentation}  ${cssProp}: ${value};`
+  } else {
+    return `${indentation}  ${cssProp}: ${value}px;`
+  }
 }
 
 const renderStatement = (key: string, value: string | number | XinStyleRule | undefined, indentation = ''): string => {
@@ -16,10 +30,9 @@ const renderStatement = (key: string, value: string | number | XinStyleRule | un
   if (typeof value === 'object') {
     const renderedRule = Object.keys(value).map(innerKey => renderStatement(innerKey, value[innerKey], `${indentation}  `)).join('\n')
     return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`
-  } else if (typeof value === 'number' && value !== 0) {
-    return `${indentation}  ${cssProp}: ${value}px;`
+  } else {
+    return renderProp(indentation, cssProp, value)
   }
-  return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : ''
 }
 
 export const css = (obj: XinStyleSheet | XinStyleMap, indentation = ''): string => {
@@ -39,7 +52,7 @@ export const css = (obj: XinStyleSheet | XinStyleMap, indentation = ''): string 
   return selectors.join('\n\n')
 }
 
-export const initVars = (obj: XinStyleRule): XinStyleRule => {
+export const initVars = (obj: { [key: string]: string | number }): XinStyleRule => {
   const rule: XinStyleRule = {}
   for (const key of Object.keys(obj)) {
     const value = obj[key]

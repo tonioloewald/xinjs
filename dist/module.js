@@ -524,6 +524,7 @@ class $72989831e95a2bab$export$892596cec99bc70e {
     static fromCss(spec) {
         $72989831e95a2bab$var$span.style.color = spec;
         const converted = $72989831e95a2bab$var$span.style.color;
+        console.log(spec, converted);
         const [r, g, b, a] = converted.match(/[\d.]+/g);
         return new $72989831e95a2bab$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
     }
@@ -757,7 +758,8 @@ const $b5796eaeba5c782e$var$handleBoundEvent = (event)=>{
         // eslint-disable-next-line
         const handlers = eventBindings[event.type] || [];
         for (const handler of handlers){
-            if (typeof handler === "function") handler(wrappedEvent);
+            if (typeof handler === "function") // eslint-disable-next-line
+            handler(wrappedEvent);
             else {
                 const func = (0, $547f11326d897190$export$966034e6c6823eb0)[handler];
                 if (typeof func === "function") func(wrappedEvent);
@@ -1085,7 +1087,7 @@ const $9e0c0b8784c80412$var$templates = {};
 const $9e0c0b8784c80412$export$3bc26eec1cc2439f = (...componentParts)=>{
     return (...args)=>$9e0c0b8784c80412$export$7a5d735b2ab6389d.div(...args, ...componentParts);
 };
-const $9e0c0b8784c80412$export$185802fd694ee1f5 = (tagType, ...contents)=>{
+const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
     if ($9e0c0b8784c80412$var$templates[tagType] === undefined) $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElement(tagType);
     const elt = $9e0c0b8784c80412$var$templates[tagType].cloneNode();
     const elementProps = {};
@@ -1135,7 +1137,7 @@ const $9e0c0b8784c80412$export$7a5d735b2ab6389d = new Proxy({
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
         if (tagName.match(/^\w+(-\w+)*$/) == null) throw new Error(`${tagName} does not appear to be a valid element tagName`);
         else if (target[tagName] === undefined) // @ts-expect-error
-        target[tagName] = (...contents)=>$9e0c0b8784c80412$export$185802fd694ee1f5(tagName, ...contents);
+        target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(tagName, ...contents);
         // @ts-expect-error
         return target[tagName];
     },

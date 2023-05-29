@@ -1,4 +1,4 @@
-import { XinBinding, XinObject, XinProxy } from './xin-types'
+import { XinObject, XinProxy, XinBinding, XinEventHandler } from './xin-types'
 import { deepClone } from './deep-clone'
 
 export const BOUND_CLASS = '-xin-data'
@@ -23,8 +23,6 @@ export interface DataBinding {
   binding: XinBinding
   options?: XinObject
 }
-
-export type XinEventHandler = ((event: Event) => void) | string
 
 export type DataBindings = DataBinding[]
 

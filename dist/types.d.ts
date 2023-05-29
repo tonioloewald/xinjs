@@ -2,98 +2,99 @@ declare const XIN_PATH: unique symbol;
 declare const XIN_VALUE: unique symbol;
 export const xinPath: (x: any) => string | undefined;
 export function xinValue<T extends {}>(x: T): T;
-type _XinEventHandler1 = ((event: Event) => void) | string;
 export const getListItem: (element: HTMLElement) => any;
-export type XinScalar = string | boolean | number | Function;
-export type XinArray = XinObject[] | XinScalar[];
-export interface XinObject {
-    [key: string]: XinObject | XinArray | XinScalar;
-}
-export type XinProxyTarget = XinObject | XinArray;
-export type XinValue = XinObject | XinArray | XinScalar | null | undefined;
-export interface XinProps {
-    [XIN_VALUE]: XinObject | XinObject | XinScalar;
-    [XIN_PATH]: string;
-}
-export type XinProxyObject = XinProps & {
-    [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar;
-};
-export type XinProxyArray = XinProps & {
-    [key: string]: XinProxyObject;
-} & (XinProxyObject[] | XinScalar[]);
-export type XinProxy = XinProps & (XinObject | XinArray);
-export type XinProxyValue = XinProxy | XinScalar | null | undefined;
-export type XinTouchableType = string | XinProps;
-export type XinEventHandler<T = Event> = ((evt: T) => void) | ((evt: T) => Promise<void> | string | Promise<string>);
-export type XinBindingShortcut = XinTouchableType | XinBindingSpec;
-type _BooleanFunction = () => boolean;
-type _PathTestFunction = (path: string) => boolean | Symbol;
-export type PathTestFunction = _BooleanFunction | _PathTestFunction;
-type OptionalSymbol = Symbol | undefined;
-type _CallbackFunction = (() => void) | (() => OptionalSymbol);
-type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol);
-export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction;
-export interface XinBindingSpec {
-    value: XinTouchableType;
-    [key: string]: any;
-}
-export interface XinBinding {
-    toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void;
-    fromDOM?: (element: HTMLElement, options?: XinObject) => any;
-}
-export interface XinStyleRule {
-    alignContent?: string | number;
-    alignItems?: string | number;
-    alignSelf?: string | number;
-    all?: string | number;
-    animation?: string | number;
-    animationDelay?: string | number;
-    animationDirection?: string | number;
-    animationDuration?: string | number;
-    animationFillMode?: string | number;
+type CSSBasicAlign = 'nomal' | 'stretch';
+type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end';
+type CSSDistributedAlign = 'space-between' | 'space-around' | 'space-evenly' | 'stretch';
+type CSSSelfAlign = 'self-start' | 'self-end';
+type CSSBaselineAlign = 'baseline' | 'first baseline' | 'last baseline';
+type CSSOverflowAlign = 'safe center' | 'unsafe center';
+type CSSGlobalValues = 'inherit' | 'initial' | 'revert' | 'unset' | 'revert-layer';
+type CSSAnimationDirection = 'normal' | 'reverse' | 'alternate' | 'aternate-reverse';
+type CSSAnimationFillMode = 'node' | 'forwards' | 'backwards' | 'both';
+type CSSAnimationPlayState = 'paused' | 'running';
+type CSSAnimationTimingFunction = 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | 'step-start' | 'step-end';
+type CSSAppearance = 'none' | 'auto';
+type CSSCursor = 'auto' | 'default' | 'none';
+type CSSCursorLink = 'context-menu' | 'help' | 'pointer' | 'progress' | 'wait';
+type CSSCursorSelection = 'cell' | 'crosshair' | 'text' | 'vertical-text';
+type CSSCursorDrag = 'alias' | 'copy' | 'move' | 'no-drop' | 'not-allowed' | 'grap' | 'grabbing';
+type CSSCursorCompass = 'n-resize' | 'e-resize' | 's-resize' | 'w-resize' | 'ne-resize' | 'se-resize' | 'sw-resize' | 'nw-resize' | 'nesw-resize' | 'nwse-resize';
+type CSSCursorResize = 'col-resize' | 'row-resize';
+type CSSCursorScroll = 'all-scroll';
+type CSSCursorZoom = 'zoom-in' | 'zoom-out';
+type CSSDisplay = 'block' | 'inline-block' | 'none' | 'flex' | 'inline-flex' | 'grid' | 'inline-grid' | 'flow-root' | 'contents';
+type CSSDisplayOther = 'table' | 'table-row' | 'list-item';
+type CSSDisplayMulti = 'block flow' | 'inline flow' | 'inline flow-root' | 'block-flex' | 'block-grid' | 'inline grid' | 'block flow-root';
+type CSSFloat = 'left' | 'right' | 'none' | 'inline-start' | 'inline-end';
+type CSSFlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse';
+type CSSFlexFlow = CSSFlexDirection | CSSFlexWrap | 'row nowrap' | 'column wrap' | 'column-reverse wrap-reverse';
+type CSSFlexWrap = 'nowrap' | 'wrap' | 'wrap-reverse';
+type CSSPointerEvents = 'auto' | 'none';
+type CSSSVGPointerEvents = 'stroke' | 'fill' | 'visibleFill' | 'visibleStroke' | 'visible' | 'painted' | 'fill' | 'stroke' | 'all';
+type CSSOverflow = 'visible' | 'hidden' | 'clip' | 'scroll' | 'auto' | 'hidden visible';
+type CSSPosition = 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky';
+type CSSTouchAction = 'auto' | 'none' | 'pan-x' | 'pan-left' | 'pan-right' | 'pan-y' | 'pan-up' | 'pan-down' | 'pinch-zoom' | 'manipulation';
+type CSSVisibility = 'visible' | 'hidden';
+type CSSWhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces';
+type CSSWordBreak = 'normal' | 'break-all' | 'keep-all';
+interface _XinStyleRule1 {
+    accentColor?: string;
+    alignContent?: CSSBasicAlign | CSSBaselineAlign | CSSDistributedAlign | CSSPositionalAlign | CSSGlobalValues;
+    alignItems?: CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | CSSSelfAlign;
+    alignSelf?: 'auto' | CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues;
+    all?: CSSGlobalValues;
+    animation?: string;
+    animationDelay?: string;
+    animationDirection?: CSSAnimationDirection;
+    animationDuration?: string;
+    animationFillMode?: CSSAnimationFillMode;
     animationIterationCount?: string | number;
-    animationName?: string | number;
-    animationPlayState?: string | number;
-    animationTimingFunction?: string | number;
-    backfaceVisibility?: string | number;
-    background?: string | number;
+    animationName?: string;
+    animationPlayState?: CSSAnimationPlayState | CSSGlobalValues;
+    animationTimingFunction?: CSSAnimationTimingFunction | CSSGlobalValues | string;
+    appearance?: CSSAppearance | CSSGlobalValues | string;
+    aspectRatio?: 'auto' | CSSGlobalValues | string;
+    backdropFilter?: 'none' | string | CSSGlobalValues;
+    backfaceVisibility?: CSSVisibility | CSSGlobalValues;
+    background?: string;
     backgroundAttachment?: string | number;
-    backgroundBlendMode?: string | number;
+    backgroundBlendMode?: string;
     backgroundClip?: string | number;
-    backgroundColor?: string | number;
-    backgroundImage?: string | number;
+    backgroundColor?: string;
+    backgroundImage?: string;
     backgroundOrigin?: string | number;
     backgroundPosition?: string | number;
     backgroundRepeat?: string | number;
     backgroundSize?: string | number;
     border?: string | number;
     borderBottom?: string | number;
-    borderBottomColor?: string | number;
+    borderBottomColor?: string;
     borderBottomLeftRadius?: string | number;
     borderBottomRightRadius?: string | number;
     borderBottomStyle?: string | number;
     borderBottomWidth?: string | number;
     borderCollapse?: string | number;
-    borderColor?: string | number;
-    borderImage?: string | number;
+    borderColor?: string;
+    borderImage?: string;
     borderImageOutset?: string | number;
     borderImageRepeat?: string | number;
     borderImageSlice?: string | number;
     borderImageSource?: string | number;
     borderImageWidth?: string | number;
     borderLeft?: string | number;
-    borderLeftColor?: string | number;
+    borderLeftColor?: string;
     borderLeftStyle?: string | number;
     borderLeftWidth?: string | number;
     borderRadius?: string | number;
     borderRight?: string | number;
-    borderRightColor?: string | number;
+    borderRightColor?: string;
     borderRightStyle?: string | number;
     borderRightWidth?: string | number;
     borderSpacing?: string | number;
     borderStyle?: string | number;
     borderTop?: string | number;
-    borderTopColor?: string | number;
+    borderTopColor?: string;
     borderTopLeftRadius?: string | number;
     borderTopRightRadius?: string | number;
     borderTopStyle?: string | number;
@@ -103,16 +104,16 @@ export interface XinStyleRule {
     boxShadow?: string | number;
     boxSizing?: string | number;
     captionSide?: string | number;
-    caretColor?: string | number;
+    caretColor?: string;
     clear?: string | number;
     clip?: string | number;
     clipPath?: string | number;
-    color?: string | number;
+    color?: string;
     columnCount?: string | number;
     columnFill?: string | number;
     columnGap?: string | number;
     columnRule?: string | number;
-    columnRuleColor?: string | number;
+    columnRuleColor?: string;
     columnRuleStyle?: string | number;
     columnRuleWidth?: string | number;
     columnSpan?: string | number;
@@ -121,19 +122,19 @@ export interface XinStyleRule {
     content?: string | number;
     counterIncrement?: string | number;
     counterReset?: string | number;
-    cursor?: string | number;
+    cursor?: CSSCursor | CSSCursorDrag | CSSCursorLink | CSSCursorResize | CSSCursorCompass | CSSCursorSelection | CSSCursorScroll | CSSCursorZoom | CSSGlobalValues;
     direction?: string | number;
-    display?: string | number;
-    emptyCells?: string | number;
-    filter?: string | number;
+    display?: CSSDisplay | CSSDisplayOther | CSSDisplayMulti | CSSGlobalValues;
+    emptyCells?: 'show' | 'hide' | CSSGlobalValues;
+    filter?: string | CSSGlobalValues;
     flex?: string | number;
     flexBasis?: string | number;
-    flexDirection?: string | number;
-    flexFlow?: string | number;
+    flexDirection?: CSSFlexDirection | CSSGlobalValues;
+    flexFlow?: CSSFlexFlow | CSSGlobalValues;
     flexGrow?: string | number;
     flexShrink?: string | number;
-    flexWrap?: string | number;
-    float?: string | number;
+    flexWrap?: CSSFlexWrap | CSSGlobalValues;
+    float?: CSSFloat | CSSGlobalValues;
     font?: string | number;
     fontFamily?: string | number;
     fontKerning?: string | number;
@@ -168,7 +169,7 @@ export interface XinStyleRule {
     letterSpacing?: string | number;
     lineHeight?: string | number;
     listStyle?: string | number;
-    listStyleImage?: string | number;
+    listStyleImage?: string;
     listStylePosition?: string | number;
     listStyleType?: string | number;
     margin?: string | number;
@@ -185,13 +186,13 @@ export interface XinStyleRule {
     opacity?: string | number;
     order?: string | number;
     outline?: string | number;
-    outlineColor?: string | number;
+    outlineColor?: string;
     outlineOffset?: string | number;
     outlineStyle?: string | number;
     outlineWidth?: string | number;
-    overflow?: string | number;
-    overflowX?: string | number;
-    overflowY?: string | number;
+    overflow?: CSSOverflow | CSSGlobalValues;
+    overflowX?: CSSOverflow | CSSGlobalValues;
+    overflowY?: CSSOverflow | CSSGlobalValues;
     padding?: string | number;
     paddingBottom?: string | number;
     paddingLeft?: string | number;
@@ -202,16 +203,16 @@ export interface XinStyleRule {
     pageBreakInside?: string | number;
     perspective?: string | number;
     perspectiveOrigin?: string | number;
-    pointerEvents?: string | number;
-    position?: string | number;
-    quotes?: string | number;
+    pointerEvents?: CSSPointerEvents | CSSSVGPointerEvents | CSSGlobalValues;
+    position?: CSSPosition | CSSGlobalValues;
+    quotes?: string;
     right?: string | number;
     scrollBehavior?: string | number;
     tableLayout?: string | number;
     textAlign?: string | number;
     textAlignLast?: string | number;
     textDecoration?: string | number;
-    textDecorationColor?: string | number;
+    textDecorationColor?: string;
     textDecorationLine?: string | number;
     textDecorationStyle?: string | number;
     textIndent?: string | number;
@@ -220,28 +221,70 @@ export interface XinStyleRule {
     textShadow?: string | number;
     textTransform?: string | number;
     top?: string | number;
-    transform?: string | number;
-    transformOrigin?: string | number;
-    transformStyle?: string | number;
-    transition?: string | number;
-    transitionDelay?: string | number;
-    transitionDuration?: string | number;
-    transitionProperty?: string | number;
-    transitionTimingFunction?: string | number;
+    touchAction?: CSSTouchAction | CSSGlobalValues;
+    transform?: string;
+    transformOrigin?: string;
+    transformStyle?: string;
+    transition?: string;
+    transitionDelay?: string;
+    transitionDuration?: string;
+    transitionProperty?: string;
+    transitionTimingFunction?: string;
     userSelect?: string | number;
-    verticalAlign?: string | number;
-    visibility?: string | number;
-    whiteSpace?: string | number;
+    verticalAlign?: string;
+    visibility?: CSSVisibility | 'collapse' | CSSGlobalValues;
+    whiteSpace?: CSSWhiteSpace | CSSGlobalValues;
     width?: string | number;
-    wordBreak?: string | number;
+    widows?: string | number;
+    wordBreak?: CSSWordBreak | CSSGlobalValues;
     wordSpacing?: string | number;
     wordWrap?: string | number;
-    writingMode?: string | number;
+    writingMode?: string;
     zIndex?: string | number;
     [key: string]: string | number | undefined;
 }
-export interface XinStyleMap {
-    [key: string]: XinStyleRule;
+interface _XinStyleMap1 {
+    [key: string]: _XinStyleRule1;
+}
+interface _XinStyleSheet1 {
+    [key: string]: _XinStyleRule1 | _XinStyleMap1 | string;
+}
+export type XinScalar = string | boolean | number | Function;
+export type XinArray = XinObject[] | XinScalar[];
+export interface XinObject {
+    [key: string]: XinObject | XinArray | XinScalar;
+}
+export type XinProxyTarget = XinObject | XinArray;
+export type XinValue = XinObject | XinArray | XinScalar | null | undefined;
+export interface XinProps {
+    [XIN_VALUE]: XinObject | XinObject | XinScalar;
+    [XIN_PATH]: string;
+}
+export type XinProxyObject = XinProps & {
+    [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar;
+};
+export type XinProxyArray = XinProps & {
+    [key: string]: XinProxyObject;
+} & (XinProxyObject[] | XinScalar[]);
+export type XinProxy = XinProps & (XinObject | XinArray);
+export type XinProxyValue = XinProxy | XinScalar | null | undefined;
+export type XinTouchableType = string | XinProps;
+export type XinEventHandler<T = Event> = ((evt: T) => void) | ((evt: T) => Promise<void>) | string;
+export type XinBindingShortcut = XinTouchableType | XinBindingSpec;
+type _BooleanFunction = () => boolean;
+type _PathTestFunction = (path: string) => boolean | Symbol;
+export type PathTestFunction = _BooleanFunction | _PathTestFunction;
+type OptionalSymbol = Symbol | undefined;
+type _CallbackFunction = (() => void) | (() => OptionalSymbol);
+type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol);
+export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction;
+export interface XinBindingSpec {
+    value: XinTouchableType;
+    [key: string]: any;
+}
+export interface XinBinding {
+    toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void;
+    fromDOM?: (element: HTMLElement, options?: XinObject) => any;
 }
 export interface ElementProps {
     onClick?: XinEventHandler<MouseEvent>;
@@ -254,7 +297,7 @@ export interface ElementProps {
     bindEnabled?: XinBindingShortcut;
     bindDisabled?: XinBindingShortcut;
     bindStyle?: XinBindingShortcut;
-    style?: XinStyleRule;
+    style?: _XinStyleRule1;
     [key: string]: any;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -280,11 +323,19 @@ export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
-export function xinProxy<T extends {}>(obj: T): T;
+export const bind: (element: HTMLElement | DocumentFragment, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject) => HTMLElement;
+export const on: (element: HTMLElement, eventType: string, eventHandler: XinEventHandler) => void;
 type VoidFunc = (...args: any[]) => void;
 export const debounce: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
 export const throttle: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
-export const hotReload: (test?: PathTestFunction) => void;
+declare global {
+    interface HTMLElement {
+        [listBindingRef]?: ListBinding;
+    }
+}
+export const bindings: {
+    [key: string | symbol]: XinBinding;
+};
 declare class HslColor {
     h: number;
     s: number;
@@ -321,18 +372,7 @@ export class Color {
     swatch(): void;
     blend(otherColor: Color, t: number): Color;
 }
-export const bind: (element: HTMLElement | DocumentFragment, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject) => HTMLElement;
-export const on: (element: HTMLElement, eventType: string, eventHandler: _XinEventHandler1) => void;
-declare global {
-    interface HTMLElement {
-        [listBindingRef]?: ListBinding;
-    }
-}
-export const bindings: {
-    [key: string | symbol]: XinBinding;
-};
-export const makeComponent: (...componentParts: ElementPart[]) => (...args: ElementPart[]) => HTMLDivElement;
-interface ElementsProxy {
+interface _ElementsProxy1 {
     a: ElementCreator<HTMLAnchorElement>;
     abbr: ElementCreator;
     acronym: ElementCreator;
@@ -459,12 +499,16 @@ interface ElementsProxy {
     wbr: ElementCreator;
     [key: string | symbol]: ElementCreator<any>;
 }
-export const elements: ElementsProxy;
-interface XinStyleSheet {
-    [key: string]: XinStyleRule | XinStyleMap | string;
-}
+export const makeComponent: (...componentParts: ElementPart[]) => (...args: ElementPart[]) => HTMLDivElement;
+export type ElementsProxy = _ElementsProxy1;
+export const elements: _ElementsProxy1;
+export type XinStyleSheet = _XinStyleSheet1;
+export type XinStyleRule = _XinStyleRule1;
+export type XinStyleMap = _XinStyleMap1;
 export const css: (obj: XinStyleSheet | XinStyleMap, indentation?: string) => string;
-export const initVars: (obj: XinStyleRule) => XinStyleRule;
+export const initVars: (obj: {
+    [key: string]: string | number;
+}) => XinStyleRule;
 export const darkMode: (obj: XinStyleRule) => XinStyleRule;
 export const vars: {
     [key: string]: string;
@@ -490,6 +534,8 @@ export abstract class Component extends HTMLElement {
     queueRender(triggerChangeEvent?: boolean): void;
     render(): void;
 }
+export const hotReload: (test?: PathTestFunction) => void;
+export function xinProxy<T extends {}>(obj: T): T;
 export const MoreMath: typeof _MoreMath;
 
 //# sourceMappingURL=types.d.ts.map
