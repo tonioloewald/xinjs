@@ -1,10 +1,8 @@
 import { bind, on } from './bind'
 import { bindings } from './bindings'
 import { ElementPart, ElementProps, ElementCreator, SwissArmyElement } from './xin-types'
-import { ElementsProxy } from './elements-types'
+import { ElementsProxy as _ElementsProxy } from './elements-types'
 import { camelToKabob } from './string-case'
-
-export { ElementsProxy } from './elements-types'
 
 const templates: { [key: string]: HTMLElement } = {}
 
@@ -86,6 +84,7 @@ const fragment: ElementCreator<DocumentFragment> = (...contents: ElementPart[]) 
   return frag
 }
 
+export type ElementsProxy = _ElementsProxy
 export const elements = new Proxy({ fragment }, {
   get (target, tagName: string) {
     tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`)

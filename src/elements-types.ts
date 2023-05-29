@@ -125,5 +125,5 @@ export interface ElementsProxy {
   var: ElementCreator
   video: ElementCreator<HTMLVideoElement>
   wbr: ElementCreator
-  [key: string | symbol]: ElementCreator<HTMLElement | Node>
+  [key: string | symbol]: ElementCreator<any>
 }
