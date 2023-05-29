@@ -20,22 +20,26 @@
 - works anywhere (browsers, node, bun, electron etc.)
 
 If you want to build a web-application that's performant, robust, and maintainable, 
-`xinjs` lets you write your business  logic however you like (or reuse existing logic) 
-build your UI with pure `React` components (using `useXin`) and/or `web-component`, 
-and neatly *bind* the state of your business objects to the user-interface *directly*.
+`xinjs` lets you:
+
+- implement your business logic however you like (or reuse existing code), 
+- build your UI with pure `React` components (using `useXin`) 
+- and/or `web-component`s, 
+- and neatly *bind* the state of your business objects to the user-interface *directly*.
 
 In general, `xinjs` is able to accomplish the same or better compactness, expressiveness,
-and simplicity as you get with highly-refined React-centric toolchains without transpilation,
-domain-specific-languages, or other tricks that provide convenience at the cost of lock-in.
+and simplicity as you get with highly-refined React-centric toolchains, but without transpilation,
+domain-specific-languages, or other tricks that provide convenience at the cost of becoming locked-in
+to React, a specific state-management system (which permeats your business logic), and UI framework.
 
-Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts).
+Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts.
 
 The standard [React Todo List Example](https://codesandbox.io/s/xinjs-react-reminders-demo-v0-4-2-l46k52?file=/src/App.tsx)
-is shorter and simpler with `xinjs` and *cleanly separates* business logic from presentation.
+becomes shorter and simpler with `xinjs` and *cleanly separates* business logic from presentation. `xinjs` **paths** route data to/from UI elements, and events from the UI to methods, and those paths are *exactly what you expect*.
 
-`xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't 
-bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
-me.
+> `xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't 
+> bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
+> me.
 
 If you want to build your own `web-components` versus use something off-the-rack,
 `xinjs` offers a `Component` base class that, along with its `elements` and `css` libraries
@@ -98,10 +102,9 @@ and direct updates to application state.
 > A `XinProxy` is an [ES Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) 
 > wrapped around an `object` (which in Javascript means anything
 > that has a `constructor` which in particular includes `Array`s, `class` instances, `function`s
-> and so on, but not "scalars" like `number`s, `string`s and `boolean`s.) Also for some crazy
-> reason `null` is a special case and then there are `Symbol`s.
+> and so on, but not "scalars" like `number`s, `string`s, `boolean`s, `null`, and `undefined`)
 >
-> All you need to know about a `XinProxy` is that it's a nearly invisible wrapper around an
+> All you need to know about a `XinProxy` is that it's Proxy wrapped around your original
 > object that allows you to interact with the object normally, but which allows `xinjs` to
 > **observe** changes made to the wrapped object and tell interested parties about the changes.
 >
