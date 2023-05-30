@@ -1,4 +1,5 @@
-import { css, XinStyleSheet } from './css'
+import { css } from './css'
+import { XinStyleSheet } from './css-types'
 import { deepClone } from './deep-clone'
 import { appendContentToElement, dispatch, resizeObserver } from './dom'
 import { elements, ElementsProxy } from './elements'

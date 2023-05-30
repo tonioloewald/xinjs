@@ -38,7 +38,7 @@ type CSSTouchAction = 'auto' | 'none' | 'pan-x' | 'pan-left' | 'pan-right' | 'pa
 type CSSVisibility = 'visible' | 'hidden';
 type CSSWhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces';
 type CSSWordBreak = 'normal' | 'break-all' | 'keep-all';
-interface _XinStyleRule1 {
+export interface XinStyleRule {
     accentColor?: string;
     alignContent?: CSSBasicAlign | CSSBaselineAlign | CSSDistributedAlign | CSSPositionalAlign | CSSGlobalValues;
     alignItems?: CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | CSSSelfAlign;
@@ -243,11 +243,11 @@ interface _XinStyleRule1 {
     zIndex?: string | number;
     [key: string]: string | number | undefined;
 }
-interface _XinStyleMap1 {
-    [key: string]: _XinStyleRule1;
+export interface XinStyleMap {
+    [key: string]: XinStyleRule;
 }
-interface _XinStyleSheet1 {
-    [key: string]: _XinStyleRule1 | _XinStyleMap1 | string;
+export interface XinStyleSheet {
+    [key: string]: XinStyleRule | XinStyleMap | string;
 }
 export type XinScalar = string | boolean | number | Function;
 export type XinArray = XinObject[] | XinScalar[];
@@ -297,7 +297,7 @@ export interface ElementProps {
     bindEnabled?: XinBindingShortcut;
     bindDisabled?: XinBindingShortcut;
     bindStyle?: XinBindingShortcut;
-    style?: _XinStyleRule1;
+    style?: XinStyleRule;
     [key: string]: any;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -372,7 +372,7 @@ export class Color {
     swatch(): void;
     blend(otherColor: Color, t: number): Color;
 }
-interface _ElementsProxy1 {
+export interface ElementsProxy {
     a: ElementCreator<HTMLAnchorElement>;
     abbr: ElementCreator;
     acronym: ElementCreator;
@@ -500,11 +500,7 @@ interface _ElementsProxy1 {
     [key: string | symbol]: ElementCreator<any>;
 }
 export const makeComponent: (...componentParts: ElementPart[]) => (...args: ElementPart[]) => HTMLDivElement;
-export type ElementsProxy = _ElementsProxy1;
-export const elements: _ElementsProxy1;
-export type XinStyleSheet = _XinStyleSheet1;
-export type XinStyleRule = _XinStyleRule1;
-export type XinStyleMap = _XinStyleMap1;
+export const elements: ElementsProxy;
 export const css: (obj: XinStyleSheet | XinStyleMap, indentation?: string) => string;
 export const initVars: (obj: {
     [key: string]: string | number;

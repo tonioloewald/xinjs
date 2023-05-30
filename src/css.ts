@@ -1,11 +1,7 @@
 import { Color } from './color'
 import { elements } from './elements'
 import { camelToKabob } from './string-case'
-import { XinStyleSheet as _XinStyleSheet, XinStyleRule as _XinStyleRule, XinStyleMap as _XinStyleMap } from './css-types'
-
-export type XinStyleSheet = _XinStyleSheet
-export type XinStyleRule = _XinStyleRule
-export type XinStyleMap = _XinStyleMap
+import { XinStyleSheet, XinStyleRule, XinStyleMap } from './css-types'
 
 export function StyleNode (styleSheet: XinStyleSheet): HTMLStyleElement {
   return elements.style(css(styleSheet))

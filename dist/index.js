@@ -1,8 +1,16 @@
 function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
-// workaround for https://github.com/parcel-bundler/parcel/issues/5911
-var $e070b3c758093e25$exports = {};
+/*
+  Note that re-exported types should be explicitly and separately exported
+  as types because of issues with parceljs
+
+  The error messages will be very perplexing
+
+  https://github.com/parcel-bundler/parcel/issues/4796
+  https://github.com/parcel-bundler/parcel/issues/4240
+  https://devblogs.microsoft.com/typescript/announcing-typescript-3-8/#type-only-imports-exports
+*/ var $e070b3c758093e25$exports = {};
 
 $parcel$export($e070b3c758093e25$exports, "RADIANS_TO_DEGREES", () => $e070b3c758093e25$export$ba6bc6c220358ed9);
 $parcel$export($e070b3c758093e25$exports, "DEGREES_TO_RADIANS", () => $e070b3c758093e25$export$1518e1a62333c8a4);
@@ -436,202 +444,6 @@ const $b3e4d800ba46b430$export$966034e6c6823eb0 = new Proxy($b3e4d800ba46b430$va
 
 
 
-function $b43c5f28217f2268$export$95a552d2395ab4c4(obj) {
-    const registered = {};
-    Object.keys(obj).forEach((key)=>{
-        // eslint-disable-next-line
-        (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] = obj[key];
-        registered[key] = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key];
-    });
-    return registered;
-}
-
-
-
-
-const $b350994d7e7e7767$export$61fc7d43ac8f84b0 = (origFn, minInterval = 250)=>{
-    let debounceId;
-    return (...args)=>{
-        if (debounceId !== undefined) clearTimeout(debounceId);
-        debounceId = setTimeout(()=>{
-            origFn(...args);
-        }, minInterval);
-    };
-};
-const $b350994d7e7e7767$export$de363e709c412c8a = (origFn, minInterval = 250)=>{
-    let debounceId;
-    let previousCall = Date.now() - minInterval;
-    let inFlight = false;
-    return (...args)=>{
-        clearTimeout(debounceId);
-        debounceId = setTimeout(async ()=>{
-            origFn(...args);
-            previousCall = Date.now();
-        }, minInterval);
-        if (!inFlight && Date.now() - previousCall >= minInterval) {
-            inFlight = true;
-            try {
-                origFn(...args);
-                previousCall = Date.now();
-            } finally{
-                inFlight = false;
-            }
-        }
-    };
-};
-
-
-const $dbb4e81089a7f491$export$93b87f7746612069 = (test = ()=>true)=>{
-    const savedState = localStorage.getItem("xin-state");
-    if (savedState != null) {
-        const state = JSON.parse(savedState);
-        for (const key of Object.keys(state).filter(test))if ((0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] !== undefined) Object.assign((0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key], state[key]);
-        else (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] = state[key];
-    }
-    const saveState = (0, $b350994d7e7e7767$export$61fc7d43ac8f84b0)(()=>{
-        const obj = {};
-        const state = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[0, $2f9efd8dbae277cd$export$bdd0d039ad781534];
-        for (const key of Object.keys(state).filter(test))obj[key] = state[key];
-        localStorage.setItem("xin-state", JSON.stringify(obj));
-        console.log("xin state saved to localStorage");
-    }, 500);
-    (0, $b3e4d800ba46b430$export$d1203567a167490e)(test, saveState);
-};
-
-
-
-
-const $16008b2efdc923f4$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
-const $16008b2efdc923f4$var$span = globalThis.document != null ? globalThis.document.createElement("span") : {
-    style: {
-        color: ""
-    }
-};
-class $16008b2efdc923f4$var$HslColor {
-    constructor(r, g, b){
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        const l = Math.max(r, g, b);
-        const s = l - Math.min(r, g, b);
-        const h = s !== 0 ? l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s : 0;
-        this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h;
-        this.s = s !== 0 ? l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s)) : 0;
-        this.l = (2 * l - s) / 2;
-    }
-}
-class $16008b2efdc923f4$export$892596cec99bc70e {
-    static fromCss(spec) {
-        $16008b2efdc923f4$var$span.style.color = spec;
-        const converted = $16008b2efdc923f4$var$span.style.color;
-        console.log(spec, converted);
-        const [r, g, b, a] = converted.match(/[\d.]+/g);
-        return new $16008b2efdc923f4$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
-    }
-    static fromHsl(h, s, l, a = 1) {
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
-    }
-    constructor(r, g, b, a = 1){
-        this.r = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, r, 255);
-        this.g = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, g, 255);
-        this.b = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, b, 255);
-        this.a = a !== undefined ? (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, a, 1) : a = 1;
-    }
-    get inverse() {
-        return new $16008b2efdc923f4$export$892596cec99bc70e(255 - this.r, 255 - this.g, 255 - this.b, this.a);
-    }
-    get inverseLuminance() {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, 1 - l, this.a);
-    }
-    get rgb() {
-        const { r: r , g: g , b: b  } = this;
-        return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
-    }
-    get rgba() {
-        const { r: r , g: g , b: b , a: a  } = this;
-        return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
-    }
-    get RGBA() {
-        return [
-            this.r / 255,
-            this.g / 255,
-            this.b / 255,
-            this.a
-        ];
-    }
-    get ARGB() {
-        return [
-            this.a,
-            this.r / 255,
-            this.g / 255,
-            this.b / 255
-        ];
-    }
-    get _hsl() {
-        if (this._hslCached == null) this._hslCached = new $16008b2efdc923f4$var$HslColor(this.r, this.g, this.b);
-        return this._hslCached;
-    }
-    get hsl() {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`;
-    }
-    get hsla() {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`;
-    }
-    get mono() {
-        const v = this.brightness * 255;
-        return new $16008b2efdc923f4$export$892596cec99bc70e(v, v, v);
-    }
-    get brightness() {
-        // http://www.itu.int/rec/R-REC-BT.601
-        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
-    }
-    get html() {
-        return this.a === 1 ? "#" + $16008b2efdc923f4$var$hex2(this.r) + $16008b2efdc923f4$var$hex2(this.g) + $16008b2efdc923f4$var$hex2(this.b) : "#" + $16008b2efdc923f4$var$hex2(this.r) + $16008b2efdc923f4$var$hex2(this.g) + $16008b2efdc923f4$var$hex2(this.b) + $16008b2efdc923f4$var$hex2(Math.floor(255 * this.a));
-    }
-    brighten(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        l = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    darken(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        l = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    saturate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        s = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    desaturate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        s = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    rotate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        h = (h + 360 + amount) % 360;
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    opacity(alpha) {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, alpha);
-    }
-    swatch() {
-        const { r: r , g: g , b: b , a: a  } = this;
-        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
-    }
-    blend(otherColor, t) {
-        return new $16008b2efdc923f4$export$892596cec99bc70e((0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.r, otherColor.r, t), (0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.g, otherColor.g, t), (0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.b, otherColor.b, t), (0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
-    }
-}
-
-
-
-
 const { document: $5258c5e951c26004$var$document , MutationObserver: $5258c5e951c26004$var$MutationObserver  } = globalThis;
 const $5258c5e951c26004$export$80bf2f765c31be6a = (element, changedPath)=>{
     const dataBindings = (0, $2f9efd8dbae277cd$export$1f922de8d0ecbb7e).get(element);
@@ -868,6 +680,37 @@ const $937ce97164a17ff0$export$6bb13967611cdb1 = (elt, content)=>{
 };
 
 
+const $b350994d7e7e7767$export$61fc7d43ac8f84b0 = (origFn, minInterval = 250)=>{
+    let debounceId;
+    return (...args)=>{
+        if (debounceId !== undefined) clearTimeout(debounceId);
+        debounceId = setTimeout(()=>{
+            origFn(...args);
+        }, minInterval);
+    };
+};
+const $b350994d7e7e7767$export$de363e709c412c8a = (origFn, minInterval = 250)=>{
+    let debounceId;
+    let previousCall = Date.now() - minInterval;
+    let inFlight = false;
+    return (...args)=>{
+        clearTimeout(debounceId);
+        debounceId = setTimeout(async ()=>{
+            origFn(...args);
+            previousCall = Date.now();
+        }, minInterval);
+        if (!inFlight && Date.now() - previousCall >= minInterval) {
+            inFlight = true;
+            try {
+                origFn(...args);
+                previousCall = Date.now();
+            } finally{
+                inFlight = false;
+            }
+        }
+    };
+};
+
 
 
 
@@ -1071,6 +914,137 @@ const $5c922f2f7914f4ef$export$97a1a3e6f39778d2 = {
 };
 
 
+
+const $16008b2efdc923f4$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
+const $16008b2efdc923f4$var$span = globalThis.document != null ? globalThis.document.createElement("span") : {
+    style: {
+        color: ""
+    }
+};
+class $16008b2efdc923f4$var$HslColor {
+    constructor(r, g, b){
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const l = Math.max(r, g, b);
+        const s = l - Math.min(r, g, b);
+        const h = s !== 0 ? l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s : 0;
+        this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h;
+        this.s = s !== 0 ? l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s)) : 0;
+        this.l = (2 * l - s) / 2;
+    }
+}
+class $16008b2efdc923f4$export$892596cec99bc70e {
+    static fromCss(spec) {
+        $16008b2efdc923f4$var$span.style.color = spec;
+        const converted = $16008b2efdc923f4$var$span.style.color;
+        const [r, g, b, a] = converted.match(/[\d.]+/g);
+        return new $16008b2efdc923f4$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
+    }
+    static fromHsl(h, s, l, a = 1) {
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
+    }
+    constructor(r, g, b, a = 1){
+        this.r = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, r, 255);
+        this.g = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, g, 255);
+        this.b = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, b, 255);
+        this.a = a !== undefined ? (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, a, 1) : a = 1;
+    }
+    get inverse() {
+        return new $16008b2efdc923f4$export$892596cec99bc70e(255 - this.r, 255 - this.g, 255 - this.b, this.a);
+    }
+    get inverseLuminance() {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, 1 - l, this.a);
+    }
+    get rgb() {
+        const { r: r , g: g , b: b  } = this;
+        return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
+    }
+    get rgba() {
+        const { r: r , g: g , b: b , a: a  } = this;
+        return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
+    }
+    get RGBA() {
+        return [
+            this.r / 255,
+            this.g / 255,
+            this.b / 255,
+            this.a
+        ];
+    }
+    get ARGB() {
+        return [
+            this.a,
+            this.r / 255,
+            this.g / 255,
+            this.b / 255
+        ];
+    }
+    get _hsl() {
+        if (this._hslCached == null) this._hslCached = new $16008b2efdc923f4$var$HslColor(this.r, this.g, this.b);
+        return this._hslCached;
+    }
+    get hsl() {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`;
+    }
+    get hsla() {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`;
+    }
+    get mono() {
+        const v = this.brightness * 255;
+        return new $16008b2efdc923f4$export$892596cec99bc70e(v, v, v);
+    }
+    get brightness() {
+        // http://www.itu.int/rec/R-REC-BT.601
+        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
+    }
+    get html() {
+        return this.a === 1 ? "#" + $16008b2efdc923f4$var$hex2(this.r) + $16008b2efdc923f4$var$hex2(this.g) + $16008b2efdc923f4$var$hex2(this.b) : "#" + $16008b2efdc923f4$var$hex2(this.r) + $16008b2efdc923f4$var$hex2(this.g) + $16008b2efdc923f4$var$hex2(this.b) + $16008b2efdc923f4$var$hex2(Math.floor(255 * this.a));
+    }
+    brighten(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        l = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    darken(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        l = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    saturate(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        s = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    desaturate(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        s = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    rotate(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        h = (h + 360 + amount) % 360;
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    opacity(alpha) {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, alpha);
+    }
+    swatch() {
+        const { r: r , g: g , b: b , a: a  } = this;
+        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
+    }
+    blend(otherColor, t) {
+        return new $16008b2efdc923f4$export$892596cec99bc70e((0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.r, otherColor.r, t), (0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.g, otherColor.g, t), (0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.b, otherColor.b, t), (0, $e070b3c758093e25$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
+    }
+}
+
+
+
+
 function $40005b86e623b59d$export$87ae551bf60f4bb(s) {
     return s.replace(/[A-Z]/g, (c)=>{
         return `-${c.toLocaleLowerCase()}`;
@@ -1151,13 +1125,31 @@ const $a20b878345862077$export$7a5d735b2ab6389d = new Proxy({
 function $5ce3d7bba914ef8e$export$bc59121b0a0fcbd3(styleSheet) {
     return (0, $a20b878345862077$export$7a5d735b2ab6389d).style($5ce3d7bba914ef8e$export$dbf350e5966cf602(styleSheet));
 }
+const $5ce3d7bba914ef8e$var$numericProps = [
+    "animation-iteration-count",
+    "flex",
+    "flex-base",
+    "flex-grow",
+    "flex-shrink",
+    "gap",
+    "opacity",
+    "order",
+    "tab-size",
+    "widows",
+    "z-index",
+    "zoom"
+];
+const $5ce3d7bba914ef8e$var$renderProp = (indentation, cssProp, value)=>{
+    if (value === undefined) return "";
+    else if (typeof value === "string" || $5ce3d7bba914ef8e$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
+    else return `${indentation}  ${cssProp}: ${value}px;`;
+};
 const $5ce3d7bba914ef8e$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $40005b86e623b59d$export$87ae551bf60f4bb)(key);
     if (typeof value === "object") {
         const renderedRule = Object.keys(value).map((innerKey)=>$5ce3d7bba914ef8e$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
-    } else if (typeof value === "number" && value !== 0) return `${indentation}  ${cssProp}: ${value}px;`;
-    return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : "";
+    } else return $5ce3d7bba914ef8e$var$renderProp(indentation, cssProp, value);
 };
 const $5ce3d7bba914ef8e$export$dbf350e5966cf602 = (obj, indentation = "")=>{
     const selectors = Object.keys(obj).map((selector)=>{
@@ -1237,6 +1229,8 @@ const $5ce3d7bba914ef8e$export$3cb96c9f6c8d16a4 = new Proxy({}, {
         return target[prop];
     }
 });
+
+
 
 
 
@@ -1421,14 +1415,45 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
 
 
 
+const $dbb4e81089a7f491$export$93b87f7746612069 = (test = ()=>true)=>{
+    const savedState = localStorage.getItem("xin-state");
+    if (savedState != null) {
+        const state = JSON.parse(savedState);
+        for (const key of Object.keys(state).filter(test))if ((0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] !== undefined) Object.assign((0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key], state[key]);
+        else (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] = state[key];
+    }
+    const saveState = (0, $b350994d7e7e7767$export$61fc7d43ac8f84b0)(()=>{
+        const obj = {};
+        const state = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[0, $2f9efd8dbae277cd$export$bdd0d039ad781534];
+        for (const key of Object.keys(state).filter(test))obj[key] = state[key];
+        localStorage.setItem("xin-state", JSON.stringify(obj));
+        console.log("xin state saved to localStorage");
+    }, 500);
+    (0, $b3e4d800ba46b430$export$d1203567a167490e)(test, saveState);
+};
+
+
+
 
 
 
 var $29ed5e5434553132$exports = {};
 
 
+
+function $b43c5f28217f2268$export$95a552d2395ab4c4(obj) {
+    const registered = {};
+    Object.keys(obj).forEach((key)=>{
+        // eslint-disable-next-line
+        (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] = obj[key];
+        registered[key] = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key];
+    });
+    return registered;
+}
+
+
 const $f0d540db358c20b7$export$5e0dd9fd5d74e0c5 = $e070b3c758093e25$exports;
 
 
-export {$f0d540db358c20b7$export$5e0dd9fd5d74e0c5 as MoreMath, $b3e4d800ba46b430$export$966034e6c6823eb0 as xin, $b3e4d800ba46b430$export$d1203567a167490e as observe, $26326a5bf69c90fe$export$23a2283368c55ea2 as unobserve, $26326a5bf69c90fe$export$d0b7ea69ab6056df as touch, $26326a5bf69c90fe$export$253d09664e30b967 as observerShouldBeRemoved, $b43c5f28217f2268$export$95a552d2395ab4c4 as xinProxy, $dbb4e81089a7f491$export$93b87f7746612069 as hotReload, $b350994d7e7e7767$export$de363e709c412c8a as throttle, $b350994d7e7e7767$export$61fc7d43ac8f84b0 as debounce, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 as Component, $a20b878345862077$export$7a5d735b2ab6389d as elements, $a20b878345862077$export$3bc26eec1cc2439f as makeComponent, $f5502bd23d7f7c5a$export$a5a6e0b888b2c992 as settings, $5258c5e951c26004$export$2385a24977818dd0 as bind, $5258c5e951c26004$export$af631764ddc44097 as on, $5c922f2f7914f4ef$export$97a1a3e6f39778d2 as bindings, $2f9efd8dbae277cd$export$4c309843c07ce679 as getListItem, $2f9efd8dbae277cd$export$40700dafb97c3799 as xinPath, $2f9efd8dbae277cd$export$5dcba2d45033d435 as xinValue, $5ce3d7bba914ef8e$export$3cb96c9f6c8d16a4 as vars, $5ce3d7bba914ef8e$export$90d0ea046136e3ed as initVars, $5ce3d7bba914ef8e$export$dbf350e5966cf602 as css, $5ce3d7bba914ef8e$export$808aaf1b460dc9af as darkMode, $16008b2efdc923f4$export$892596cec99bc70e as Color};
+export {$f0d540db358c20b7$export$5e0dd9fd5d74e0c5 as MoreMath, $5258c5e951c26004$export$2385a24977818dd0 as bind, $5258c5e951c26004$export$af631764ddc44097 as on, $5c922f2f7914f4ef$export$97a1a3e6f39778d2 as bindings, $5ce3d7bba914ef8e$export$3cb96c9f6c8d16a4 as vars, $5ce3d7bba914ef8e$export$90d0ea046136e3ed as initVars, $5ce3d7bba914ef8e$export$dbf350e5966cf602 as css, $5ce3d7bba914ef8e$export$808aaf1b460dc9af as darkMode, $16008b2efdc923f4$export$892596cec99bc70e as Color, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 as Component, $a20b878345862077$export$7a5d735b2ab6389d as elements, $a20b878345862077$export$3bc26eec1cc2439f as makeComponent, $dbb4e81089a7f491$export$93b87f7746612069 as hotReload, $2f9efd8dbae277cd$export$4c309843c07ce679 as getListItem, $2f9efd8dbae277cd$export$40700dafb97c3799 as xinPath, $2f9efd8dbae277cd$export$5dcba2d45033d435 as xinValue, $f5502bd23d7f7c5a$export$a5a6e0b888b2c992 as settings, $b350994d7e7e7767$export$de363e709c412c8a as throttle, $b350994d7e7e7767$export$61fc7d43ac8f84b0 as debounce, $b3e4d800ba46b430$export$966034e6c6823eb0 as xin, $b3e4d800ba46b430$export$d1203567a167490e as observe, $26326a5bf69c90fe$export$23a2283368c55ea2 as unobserve, $26326a5bf69c90fe$export$d0b7ea69ab6056df as touch, $26326a5bf69c90fe$export$253d09664e30b967 as observerShouldBeRemoved, $b43c5f28217f2268$export$95a552d2395ab4c4 as xinProxy};
 //# sourceMappingURL=index.js.map

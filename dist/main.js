@@ -19,32 +19,40 @@ function $parcel$export(e, n, v, s) {
 }
 
 $parcel$export(module.exports, "MoreMath", () => $882b6d93070905b3$export$5e0dd9fd5d74e0c5);
+$parcel$export(module.exports, "bind", () => $fc64c421299f5d54$export$2385a24977818dd0);
+$parcel$export(module.exports, "on", () => $fc64c421299f5d54$export$af631764ddc44097);
+$parcel$export(module.exports, "bindings", () => $e49806807158e47d$export$97a1a3e6f39778d2);
+$parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
+$parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
+$parcel$export(module.exports, "css", () => $db77bb2de3733b56$export$dbf350e5966cf602);
+$parcel$export(module.exports, "darkMode", () => $db77bb2de3733b56$export$808aaf1b460dc9af);
+$parcel$export(module.exports, "Color", () => $dde521108530e806$export$892596cec99bc70e);
+$parcel$export(module.exports, "Component", () => $8c7b36581a3597bc$export$16fa2f45be04daa8);
+$parcel$export(module.exports, "elements", () => $c004c420133596e3$export$7a5d735b2ab6389d);
+$parcel$export(module.exports, "makeComponent", () => $c004c420133596e3$export$3bc26eec1cc2439f);
+$parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87f7746612069);
+$parcel$export(module.exports, "getListItem", () => $3f1d78706f6d8212$export$4c309843c07ce679);
+$parcel$export(module.exports, "xinPath", () => $3f1d78706f6d8212$export$40700dafb97c3799);
+$parcel$export(module.exports, "xinValue", () => $3f1d78706f6d8212$export$5dcba2d45033d435);
+$parcel$export(module.exports, "settings", () => $7c791d4499aeb3a0$export$a5a6e0b888b2c992);
+$parcel$export(module.exports, "throttle", () => $a948014a44fcb9ad$export$de363e709c412c8a);
+$parcel$export(module.exports, "debounce", () => $a948014a44fcb9ad$export$61fc7d43ac8f84b0);
 $parcel$export(module.exports, "xin", () => $3c20fb09d41b8da8$export$966034e6c6823eb0);
 $parcel$export(module.exports, "observe", () => $3c20fb09d41b8da8$export$d1203567a167490e);
 $parcel$export(module.exports, "unobserve", () => $287d4a4db165612d$export$23a2283368c55ea2);
 $parcel$export(module.exports, "touch", () => $287d4a4db165612d$export$d0b7ea69ab6056df);
 $parcel$export(module.exports, "observerShouldBeRemoved", () => $287d4a4db165612d$export$253d09664e30b967);
 $parcel$export(module.exports, "xinProxy", () => $fce641fe9ed990db$export$95a552d2395ab4c4);
-$parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87f7746612069);
-$parcel$export(module.exports, "throttle", () => $a948014a44fcb9ad$export$de363e709c412c8a);
-$parcel$export(module.exports, "debounce", () => $a948014a44fcb9ad$export$61fc7d43ac8f84b0);
-$parcel$export(module.exports, "Component", () => $8c7b36581a3597bc$export$16fa2f45be04daa8);
-$parcel$export(module.exports, "elements", () => $c004c420133596e3$export$7a5d735b2ab6389d);
-$parcel$export(module.exports, "makeComponent", () => $c004c420133596e3$export$3bc26eec1cc2439f);
-$parcel$export(module.exports, "settings", () => $7c791d4499aeb3a0$export$a5a6e0b888b2c992);
-$parcel$export(module.exports, "bind", () => $fc64c421299f5d54$export$2385a24977818dd0);
-$parcel$export(module.exports, "on", () => $fc64c421299f5d54$export$af631764ddc44097);
-$parcel$export(module.exports, "bindings", () => $e49806807158e47d$export$97a1a3e6f39778d2);
-$parcel$export(module.exports, "getListItem", () => $3f1d78706f6d8212$export$4c309843c07ce679);
-$parcel$export(module.exports, "xinPath", () => $3f1d78706f6d8212$export$40700dafb97c3799);
-$parcel$export(module.exports, "xinValue", () => $3f1d78706f6d8212$export$5dcba2d45033d435);
-$parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
-$parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
-$parcel$export(module.exports, "css", () => $db77bb2de3733b56$export$dbf350e5966cf602);
-$parcel$export(module.exports, "darkMode", () => $db77bb2de3733b56$export$808aaf1b460dc9af);
-$parcel$export(module.exports, "Color", () => $dde521108530e806$export$892596cec99bc70e);
-// workaround for https://github.com/parcel-bundler/parcel/issues/5911
-var $64a1e022735c9832$exports = {};
+/*
+  Note that re-exported types should be explicitly and separately exported
+  as types because of issues with parceljs
+
+  The error messages will be very perplexing
+
+  https://github.com/parcel-bundler/parcel/issues/4796
+  https://github.com/parcel-bundler/parcel/issues/4240
+  https://devblogs.microsoft.com/typescript/announcing-typescript-3-8/#type-only-imports-exports
+*/ var $64a1e022735c9832$exports = {};
 
 $parcel$export($64a1e022735c9832$exports, "RADIANS_TO_DEGREES", () => $64a1e022735c9832$export$ba6bc6c220358ed9);
 $parcel$export($64a1e022735c9832$exports, "DEGREES_TO_RADIANS", () => $64a1e022735c9832$export$1518e1a62333c8a4);
@@ -478,202 +486,6 @@ const $3c20fb09d41b8da8$export$966034e6c6823eb0 = new Proxy($3c20fb09d41b8da8$va
 
 
 
-function $fce641fe9ed990db$export$95a552d2395ab4c4(obj) {
-    const registered = {};
-    Object.keys(obj).forEach((key)=>{
-        // eslint-disable-next-line
-        (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key] = obj[key];
-        registered[key] = (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key];
-    });
-    return registered;
-}
-
-
-
-
-const $a948014a44fcb9ad$export$61fc7d43ac8f84b0 = (origFn, minInterval = 250)=>{
-    let debounceId;
-    return (...args)=>{
-        if (debounceId !== undefined) clearTimeout(debounceId);
-        debounceId = setTimeout(()=>{
-            origFn(...args);
-        }, minInterval);
-    };
-};
-const $a948014a44fcb9ad$export$de363e709c412c8a = (origFn, minInterval = 250)=>{
-    let debounceId;
-    let previousCall = Date.now() - minInterval;
-    let inFlight = false;
-    return (...args)=>{
-        clearTimeout(debounceId);
-        debounceId = setTimeout(async ()=>{
-            origFn(...args);
-            previousCall = Date.now();
-        }, minInterval);
-        if (!inFlight && Date.now() - previousCall >= minInterval) {
-            inFlight = true;
-            try {
-                origFn(...args);
-                previousCall = Date.now();
-            } finally{
-                inFlight = false;
-            }
-        }
-    };
-};
-
-
-const $04b008a736a73fbf$export$93b87f7746612069 = (test = ()=>true)=>{
-    const savedState = localStorage.getItem("xin-state");
-    if (savedState != null) {
-        const state = JSON.parse(savedState);
-        for (const key of Object.keys(state).filter(test))if ((0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key] !== undefined) Object.assign((0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key], state[key]);
-        else (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key] = state[key];
-    }
-    const saveState = (0, $a948014a44fcb9ad$export$61fc7d43ac8f84b0)(()=>{
-        const obj = {};
-        const state = (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[0, $3f1d78706f6d8212$export$bdd0d039ad781534];
-        for (const key of Object.keys(state).filter(test))obj[key] = state[key];
-        localStorage.setItem("xin-state", JSON.stringify(obj));
-        console.log("xin state saved to localStorage");
-    }, 500);
-    (0, $3c20fb09d41b8da8$export$d1203567a167490e)(test, saveState);
-};
-
-
-
-
-const $dde521108530e806$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
-const $dde521108530e806$var$span = globalThis.document != null ? globalThis.document.createElement("span") : {
-    style: {
-        color: ""
-    }
-};
-class $dde521108530e806$var$HslColor {
-    constructor(r, g, b){
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        const l = Math.max(r, g, b);
-        const s = l - Math.min(r, g, b);
-        const h = s !== 0 ? l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s : 0;
-        this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h;
-        this.s = s !== 0 ? l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s)) : 0;
-        this.l = (2 * l - s) / 2;
-    }
-}
-class $dde521108530e806$export$892596cec99bc70e {
-    static fromCss(spec) {
-        $dde521108530e806$var$span.style.color = spec;
-        const converted = $dde521108530e806$var$span.style.color;
-        console.log(spec, converted);
-        const [r, g, b, a] = converted.match(/[\d.]+/g);
-        return new $dde521108530e806$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
-    }
-    static fromHsl(h, s, l, a = 1) {
-        return $dde521108530e806$export$892596cec99bc70e.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
-    }
-    constructor(r, g, b, a = 1){
-        this.r = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, r, 255);
-        this.g = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, g, 255);
-        this.b = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, b, 255);
-        this.a = a !== undefined ? (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, a, 1) : a = 1;
-    }
-    get inverse() {
-        return new $dde521108530e806$export$892596cec99bc70e(255 - this.r, 255 - this.g, 255 - this.b, this.a);
-    }
-    get inverseLuminance() {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, 1 - l, this.a);
-    }
-    get rgb() {
-        const { r: r , g: g , b: b  } = this;
-        return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
-    }
-    get rgba() {
-        const { r: r , g: g , b: b , a: a  } = this;
-        return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
-    }
-    get RGBA() {
-        return [
-            this.r / 255,
-            this.g / 255,
-            this.b / 255,
-            this.a
-        ];
-    }
-    get ARGB() {
-        return [
-            this.a,
-            this.r / 255,
-            this.g / 255,
-            this.b / 255
-        ];
-    }
-    get _hsl() {
-        if (this._hslCached == null) this._hslCached = new $dde521108530e806$var$HslColor(this.r, this.g, this.b);
-        return this._hslCached;
-    }
-    get hsl() {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`;
-    }
-    get hsla() {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`;
-    }
-    get mono() {
-        const v = this.brightness * 255;
-        return new $dde521108530e806$export$892596cec99bc70e(v, v, v);
-    }
-    get brightness() {
-        // http://www.itu.int/rec/R-REC-BT.601
-        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
-    }
-    get html() {
-        return this.a === 1 ? "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) : "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) + $dde521108530e806$var$hex2(Math.floor(255 * this.a));
-    }
-    brighten(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        l = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    darken(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        l = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    saturate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        s = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    desaturate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        s = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    rotate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
-        h = (h + 360 + amount) % 360;
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
-    }
-    opacity(alpha) {
-        const { h: h , s: s , l: l  } = this._hsl;
-        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, alpha);
-    }
-    swatch() {
-        const { r: r , g: g , b: b , a: a  } = this;
-        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
-    }
-    blend(otherColor, t) {
-        return new $dde521108530e806$export$892596cec99bc70e((0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.r, otherColor.r, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.g, otherColor.g, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.b, otherColor.b, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
-    }
-}
-
-
-
-
 const { document: $fc64c421299f5d54$var$document , MutationObserver: $fc64c421299f5d54$var$MutationObserver  } = globalThis;
 const $fc64c421299f5d54$export$80bf2f765c31be6a = (element, changedPath)=>{
     const dataBindings = (0, $3f1d78706f6d8212$export$1f922de8d0ecbb7e).get(element);
@@ -910,6 +722,37 @@ const $2f96dbadf81a4e19$export$6bb13967611cdb1 = (elt, content)=>{
 };
 
 
+const $a948014a44fcb9ad$export$61fc7d43ac8f84b0 = (origFn, minInterval = 250)=>{
+    let debounceId;
+    return (...args)=>{
+        if (debounceId !== undefined) clearTimeout(debounceId);
+        debounceId = setTimeout(()=>{
+            origFn(...args);
+        }, minInterval);
+    };
+};
+const $a948014a44fcb9ad$export$de363e709c412c8a = (origFn, minInterval = 250)=>{
+    let debounceId;
+    let previousCall = Date.now() - minInterval;
+    let inFlight = false;
+    return (...args)=>{
+        clearTimeout(debounceId);
+        debounceId = setTimeout(async ()=>{
+            origFn(...args);
+            previousCall = Date.now();
+        }, minInterval);
+        if (!inFlight && Date.now() - previousCall >= minInterval) {
+            inFlight = true;
+            try {
+                origFn(...args);
+                previousCall = Date.now();
+            } finally{
+                inFlight = false;
+            }
+        }
+    };
+};
+
 
 
 
@@ -1113,6 +956,137 @@ const $e49806807158e47d$export$97a1a3e6f39778d2 = {
 };
 
 
+
+const $dde521108530e806$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
+const $dde521108530e806$var$span = globalThis.document != null ? globalThis.document.createElement("span") : {
+    style: {
+        color: ""
+    }
+};
+class $dde521108530e806$var$HslColor {
+    constructor(r, g, b){
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const l = Math.max(r, g, b);
+        const s = l - Math.min(r, g, b);
+        const h = s !== 0 ? l === r ? (g - b) / s : l === g ? 2 + (b - r) / s : 4 + (r - g) / s : 0;
+        this.h = 60 * h < 0 ? 60 * h + 360 : 60 * h;
+        this.s = s !== 0 ? l <= 0.5 ? s / (2 * l - s) : s / (2 - (2 * l - s)) : 0;
+        this.l = (2 * l - s) / 2;
+    }
+}
+class $dde521108530e806$export$892596cec99bc70e {
+    static fromCss(spec) {
+        $dde521108530e806$var$span.style.color = spec;
+        const converted = $dde521108530e806$var$span.style.color;
+        const [r, g, b, a] = converted.match(/[\d.]+/g);
+        return new $dde521108530e806$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
+    }
+    static fromHsl(h, s, l, a = 1) {
+        return $dde521108530e806$export$892596cec99bc70e.fromCss(`hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${a.toFixed(2)})`);
+    }
+    constructor(r, g, b, a = 1){
+        this.r = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, r, 255);
+        this.g = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, g, 255);
+        this.b = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, b, 255);
+        this.a = a !== undefined ? (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, a, 1) : a = 1;
+    }
+    get inverse() {
+        return new $dde521108530e806$export$892596cec99bc70e(255 - this.r, 255 - this.g, 255 - this.b, this.a);
+    }
+    get inverseLuminance() {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, 1 - l, this.a);
+    }
+    get rgb() {
+        const { r: r , g: g , b: b  } = this;
+        return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
+    }
+    get rgba() {
+        const { r: r , g: g , b: b , a: a  } = this;
+        return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
+    }
+    get RGBA() {
+        return [
+            this.r / 255,
+            this.g / 255,
+            this.b / 255,
+            this.a
+        ];
+    }
+    get ARGB() {
+        return [
+            this.a,
+            this.r / 255,
+            this.g / 255,
+            this.b / 255
+        ];
+    }
+    get _hsl() {
+        if (this._hslCached == null) this._hslCached = new $dde521108530e806$var$HslColor(this.r, this.g, this.b);
+        return this._hslCached;
+    }
+    get hsl() {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`;
+    }
+    get hsla() {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`;
+    }
+    get mono() {
+        const v = this.brightness * 255;
+        return new $dde521108530e806$export$892596cec99bc70e(v, v, v);
+    }
+    get brightness() {
+        // http://www.itu.int/rec/R-REC-BT.601
+        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
+    }
+    get html() {
+        return this.a === 1 ? "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) : "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) + $dde521108530e806$var$hex2(Math.floor(255 * this.a));
+    }
+    brighten(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        l = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    darken(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        l = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    saturate(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        s = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    desaturate(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        s = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    rotate(amount) {
+        let { h: h , s: s , l: l  } = this._hsl;
+        h = (h + 360 + amount) % 360;
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+    }
+    opacity(alpha) {
+        const { h: h , s: s , l: l  } = this._hsl;
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, alpha);
+    }
+    swatch() {
+        const { r: r , g: g , b: b , a: a  } = this;
+        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
+    }
+    blend(otherColor, t) {
+        return new $dde521108530e806$export$892596cec99bc70e((0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.r, otherColor.r, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.g, otherColor.g, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.b, otherColor.b, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
+    }
+}
+
+
+
+
 function $6d99f825475e91d0$export$87ae551bf60f4bb(s) {
     return s.replace(/[A-Z]/g, (c)=>{
         return `-${c.toLocaleLowerCase()}`;
@@ -1193,13 +1167,31 @@ const $c004c420133596e3$export$7a5d735b2ab6389d = new Proxy({
 function $db77bb2de3733b56$export$bc59121b0a0fcbd3(styleSheet) {
     return (0, $c004c420133596e3$export$7a5d735b2ab6389d).style($db77bb2de3733b56$export$dbf350e5966cf602(styleSheet));
 }
+const $db77bb2de3733b56$var$numericProps = [
+    "animation-iteration-count",
+    "flex",
+    "flex-base",
+    "flex-grow",
+    "flex-shrink",
+    "gap",
+    "opacity",
+    "order",
+    "tab-size",
+    "widows",
+    "z-index",
+    "zoom"
+];
+const $db77bb2de3733b56$var$renderProp = (indentation, cssProp, value)=>{
+    if (value === undefined) return "";
+    else if (typeof value === "string" || $db77bb2de3733b56$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
+    else return `${indentation}  ${cssProp}: ${value}px;`;
+};
 const $db77bb2de3733b56$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
     if (typeof value === "object") {
         const renderedRule = Object.keys(value).map((innerKey)=>$db77bb2de3733b56$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
-    } else if (typeof value === "number" && value !== 0) return `${indentation}  ${cssProp}: ${value}px;`;
-    return value !== undefined ? `${indentation}  ${cssProp}: ${value};` : "";
+    } else return $db77bb2de3733b56$var$renderProp(indentation, cssProp, value);
 };
 const $db77bb2de3733b56$export$dbf350e5966cf602 = (obj, indentation = "")=>{
     const selectors = Object.keys(obj).map((selector)=>{
@@ -1279,6 +1271,8 @@ const $db77bb2de3733b56$export$3cb96c9f6c8d16a4 = new Proxy({}, {
         return target[prop];
     }
 });
+
+
 
 
 
@@ -1463,10 +1457,41 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
 
 
 
+const $04b008a736a73fbf$export$93b87f7746612069 = (test = ()=>true)=>{
+    const savedState = localStorage.getItem("xin-state");
+    if (savedState != null) {
+        const state = JSON.parse(savedState);
+        for (const key of Object.keys(state).filter(test))if ((0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key] !== undefined) Object.assign((0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key], state[key]);
+        else (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key] = state[key];
+    }
+    const saveState = (0, $a948014a44fcb9ad$export$61fc7d43ac8f84b0)(()=>{
+        const obj = {};
+        const state = (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[0, $3f1d78706f6d8212$export$bdd0d039ad781534];
+        for (const key of Object.keys(state).filter(test))obj[key] = state[key];
+        localStorage.setItem("xin-state", JSON.stringify(obj));
+        console.log("xin state saved to localStorage");
+    }, 500);
+    (0, $3c20fb09d41b8da8$export$d1203567a167490e)(test, saveState);
+};
+
+
+
 
 
 
 var $b66768ad3e594848$exports = {};
+
+
+
+function $fce641fe9ed990db$export$95a552d2395ab4c4(obj) {
+    const registered = {};
+    Object.keys(obj).forEach((key)=>{
+        // eslint-disable-next-line
+        (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key] = obj[key];
+        registered[key] = (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[key];
+    });
+    return registered;
+}
 
 
 const $882b6d93070905b3$export$5e0dd9fd5d74e0c5 = $64a1e022735c9832$exports;
