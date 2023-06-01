@@ -275,7 +275,7 @@ function $d43c1d4bf4059510$var$expectArray(obj) {
     if (!Array.isArray(obj)) throw (0, $7462882f3d13e4d6$export$5a4bb2b1c89bdce7)("setByPath failed: expected array, found", obj);
 }
 function $d43c1d4bf4059510$var$expectObject(obj) {
-    if (obj == null || obj.constructor !== Object) throw (0, $7462882f3d13e4d6$export$5a4bb2b1c89bdce7)("setByPath failed: expected Object, found", obj);
+    if (obj == null || !(obj instanceof Object)) throw (0, $7462882f3d13e4d6$export$5a4bb2b1c89bdce7)("setByPath failed: expected Object, found", obj);
 }
 function $d43c1d4bf4059510$export$44b5bed83342a92f(obj, path) {
     const parts = $d43c1d4bf4059510$export$f5d2dd4cfd729958(path);
@@ -836,6 +836,9 @@ class $17b559bf321bb783$var$ListBinding {
                     const idValue = item[idPath];
                     const itemPath = `${arrayPath}[${idPath}=${idValue}]`;
                     $17b559bf321bb783$var$updateRelativeBindings(element, itemPath);
+                } else {
+                    const itemPath = `${arrayPath}[${i}]`;
+                    $17b559bf321bb783$var$updateRelativeBindings(element, itemPath);
                 }
                 if (initInstance != null) // eslint-disable-next-line
                 initInstance(element, item);
@@ -916,11 +919,6 @@ const $5c922f2f7914f4ef$export$97a1a3e6f39778d2 = {
 
 
 const $16008b2efdc923f4$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
-const $16008b2efdc923f4$var$span = globalThis.document != null ? globalThis.document.createElement("span") : {
-    style: {
-        color: ""
-    }
-};
 class $16008b2efdc923f4$var$HslColor {
     constructor(r, g, b){
         r /= 255;
@@ -934,10 +932,16 @@ class $16008b2efdc923f4$var$HslColor {
         this.l = (2 * l - s) / 2;
     }
 }
+const $16008b2efdc923f4$var$span = globalThis.document !== undefined ? globalThis.document.createElement("span") : undefined;
 class $16008b2efdc923f4$export$892596cec99bc70e {
     static fromCss(spec) {
         $16008b2efdc923f4$var$span.style.color = spec;
-        const converted = $16008b2efdc923f4$var$span.style.color;
+        let converted = spec;
+        if ($16008b2efdc923f4$var$span instanceof HTMLSpanElement) {
+            document.body.appendChild($16008b2efdc923f4$var$span);
+            converted = getComputedStyle($16008b2efdc923f4$var$span).color;
+            $16008b2efdc923f4$var$span.remove();
+        }
         const [r, g, b, a] = converted.match(/[\d.]+/g);
         return new $16008b2efdc923f4$export$892596cec99bc70e(Number(r), Number(g), Number(b), a == null ? 1 : Number(a));
     }
