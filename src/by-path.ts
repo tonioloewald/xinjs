@@ -129,7 +129,7 @@ function expectArray (obj: any): void {
 }
 
 function expectObject (obj: any): void {
-  if ((obj == null) || obj.constructor !== Object) {
+  if ((obj == null) || !(obj instanceof Object)) {
     throw makeError('setByPath failed: expected Object, found', obj)
   }
 }
