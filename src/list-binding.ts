@@ -186,6 +186,9 @@ class ListBinding {
           const idValue = item[idPath] as string
           const itemPath = `${arrayPath}[${idPath}=${idValue}]`
           updateRelativeBindings(element, itemPath)
+        } else {
+          const itemPath = `${arrayPath}[${i}]`
+          updateRelativeBindings(element, itemPath)
         }
         if (initInstance != null) {
           // eslint-disable-next-line
