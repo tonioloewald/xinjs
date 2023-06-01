@@ -127,8 +127,8 @@ Until browsers support color calculations the way they support dimenion arithmet
 this is the miserable existence we all lead. That, or defining huge arrays of color
 values that we mostly don't use and are often not exactly what we want. You choose!
 
-> Finally, `vars` color computations **will not work on named HTML colors** (e.g. `aliceblue`)
-> because I refuse to add the definitions for this trash into the `xinjs` codebase.
+> **New** color now supports CSS [named colors](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color), 
+such as `black`, `red`, and `aliceblue`.
 
 `vars` also allows you to perform color calculations on css (color) 
 variables:
