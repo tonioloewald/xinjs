@@ -2,8 +2,6 @@ import { lerp, clamp } from './more-math'
 
 const hex2 = (n: number): string => ('00' + Math.round(Number(n)).toString(16)).slice(-2)
 
-const span = globalThis.document != null ? globalThis.document.createElement('span') : { style: { color: '' } }
-
 class HslColor {
   h: number
   s: number
@@ -29,6 +27,7 @@ class HslColor {
   }
 }
 
+const span = globalThis.document !== undefined ? globalThis.document.createElement('span') : undefined
 export class Color {
   r: number
   g: number
@@ -36,8 +35,13 @@ export class Color {
   a: number
 
   static fromCss (spec: string): Color {
-    span.style.color = spec
-    const converted = span.style.color
+    let converted = spec
+    if (span instanceof HTMLSpanElement) {
+      span.style.color = spec
+      document.body.appendChild(span)
+      converted = getComputedStyle(span).color
+      span.remove()
+    }
     const [r, g, b, a] = converted.match(/[\d.]+/g) as string[]
     return new Color(Number(r), Number(g), Number(b), a == null ? 1 : Number(a))
   }
