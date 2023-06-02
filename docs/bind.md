@@ -2,7 +2,7 @@
 
 ## An Aside on Reactive Programming vs. the Observer Model
 
-A good deal of user-facing code deals with keeping the application's
+A good deal of front-end code deals with keeping the application's
 state synchronized with the user-interface. One approach to this problem
 is [Reactive Programming](https://en.wikipedia.org/wiki/Reactive_programming) 
 as exemplified by [React](https://reactjs.org) and its many imitators.
