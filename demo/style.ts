@@ -93,6 +93,15 @@ const rules: XinStyleSheet = {
   'p, h4, h5, h6, pre, blockquote': {
     margin: `0 0 ${vars.spacing}`,
   },
+  h1: {
+    lineHeight: vars.lineHeight200,
+  },
+  h2: {
+    lineHeight: vars.lineHeight150,
+  },
+  h2: {
+    lineHeight: vars.lineHeight125,
+  },
   pre: {
     fontSize: vars.codeFontSize,
     background: vars.codeBg,
@@ -237,10 +246,13 @@ const rules: XinStyleSheet = {
   },
   '::placeholder': {
     opacity: vars.placeholderOpacity
+  },
+  ':focus-visible': {
+    outline: 'none',
+    boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5).html}`
   }
 }
 
-console.log(css(rules))
 document.head.append(style({id: 'base-style'}, css(rules))) 
 
 // adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/

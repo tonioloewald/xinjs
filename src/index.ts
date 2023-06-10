@@ -9,7 +9,6 @@
   https://devblogs.microsoft.com/typescript/announcing-typescript-3-8/#type-only-imports-exports
 */
 
-import * as _MoreMath from './more-math'
 export { bind, on } from './bind'
 export { bindings } from './bindings'
 export { vars, initVars, css, darkMode } from './css'
@@ -20,7 +19,7 @@ export { elements, makeComponent } from './elements'
 export type { ElementsProxy } from './elements'
 export { hotReload } from './hot-reload'
 export { getListItem, xinPath, xinValue } from './metadata'
-export const MoreMath = _MoreMath
+export { MoreMath } from './more-math'
 export { settings } from './settings'
 export { throttle, debounce } from './throttle'
 export { xin, observe, unobserve, touch, observerShouldBeRemoved } from './xin'

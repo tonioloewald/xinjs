@@ -46,6 +46,8 @@ The `list` binding accepts as options:
 - `initInstance: (element, item: any) => void`
 - `updateInstance: (element, item: any) => void` 
 - `virtual: {width?: number, height: number}`
+- `hiddenProp: symbol | string`
+- `visibleProp: symbol | string`
 
 `initInstance` is called once for each element created, and is passed
 that element and the array value that it represents.
@@ -66,3 +68,19 @@ See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
 If you want to bind large lists and maintain performance, you can make a list
 binding `virtual` by passing the `height` (and optionally `width`) of an item.
 Only visible elements will be rendered.
+
+### Filtered Lists and Detail Views
+
+You can **filter** the elements you wish to display in a bound list by using the
+`hiddenProp` (to hide elements of the list) and/or `visibleProp` (to show elements
+of the list).
+
+You can pass a `path` or a `symbol` as either the `hiddenProp` or `visibleProp`.
+
+Typically, you can use `hiddenProp` to power filters and `visibleProp` to power
+detail views. The beautfy of using symbols is that it won't impact the serialized
+values of the array and different views of the array can use different selection
+and filtering criteria.
+
+An example of a virtual list with both filters and a detail view can be found
+in [list-filters.ts](../demo/components/list-filters.ts).

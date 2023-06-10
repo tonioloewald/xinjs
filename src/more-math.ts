@@ -15,3 +15,8 @@ export function lerp (a: number, b: number, t: number): number {
   t = clamp(0, t, 1)
   return t * (b - a) + a
 }
+
+export const MoreMath = {
+  clamp,
+  lerp
+}

@@ -39,7 +39,7 @@ type _PathCallbackFunction = ((path: string) => void) | ((path: string) => Optio
 export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction
 
 export interface XinBindingSpec {
-  value: XinTouchableType
+  value: XinTouchableType | any
   [key: string]: any
 }
 

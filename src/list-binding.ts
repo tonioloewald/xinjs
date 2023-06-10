@@ -2,7 +2,7 @@ import { settings } from './settings'
 import { resizeObserver } from './dom'
 import { throttle } from './throttle'
 import { xin } from './xin'
-import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding, XIN_VALUE, XIN_PATH } from './metadata'
+import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding, xinValue, xinPath } from './metadata'
 import { XinObject } from './xin-types'
 
 const listBindingRef = Symbol('list-binding')
@@ -19,9 +19,12 @@ interface ListBindingOptions {
   initInstance?: (element: HTMLElement, value: any) => void
   updateInstance?: (element: HTMLElement, value: any) => void
   virtual?: { height: number, width?: number }
+  hiddenProp?: symbol | string
+  visibleProp?: symbol | string
 }
 
 interface VirtualListSlice {
+  items: any[]
   firstItem: number
   lastItem: number
   topBuffer: number
@@ -89,9 +92,16 @@ class ListBinding {
   }
 
   private visibleSlice (): VirtualListSlice {
-    const { virtual } = this.options
+    const { virtual, hiddenProp, visibleProp } = this.options
+    let visibleArray = this._array
+    if (hiddenProp !== undefined) {
+      visibleArray = visibleArray.filter(item => item[hiddenProp] !== true)
+    }
+    if (visibleProp !== undefined) {
+      visibleArray = visibleArray.filter(item => item[visibleProp] === true)
+    }
     let firstItem = 0
-    let lastItem = this._array.length - 1
+    let lastItem = visibleArray.length - 1
     let topBuffer = 0
     let bottomBuffer = 0
 
@@ -101,7 +111,7 @@ class ListBinding {
 
       const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1
       const visibleRows = Math.ceil(height / virtual.height) + 1
-      const totalRows = Math.ceil(this._array.length / visibleColumns)
+      const totalRows = Math.ceil(visibleArray.length / visibleColumns)
       const visibleItems = visibleColumns * visibleRows
       let topRow = Math.floor(this.boundElement.scrollTop / virtual.height)
       if (topRow > totalRows - visibleRows + 1) {
@@ -111,10 +121,11 @@ class ListBinding {
       lastItem = firstItem + visibleItems - 1
 
       topBuffer = topRow * virtual.height
-      bottomBuffer = totalRows * virtual.height - height - topBuffer
+      bottomBuffer = Math.max(totalRows * virtual.height - height - topBuffer, 0)
     }
 
     return {
+      items: visibleArray,
       firstItem,
       lastItem,
       topBuffer,
@@ -128,14 +139,23 @@ class ListBinding {
     }
     this._array = array
 
-    const { initInstance, updateInstance } = this.options
+    const { initInstance, updateInstance, hiddenProp, visibleProp } = this.options
     // @ts-expect-error
-    const arrayPath: string = array[XIN_PATH]
+    const arrayPath: string = xinPath(array)
 
     const slice = this.visibleSlice()
+    console.log({ slice })
+    this.boundElement.classList.toggle('xin-empty-list', slice.items.length === 0)
     const previousSlice = this._previousSlice
     const { firstItem, lastItem, topBuffer, bottomBuffer } = slice
-    if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
+    if (
+      hiddenProp === undefined &&
+      visibleProp === undefined &&
+      isSlice === true &&
+      previousSlice != null &&
+      firstItem === previousSlice.firstItem &&
+      lastItem === previousSlice.lastItem
+    ) {
       return
     }
     this._previousSlice = slice
@@ -152,7 +172,7 @@ class ListBinding {
       if (proxy == null) {
         element.remove()
       } else {
-        const idx = array.indexOf(proxy)
+        const idx = slice.items.indexOf(proxy)
         if (idx < firstItem || idx > lastItem) {
           element.remove()
           this.itemToElement.delete(proxy)
@@ -169,17 +189,17 @@ class ListBinding {
     const elements: HTMLElement[] = []
     const { idPath } = this.options
     for (let i = firstItem; i <= lastItem; i++) {
-      const item = array[i]
+      const item = slice.items[i]
       if (item === undefined) {
         continue
       }
-      let element = this.itemToElement.get(item[XIN_VALUE])
+      let element = this.itemToElement.get(xinValue(item))
       if (element == null) {
         created++
         element = cloneWithBindings(this.template) as HTMLElement
         if (typeof item === 'object') {
-          this.itemToElement.set(item[XIN_VALUE], element)
-          elementToItem.set(element, item[XIN_VALUE])
+          this.itemToElement.set(xinValue(item), element)
+          elementToItem.set(element, xinValue(item))
         }
         this.boundElement.insertBefore(element, this.listBottom)
         if (idPath != null) {

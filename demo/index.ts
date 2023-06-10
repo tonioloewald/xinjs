@@ -1,3 +1,4 @@
+import './style'
 import { xin, touch, xinProxy, elements, hotReload, settings, vars, ContentType } from '../src/'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
@@ -9,8 +10,8 @@ import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater, bReflect
 import { bBiped } from './components/biped'
 import { gameController } from './components/game-controller'
 import { wordSearch } from './WordSearch'
+import { listFilterDemo } from './components'
 import { Color } from '../src/color'
-import './style'
 const logo = './assets/xinjs-logo.svg'
 const readmeMd = './assets/readme.md'
 const scene = './assets/b-frame-test.glb'
@@ -26,14 +27,6 @@ console.time('total')
 settings.perf = true
 
 const {img, h1, div, span, button, a, main} = elements
-
-async function getEmoji() {
-  const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
-  xin.emoji = await request.json() as any[]
-  console.log(xin.emoji.length, 'emoji loaded')
-}
-
-getEmoji()
 
 hotReload(path => {
   if (path.startsWith('words') || path.startsWith('emoji')) {
@@ -71,6 +64,10 @@ const routes: Route[] = [
   {
     path: 'word-search',
     content: wordSearch,
+  },
+  {
+    path: 'list-filters',
+    content: () => div({class: 'page-padded'}, listFilterDemo()),
   },
   {
     path: 'kitchen-sink',
@@ -226,7 +223,7 @@ document.body.append(div(
     main(
       {
         style: {
-          overflowY: 'overlay',
+          overflowY: 'scroll',
           flex: '1 1 auto',
           background: 'var(--input-bg)',
           position: 'relative'
