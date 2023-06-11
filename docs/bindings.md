@@ -15,6 +15,8 @@ The `fromDOM` function is only needed for bindings to elements that trigger `cha
 events, typically `<input>`, `<textarea>`, and `<select>` elements, and of course your
 own [Custom Elements](web-components.md).
 
+You can see examples of these bindings in the [kitchen sink demo](../demo/components/kitchen-sink.ts).
+
 ## value
 
 The `value` binding syncs state from `xin` to the bound element's `value` property.
@@ -55,19 +57,15 @@ that element and the array value that it represents.
 Meanwhile, `updateInstance` is called once on creation and then any time the 
 array value is updated.
 
-### Binding custom-elements using idPath
-
-If you list-bind a custom-element with `bindValue` implemented and providing an
-`idPath` then the list-binding will bind the array items to the value of the 
-custom-element.
-
-See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
-
 ### Virtual List Binding
 
-If you want to bind large lists and maintain performance, you can make a list
+If you want to bind large arrays with minimal performance impact, you can make a list
 binding `virtual` by passing the `height` (and optionally `width`) of an item.
-Only visible elements will be rendered.
+Only visible elements will be rendered. Just make sure the values passed represent
+the *minimum* dimensions of the individual rendered items if they can vary in size.
+
+You can find examples of large, virtual bound arrays in [ArrayBindingsTest.ts](../demo/ArrayBindingTest.ts)
+and [list-filters.ts](../demo/components/list-filters.ts)
 
 ### Filtered Lists and Detail Views
 
@@ -82,5 +80,22 @@ detail views. The beautfy of using symbols is that it won't impact the serialize
 values of the array and different views of the array can use different selection
 and filtering criteria.
 
-An example of a virtual list with both filters and a detail view can be found
-in [list-filters.ts](../demo/components/list-filters.ts).
+An example of a large array bound to a filtered list view using `hiddenProp`
+and a detail view using `visibleProp` can be found in [list-filters.ts](../demo/components/list-filters.ts).
+
+> **Note** for a given list-binding, if you specify `hiddenProp` (but not `visibleProp`),
+> then all items in the array will be shown *unless* `item[hiddenProp] === true`.
+>
+> Conversely, if you specify `visibleProp` (but not `hiddenProp`), then all items
+> in the array will be ignored *unless* `item[visibleProp] === true`.
+>
+> If, for some reason, you specify both then an item will only be visible if
+> it `item[visibleProp] === true` and `item[hiddenProp] !== true`.
+
+### Binding custom-elements using idPath
+
+If you list-bind a custom-element with `bindValue` implemented and providing an
+`idPath` then the list-binding will bind the array items to the value of the 
+custom-element.
+
+See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
