@@ -92,7 +92,7 @@ if (globalThis.document != null) {
   document.body.addEventListener('input', handleChange, true)
 }
 
-export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject): HTMLElement => {
+export function bind<T extends HTMLElement> (element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject): T {
   if (element instanceof DocumentFragment) {
     throw new Error('bind cannot bind to a DocumentFragment')
   }
