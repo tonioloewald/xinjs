@@ -250,6 +250,9 @@ const rules: XinStyleSheet = {
   ':focus-visible': {
     outline: 'none',
     boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5).html}`
+  },
+  '.show-after-empty:not(.xin-empty-list+*)': {
+    display: 'none'
   }
 }
 
