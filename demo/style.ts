@@ -259,11 +259,15 @@ const rules: XinStyleSheet = {
     color: vars.brandTextColor
   },
   '*::-webkit-scrollbar': {
-    background: 'transparent',
+    background: '#fff6',
     width: vars.spacing50,
     height: vars.spacing50,
   },
   '*::-webkit-scrollbar-thumb': {
+    background: brandColor.opacity(0.5).html,
+    borderRadius: vars.spacing25,
+  },
+  '*::-webkit-scrollbar-thumb:hover': {
     background: vars.brandColor,
     borderRadius: vars.spacing25,
   }
