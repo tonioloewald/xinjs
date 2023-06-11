@@ -1,4 +1,5 @@
 import { xinProxy, elements, touch, vars, XinStyleSheet, css, getListItem, bindings } from "../../src"
+import { markdownViewer } from "./markdown-viewer"
 
 const { div, span, h1, h2, input, template, style, button, label, textarea, p } = elements
 
@@ -23,6 +24,10 @@ const styles: XinStyleSheet = {
   '.emoji-table .t-row[data-selected]': {
     background: vars.brandColor,
     color: vars.background,
+  },
+
+  '.emoji-table .t-row:hover:not([data-selected])': {
+    background: vars.brandColor10o,
   },
 
   '.emoji-table .t-row': {
@@ -80,7 +85,6 @@ const { emoji } = xinProxy({
     set needle (newValue: string) {
       newValue = newValue.trim().toLocaleLowerCase()
       if (newValue !== emoji._needle) {
-        console.log('filter changed')
         emoji._needle = newValue
         if (newValue === '') {
           emoji.list.forEach(item => { delete item[HIDDEN]})
@@ -142,8 +146,8 @@ export const listFilterDemo = () => div(
     { style: { marginTop: 0 } },
     'Filtered Lists'
   ),
-  p(`The list and detail views are both filtered list-bindings and thus the views have a single source of truth.
-  The only reason your notes aren't persisted on reload is that the array is large and so it's excluded from hot-reload.`),
+  markdownViewer(`The **list** and **detail** views are both *filtered* list-bindings and thus the views have a *single source of truth*.
+  The only reason notes aren't persisted on reload is that the array is large and so it's excluded from hot-reload.`),
   div(
     { style: {
       marginBottom: vars.spacing
