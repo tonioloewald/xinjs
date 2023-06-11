@@ -55,6 +55,10 @@ const styles: XinStyleSheet = {
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis'
+  },
+
+  'input[type="search"]': {
+    padding: `${vars.spacing75} ${vars.spacing125}`
   }
 }
 
