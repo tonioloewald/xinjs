@@ -6,16 +6,11 @@ import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
 import { kitchenSink } from './components/kitchen-sink'
-import { b3d, bSphere, bLoader, bButton, bLight, bSun, bSkybox, bWater, bReflections } from './components/babylon3d'
-import { bBiped } from './components/biped'
-import { gameController } from './components/game-controller'
 import { wordSearch } from './WordSearch'
 import { listFilterDemo } from './components'
 import { Color } from '../src/color'
 const logo = './assets/xinjs-logo.svg'
 const readmeMd = './assets/readme.md'
-const scene = './assets/b-frame-test.glb'
-const omnidude = './assets/omnidude.glb'
 
 xin.app = {
   title: 'docs & tests',
@@ -73,32 +68,6 @@ const routes: Route[] = [
     path: 'kitchen-sink',
     content: () => div({class: 'page-padded'}, kitchenSink()),
   },
-  {
-    path: 'babylon-3d',
-    content: () => b3d(
-      {glowLayerIntensity: 1},
-      bSun({shadowCascading: true, shadowTextureSize: 2048, activeDistance: 20}),
-      bSkybox({timeOfDay: 6, realtimeScale: 100}),
-      bSphere({name: 'tiny-sphere', diameter: 0.25, y: 0.125, x: 2}), 
-      bSphere({name: 'sphere-mirror', diameter: 0.5, y: 0.25, x: 1.5, color: '#444444'}),
-      bLoader({url: scene}),
-      gameController(bBiped({url: omnidude, x: 5, ry: 135, player: true, cameraType: 'follow', initialState: 'look'})),
-      bBiped({url: omnidude, x: 3, initialState: 'dance'}),
-      bButton({caption: 'Toggle XR', x: -2, y: 1.5, action: () => {
-        const biped = document.querySelector('b-biped[player]')
-        // @ts-ignore-error
-        if (biped.cameraType !== 'xr') {
-          // @ts-ignore-error
-          biped.cameraType = 'xr'
-        } else {
-          window.location.reload()
-        }
-      }}),
-      bLight({y: 1, z: 0.5, intensity: 0.2, diffuse: '#8080ff'}),
-      bWater({y: -0.2, twoSided: true, size: 1024}),
-      bReflections(),
-    )
-  }
 ]
 
 function showRoute () {

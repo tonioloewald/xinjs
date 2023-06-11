@@ -133,8 +133,13 @@ export interface ElementsProxy {
 
 const templates: { [key: string]: HTMLElement } = {}
 
-export const makeComponent = (...componentParts: ElementPart[]) => {
-  return (...args: ElementPart[]) => elements.div(...args, ...componentParts)
+/**
+ * makeComponent takes an elementCreator along with its arguments and produces
+ * a "curried" version of that element creator. This is a way of creating
+ * reusable, composable, pure functional components with no shadowDOM.
+ */
+export function makeComponent<T extends HTMLElement> (rootElementCreator: ElementCreator<T>, ...componentParts: ElementPart[]): ElementCreator<T> {
+  return (...args: ElementPart[]) => rootElementCreator(...args, ...componentParts)
 }
 
 const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement => {
@@ -211,6 +216,11 @@ const fragment: ElementCreator<DocumentFragment> = (...contents: ElementPart[]) 
   return frag
 }
 
+/**
+ * elements is a proxy that produces ElementCreators, e.g.
+ * elements.div() creates <div> elements and
+ * elements.myElement() creatres <my-element> elements.
+ */
 export const elements = new Proxy({ fragment }, {
   get (target, tagName: string) {
     tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`)

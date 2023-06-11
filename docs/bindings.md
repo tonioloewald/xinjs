@@ -102,6 +102,6 @@ See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
 
 ### xin-empty-list class
 
-The `list` binding will automatically add the class `xin-empty-list` to a 
+The `list` binding will automatically add the class `-xin-empty-list` to a 
 container bound to an empty array, making it easier to conditionally render
 instructions or explanations when a list is empty.

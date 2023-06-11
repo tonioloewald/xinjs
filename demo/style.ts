@@ -78,7 +78,7 @@ const rules: XinStyleSheet = {
     margin: 0,
     fontSize: vars.fontSize,
     lineHeight: vars.lineHeight,
-    accentColor: vars.brandColor
+    accentColor: vars.brandColor,
   },
   '@media (prefers-color-scheme: dark)': {
     body: initVars({
@@ -251,8 +251,21 @@ const rules: XinStyleSheet = {
     outline: 'none',
     boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5).html}`
   },
-  '.show-after-empty:not(.xin-empty-list+*)': {
+  '.show-after-empty:not(.-xin-empty-list+*)': {
     display: 'none'
+  },
+  '::selection': {
+    background: vars.brandColor,
+    color: vars.brandTextColor
+  },
+  '*::-webkit-scrollbar': {
+    background: 'transparent',
+    width: vars.spacing50,
+    height: vars.spacing50,
+  },
+  '*::-webkit-scrollbar-thumb': {
+    background: vars.brandColor,
+    borderRadius: vars.spacing25,
   }
 }
 

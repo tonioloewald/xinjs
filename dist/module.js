@@ -772,7 +772,7 @@ class $ea2c6a36710de0a8$var$ListBinding {
         // @ts-expect-error
         const arrayPath = (0, $e921b0bd4f6415ab$export$40700dafb97c3799)(array);
         const slice = this.visibleSlice();
-        this.boundElement.classList.toggle("xin-empty-list", slice.items.length === 0);
+        this.boundElement.classList.toggle("-xin-empty-list", slice.items.length === 0);
         const previousSlice = this._previousSlice;
         const { firstItem: firstItem , lastItem: lastItem , topBuffer: topBuffer , bottomBuffer: bottomBuffer  } = slice;
         if (hiddenProp === undefined && visibleProp === undefined && isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) return;
@@ -1061,9 +1061,9 @@ function $bed4bed3dcfb6f9a$export$fd322201efdc650f(s) {
 
 
 const $9e0c0b8784c80412$var$templates = {};
-const $9e0c0b8784c80412$export$3bc26eec1cc2439f = (...componentParts)=>{
-    return (...args)=>$9e0c0b8784c80412$export$7a5d735b2ab6389d.div(...args, ...componentParts);
-};
+function $9e0c0b8784c80412$export$3bc26eec1cc2439f(rootElementCreator, ...componentParts) {
+    return (...args)=>rootElementCreator(...args, ...componentParts);
+}
 const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
     if ($9e0c0b8784c80412$var$templates[tagType] === undefined) $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElement(tagType);
     const elt = $9e0c0b8784c80412$var$templates[tagType].cloneNode();

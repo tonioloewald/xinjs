@@ -32,10 +32,36 @@ and simplicity as you get with highly-refined React-centric toolchains, but with
 domain-specific-languages, or other tricks that provide convenience at the cost of becoming locked-in
 to React, a specific state-management system (which permeats your business logic), and UI framework.
 
-Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts.
+Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts).
 
 The standard [React Todo List Example](https://codesandbox.io/s/xinjs-react-reminders-demo-v0-4-2-l46k52?file=/src/App.tsx)
 becomes shorter and simpler with `xinjs` and *cleanly separates* business logic from presentation. `xinjs` **paths** route data to/from UI elements, and events from the UI to methods, and those paths are *exactly what you expect*.
+
+But xinjs lets you work with pure HTML components as cleanly—more cleanly—and efficiently than
+React toolchains let you work with JSX.
+
+    export default function App() {
+      return (
+        <div className="App">
+          <h1>Hello React</h1>
+          <h2>Start editing to see some magic happen!</h2>
+        </div>
+      );
+    }
+
+Becomes:
+
+    const { div, h1, h2 } = elements // exported from xinjs
+    export default () => div(
+      { class: 'App' },
+      h1('Hello xinjs'),
+      h2('Start editing to see some magic happen!)
+    )
+
+Except this reusable component outputs native DOM nodes. No transpilation, spooky magic at a distance,
+or virtual DOM required. And it all works just as well with web-components.
+
+Lean into web-standards and native browser functionality.
 
 > `xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't 
 > bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying

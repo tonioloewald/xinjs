@@ -144,7 +144,7 @@ class ListBinding {
     const arrayPath: string = xinPath(array)
 
     const slice = this.visibleSlice()
-    this.boundElement.classList.toggle('xin-empty-list', slice.items.length === 0)
+    this.boundElement.classList.toggle('-xin-empty-list', slice.items.length === 0)
     const previousSlice = this._previousSlice
     const { firstItem, lastItem, topBuffer, bottomBuffer } = slice
     if (

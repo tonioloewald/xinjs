@@ -505,7 +505,17 @@ export interface ElementsProxy {
     wbr: ElementCreator;
     [key: string | symbol]: ElementCreator<any>;
 }
-export const makeComponent: (...componentParts: ElementPart[]) => (...args: ElementPart[]) => HTMLDivElement;
+/**
+ * makeComponent takes an elementCreator along with its arguments and produces
+ * a "curried" version of that element creator. This is a way of creating
+ * reusable, composable, pure functional components with no shadowDOM.
+ */
+export function makeComponent<T extends HTMLElement>(rootElementCreator: ElementCreator<T>, ...componentParts: ElementPart[]): ElementCreator<T>;
+/**
+ * elements is a proxy that produces ElementCreators, e.g.
+ * elements.div() creates <div> elements and
+ * elements.myElement() creatres <my-element> elements.
+ */
 export const elements: ElementsProxy;
 export const css: (obj: XinStyleSheet | XinStyleMap, indentation?: string) => string;
 export const initVars: (obj: {

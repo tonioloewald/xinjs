@@ -1,7 +1,7 @@
 import {xin, touch, elements, makeComponent, Component, vars} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
-const {div, span, form, button, label, input, select, option, datalist, h4, p, template} = elements
+const {div, span, form, button, label, input, select, option, datalist, h4, p, template, fragment} = elements
 
 const wordsToCamelCase = string => string.split(/\s+/)
   .map((word, idx) => idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1): word)
@@ -59,6 +59,7 @@ document.body.append(fragment(
 `
 
 export const kitchenSink = makeComponent(
+  fragment,
   markdownViewer(`# Kitchen Sink
 
 This is an in-browser test of key functionality including:

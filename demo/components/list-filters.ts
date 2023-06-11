@@ -15,7 +15,8 @@ bindings.selected = {
 
 const styles: XinStyleSheet = {
   '.emoji-table': {
-    maxHeight: '380px',
+    height: '380px',
+    overflowX: 'hidden',
     overflowY: 'scroll',
     flex: '1 0 350px',
     cursor: 'default',
@@ -23,7 +24,7 @@ const styles: XinStyleSheet = {
 
   '.emoji-table .t-row[data-selected]': {
     background: vars.brandColor,
-    color: vars.background,
+    color: vars.brandTextColor,
   },
 
   '.emoji-table .t-row:hover:not([data-selected])': {
@@ -38,17 +39,30 @@ const styles: XinStyleSheet = {
     height: '30px'
   },
 
-  '.emoji-detail:not(.xin-empty-list)': {
-    flex: `1 1 100%`,
-    position: 'relative',
-    borderRadius: vars.roundedRadius,
-    boxShadow: `0 0 0 2px ${vars.brandColor}`
+  '.emoji-detail:not(.-xin-empty-list)': {
+    flex: '1 1 auto',
+    width: 'calc(100% - 350px)',
+    position: 'absolute',
+    background: vars.inputBg75o,
+    backdropFilter: 'blur(4px)',
+    pointerEvents: 'none',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    borderRadius: `0 ${vars.roundedRadius} ${vars.roundedRadius} 0`,
+    boxShadow: vars.inputBorderShadow,
+  },
+
+  '.emoji-detail:not(.-xin-empty-list) textarea, .emoji-detail:not(.-xin-empty-list) button': {
+    pointerEvents: 'all'
   },
 
   '.close-detail': {
     position: 'absolute',
     top: vars.spacing50,
     right: vars.spacing50,
+    boxShadow: 'none',
+    background: 'transparent',
   },
 
   '.graphic': {
@@ -135,19 +149,19 @@ async function getEmoji() {
 getEmoji()
 
 export const listFilterDemo = () => div(
-  {
-    style: {
-      boxShadow: `0 0 0 2px ${vars.brandColor}`,
-      borderRadius: vars.roundedRadius150,
-      padding: vars.spacing
-    }
-  },
   h1(
     { style: { marginTop: 0 } },
     'Filtered Lists'
   ),
-  markdownViewer(`The **list** and **detail** views are both *filtered* list-bindings and thus the views have a *single source of truth*.
-  The only reason notes aren't persisted on reload is that the array is large and so it's excluded from hot-reload.`),
+  markdownViewer(`In this example, the **list** and **detail** views are both *filtered* list-bindings bound to the 
+same array, and thus the views have a *single source of truth*.
+
+The **list** view uses \`hiddenProp\` to remove non-matches from the list, while the detail view uses \`selectedProp\` to
+specify which item appears in the **detail** view. In both cases the property used is a \`symbol\`, but a string could
+be used to leverage an existing object property.
+
+The only reason notes aren't persisted on refresh is that the array is kind of large and so it's excluded
+from hot-reload.`),
   div(
     { style: {
       marginBottom: vars.spacing
@@ -165,7 +179,11 @@ export const listFilterDemo = () => div(
   div(
     {
       style: {
-        display: 'flex'
+        display: 'flex',
+        overflow: 'hidden',
+        boxShadow: vars.inputBorderShadow,
+        borderRadius: vars.roundedRadius,
+        position: 'relative',
       }
     },
     div(
