@@ -1,5 +1,5 @@
 import { labeledInput, toolBar } from './components'
-import { xinProxy, elements, touch, bind, bindings, ElementPart } from '../src'
+import { xinProxy, elements, touch, bind, bindings, ElementPart, vars } from '../src'
 import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
 import wordList from './words'
@@ -84,7 +84,7 @@ export const wordSearch = (...args: ElementPart[]) => div(
         padding: '2px 10px',
         margin: '2px',
         borderRadius: '99px',
-        background: '#00f2',
+        background: vars.panelBg,
         fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
         textDecoration: 'none',
         color: 'var(--text-color)'
