@@ -95,6 +95,7 @@ export const arrayBindingTest = (...args) => div(
     }
   },
   toolBar(
+    { style: { flex: '1 0 auto' } },
     button('create', {
       onClick() {
         console.log('create')
