@@ -67,29 +67,40 @@ export const wordSearch = (...args: ElementPart[]) => div(
       ' words'
     )
   ),
-  bind(
-    div(
-      a({
-        style: {
-          display: 'inline-block',
-          padding: '2px 10px',
-          margin: '2px',
-          borderRadius: '99px',
-          background: '#00f2',
-          fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
-          textDecoration: 'none',
-          color: 'var(--text-color)'
-        }
-      })
-    ),
-    'words.list',
-    bindings.list,
+  div(
     {
-      initInstance(element, word) {
-        element.textContent = word
-        element.setAttribute('href', `https://thefreedictionary.com/${word}`)
-        element.setAttribute('target', `definition`)
+      bindList: {
+        value: 'words.list',
+        initInstance(element, word) {
+          element.textContent = word
+          element.setAttribute('href', `https://thefreedictionary.com/${word}`)
+          element.setAttribute('target', `definition`)
+        }
       }
-    }
+    },
+    a({
+      style: {
+        display: 'inline-block',
+        padding: '2px 10px',
+        margin: '2px',
+        borderRadius: '99px',
+        background: '#00f2',
+        fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
+        textDecoration: 'none',
+        color: 'var(--text-color)'
+      }
+    })
+  ),
+  div(
+    { 
+      class: 'show-after-empty',
+      style: {
+        lineHeight: '200px',
+        height: '200px',
+        textAlign: 'center',
+        opacity: 0.5
+      },
+    },
+    'enter criteria to find anagrams'
   )
 )
