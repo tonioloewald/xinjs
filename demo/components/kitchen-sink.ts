@@ -125,7 +125,7 @@ This is an in-browser test of key functionality including:
       ...options.map(item => option(item))
     )),
     label(
-      span('select all that apply (avoid using these!)'), 
+      span('select all that apply (avoid using select multiple, users do not understand them!)'), 
       select(
         { multiple: true, bindValue: 'formTest.pickAny' },
         ...options.map(item => option(item, {value: wordsToCamelCase(item)}))
