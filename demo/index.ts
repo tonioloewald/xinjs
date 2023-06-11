@@ -192,7 +192,7 @@ document.body.append(div(
     main(
       {
         style: {
-          overflowY: 'scroll',
+          overflowY: 'auto',
           flex: '1 1 auto',
           background: 'var(--input-bg)',
           position: 'relative'
