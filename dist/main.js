@@ -780,9 +780,12 @@ class $30c2e647bc2c31d1$var$ListBinding {
         }
     }
     visibleSlice() {
-        const { virtual: virtual  } = this.options;
+        const { virtual: virtual , hiddenProp: hiddenProp , visibleProp: visibleProp  } = this.options;
+        let visibleArray = this._array;
+        if (hiddenProp !== undefined) visibleArray = visibleArray.filter((item)=>item[hiddenProp] !== true);
+        if (visibleProp !== undefined) visibleArray = visibleArray.filter((item)=>item[visibleProp] === true);
         let firstItem = 0;
-        let lastItem = this._array.length - 1;
+        let lastItem = visibleArray.length - 1;
         let topBuffer = 0;
         let bottomBuffer = 0;
         if (virtual != null) {
@@ -790,16 +793,17 @@ class $30c2e647bc2c31d1$var$ListBinding {
             const height = this.boundElement.offsetHeight;
             const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
             const visibleRows = Math.ceil(height / virtual.height) + 1;
-            const totalRows = Math.ceil(this._array.length / visibleColumns);
+            const totalRows = Math.ceil(visibleArray.length / visibleColumns);
             const visibleItems = visibleColumns * visibleRows;
             let topRow = Math.floor(this.boundElement.scrollTop / virtual.height);
             if (topRow > totalRows - visibleRows + 1) topRow = Math.max(0, totalRows - visibleRows + 1);
             firstItem = topRow * visibleColumns;
             lastItem = firstItem + visibleItems - 1;
             topBuffer = topRow * virtual.height;
-            bottomBuffer = totalRows * virtual.height - height - topBuffer;
+            bottomBuffer = Math.max(totalRows * virtual.height - height - topBuffer, 0);
         }
         return {
+            items: visibleArray,
             firstItem: firstItem,
             lastItem: lastItem,
             topBuffer: topBuffer,
@@ -809,13 +813,14 @@ class $30c2e647bc2c31d1$var$ListBinding {
     update(array, isSlice) {
         if (array == null) array = [];
         this._array = array;
-        const { initInstance: initInstance , updateInstance: updateInstance  } = this.options;
+        const { initInstance: initInstance , updateInstance: updateInstance , hiddenProp: hiddenProp , visibleProp: visibleProp  } = this.options;
         // @ts-expect-error
-        const arrayPath = array[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a];
+        const arrayPath = (0, $3f1d78706f6d8212$export$40700dafb97c3799)(array);
         const slice = this.visibleSlice();
+        this.boundElement.classList.toggle("xin-empty-list", slice.items.length === 0);
         const previousSlice = this._previousSlice;
         const { firstItem: firstItem , lastItem: lastItem , topBuffer: topBuffer , bottomBuffer: bottomBuffer  } = slice;
-        if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) return;
+        if (hiddenProp === undefined && visibleProp === undefined && isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) return;
         this._previousSlice = slice;
         let removed = 0;
         let moved = 0;
@@ -827,7 +832,7 @@ class $30c2e647bc2c31d1$var$ListBinding {
             const proxy = (0, $3f1d78706f6d8212$export$86caed35dd837d06).get(element);
             if (proxy == null) element.remove();
             else {
-                const idx = array.indexOf(proxy);
+                const idx = slice.items.indexOf(proxy);
                 if (idx < firstItem || idx > lastItem) {
                     element.remove();
                     this.itemToElement.delete(proxy);
@@ -842,15 +847,15 @@ class $30c2e647bc2c31d1$var$ListBinding {
         const elements = [];
         const { idPath: idPath  } = this.options;
         for(let i = firstItem; i <= lastItem; i++){
-            const item = array[i];
+            const item = slice.items[i];
             if (item === undefined) continue;
-            let element = this.itemToElement.get(item[0, $3f1d78706f6d8212$export$bdd0d039ad781534]);
+            let element = this.itemToElement.get((0, $3f1d78706f6d8212$export$5dcba2d45033d435)(item));
             if (element == null) {
                 created++;
                 element = (0, $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f)(this.template);
                 if (typeof item === "object") {
-                    this.itemToElement.set(item[0, $3f1d78706f6d8212$export$bdd0d039ad781534], element);
-                    (0, $3f1d78706f6d8212$export$86caed35dd837d06).set(element, item[0, $3f1d78706f6d8212$export$bdd0d039ad781534]);
+                    this.itemToElement.set((0, $3f1d78706f6d8212$export$5dcba2d45033d435)(item), element);
+                    (0, $3f1d78706f6d8212$export$86caed35dd837d06).set(element, (0, $3f1d78706f6d8212$export$5dcba2d45033d435)(item));
                 }
                 this.boundElement.insertBefore(element, this.listBottom);
                 if (idPath != null) {
@@ -974,9 +979,9 @@ class $dde521108530e806$var$HslColor {
 const $dde521108530e806$var$span = globalThis.document !== undefined ? globalThis.document.createElement("span") : undefined;
 class $dde521108530e806$export$892596cec99bc70e {
     static fromCss(spec) {
-        $dde521108530e806$var$span.style.color = spec;
         let converted = spec;
         if ($dde521108530e806$var$span instanceof HTMLSpanElement) {
+            $dde521108530e806$var$span.style.color = spec;
             document.body.appendChild($dde521108530e806$var$span);
             converted = getComputedStyle($dde521108530e806$var$span).color;
             $dde521108530e806$var$span.remove();
