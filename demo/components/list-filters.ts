@@ -16,7 +16,7 @@ const styles: XinStyleSheet = {
   '.emoji-table': {
     maxHeight: '300px',
     overflowY: 'scroll',
-    flex: '1 0 340px',
+    flex: '1 0 350px',
     cursor: 'default',
   },
 
@@ -27,7 +27,7 @@ const styles: XinStyleSheet = {
 
   '.emoji-table .t-row': {
     display: 'grid',
-    gridTemplateColumns: '40px 300px 200px 200px',
+    gridTemplateColumns: '50px 300px 200px 200px',
     whiteSpace: 'nowrap',
     lineHeight: '30px',
     height: '30px'
@@ -98,7 +98,6 @@ const { emoji } = xinProxy({
       touch('emoji.list')
     },
     select(event) {
-      console.log(event)
       if (event.type !== 'click' && event.code !== 'Space') {
         return
       }
@@ -107,9 +106,11 @@ const { emoji } = xinProxy({
       }
       const selectedItem = getListItem(event.target)
       emoji.list.forEach(item => {
-        if (item === selectedItem && !item[SELECTED]) {
-          item[SELECTED] = true
-          touch('emoji.list')
+        if (item === selectedItem) {
+          if (!item[SELECTED]) {
+            item[SELECTED] = true
+            touch('emoji.list')
+          }
         } else {
           delete item[SELECTED]
         }
