@@ -37,10 +37,11 @@ class ColorSwatch extends Component {
       padding: '10px',
       margin: '5px',
       gap: '10px',
-      width: '240px',
+      width: '260px',
       background: vars.inputBg,
       '--input-width': '140px',
-      alignItems: 'center'
+      alignItems: 'center',
+      overflow: 'hidden',
     },
     ':host > span': {
       display: 'inline-block',
@@ -159,7 +160,8 @@ export const arrayBindingTest = (...args) => div(
     {
       style: {
         flex: '1 1 auto',
-        overflowY: 'scroll'
+        overflowY: 'scroll',
+        padding: '5px',
       }
     },
     template( colorSwatch({bindValue: '^'})), 
@@ -167,7 +169,7 @@ export const arrayBindingTest = (...args) => div(
       bindList: {
         value: colors.items, 
         idPath: 'id',
-        virtual: { width: 274, height: 61 }
+        virtual: { width: 284, height: 61 }
       }
     }
   )
