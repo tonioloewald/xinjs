@@ -1,6 +1,6 @@
 import { xinProxy, elements, touch, vars, XinStyleSheet, css, getListItem, bindings } from "../../src"
 
-const { div, span, h1, h2, input, template, style, button } = elements
+const { div, span, h1, h2, input, template, style, button, label, textarea, p } = elements
 
 bindings.selected = {
   toDOM(element, value) {
@@ -14,7 +14,7 @@ bindings.selected = {
 
 const styles: XinStyleSheet = {
   '.emoji-table': {
-    maxHeight: '300px',
+    maxHeight: '380px',
     overflowY: 'scroll',
     flex: '1 0 350px',
     cursor: 'default',
@@ -121,14 +121,29 @@ const { emoji } = xinProxy({
 
 async function getEmoji() {
   const request = await fetch('https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json')
-  emoji.list = await request.json() as any[]
+  emoji.list = (await request.json() as any[]).map(e => {
+    e.notes = ''
+    return e
+  })
   console.log(emoji.list.length, 'emoji loaded')
 }
 
 getEmoji()
 
 export const listFilterDemo = () => div(
-  h1('Filtered Lists'),
+  {
+    style: {
+      boxShadow: `0 0 0 2px ${vars.brandColor}`,
+      borderRadius: vars.roundedRadius150,
+      padding: vars.spacing
+    }
+  },
+  h1(
+    { style: { marginTop: 0 } },
+    'Filtered Lists'
+  ),
+  p(`The list and detail views are both filtered list-bindings and thus the views have a single source of truth.
+  The only reason your notes aren't persisted on reload is that the array is large and so it's excluded from hot-reload.`),
   div(
     { style: {
       marginBottom: vars.spacing
@@ -194,11 +209,19 @@ export const listFilterDemo = () => div(
           } },
           div({ bindText: '^.chars', style: {
             fontSize: '120px',
-            lineHeight: '140px',
+            lineHeight: '120px',
           } } ),
-          h2({ bindText: '^.name', class: 'no-overflow' }),
+          h2({ bindText: '^.name', class: 'no-overflow', style: { marginTop: vars.spacing } }),
           div({ bindText: '^.category', class: 'no-overflow' }),
           div({ bindText: '^.subcategory', class: 'no-overflow' }),
+          label(
+            span('Notes'),
+            textarea({
+              placeholder: 'enter your notes here',
+              bindValue: '^.notes', 
+              style: {resize: 'none'}
+            })
+          ),
           button('✕', { class: 'close-detail', onClick: emoji.deselect })
         )
       )
