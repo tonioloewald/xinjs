@@ -38,6 +38,7 @@ class Todo {
 const { todoApp } = xinProxy({todoApp: new Todo()})
 
 const flex = { display: 'flex', gap: vars.spacing50, flexDirection: 'row' }
+const row = { ...flex, alignItems: 'center' }
 const stack = { ...flex, flexDirection: 'column' }
 const elastic = { flex: '1 1 auto' }
 const padded = { padding: `${vars.spacing} ${vars.spacing200}` }
@@ -54,7 +55,7 @@ export const todo = makeComponent(
     div(
       { style: stack },
       template(div(
-        { style: {...flex }},
+        { style: row },
         span({ bindText: '^.reminder', style: elastic }),
         button(span('✕'), {title: 'delete', onClick(event){
           const item = getListItem(event.target as HTMLElement)
@@ -66,7 +67,7 @@ export const todo = makeComponent(
       { bindList: {value: todoApp.list, idPath: 'id'} }
     ),
     form(
-      { style: flex },
+      { style: row },
       {
         onSubmit(event){
           todoApp.addItem()
