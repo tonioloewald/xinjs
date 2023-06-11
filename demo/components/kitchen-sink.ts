@@ -1,7 +1,7 @@
 import {xin, touch, elements, makeComponent, Component, vars} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
-const {div, span, form, button, label, input, select, option, datalist, h4, template} = elements
+const {div, span, form, button, label, input, select, option, datalist, h4, p, template} = elements
 
 const wordsToCamelCase = string => string.split(/\s+/)
   .map((word, idx) => idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1): word)
@@ -10,9 +10,12 @@ const wordsToCamelCase = string => string.split(/\s+/)
 class SimpleComponent extends Component {
   styleNode = Component.StyleNode({
     ':host': {
-      display: 'block',
+      display: 'flex',
+      flexDirection: 'column',
       border: `2px solid ${vars.brandColor}`,
-      padding: vars.spacing
+      padding: vars.spacing,
+      gap: vars.spacing50,
+      borderRadius: vars.roundedRadius,
     }
   })
 }
@@ -82,8 +85,16 @@ This is an in-browser test of key functionality including:
       )
     ),
     simpleComponent(
-      h4('this is a simple component'),
-      div({class: 'field readonly', bindText: 'formTest.string'}),
+      h4('This is a simple component'),
+      p('Its contents are in the "light" DOM and can be bound normally.'),
+      label(
+        span('name'),
+        input({bindValue: 'formTest.string'})
+      ),
+      label(
+        span('name (read only)'),
+        div({class: 'field readonly', bindText: 'formTest.string'}),
+      ),
       div(
         h4({bindText: 'formTest.fleet.name'}),
         div(
