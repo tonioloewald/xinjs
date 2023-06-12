@@ -93,6 +93,11 @@ const rules: XinStyleSheet = {
   'p, h4, h5, h6, pre, blockquote': {
     margin: `0 0 ${vars.spacing}`,
   },
+  blockquote: {
+    paddingLeft: `${vars.spacing}`,
+    paddingRight: `${vars.spacing}`,
+    fontSize: '90%'
+  },
   h1: {
     lineHeight: vars.lineHeight200,
   },
@@ -149,7 +154,12 @@ const rules: XinStyleSheet = {
     color: vars.textHeadingColor,
     textDecoration: 'none',
     borderRadius: vars.roundedRadius50,
-    padding: `${vars.spacing25} ${vars.spacing50}`
+    padding: `${vars.spacing25} ${vars.spacing50}`,
+    margin: `${vars.spacing_25} ${vars.spacing_50}`
+  },
+  'nav a': {
+    padding: `${vars.spacing25} ${vars.spacing}`,
+    margin: 0
   },
   '.current-route': {
     background: vars.inputBg,

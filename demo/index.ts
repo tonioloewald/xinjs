@@ -21,7 +21,7 @@ console.time('total')
 
 settings.perf = true
 
-const {img, h1, div, span, button, a, main} = elements
+const {img, h1, div, nav, span, button, a, main} = elements
 
 hotReload(path => {
   if (path.startsWith('words') || path.startsWith('emoji')) {
@@ -32,6 +32,7 @@ hotReload(path => {
 
 Object.assign(globalThis, {
   xin,
+  elements,
   vars,
   xinProxy,
   touch,
@@ -164,7 +165,7 @@ document.body.append(div(
   appBar(),
   div(
     { style: { display: 'flex', flex: '1 1 auto', overflow: 'hidden' } },
-    div(
+    nav(
       {
         class: 'left-side-nav',
         style: {
