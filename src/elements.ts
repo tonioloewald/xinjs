@@ -178,7 +178,7 @@ const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement =
       } else {
         throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`)
       }
-    } else if (Object.hasOwnProperty.call(elt.hasOwnProperty, key)) {
+    } else if (Object.hasOwnProperty.call(elt, key)) {
       // @ts-expect-error
       elt[key] = value
     } else {

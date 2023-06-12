@@ -1130,7 +1130,7 @@ const $c004c420133596e3$var$create = (tagType, ...contents)=>{
             const binding = (0, $e49806807158e47d$export$97a1a3e6f39778d2)[bindingType];
             if (binding !== undefined) (0, $fc64c421299f5d54$export$2385a24977818dd0)(elt, value, binding);
             else throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
-        } else if (Object.hasOwnProperty.call(elt.hasOwnProperty, key)) // @ts-expect-error
+        } else if (Object.hasOwnProperty.call(elt, key)) // @ts-expect-error
         elt[key] = value;
         else {
             const attr = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
