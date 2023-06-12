@@ -1107,7 +1107,10 @@ function $6d99f825475e91d0$export$fd322201efdc650f(s) {
 
 const $c004c420133596e3$var$templates = {};
 function $c004c420133596e3$export$3bc26eec1cc2439f(rootElementCreator, ...componentParts) {
-    return (...args)=>rootElementCreator(...args, ...componentParts);
+    return (...args)=>rootElementCreator(...args, ...componentParts.map((part)=>{
+            if (part instanceof Element || part instanceof DocumentFragment) return part.cloneNode(true);
+            else return part;
+        }));
 }
 const $c004c420133596e3$var$create = (tagType, ...contents)=>{
     if ($c004c420133596e3$var$templates[tagType] === undefined) $c004c420133596e3$var$templates[tagType] = globalThis.document.createElement(tagType);

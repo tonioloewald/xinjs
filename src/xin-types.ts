@@ -43,9 +43,9 @@ export interface XinBindingSpec {
   [key: string]: any
 }
 
-export interface XinBinding {
-  toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
-  fromDOM?: (element: HTMLElement, options?: XinObject) => any
+export interface XinBinding<T = HTMLElement> {
+  toDOM?: (element: T, value: any, options?: XinObject) => void
+  fromDOM?: (element: T, options?: XinObject) => any
 }
 export interface ElementProps {
   onClick?: XinEventHandler<MouseEvent>

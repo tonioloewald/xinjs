@@ -92,7 +92,7 @@ if (globalThis.document != null) {
   document.body.addEventListener('input', handleChange, true)
 }
 
-export function bind<T extends HTMLElement> (element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject): T {
+export function bind<T extends HTMLElement> (element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T {
   if (element instanceof DocumentFragment) {
     throw new Error('bind cannot bind to a DocumentFragment')
   }
@@ -116,7 +116,7 @@ export function bind<T extends HTMLElement> (element: T, what: XinTouchableType 
     dataBindings = []
     elementToBindings.set(element, dataBindings)
   }
-  dataBindings.push({ path, binding, options })
+  dataBindings.push({ path, binding: binding as XinBinding<HTMLElement>, options })
 
   if (toDOM != null && !path.startsWith('^')) {
     touch(path)

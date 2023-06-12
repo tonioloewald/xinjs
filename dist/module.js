@@ -1062,7 +1062,10 @@ function $bed4bed3dcfb6f9a$export$fd322201efdc650f(s) {
 
 const $9e0c0b8784c80412$var$templates = {};
 function $9e0c0b8784c80412$export$3bc26eec1cc2439f(rootElementCreator, ...componentParts) {
-    return (...args)=>rootElementCreator(...args, ...componentParts);
+    return (...args)=>rootElementCreator(...args, ...componentParts.map((part)=>{
+            if (part instanceof Element || part instanceof DocumentFragment) return part.cloneNode(true);
+            else return part;
+        }));
 }
 const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
     if ($9e0c0b8784c80412$var$templates[tagType] === undefined) $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElement(tagType);

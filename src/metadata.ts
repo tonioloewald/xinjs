@@ -18,9 +18,9 @@ export function xinValue<T extends {}> (x: T): T {
   return (typeof x === 'object' && x !== null ? (x as unknown as XinProxy)[XIN_VALUE] || x : x) as T
 }
 
-export interface DataBinding {
+export interface DataBinding<T = HTMLElement> {
   path: string
-  binding: XinBinding
+  binding: XinBinding<T>
   options?: XinObject
 }
 

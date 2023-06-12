@@ -282,9 +282,9 @@ export interface XinBindingSpec {
     value: XinTouchableType | any;
     [key: string]: any;
 }
-export interface XinBinding {
-    toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void;
-    fromDOM?: (element: HTMLElement, options?: XinObject) => any;
+export interface XinBinding<T = HTMLElement> {
+    toDOM?: (element: T, value: any, options?: XinObject) => void;
+    fromDOM?: (element: T, options?: XinObject) => any;
 }
 export interface ElementProps {
     onClick?: XinEventHandler<MouseEvent>;
@@ -323,7 +323,7 @@ export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
-export function bind<T extends HTMLElement>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject): T;
+export function bind<T extends HTMLElement>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T;
 export const on: (element: HTMLElement, eventType: string, eventHandler: XinEventHandler) => void;
 type VoidFunc = (...args: any[]) => void;
 export const debounce: (origFn: VoidFunc, minInterval?: number) => VoidFunc;

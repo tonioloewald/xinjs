@@ -139,7 +139,13 @@ const templates: { [key: string]: HTMLElement } = {}
  * reusable, composable, pure functional components with no shadowDOM.
  */
 export function makeComponent<T extends HTMLElement> (rootElementCreator: ElementCreator<T>, ...componentParts: ElementPart[]): ElementCreator<T> {
-  return (...args: ElementPart[]) => rootElementCreator(...args, ...componentParts)
+  return (...args: ElementPart[]) => rootElementCreator(...args, ...componentParts.map(part => {
+    if (part instanceof Element || part instanceof DocumentFragment) {
+      return part.cloneNode(true)
+    } else {
+      return part
+    }
+  }))
 }
 
 const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement => {
