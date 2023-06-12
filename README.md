@@ -52,25 +52,36 @@ React toolchains let you work with JSX.
 Becomes:
 
     const { div, h1, h2 } = elements // exported from xinjs
-    export default () => div(
+    export const App = () => div(
       { class: 'App' },
       h1('Hello xinjs'),
-      h2('Start editing to see some magic happen!)
+      h2('Start editing to see some magic happen!')
     )
 
 Except this reusable component outputs native DOM nodes. No transpilation, spooky magic at a distance,
-or virtual DOM required. And it all works just as well with web-components.
+or virtual DOM required. And it all works just as well with web-components. This is you get when
+you run App() in the console:
 
-Lean into web-standards and native browser functionality.
+    ▼ <div class="App">
+        <h1>Hello xinjs</h1>
+        <h2>Start editing to see some magic happen!</h2>
+      </div>
 
-> `xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't 
-> bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
-> me.
+The ▼ is there to show that's **DOM nodes**, not HTML.
 
-If you want to build your own `web-components` versus use something off-the-rack,
-`xinjs` offers a `Component` base class that, along with its `elements` and `css` libraries
-allows you to implement component views in pure Javascript more compactly than with `jsx`
-(and without a virtual DOM).
+`xinjs` lets you lean into web-standards and native browser functionality while writing less code that's
+easier to run, debug, deploy, and maintain. Bind data direct to standard input elements—without having
+to fight their basic behavior—and now you're using *native* functionality with *deep accessibility* support
+as opposed to whatever the folks who wrote the library you're using have gotten around to implementing.
+
+>**Aside**: `xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't 
+>bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
+>me.
+
+If you want to build your own `web-components` versus use something off-the-rack like 
+[Shoelace](https://shoelace.style), `xinjs` offers a `Component` base class that, along with 
+its `elements` and `css` libraries allows you to implement component views in pure Javascript 
+more compactly than with `jsx` (and without a virtual DOM).
 
     import { Component, elements, css } from 'xinjs'
 
