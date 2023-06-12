@@ -506,12 +506,6 @@ export interface ElementsProxy {
     [key: string | symbol]: ElementCreator<any>;
 }
 /**
- * makeComponent takes an elementCreator along with its arguments and produces
- * a "curried" version of that element creator. This is a way of creating
- * reusable, composable, pure functional components with no shadowDOM.
- */
-export function makeComponent<T extends HTMLElement>(rootElementCreator: ElementCreator<T>, ...componentParts: ElementPart[]): ElementCreator<T>;
-/**
  * elements is a proxy that produces ElementCreators, e.g.
  * elements.div() creates <div> elements and
  * elements.myElement() creatres <my-element> elements.

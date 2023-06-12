@@ -1,4 +1,4 @@
-import {xinProxy, elements, touch, getListItem, makeComponent, vars} from '../../src/index'
+import {xinProxy, elements, touch, getListItem, ElementPart, vars} from '../../src/index'
 
 const {h1, div, template, form, span, input, button} = elements
 
@@ -43,8 +43,8 @@ const stack = { ...flex, flexDirection: 'column', gap: vars.spacing25, paddingLe
 const elastic = { flex: '1 1 auto' }
 const padded = { padding: `${vars.spacing} ${vars.spacing200}` }
 
-export const todo = makeComponent(
-  div,
+export const todo = (...args:ElementPart[]) => div(
+  ...args,
   {
     style: {...padded, ...stack},
     // TODO figure out how to make this automatic

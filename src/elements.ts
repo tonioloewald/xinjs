@@ -133,21 +133,6 @@ export interface ElementsProxy {
 
 const templates: { [key: string]: HTMLElement } = {}
 
-/**
- * makeComponent takes an elementCreator along with its arguments and produces
- * a "curried" version of that element creator. This is a way of creating
- * reusable, composable, pure functional components with no shadowDOM.
- */
-export function makeComponent<T extends HTMLElement> (rootElementCreator: ElementCreator<T>, ...componentParts: ElementPart[]): ElementCreator<T> {
-  return (...args: ElementPart[]) => rootElementCreator(...args, ...componentParts.map(part => {
-    if (part instanceof Element || part instanceof DocumentFragment) {
-      return part.cloneNode(true)
-    } else {
-      return part
-    }
-  }))
-}
-
 const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement => {
   if (templates[tagType] === undefined) {
     templates[tagType] = globalThis.document.createElement(tagType)
@@ -193,6 +178,9 @@ const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement =
       } else {
         throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`)
       }
+    } else if (Object.hasOwnProperty.call(elt.hasOwnProperty, key)) {
+      // @ts-expect-error
+      elt[key] = value
     } else {
       const attr = camelToKabob(key)
 

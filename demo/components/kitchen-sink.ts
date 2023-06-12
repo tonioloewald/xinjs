@@ -1,4 +1,4 @@
-import {xin, touch, elements, makeComponent, Component, vars} from '../../src'
+import {xin, touch, elements, Component, vars} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
 const {div, span, form, button, label, input, select, option, datalist, h4, p, template, fragment} = elements
@@ -58,8 +58,7 @@ document.body.append(fragment(
 ))
 `
 
-export const kitchenSink = makeComponent(
-  fragment,
+export const kitchenSink = () => fragment(
   markdownViewer(`# Kitchen Sink
 
 This is an in-browser test of key functionality including:

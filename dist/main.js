@@ -28,7 +28,6 @@ $parcel$export(module.exports, "darkMode", () => $db77bb2de3733b56$export$808aaf
 $parcel$export(module.exports, "Color", () => $dde521108530e806$export$892596cec99bc70e);
 $parcel$export(module.exports, "Component", () => $8c7b36581a3597bc$export$16fa2f45be04daa8);
 $parcel$export(module.exports, "elements", () => $c004c420133596e3$export$7a5d735b2ab6389d);
-$parcel$export(module.exports, "makeComponent", () => $c004c420133596e3$export$3bc26eec1cc2439f);
 $parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87f7746612069);
 $parcel$export(module.exports, "getListItem", () => $3f1d78706f6d8212$export$4c309843c07ce679);
 $parcel$export(module.exports, "xinPath", () => $3f1d78706f6d8212$export$40700dafb97c3799);
@@ -1106,12 +1105,6 @@ function $6d99f825475e91d0$export$fd322201efdc650f(s) {
 
 
 const $c004c420133596e3$var$templates = {};
-function $c004c420133596e3$export$3bc26eec1cc2439f(rootElementCreator, ...componentParts) {
-    return (...args)=>rootElementCreator(...args, ...componentParts.map((part)=>{
-            if (part instanceof Element || part instanceof DocumentFragment) return part.cloneNode(true);
-            else return part;
-        }));
-}
 const $c004c420133596e3$var$create = (tagType, ...contents)=>{
     if ($c004c420133596e3$var$templates[tagType] === undefined) $c004c420133596e3$var$templates[tagType] = globalThis.document.createElement(tagType);
     const elt = $c004c420133596e3$var$templates[tagType].cloneNode();
@@ -1137,7 +1130,9 @@ const $c004c420133596e3$var$create = (tagType, ...contents)=>{
             const binding = (0, $e49806807158e47d$export$97a1a3e6f39778d2)[bindingType];
             if (binding !== undefined) (0, $fc64c421299f5d54$export$2385a24977818dd0)(elt, value, binding);
             else throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
-        } else {
+        } else if (Object.hasOwnProperty.call(elt.hasOwnProperty, key)) // @ts-expect-error
+        elt[key] = value;
+        else {
             const attr = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
             if (attr === "class") value.split(" ").forEach((className)=>{
                 elt.classList.add(className);
