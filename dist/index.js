@@ -1086,7 +1086,8 @@ const $a20b878345862077$var$create = (tagType, ...contents)=>{
             const binding = (0, $5c922f2f7914f4ef$export$97a1a3e6f39778d2)[bindingType];
             if (binding !== undefined) (0, $5258c5e951c26004$export$2385a24977818dd0)(elt, value, binding);
             else throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
-        } else if (Object.hasOwnProperty.call(elt, key)) // @ts-expect-error
+        // @ts-expect-error
+        } else if (elt[key] !== undefined) // @ts-expect-error
         elt[key] = value;
         else {
             const attr = (0, $40005b86e623b59d$export$87ae551bf60f4bb)(key);

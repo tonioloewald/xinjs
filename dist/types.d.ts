@@ -298,6 +298,8 @@ export interface ElementProps {
     bindDisabled?: XinBindingShortcut;
     bindStyle?: XinBindingShortcut;
     style?: XinStyleRule;
+    class?: string;
+    apply?: (element: HTMLElement) => void | Promise<void>;
     [key: string]: any;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
