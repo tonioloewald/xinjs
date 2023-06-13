@@ -1,13 +1,16 @@
-import {xin, touch, elements, Component, vars} from '../../src'
+import {xin, touch, elements, Component, vars, css} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
-const {div, span, form, button, label, input, select, option, datalist, h4, p, template, fragment} = elements
+const {div, span, form, button, label, input, select, option, datalist, h4, p, template, fragment, style} = elements
 
 const wordsToCamelCase = string => string.split(/\s+/)
   .map((word, idx) => idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1): word)
   .join('')
 
 class SimpleComponent extends Component {
+  exampleProp: (() => {word: string}) | null = null
+  undefinedProp: string | undefined
+
   styleNode = Component.StyleNode({
     ':host': {
       display: 'flex',
@@ -21,6 +24,48 @@ class SimpleComponent extends Component {
 }
 
 const simpleComponent = SimpleComponent.elementCreator({tag: 'simple-component'})
+
+type TestExpression = () => Promise<boolean> | boolean
+
+async function test(container: HTMLElement, description: string, expr: TestExpression): Promise<void> {
+  const testOutcome = div({ class: 'test pending' }, description)
+  const testStart = Date.now()
+  const testInterval = setInterval(() => {
+    testOutcome.dataset.elapsed = ((Date.now() - testStart) * 0.001).toFixed(1)
+  }, 100)
+  container.append(testOutcome)
+  let result
+  try {
+    result = await expr() 
+  } catch(err) {
+    result = false
+  }
+  clearInterval(testInterval)
+  testOutcome.classList.remove('pending')
+  testOutcome.classList.add(result ? 'pass': 'fail')
+}
+
+function delay (ms: number = 100) : Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}
+
+const runTests = async (container: HTMLElement): Promise<void> => {
+  await delay()
+  const simple = document.querySelector('simple-component') as SimpleComponent
+  test(container, 'test should be success', () => true)
+  test(container, 'test should be failure', () => false)
+  test(container, 'test should succeed after 5s', async () => {
+    await delay(5000)
+    return true
+  })
+  test(container, 'test should fail after 10s', async () => {
+    await delay(10000)
+    return false
+  })
+  test(container, 'custom element camelCase prop is set', () => simple.exampleProp !== null && simple.exampleProp().word === 'success')
+}
 
 xin.formTest = {
   string: 'hello xin',
@@ -84,7 +129,50 @@ This is an in-browser test of key functionality including:
         )
       )
     ),
+    div(
+      style(css({
+        '.test-container': {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: vars.spacing25,
+        },
+        '.test': {
+          borderRadius: vars.lineHeight,
+          lineHeight: vars.lineHeight,
+          padding: `0 ${vars.spacing50}`,
+        },
+        '.pending': {
+          background: '#ff8'
+        },
+        '.fail': {
+          background: '#f88'
+        },
+        '.pass': {
+          background: '#8f8'
+        },
+        '.test[data-elapsed]::after': {
+          fontSize: '75%',
+          background: '#0008',
+          color: '#fff',
+          lineHeight: vars.lineHeight75,
+          padding: `0 ${vars.spacing25}`,
+          borderRadius: vars.roundedRadius50,
+          display: 'inline-block',
+          content: '"[" attr(data-elapsed)"s elapsed]"',
+          marginLeft: vars.spacing50
+        }
+      })),
+      h4('Test Results'),
+      div({
+        class: 'test-container',
+        apply: runTests
+      }),
+    ),
     simpleComponent(
+      {
+        exampleProp: () => ({word: 'success'})
+      },
       h4('This is a simple component'),
       p('Its contents are in the "light" DOM and can be bound normally.'),
       label(
