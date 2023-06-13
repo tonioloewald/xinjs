@@ -11,8 +11,8 @@ const countLetters = (word: string) => {
 
 export class WordList {
   words: string[]
-  letters = ''
-  mustContain = ''
+  letters = 'enlivened'
+  mustContain = 'v'
   minLength = 4
   reuseLetters = true
   filterCount = 0
