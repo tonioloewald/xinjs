@@ -1450,6 +1450,7 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
 }
 class $0ea0392c3fe8c9d5$var$XinSlot extends $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 {
     name = "";
+    content = null;
     constructor(){
         super();
         this.initAttributes("name");

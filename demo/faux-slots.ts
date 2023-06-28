@@ -16,7 +16,7 @@ class FauxSlots extends Component {
     // this will automatically be converted to a `<xin-slot>` on hydration
     h1(slot({name: 'heading'})),
     // in order to style this slot, we will explicitly create a `<xin-slot>`.
-    div(xinSlot({style: { display: 'flex', flexDirection: 'column' }}))
+    div(xinSlot({style: { display: 'flex', gap: '10px', flexDirection: 'column', alignItems: 'flex-start' }}))
   )
 }
 

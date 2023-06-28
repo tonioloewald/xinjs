@@ -240,6 +240,7 @@ export abstract class Component extends HTMLElement {
 
 class XinSlot extends Component {
   name = ''
+  content = null
 
   constructor () {
     super()

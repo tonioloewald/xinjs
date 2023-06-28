@@ -67,7 +67,7 @@ const routes: Route[] = [
     content: () => fauxSlots(
       { style: { padding: '20px', display: 'block'} },
       span({slot: 'heading'}, 'this will go in the heading'),
-      span('these will go in the body'),
+      div('these will go in the body'),
       button('Click me?')
     ),
   },
