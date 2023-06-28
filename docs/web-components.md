@@ -124,9 +124,10 @@ attribute).
 `<xin-slot>` doesn't support `:slotted` but since there's no shadowDOM, just 
 style such elements normally, or use `xin-slot` as a CSS-selector.
 
-Note that you cannot give a slot element attributes (other than `name`) so if
-you want to give a `<xin-slot>` attributes, create it explicitly rather than
-using `<slot>` elements (e.g. `elements.xinSlot()`) will do the trick.
+Note that you cannot give a `<slot>` element attributes (other than `name`) so if
+you want to give a `<xin-slot>` attributes (such as `class` or `style`), create it 
+explicitly (e.g. using `elements.xinSlot()`) rather than using `<slot>` elements
+and letting them be switched out (because they'll lose any attributes you give them).
 
 Also see the [faux-slot example](/demo/faux-slots.ts).
 
