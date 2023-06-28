@@ -8,6 +8,7 @@ import { todo } from './components/todo'
 import { kitchenSink } from './components/kitchen-sink'
 import { wordSearch } from './WordSearch'
 import { listFilterDemo } from './components'
+import { fauxSlots } from './faux-slots'
 import { Color } from '../src/color'
 const logo = './assets/xinjs-logo.svg'
 const readmeMd = './assets/readme.md'
@@ -60,6 +61,15 @@ const routes: Route[] = [
   {
     path: 'word-search',
     content: wordSearch,
+  },
+  {
+    path: 'faux-slots',
+    content: () => fauxSlots(
+      { style: { padding: '20px', display: 'block'} },
+      span({slot: 'heading'}, 'this will go in the heading'),
+      span('these will go in the body'),
+      button('Click me?')
+    ),
   },
   {
     path: 'list-filters',

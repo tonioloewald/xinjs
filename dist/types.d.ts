@@ -527,6 +527,7 @@ export abstract class Component extends HTMLElement {
     styleNode?: HTMLStyleElement;
     content: ContentType | (() => ContentType) | null;
     value?: any;
+    isSlotted?: boolean;
     [key: string]: any;
     static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement;
     static elementCreator(options?: ElementDefinitionOptions & {

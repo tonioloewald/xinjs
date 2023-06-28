@@ -15,6 +15,7 @@ export abstract class Component extends HTMLElement {
   styleNode?: HTMLStyleElement
   content: ContentType | (() => ContentType) | null = elements.slot()
   value?: any
+  isSlotted?: boolean
   [key: string]: any
 
   static StyleNode (styleSpec: XinStyleSheet): HTMLStyleElement {
@@ -216,7 +217,19 @@ export abstract class Component extends HTMLElement {
         shadow.appendChild(this.styleNode)
         appendContentToElement(shadow, _content)
       } else {
-        appendContentToElement(this as HTMLElement, _content)
+        const existingChildren = [...this.childNodes]
+        if (appendContentToElement(this as HTMLElement, _content) && (existingChildren.length > 0)) {
+          const slotMap: { [key: string]: Element } = { '': this }
+          ;[...this.querySelectorAll('xin-slot')].forEach(slot => {
+            // @ts-expect-error
+            slotMap[slot.name] = slot
+          })
+          existingChildren.forEach(child => {
+            const defaultSlot = slotMap['']
+            const destSlot = child instanceof Element ? slotMap[child.slot] : defaultSlot
+            ;(destSlot !== undefined ? destSlot : defaultSlot).append(child)
+          })
+        }
       }
       this._hydrated = true
     }
@@ -224,3 +237,14 @@ export abstract class Component extends HTMLElement {
 
   render (): void {}
 }
+
+class XinSlot extends Component {
+  name = ''
+
+  constructor () {
+    super()
+    this.initAttributes('name')
+  }
+}
+
+export const xinSlot = XinSlot.elementCreator({ tag: 'xin-slot' })

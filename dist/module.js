@@ -644,15 +644,31 @@ const $f314c6851ceb0f9e$export$b13421f1ae71d316 = $f314c6851ceb0f9e$var$ResizeOb
     observe () {},
     unobserve () {}
 };
+function $f314c6851ceb0f9e$var$convertToXinSlot(slot) {
+    const xinSlot = document.createElement("xin-slot");
+    if (slot.name !== "") xinSlot.setAttribute("name", slot.name);
+    slot.replaceWith(xinSlot);
+}
 const $f314c6851ceb0f9e$export$6bb13967611cdb1 = (elt, content)=>{
+    let isSlotted = false;
     if (elt != null && content != null) {
         if (typeof content === "string") elt.textContent = content;
         else if (Array.isArray(content)) content.forEach((node)=>{
             elt.append(node instanceof Node ? (0, $e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f)(node) : node);
+            if (node instanceof Node && node.querySelector("slot") != null) isSlotted = true;
         });
-        else if (content instanceof HTMLElement) elt.append((0, $e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f)(content));
-        else throw new Error("expect text content or document node");
+        else if (content instanceof HTMLElement || content instanceof DocumentFragment) {
+            const slots = [
+                ...content.querySelectorAll("slot")
+            ];
+            if (slots.length > 0) {
+                isSlotted = true;
+                slots.forEach($f314c6851ceb0f9e$var$convertToXinSlot);
+            }
+            elt.append((0, $e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f)(content));
+        } else throw new Error("expect text content or document node");
     }
+    return isSlotted;
 };
 
 
@@ -1406,12 +1422,42 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                 });
                 shadow.appendChild(this.styleNode);
                 (0, $f314c6851ceb0f9e$export$6bb13967611cdb1)(shadow, _content);
-            } else (0, $f314c6851ceb0f9e$export$6bb13967611cdb1)(this, _content);
+            } else {
+                const existingChildren = [
+                    ...this.childNodes
+                ];
+                if ((0, $f314c6851ceb0f9e$export$6bb13967611cdb1)(this, _content) && existingChildren.length > 0) {
+                    const slotMap = {
+                        "": this
+                    };
+                    [
+                        ...this.querySelectorAll("xin-slot")
+                    ].forEach((slot)=>{
+                        // @ts-expect-error
+                        slotMap[slot.name] = slot;
+                    });
+                    existingChildren.forEach((child)=>{
+                        const defaultSlot = slotMap[""];
+                        const destSlot = child instanceof Element ? slotMap[child.slot] : defaultSlot;
+                        (destSlot !== undefined ? destSlot : defaultSlot).append(child);
+                    });
+                }
+            }
             this._hydrated = true;
         }
     }
     render() {}
 }
+class $cd387b053feba574$var$XinSlot extends $cd387b053feba574$export$16fa2f45be04daa8 {
+    name = "";
+    constructor(){
+        super();
+        this.initAttributes("name");
+    }
+}
+const $cd387b053feba574$export$a0751b4aa1961d4e = $cd387b053feba574$var$XinSlot.elementCreator({
+    tag: "xin-slot"
+});
 
 
 

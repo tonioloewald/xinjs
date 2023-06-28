@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -24,7 +24,8 @@
     "make": "bun clear-targets && bun static-assets && bun test && bun parcel build",
     "pack": "bun lint && bun run make && npm pack --pack-destination ~",
     "test": "bun test",
-    "make-icons": "rm -rf static/icons && mkdir static/icons && npx fantasticon"
+    "make-icons": "rm -rf static/icons && mkdir static/icons && npx fantasticon",
+    "update": "npm update && bun install"
   },
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",

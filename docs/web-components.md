@@ -114,6 +114,30 @@ slot using the `slot` attribute.
 [app-layout.ts](../demo/components/app-layout.ts) is a more complex example of a
 structural element utilizing multiple named `<slot>`s.
 
+#### `<xin-slot>`
+
+If you put `<slot>` elements inside a `Component` subclass that doesn't have a
+shadowDOM, they will automatically be replaced with `<xin-slot>` elements that
+have the expected behavior (i.e. sucking in children in based on their `<slot>`
+attribute).
+
+`<xin-slot>` doesn't support `:slotted` but since there's no shadowDOM, just 
+style such elements normally, or use `xin-slot` as a CSS-selector.
+
+Note that you cannot give a slot element attributes (other than `name`) so if
+you want to give a `<xin-slot>` attributes, create it explicitly rather than
+using `<slot>` elements (e.g. `elements.xinSlot()`) will do the trick.
+
+Also see the [faux-slot example](/demo/faux-slots.ts).
+
+> ##### Background
+>
+> `<slot>` elements do not work as expected in shadowDOM-less components. This is
+> hugely annoying since it prevents components from composing nicely unless they
+> have a shadowDOM, and while the shadowDOM is great for small widgets, it's
+> terrible for composite views and breaks `xinjs`'s bindings (inside the shadow
+> DOM you need to do data- and event- binding manually).
+
 #### styleNode: HTMLStyleElement
 
 `styleNode` is the `<style>` element that will be inserted into the element's
