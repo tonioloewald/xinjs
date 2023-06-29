@@ -68,7 +68,11 @@ const routes: Route[] = [
       { style: { padding: '20px', display: 'block'} },
       span({slot: 'heading'}, 'this will go in the heading'),
       div('these will go in the body'),
-      button('Click me?')
+      fauxSlots(
+        { style: { padding: '20px', margin: '10px 0', background: vars.panelBg } },
+        span({slot: 'heading'}, 'this will go in the inner instance heading'),
+        span('and this goes in the inner instance body')
+      ),
     ),
   },
   {
