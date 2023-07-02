@@ -8,12 +8,6 @@ import { XinObject } from './xin-types'
 const listBindingRef = Symbol('list-binding')
 const SLICE_INTERVAL_MS = 16 // 60fps
 
-declare global {
-  interface HTMLElement {
-    [listBindingRef]?: ListBinding
-  }
-}
-
 interface ListBindingOptions {
   idPath?: string
   initInstance?: (element: HTMLElement, value: any) => void
@@ -242,9 +236,11 @@ class ListBinding {
 }
 
 export const getListBinding = (boundElement: HTMLElement, options?: ListBindingOptions): ListBinding => {
+  // @ts-expect-error
   let listBinding = boundElement[listBindingRef]
   if (listBinding == null) {
     listBinding = new ListBinding(boundElement, options)
+    // @ts-expect-error
     boundElement[listBindingRef] = listBinding
   }
   return listBinding

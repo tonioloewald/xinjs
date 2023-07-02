@@ -1,4 +1,4 @@
-import { xinProxy, touch, Component, elements, vars} from '../src/index'
+import { xinProxy, touch, Component, elements, vars, initVars} from '../src/index'
 import { xinValue } from '../src/metadata'
 import {toolBar, labeledValue, labeledInput} from './components/index'
 import {randomColor} from './random-color'
@@ -39,7 +39,7 @@ class ColorSwatch extends Component {
       gap: '10px',
       width: '260px',
       background: vars.inputBg,
-      '--input-width': '140px',
+      ...initVars({ inputWith: '140px'}),
       alignItems: 'center',
       overflow: 'hidden',
     },
@@ -106,17 +106,17 @@ export const arrayBindingTest = (...args) => div(
       placeholder: 'items to create',
       reversed: true,
       type: 'number',
-      style: {
-        '--flex-direction': 'row-reverse',
-        '--input-width': '60px'
-      },
+      style: initVars({
+        flexDirection: 'row-reverse',
+        inputWidth: 60
+      }),
       bindValue: 'colors.itemsToCreate'
     }),
     span({style: {flex: '1 1 auto'}}),
     labeledValue('items', {
-      style: {
-        '--flex-direction': 'row-reverse'
-      },
+      style: initVars({
+        flexDirection: 'row-reverse'
+      }),
       bindValue: 'colors.items.length' 
     }),
     button('scramble', {

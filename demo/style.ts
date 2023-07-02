@@ -104,7 +104,7 @@ const rules: XinStyleSheet = {
   h2: {
     lineHeight: vars.lineHeight150,
   },
-  h2: {
+  h3: {
     lineHeight: vars.lineHeight125,
   },
   pre: {

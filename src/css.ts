@@ -118,3 +118,15 @@ export const vars = new Proxy<{ [key: string]: string }>({}, {
     return target[prop]
   }
 })
+
+type CssVarBuilder = (val: string | number) => string
+
+export const varDefault = new Proxy<{ [key: string]: CssVarBuilder }>({}, {
+  get (target, prop: string) {
+    if (target[prop] === undefined) {
+      const varName = `--${prop.replace(/[A-Z]/g, x => `-${x.toLocaleLowerCase()}`)}`
+      target[prop] = (val: string | number) => `var(${varName}, ${val})`
+    }
+    return target[prop]
+  }
+})

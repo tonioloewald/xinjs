@@ -65,10 +65,10 @@ export interface ElementProps {
 }
 
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-export type SwissArmyElement = HTMLElement & HTMLInputElement & HTMLCanvasElement
-export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number
+export type SwissArmyElement = Element & HTMLInputElement & HTMLCanvasElement
+export type ElementPart = Element | DocumentFragment | ElementProps | string | number
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
 export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
-export type ContentPart = HTMLElement | DocumentFragment | string
+export type ContentPart = Element | DocumentFragment | string
 export type ContentType = ContentPart | ContentPart[]

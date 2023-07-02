@@ -6,6 +6,11 @@ import { elements, ElementsProxy } from './elements'
 import { camelToKabob, kabobToCamel } from './string-case'
 import { ElementCreator, SwissArmyElement, ContentType } from './xin-types'
 
+let anonymousElementCount = 0
+
+function anonElementTag (): string {
+  return `custom-elt${(anonymousElementCount++).toString(36)}`
+}
 let instanceCount = 0
 
 export abstract class Component extends HTMLElement {
@@ -24,25 +29,24 @@ export abstract class Component extends HTMLElement {
 
   static elementCreator (options?: ElementDefinitionOptions & { tag?: string }): ElementCreator {
     if (this._elementCreator == null) {
-      let desiredTag = options != null ? options.tag : null
-      if (desiredTag == null) {
-        desiredTag = camelToKabob(this.name)
-        if (desiredTag.startsWith('-')) {
-          desiredTag = desiredTag.substring(1)
-        }
-        if (!desiredTag.includes('-')) {
-          desiredTag += '-elt'
+      let tagName = options != null ? options.tag : null
+      if (tagName == null) {
+        if (typeof this.name === 'string' && this.name !== '') {
+          tagName = camelToKabob(this.name)
+          if (tagName.startsWith('-')) {
+            tagName = tagName.slice(1)
+          }
+        } else {
+          tagName = anonElementTag()
         }
       }
-      let attempts = 0
       while (this._elementCreator == null) {
-        attempts += 1
-        const tag = attempts === 1 ? desiredTag : `${desiredTag}-${attempts}`
         try {
-          window.customElements.define(tag, this as unknown as CustomElementConstructor, options)
-          this._elementCreator = elements[tag]
+          window.customElements.define(tagName, this as unknown as CustomElementConstructor, options)
+          this._elementCreator = elements[tagName]
         } catch (e) {
-          throw new Error(`could not define ${this.name} as <${tag}>: ${String(e)}`)
+          console.error(`failed to define ${this.name} as <${tagName}>: ${String(e)}`)
+          tagName = anonElementTag()
         }
       }
     }

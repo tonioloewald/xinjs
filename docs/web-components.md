@@ -163,13 +163,19 @@ which will then penetrate the `shadowDOM`.
 #### refs: {[key:string]: Element | undefined}
 
     render() {
-      super.render()
+      super.render() // see note
       const {span, input} = this.refs
       span.textContent = this.caption
       if (input.value !== this.value) {
         input.value = this.value
       }
     }
+
+> **Note**: the `render()` method of the base `Component` class doesn't currently
+> do anything, so calling it is optional (but a good practice in case one day…)
+>
+> It is *necessary* however to call `super.connectedCallback`, `super.disconnectedCallback`
+> and `super()` in the `constructor()` should you override them.
 
 `this.refs` returns a proxy that provides elements conveniently and efficiently. It
 is intended to facilitate access to static elements (it memoizes its values the

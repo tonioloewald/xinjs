@@ -60,7 +60,6 @@ the values, with `px` suffixed to bare numbers where appropriate.
     const myStyleMap = {
       ':root': initVars(cssVars)
     }
-
 ## darkMode({[key: string]: any}) => {[key: string]: string}
 
 Given a map of CSS properties (in camelCase) emit a map of those properties that
@@ -75,10 +74,20 @@ has color values with their luminance inverted.
 
 ## vars
 
-Vars is a proxy object that will return a css variable string from
+`vars` is a proxy object that will return a css variable string from
 a camelCase property, e.g.
 
     vars.camelCase // 'var(--camel-case)'
+
+> **it isn't called `var`** because that's a reserved word!
+
+### varDefault
+
+`varDefault` is a proxy object just like `vars` except that it returns a
+`function` that takes a property and renders it as a css variable reference
+with a default, e.g
+
+    varDefault.borderColor('red') // `var(--border-color, red)`
 
 ### Syntax Sugar for `calc(...)`
 

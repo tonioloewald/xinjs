@@ -21,13 +21,16 @@ function $parcel$export(e, n, v, s) {
 $parcel$export(module.exports, "bind", () => $fc64c421299f5d54$export$2385a24977818dd0);
 $parcel$export(module.exports, "on", () => $fc64c421299f5d54$export$af631764ddc44097);
 $parcel$export(module.exports, "bindings", () => $e49806807158e47d$export$97a1a3e6f39778d2);
-$parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
-$parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
 $parcel$export(module.exports, "css", () => $db77bb2de3733b56$export$dbf350e5966cf602);
 $parcel$export(module.exports, "darkMode", () => $db77bb2de3733b56$export$808aaf1b460dc9af);
+$parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
+$parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
+$parcel$export(module.exports, "varDefault", () => $db77bb2de3733b56$export$75c0e6adb3e38f31);
 $parcel$export(module.exports, "Color", () => $dde521108530e806$export$892596cec99bc70e);
 $parcel$export(module.exports, "Component", () => $8c7b36581a3597bc$export$16fa2f45be04daa8);
 $parcel$export(module.exports, "elements", () => $c004c420133596e3$export$7a5d735b2ab6389d);
+$parcel$export(module.exports, "svgElements", () => $c004c420133596e3$export$cf20112a1bc148da);
+$parcel$export(module.exports, "mathML", () => $c004c420133596e3$export$8ec252cfdd664597);
 $parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87f7746612069);
 $parcel$export(module.exports, "getListItem", () => $3f1d78706f6d8212$export$4c309843c07ce679);
 $parcel$export(module.exports, "xinPath", () => $3f1d78706f6d8212$export$40700dafb97c3799);
@@ -906,9 +909,11 @@ class $30c2e647bc2c31d1$var$ListBinding {
     }
 }
 const $30c2e647bc2c31d1$export$b0eb386be3b9fed8 = (boundElement, options)=>{
+    // @ts-expect-error
     let listBinding = boundElement[$30c2e647bc2c31d1$var$listBindingRef];
     if (listBinding == null) {
         listBinding = new $30c2e647bc2c31d1$var$ListBinding(boundElement, options);
+        // @ts-expect-error
         boundElement[$30c2e647bc2c31d1$var$listBindingRef] = listBinding;
     }
     return listBinding;
@@ -1120,9 +1125,15 @@ function $6d99f825475e91d0$export$fd322201efdc650f(s) {
 }
 
 
+const $c004c420133596e3$var$MATH = "http://www.w3.org/1998/Math/MathML";
+const $c004c420133596e3$var$SVG = "http://www.w3.org/2000/svg";
 const $c004c420133596e3$var$templates = {};
 const $c004c420133596e3$var$create = (tagType, ...contents)=>{
-    if ($c004c420133596e3$var$templates[tagType] === undefined) $c004c420133596e3$var$templates[tagType] = globalThis.document.createElement(tagType);
+    if ($c004c420133596e3$var$templates[tagType] === undefined) {
+        const [tag, namespace] = tagType.split("|");
+        if (namespace === undefined) $c004c420133596e3$var$templates[tagType] = globalThis.document.createElement(tag);
+        else $c004c420133596e3$var$templates[tagType] = globalThis.document.createElementNS(namespace, tag);
+    }
     const elt = $c004c420133596e3$var$templates[tagType].cloneNode();
     const elementProps = {};
     for (const item of contents)if (item instanceof Element || item instanceof DocumentFragment || typeof item === "string" || typeof item === "number") {
@@ -1147,9 +1158,11 @@ const $c004c420133596e3$var$create = (tagType, ...contents)=>{
             if (binding !== undefined) (0, $fc64c421299f5d54$export$2385a24977818dd0)(elt, value, binding);
             else throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
         // @ts-expect-error
-        } else if (elt[key] !== undefined) // @ts-expect-error
-        elt[key] = value;
-        else {
+        } else if (elt[key] !== undefined) {
+            if (elt instanceof SVGElement || elt instanceof MathMLElement) elt.setAttribute(key, value);
+            else // @ts-expect-error
+            elt[key] = value;
+        } else {
             const attr = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
             if (attr === "class") value.split(" ").forEach((className)=>{
                 elt.classList.add(className);
@@ -1172,9 +1185,37 @@ const $c004c420133596e3$export$7a5d735b2ab6389d = new Proxy({
 }, {
     get (target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
-        if (tagName.match(/^\w+(-\w+)*$/) == null) throw new Error(`${tagName} does not appear to be a valid element tagName`);
-        else if (target[tagName] === undefined) // @ts-expect-error
+        // @ts-expect-error
+        if (target[tagName] === undefined) // @ts-expect-error
         target[tagName] = (...contents)=>$c004c420133596e3$var$create(tagName, ...contents);
+        // @ts-expect-error
+        return target[tagName];
+    },
+    set () {
+        throw new Error("You may not add new properties to elements");
+    }
+});
+const $c004c420133596e3$export$cf20112a1bc148da = new Proxy({
+    fragment: $c004c420133596e3$var$fragment
+}, {
+    get (target, tagName) {
+        // @ts-expect-error
+        if (target[tagName] === undefined) // @ts-expect-error
+        target[tagName] = (...contents)=>$c004c420133596e3$var$create(`${tagName}|${$c004c420133596e3$var$SVG}`, ...contents);
+        // @ts-expect-error
+        return target[tagName];
+    },
+    set () {
+        throw new Error("You may not add new properties to elements");
+    }
+});
+const $c004c420133596e3$export$8ec252cfdd664597 = new Proxy({
+    fragment: $c004c420133596e3$var$fragment
+}, {
+    get (target, tagName) {
+        // @ts-expect-error
+        if (target[tagName] === undefined) // @ts-expect-error
+        target[tagName] = (...contents)=>$c004c420133596e3$var$create(`${tagName}|${$c004c420133596e3$var$MATH}`, ...contents);
         // @ts-expect-error
         return target[tagName];
     },
@@ -1292,6 +1333,15 @@ const $db77bb2de3733b56$export$3cb96c9f6c8d16a4 = new Proxy({}, {
         return target[prop];
     }
 });
+const $db77bb2de3733b56$export$75c0e6adb3e38f31 = new Proxy({}, {
+    get (target, prop) {
+        if (target[prop] === undefined) {
+            const varName = `--${prop.replace(/[A-Z]/g, (x)=>`-${x.toLocaleLowerCase()}`)}`;
+            target[prop] = (val)=>`var(${varName}, ${val})`;
+        }
+        return target[prop];
+    }
+});
 
 
 
@@ -1300,6 +1350,10 @@ const $db77bb2de3733b56$export$3cb96c9f6c8d16a4 = new Proxy({}, {
 
 
 
+let $8c7b36581a3597bc$var$anonymousElementCount = 0;
+function $8c7b36581a3597bc$var$anonElementTag() {
+    return `custom-elt${($8c7b36581a3597bc$var$anonymousElementCount++).toString(36)}`;
+}
 let $8c7b36581a3597bc$var$instanceCount = 0;
 class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     static elements = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
@@ -1309,22 +1363,19 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     }
     static elementCreator(options) {
         if (this._elementCreator == null) {
-            let desiredTag = options != null ? options.tag : null;
-            if (desiredTag == null) {
-                desiredTag = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(this.name);
-                if (desiredTag.startsWith("-")) desiredTag = desiredTag.substring(1);
-                if (!desiredTag.includes("-")) desiredTag += "-elt";
+            let tagName = options != null ? options.tag : null;
+            if (tagName == null) {
+                if (typeof this.name === "string" && this.name !== "") {
+                    tagName = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(this.name);
+                    if (tagName.startsWith("-")) tagName = tagName.slice(1);
+                } else tagName = $8c7b36581a3597bc$var$anonElementTag();
             }
-            let attempts = 0;
-            while(this._elementCreator == null){
-                attempts += 1;
-                const tag = attempts === 1 ? desiredTag : `${desiredTag}-${attempts}`;
-                try {
-                    window.customElements.define(tag, this, options);
-                    this._elementCreator = (0, $c004c420133596e3$export$7a5d735b2ab6389d)[tag];
-                } catch (e) {
-                    throw new Error(`could not define ${this.name} as <${tag}>: ${String(e)}`);
-                }
+            while(this._elementCreator == null)try {
+                window.customElements.define(tagName, this, options);
+                this._elementCreator = (0, $c004c420133596e3$export$7a5d735b2ab6389d)[tagName];
+            } catch (e) {
+                console.error(`failed to define ${this.name} as <${tagName}>: ${String(e)}`);
+                tagName = $8c7b36581a3597bc$var$anonElementTag();
             }
         }
         return this._elementCreator;

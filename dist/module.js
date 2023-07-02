@@ -862,9 +862,11 @@ class $ea2c6a36710de0a8$var$ListBinding {
     }
 }
 const $ea2c6a36710de0a8$export$b0eb386be3b9fed8 = (boundElement, options)=>{
+    // @ts-expect-error
     let listBinding = boundElement[$ea2c6a36710de0a8$var$listBindingRef];
     if (listBinding == null) {
         listBinding = new $ea2c6a36710de0a8$var$ListBinding(boundElement, options);
+        // @ts-expect-error
         boundElement[$ea2c6a36710de0a8$var$listBindingRef] = listBinding;
     }
     return listBinding;
@@ -1076,9 +1078,15 @@ function $bed4bed3dcfb6f9a$export$fd322201efdc650f(s) {
 }
 
 
+const $9e0c0b8784c80412$var$MATH = "http://www.w3.org/1998/Math/MathML";
+const $9e0c0b8784c80412$var$SVG = "http://www.w3.org/2000/svg";
 const $9e0c0b8784c80412$var$templates = {};
 const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
-    if ($9e0c0b8784c80412$var$templates[tagType] === undefined) $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElement(tagType);
+    if ($9e0c0b8784c80412$var$templates[tagType] === undefined) {
+        const [tag, namespace] = tagType.split("|");
+        if (namespace === undefined) $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElement(tag);
+        else $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElementNS(namespace, tag);
+    }
     const elt = $9e0c0b8784c80412$var$templates[tagType].cloneNode();
     const elementProps = {};
     for (const item of contents)if (item instanceof Element || item instanceof DocumentFragment || typeof item === "string" || typeof item === "number") {
@@ -1103,9 +1111,11 @@ const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
             if (binding !== undefined) (0, $b5796eaeba5c782e$export$2385a24977818dd0)(elt, value, binding);
             else throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
         // @ts-expect-error
-        } else if (elt[key] !== undefined) // @ts-expect-error
-        elt[key] = value;
-        else {
+        } else if (elt[key] !== undefined) {
+            if (elt instanceof SVGElement || elt instanceof MathMLElement) elt.setAttribute(key, value);
+            else // @ts-expect-error
+            elt[key] = value;
+        } else {
             const attr = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(key);
             if (attr === "class") value.split(" ").forEach((className)=>{
                 elt.classList.add(className);
@@ -1128,9 +1138,37 @@ const $9e0c0b8784c80412$export$7a5d735b2ab6389d = new Proxy({
 }, {
     get (target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
-        if (tagName.match(/^\w+(-\w+)*$/) == null) throw new Error(`${tagName} does not appear to be a valid element tagName`);
-        else if (target[tagName] === undefined) // @ts-expect-error
+        // @ts-expect-error
+        if (target[tagName] === undefined) // @ts-expect-error
         target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(tagName, ...contents);
+        // @ts-expect-error
+        return target[tagName];
+    },
+    set () {
+        throw new Error("You may not add new properties to elements");
+    }
+});
+const $9e0c0b8784c80412$export$cf20112a1bc148da = new Proxy({
+    fragment: $9e0c0b8784c80412$var$fragment
+}, {
+    get (target, tagName) {
+        // @ts-expect-error
+        if (target[tagName] === undefined) // @ts-expect-error
+        target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(`${tagName}|${$9e0c0b8784c80412$var$SVG}`, ...contents);
+        // @ts-expect-error
+        return target[tagName];
+    },
+    set () {
+        throw new Error("You may not add new properties to elements");
+    }
+});
+const $9e0c0b8784c80412$export$8ec252cfdd664597 = new Proxy({
+    fragment: $9e0c0b8784c80412$var$fragment
+}, {
+    get (target, tagName) {
+        // @ts-expect-error
+        if (target[tagName] === undefined) // @ts-expect-error
+        target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(`${tagName}|${$9e0c0b8784c80412$var$MATH}`, ...contents);
         // @ts-expect-error
         return target[tagName];
     },
@@ -1248,6 +1286,15 @@ const $49cee7f7f866c751$export$3cb96c9f6c8d16a4 = new Proxy({}, {
         return target[prop];
     }
 });
+const $49cee7f7f866c751$export$75c0e6adb3e38f31 = new Proxy({}, {
+    get (target, prop) {
+        if (target[prop] === undefined) {
+            const varName = `--${prop.replace(/[A-Z]/g, (x)=>`-${x.toLocaleLowerCase()}`)}`;
+            target[prop] = (val)=>`var(${varName}, ${val})`;
+        }
+        return target[prop];
+    }
+});
 
 
 
@@ -1256,6 +1303,10 @@ const $49cee7f7f866c751$export$3cb96c9f6c8d16a4 = new Proxy({}, {
 
 
 
+let $cd387b053feba574$var$anonymousElementCount = 0;
+function $cd387b053feba574$var$anonElementTag() {
+    return `custom-elt${($cd387b053feba574$var$anonymousElementCount++).toString(36)}`;
+}
 let $cd387b053feba574$var$instanceCount = 0;
 class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
     static elements = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d);
@@ -1265,22 +1316,19 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
     }
     static elementCreator(options) {
         if (this._elementCreator == null) {
-            let desiredTag = options != null ? options.tag : null;
-            if (desiredTag == null) {
-                desiredTag = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(this.name);
-                if (desiredTag.startsWith("-")) desiredTag = desiredTag.substring(1);
-                if (!desiredTag.includes("-")) desiredTag += "-elt";
+            let tagName = options != null ? options.tag : null;
+            if (tagName == null) {
+                if (typeof this.name === "string" && this.name !== "") {
+                    tagName = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(this.name);
+                    if (tagName.startsWith("-")) tagName = tagName.slice(1);
+                } else tagName = $cd387b053feba574$var$anonElementTag();
             }
-            let attempts = 0;
-            while(this._elementCreator == null){
-                attempts += 1;
-                const tag = attempts === 1 ? desiredTag : `${desiredTag}-${attempts}`;
-                try {
-                    window.customElements.define(tag, this, options);
-                    this._elementCreator = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d)[tag];
-                } catch (e) {
-                    throw new Error(`could not define ${this.name} as <${tag}>: ${String(e)}`);
-                }
+            while(this._elementCreator == null)try {
+                window.customElements.define(tagName, this, options);
+                this._elementCreator = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d)[tagName];
+            } catch (e) {
+                console.error(`failed to define ${this.name} as <${tagName}>: ${String(e)}`);
+                tagName = $cd387b053feba574$var$anonElementTag();
             }
         }
         return this._elementCreator;
@@ -1505,5 +1553,5 @@ function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj) {
 
 
 
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy};
 //# sourceMappingURL=module.js.map

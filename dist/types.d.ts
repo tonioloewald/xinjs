@@ -303,12 +303,12 @@ export interface ElementProps {
     [key: string]: any;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-export type SwissArmyElement = HTMLElement & HTMLInputElement & HTMLCanvasElement;
-export type ElementPart = HTMLElement | DocumentFragment | ElementProps | string | number;
+export type SwissArmyElement = Element & HTMLInputElement & HTMLCanvasElement;
+export type ElementPart = Element | DocumentFragment | ElementProps | string | number;
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T;
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
 export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T;
-export type ContentPart = HTMLElement | DocumentFragment | string;
+export type ContentPart = Element | DocumentFragment | string;
 export type ContentType = ContentPart | ContentPart[];
 export const settings: {
     debug: boolean;
@@ -330,11 +330,6 @@ export const on: (element: HTMLElement, eventType: string, eventHandler: XinEven
 type VoidFunc = (...args: any[]) => void;
 export const debounce: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
 export const throttle: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
-declare global {
-    interface HTMLElement {
-        [listBindingRef]?: ListBinding;
-    }
-}
 export const bindings: {
     [key: string | symbol]: XinBinding;
 };
@@ -486,7 +481,6 @@ export interface ElementsProxy {
     style: ElementCreator<HTMLStyleElement>;
     sub: ElementCreator;
     summary: ElementCreator;
-    svg: ElementCreator<SVGElement>;
     table: ElementCreator<HTMLTableElement>;
     tbody: ElementCreator<HTMLTableSectionElement>;
     td: ElementCreator<HTMLTableCellElement>;
@@ -513,6 +507,14 @@ export interface ElementsProxy {
  * elements.myElement() creatres <my-element> elements.
  */
 export const elements: ElementsProxy;
+interface SVGElementsProxy {
+    [key: string]: ElementCreator<SVGElement>;
+}
+export const svgElements: SVGElementsProxy;
+interface MathMLElementsProxy {
+    [key: string]: ElementCreator<MathMLElement>;
+}
+export const mathML: MathMLElementsProxy;
 export const css: (obj: XinStyleSheet | XinStyleMap, indentation?: string) => string;
 export const initVars: (obj: {
     [key: string]: string | number;
@@ -520,6 +522,10 @@ export const initVars: (obj: {
 export const darkMode: (obj: XinStyleRule) => XinStyleRule;
 export const vars: {
     [key: string]: string;
+};
+type CssVarBuilder = (val: string | number) => string;
+export const varDefault: {
+    [key: string]: CssVarBuilder;
 };
 export abstract class Component extends HTMLElement {
     static elements: ElementsProxy;

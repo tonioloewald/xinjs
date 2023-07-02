@@ -11,11 +11,11 @@
 
 export { bind, on } from './bind'
 export { bindings } from './bindings'
-export { vars, initVars, css, darkMode } from './css'
+export { css, darkMode, initVars, vars, varDefault } from './css'
 export type { XinStyleSheet, XinStyleMap, XinStyleRule } from './css-types'
 export { Color } from './color'
 export { Component } from './component'
-export { elements } from './elements'
+export { elements, svgElements, mathML } from './elements'
 export type { ElementsProxy } from './elements'
 export { hotReload } from './hot-reload'
 export { getListItem, xinPath, xinValue } from './metadata'

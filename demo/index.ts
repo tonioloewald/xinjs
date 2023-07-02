@@ -1,5 +1,5 @@
 import './style'
-import { xin, touch, xinProxy, elements, hotReload, settings, vars, ContentType } from '../src/'
+import { xin, touch, xinProxy, elements, hotReload, settings, vars, ContentType, svgElements, mathML } from '../src/'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
@@ -83,6 +83,47 @@ const routes: Route[] = [
     path: 'kitchen-sink',
     content: () => div({class: 'page-padded'}, kitchenSink()),
   },
+  {
+    path: 'SVG',
+    content() {
+      const {svg, polygon} = svgElements
+      return svg(
+        {
+          style: {
+            backgroundColor: vars.brandColor50o, width: 400, height: 400
+          }, 
+          viewBox: '0 0 200 200',
+        },
+        polygon({
+          points: '40,40,160,100,40,160,40,120,80,100,40,80',
+          fill: vars.brandTextColor
+        })
+      )
+    }
+  },
+  {
+    path: 'MathML',
+    content() {
+      const { math, mrow, msup, mi, mn, mo } = mathML
+      return math(
+        { 
+          style: {
+            padding: vars.spacing200,
+            fontSize: '200%',
+          }
+        },
+        mrow(
+          msup(mi('x'), mn(2)),
+          mo('+'),
+          mrow(mn(4),  mi('x'))
+        ),
+        mo('+'),
+        mn(4),
+        mo('='),
+        mn(0)
+      )
+    }
+  }
 ]
 
 function showRoute () {
@@ -127,9 +168,11 @@ const appBar = () => span(
       const leftSideNav = document.querySelector('.left-side-nav') as HTMLElement
       if (leftSideNav.style.marginLeft) {
         leftSideNav.style.marginLeft = ''
+        // @ts-expect-error
         event.target.style.transform = 'rotateZ(180deg)'
       } else {
         leftSideNav.style.marginLeft = '-180px'
+        // @ts-expect-error
         event.target.style.transform = ''
       }
     }
