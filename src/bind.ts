@@ -8,7 +8,10 @@ import { XinObject, XinProxy, XinEventHandler, XinTouchableType, XinBinding, Xin
 const { document, MutationObserver } = globalThis
 
 export const touchElement = (element: HTMLElement, changedPath?: string): void => {
-  const dataBindings = elementToBindings.get(element) as DataBindings
+  const dataBindings = elementToBindings.get(element)
+  if (dataBindings == null) {
+    return
+  }
   for (const dataBinding of dataBindings) {
     let { path, binding, options } = dataBinding
     const { toDOM } = binding
