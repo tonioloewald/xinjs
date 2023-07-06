@@ -402,3 +402,15 @@ test('parents and children', async () => {
   await updates()
   expect(changes.length).toBe(6)
 })
+
+test('no double wrapping', () => {
+  const fubar = {barfu: { bazfu: 17 }}
+  xin.fubar = fubar
+  expect(xin.fubar[XIN_VALUE]).toBe(fubar)
+  expect(xin.fubar.barfu[XIN_VALUE]).toBe(fubar.barfu)
+  xin.fubar = { ...xin.fubar }
+  expect(xin.fubar[XIN_VALUE]).not.toBe(fubar)
+  expect(xin.fubar.barfu[XIN_VALUE]).toBe(fubar.barfu)
+  delete xin.fubar
+  expect(xin.fubar).toBe(undefined)
+})

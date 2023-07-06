@@ -1,8 +1,8 @@
-import { XinProxyObject, XinProxy, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { XinProxyObject, XinProxyTarget, XinObject, XinArray, XinValue, PathTestFunction, ObserverCallbackFunction } from './xin-types'
 import { settings } from './settings'
 import { Listener, touch, observe as _observe, unobserve, updates, observerShouldBeRemoved } from './path-listener'
 import { getByPath, setByPath } from './by-path'
-import { XIN_VALUE, XIN_PATH } from './metadata'
+import { xinValue, xinPath, XIN_VALUE, XIN_PATH } from './metadata'
 
 interface ProxyConstructor {
   revocable: <T extends object, P extends object>(
@@ -42,6 +42,9 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
     if (_prop === XIN_PATH) {
       return path
     } else if (_prop === XIN_VALUE) {
+      while (xinPath(target) !== undefined) {
+        target = xinValue(target)
+      }
       return target
     }
     if (typeof _prop === 'symbol') {
@@ -103,18 +106,13 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
   },
   set (_, prop: string, value: any) {
     // eslint-disable-next-line
-    if (value != null && value[XIN_PATH]) {
-      value = value[XIN_VALUE]
-    }
+    value = xinValue(value)
     const fullPath = extendPath(path, prop)
     if (debugPaths && !isValidPath(fullPath)) {
       throw new Error(`setting invalid path ${fullPath}`)
     }
-    let existing = xin[fullPath] as XinProxy
+    const existing = xinValue(xin[fullPath])
     // eslint-disable-next-line
-    if (existing != null && existing[XIN_VALUE] != null) {
-      existing = existing[XIN_VALUE] as XinProxy
-    }
     if (existing !== value && setByPath(registry, fullPath, value)) {
       touch(fullPath)
     }
