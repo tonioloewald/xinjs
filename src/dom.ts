@@ -82,36 +82,18 @@ export const resizeObserver = ResizeObserver != null
       unobserve () {}
     }
 
-function convertToXinSlot (slot: HTMLSlotElement): void {
-  const xinSlot = document.createElement('xin-slot')
-  if (slot.name !== '') {
-    xinSlot.setAttribute('name', slot.name)
-  }
-  slot.replaceWith(xinSlot)
-}
-
-export const appendContentToElement = (elt: Element | ShadowRoot | null | undefined, content: ContentType | null | undefined): boolean => {
-  let isSlotted = false
+export const appendContentToElement = (elt: Element | ShadowRoot | null | undefined, content: ContentType | null | undefined, cloneElements = true): void => {
   if (elt != null && content != null) {
     if (typeof content === 'string') {
       elt.textContent = content
     } else if (Array.isArray(content)) {
       content.forEach(node => {
-        elt.append(node instanceof Node ? cloneWithBindings(node) : node)
-        if (node instanceof Node && (node.querySelector('slot') != null)) {
-          isSlotted = true
-        }
+        elt.append(node instanceof Node && cloneElements ? cloneWithBindings(node) : node)
       })
     } else if (content instanceof HTMLElement || content instanceof DocumentFragment) {
-      const slots = [...content.querySelectorAll('slot')]
-      if (slots.length > 0) {
-        isSlotted = true
-        slots.forEach(convertToXinSlot)
-      }
-      elt.append(cloneWithBindings(content))
+      elt.append(cloneElements ? cloneWithBindings(content) : content)
     } else {
       throw new Error('expect text content or document node')
     }
   }
-  return isSlotted
 }

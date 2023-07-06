@@ -215,18 +215,24 @@ export abstract class Component extends HTMLElement {
   private hydrate (): void {
     if (!this._hydrated) {
       this.initValue()
+      const cloneElements = typeof this.content !== 'function'
       const _content: ContentType | null = typeof this.content === 'function' ? this.content() : this.content
       if (this.styleNode !== undefined) {
         const shadow = this.attachShadow({ mode: 'open' })
         shadow.appendChild(this.styleNode)
-        appendContentToElement(shadow, _content)
-      } else {
+        appendContentToElement(shadow, _content, cloneElements)
+      } else if (_content !== null) {
         const existingChildren = [...this.childNodes]
-        if (appendContentToElement(this as HTMLElement, _content) && (existingChildren.length > 0)) {
+        appendContentToElement(this as HTMLElement, _content, cloneElements)
+        this.isSlotted = this.querySelector('slot,xin-slot') !== undefined
+        const slots = [...this.querySelectorAll('slot')]
+        if (slots.length > 0) {
+          slots.forEach(XinSlot.replaceSlot)
+        }
+        if (existingChildren.length > 0) {
           const slotMap: { [key: string]: Element } = { '': this }
-          ;[...this.querySelectorAll('xin-slot')].forEach(slot => {
-            // @ts-expect-error
-            slotMap[slot.name] = slot
+          ;[...this.querySelectorAll('xin-slot')].forEach((slot) => {
+            slotMap[(slot as XinSlot).name] = slot
           })
           existingChildren.forEach(child => {
             const defaultSlot = slotMap['']
@@ -245,6 +251,14 @@ export abstract class Component extends HTMLElement {
 class XinSlot extends Component {
   name = ''
   content = null
+
+  static replaceSlot (slot: HTMLSlotElement): void {
+    const _slot = document.createElement('xin-slot')
+    if (slot.name !== '') {
+      _slot.setAttribute('name', slot.name)
+    }
+    slot.replaceWith(_slot)
+  }
 
   constructor () {
     super()

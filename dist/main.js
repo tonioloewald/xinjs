@@ -409,7 +409,10 @@ const $3c20fb09d41b8da8$var$regHandler = (path = "")=>({
         // as you'd expect
         get (target, _prop) {
             if (_prop === (0, $3f1d78706f6d8212$export$a3622eb3b5dd592a)) return path;
-            else if (_prop === (0, $3f1d78706f6d8212$export$bdd0d039ad781534)) return target;
+            else if (_prop === (0, $3f1d78706f6d8212$export$bdd0d039ad781534)) {
+                while((0, $3f1d78706f6d8212$export$40700dafb97c3799)(target) !== undefined)target = (0, $3f1d78706f6d8212$export$5dcba2d45033d435)(target);
+                return target;
+            }
             if (typeof _prop === "symbol") // @ts-expect-error
             return target[_prop];
             let prop = _prop;
@@ -448,12 +451,11 @@ const $3c20fb09d41b8da8$var$regHandler = (path = "")=>({
         },
         set (_, prop, value) {
             // eslint-disable-next-line
-            if (value != null && value[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a]) value = value[0, $3f1d78706f6d8212$export$bdd0d039ad781534];
+            value = (0, $3f1d78706f6d8212$export$5dcba2d45033d435)(value);
             const fullPath = $3c20fb09d41b8da8$var$extendPath(path, prop);
             if ($3c20fb09d41b8da8$var$debugPaths && !$3c20fb09d41b8da8$export$a678af82bf766611(fullPath)) throw new Error(`setting invalid path ${fullPath}`);
-            let existing = $3c20fb09d41b8da8$export$966034e6c6823eb0[fullPath];
+            const existing = (0, $3f1d78706f6d8212$export$5dcba2d45033d435)($3c20fb09d41b8da8$export$966034e6c6823eb0[fullPath]);
             // eslint-disable-next-line
-            if (existing != null && existing[0, $3f1d78706f6d8212$export$bdd0d039ad781534] != null) existing = existing[0, $3f1d78706f6d8212$export$bdd0d039ad781534];
             if (existing !== value && (0, $6bd6ac320b906229$export$f65a19d15516795e)($3c20fb09d41b8da8$var$registry, fullPath, value)) (0, $287d4a4db165612d$export$d0b7ea69ab6056df)(fullPath);
             return true;
         }
@@ -470,6 +472,7 @@ const $3c20fb09d41b8da8$export$966034e6c6823eb0 = new Proxy($3c20fb09d41b8da8$va
 const { document: $fc64c421299f5d54$var$document , MutationObserver: $fc64c421299f5d54$var$MutationObserver  } = globalThis;
 const $fc64c421299f5d54$export$80bf2f765c31be6a = (element, changedPath)=>{
     const dataBindings = (0, $3f1d78706f6d8212$export$1f922de8d0ecbb7e).get(element);
+    if (dataBindings == null) return;
     for (const dataBinding of dataBindings){
         let { path: path , binding: binding , options: options  } = dataBinding;
         const { toDOM: toDOM  } = binding;
@@ -691,31 +694,15 @@ const $2f96dbadf81a4e19$export$b13421f1ae71d316 = $2f96dbadf81a4e19$var$ResizeOb
     observe () {},
     unobserve () {}
 };
-function $2f96dbadf81a4e19$var$convertToXinSlot(slot) {
-    const xinSlot = document.createElement("xin-slot");
-    if (slot.name !== "") xinSlot.setAttribute("name", slot.name);
-    slot.replaceWith(xinSlot);
-}
-const $2f96dbadf81a4e19$export$6bb13967611cdb1 = (elt, content)=>{
-    let isSlotted = false;
+const $2f96dbadf81a4e19$export$6bb13967611cdb1 = (elt, content, cloneElements = true)=>{
     if (elt != null && content != null) {
         if (typeof content === "string") elt.textContent = content;
         else if (Array.isArray(content)) content.forEach((node)=>{
-            elt.append(node instanceof Node ? (0, $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f)(node) : node);
-            if (node instanceof Node && node.querySelector("slot") != null) isSlotted = true;
+            elt.append(node instanceof Node && cloneElements ? (0, $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f)(node) : node);
         });
-        else if (content instanceof HTMLElement || content instanceof DocumentFragment) {
-            const slots = [
-                ...content.querySelectorAll("slot")
-            ];
-            if (slots.length > 0) {
-                isSlotted = true;
-                slots.forEach($2f96dbadf81a4e19$var$convertToXinSlot);
-            }
-            elt.append((0, $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f)(content));
-        } else throw new Error("expect text content or document node");
+        else if (content instanceof HTMLElement || content instanceof DocumentFragment) elt.append(cloneElements ? (0, $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f)(content) : content);
+        else throw new Error("expect text content or document node");
     }
-    return isSlotted;
 };
 
 
@@ -1510,25 +1497,31 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
+            const cloneElements = typeof this.content !== "function";
             const _content = typeof this.content === "function" ? this.content() : this.content;
             if (this.styleNode !== undefined) {
                 const shadow = this.attachShadow({
                     mode: "open"
                 });
                 shadow.appendChild(this.styleNode);
-                (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(shadow, _content);
-            } else {
+                (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(shadow, _content, cloneElements);
+            } else if (_content !== null) {
                 const existingChildren = [
                     ...this.childNodes
                 ];
-                if ((0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(this, _content) && existingChildren.length > 0) {
+                (0, $2f96dbadf81a4e19$export$6bb13967611cdb1)(this, _content, cloneElements);
+                this.isSlotted = this.querySelector("slot,xin-slot") !== undefined;
+                const slots = [
+                    ...this.querySelectorAll("slot")
+                ];
+                if (slots.length > 0) slots.forEach($8c7b36581a3597bc$var$XinSlot.replaceSlot);
+                if (existingChildren.length > 0) {
                     const slotMap = {
                         "": this
                     };
                     [
                         ...this.querySelectorAll("xin-slot")
                     ].forEach((slot)=>{
-                        // @ts-expect-error
                         slotMap[slot.name] = slot;
                     });
                     existingChildren.forEach((child)=>{
@@ -1546,6 +1539,11 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
 class $8c7b36581a3597bc$var$XinSlot extends $8c7b36581a3597bc$export$16fa2f45be04daa8 {
     name = "";
     content = null;
+    static replaceSlot(slot) {
+        const _slot = document.createElement("xin-slot");
+        if (slot.name !== "") _slot.setAttribute("name", slot.name);
+        slot.replaceWith(_slot);
+    }
     constructor(){
         super();
         this.initAttributes("name");

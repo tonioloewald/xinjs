@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "start": "bun clear-targets && bun static-assets && bun parcel demo/index.html --dist-dir www -p 8018",
-    "clear-targets": "rm -rf www dist && mkdir -p www/assets",
+    "clear-targets": "rm -rf .parcel-cache && rm -rf www dist && mkdir -p www/assets",
     "static-assets": "cp readme.md docs/*.md *.svg *.ico *.png www/assets && cp -r demo/assets/* www/assets",
     "lint": "bun ts-standard --fix src/*.ts",
     "make": "bun clear-targets && bun static-assets && bun test && bun parcel build",

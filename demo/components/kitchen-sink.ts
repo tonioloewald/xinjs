@@ -1,7 +1,7 @@
 import {xin, touch, elements, Component, vars, css} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
-const {div, span, form, button, label, input, select, option, datalist, h4, p, template, fragment, style} = elements
+const {div, span, form, button, label, input, select, option, datalist, h4, p, template, fragment, style, xinSlot} = elements
 
 const wordsToCamelCase = string => string.split(/\s+/)
   .map((word, idx) => idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1): word)
@@ -22,6 +22,43 @@ class SimpleComponent extends Component {
     }
   })
 }
+
+class LightComponent extends Component {
+  content = [
+    h4(
+      '<light-component> has no styleNode and thus no shadowDOM', {
+        style: { marginBotton: vars.spacing50 }
+      }
+    ),
+    label('...and its content elements can be bound normally: ', input({bindValue: 'formTest.string'})),
+    div(
+      {
+        style: {
+          textAlign: 'right',
+          margin: `${vars.spacing50} 0`
+        }
+      },
+      button(
+        'reset formTest.string',
+        {onClick: 'formTest.reset'}
+      ),
+    ),
+    div(
+      {
+        style: {
+          marginTop: vars.spacing50,
+          background: vars.panelBg,
+          padding: vars.spacing,
+        }
+      },
+      xinSlot({name: 'first'}),
+      xinSlot(),
+      xinSlot({name: 'last'})
+    )
+  ]
+}
+
+const lightComponent = LightComponent.elementCreator({tag: 'light-component'})
 
 const simpleComponent = SimpleComponent.elementCreator({tag: 'simple-component'})
 
@@ -85,6 +122,10 @@ xin.formTest = {
       {id: 'ncc-1031', name: 'Discovery'},
       {id: 'ncc-74656', name: 'Voyager'},
     ]
+  },
+  reset() {
+    // @ts-expect-error
+    xin.formTest.string = 'hello xin'
   }
 }
 
@@ -173,7 +214,7 @@ This is an in-browser test of key functionality including:
       {
         exampleProp: () => ({word: 'success'})
       },
-      h4('This is a simple component'),
+      h4('<simple-component> has a shadowDOM'),
       p('Its contents are in the "light" DOM and can be bound normally.'),
       label(
         span('name'),
@@ -192,8 +233,25 @@ This is an in-browser test of key functionality including:
           template(
             div({ bindText: '^.name'})
           )
+        ),
+        lightComponent(
+          { 
+            style: { display: 'block', marginTop: vars.spacing }
+          },
+          'this instance of <light-component> is nested and still works'
         )
       )
+    ),
+    lightComponent(
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+        }
+      },
+      div('this child is slotted'),
+      div({slot: 'last'}, 'this child is slotted "last"'),
+      div({slot: 'first'}, 'this child is slotted "first')
     ),
     label(span('number'), input({type: "number", bindValue: 'formTest.number'})),
     label(span('range input'), input({type: "range", value: 0, min: -5, max: 5, bindValue: 'formTest.number'})),
