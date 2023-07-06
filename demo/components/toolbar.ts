@@ -13,7 +13,7 @@ class ToolBar extends Component {
       flex: `0 0 ${vars.toolbarHeight}`,
       flexWrap: 'wrap',
       overflow: 'hidden',
-      overflowX: 'overlay'
+      overflowX: 'scroll'
     },
     ':host > *': {
       whiteSpace: 'nowrap',
