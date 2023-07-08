@@ -40,15 +40,14 @@ export abstract class Component extends HTMLElement {
           tagName = anonElementTag()
         }
       }
-      while (this._elementCreator == null) {
-        try {
-          window.customElements.define(tagName, this as unknown as CustomElementConstructor, options)
-          this._elementCreator = elements[tagName]
-        } catch (e) {
-          console.error(`failed to define ${this.name} as <${tagName}>: ${String(e)}`)
-          tagName = anonElementTag()
-        }
+      if (customElements.get(tagName) != null) {
+        console.warn(`${tagName} is already defined`)
       }
+      while (customElements.get(tagName) !== undefined) {
+        tagName = anonElementTag()
+      }
+      window.customElements.define(tagName, this as unknown as CustomElementConstructor, options)
+      this._elementCreator = elements[tagName]
     }
     return this._elementCreator
   }

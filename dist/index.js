@@ -1310,13 +1310,10 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
                     if (tagName.startsWith("-")) tagName = tagName.slice(1);
                 } else tagName = $0ea0392c3fe8c9d5$var$anonElementTag();
             }
-            while(this._elementCreator == null)try {
-                window.customElements.define(tagName, this, options);
-                this._elementCreator = (0, $a20b878345862077$export$7a5d735b2ab6389d)[tagName];
-            } catch (e) {
-                console.error(`failed to define ${this.name} as <${tagName}>: ${String(e)}`);
-                tagName = $0ea0392c3fe8c9d5$var$anonElementTag();
-            }
+            if (customElements.get(tagName) != null) console.warn(`${tagName} is already defined`);
+            while(customElements.get(tagName) !== undefined)tagName = $0ea0392c3fe8c9d5$var$anonElementTag();
+            window.customElements.define(tagName, this, options);
+            this._elementCreator = (0, $a20b878345862077$export$7a5d735b2ab6389d)[tagName];
         }
         return this._elementCreator;
     }
