@@ -6,7 +6,7 @@ const countLetters = (word: string) => {
       pop[letter]++
     }
     return pop
-  }, {}) as {[key: string]: number}
+  }, {}) as { [key: string]: number }
 }
 
 export class WordList {
@@ -21,27 +21,31 @@ export class WordList {
     this.words = words
   }
 
-  get list () {
+  get list() {
     if (!this.letters) {
       this.filterCount = 0
       return []
     }
-    let filtered = this.words.filter(word => word.length >= this.minLength)
+    let filtered = this.words.filter((word) => word.length >= this.minLength)
     if (this.mustContain) {
-      filtered = filtered.filter(word => word.includes(this.mustContain.toLocaleLowerCase()))
+      filtered = filtered.filter((word) =>
+        word.includes(this.mustContain.toLocaleLowerCase())
+      )
     }
     if (this.letters) {
       const regex = new RegExp(`^[${this.letters.toLocaleLowerCase()}]+$`)
       if (this.reuseLetters) {
-        filtered = filtered.filter(word => regex.test(word))
+        filtered = filtered.filter((word) => regex.test(word))
       } else {
         const maxCounts = countLetters(this.letters.toLocaleLowerCase())
-        filtered = filtered.filter(word => {
+        filtered = filtered.filter((word) => {
           if (!regex.test(word)) {
             return false
           }
           const letterCounts = countLetters(word)
-          return !Object.keys(letterCounts).find(letter => letterCounts[letter] > maxCounts[letter])
+          return !Object.keys(letterCounts).find(
+            (letter) => letterCounts[letter] > maxCounts[letter]
+          )
         })
       }
     }
@@ -49,7 +53,7 @@ export class WordList {
     return filtered
   }
 
-  get wordCount () {
+  get wordCount() {
     return this.words.length
   }
 }

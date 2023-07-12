@@ -1,14 +1,14 @@
-import {XinStyleSheet, bind} from '../src'
-import {initVars, darkMode, css, vars} from '../src/css'
-import {elements} from '../src/elements'
+import { XinStyleSheet, bind } from '../src'
+import { initVars, darkMode, css, vars } from '../src/css'
+import { elements } from '../src/elements'
 import { Color } from '../src/color'
-const {style} = elements
+const { style } = elements
 
 const brandColor = Color.fromCss('rgb(8, 131, 88)')
 
 bind(document.body, 'app.darkmode', {
   toDOM(elt, value) {
-    switch(value) {
+    switch (value) {
       case 'dark':
         elt.classList.add('darkmode')
         break
@@ -16,15 +16,17 @@ bind(document.body, 'app.darkmode', {
         elt.classList.remove('darkmode')
         break
       default:
-        const autoSetting = getComputedStyle(document.body).getPropertyValue('--darkmode')
+        const autoSetting = getComputedStyle(document.body).getPropertyValue(
+          '--darkmode'
+        )
         elt.classList.toggle('darkmode', autoSetting === 'true')
     }
-  }
+  },
 })
 
 const cssVars = {
-  font: '\'Roboto Slab\', Serif',
-  codeFont: '\'Space Mono\', monospace',
+  font: "'Roboto Slab', Serif",
+  codeFont: "'Space Mono', monospace",
   fontSize: 16,
   codeFontSize: 16,
   lineHeight: 24,
@@ -69,9 +71,10 @@ const codeVars = {
 }
 
 const rules: XinStyleSheet = {
-  '@import': 'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
+  '@import':
+    'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
   body: {
-    ...initVars({...cssVars, ...brandColors, ...codeVars}),
+    ...initVars({ ...cssVars, ...brandColors, ...codeVars }),
     fontFamily: vars.font,
     background: vars.background,
     color: vars.textColor,
@@ -82,10 +85,10 @@ const rules: XinStyleSheet = {
   },
   '@media (prefers-color-scheme: dark)': {
     body: initVars({
-      darkmode: 'true'
-    })
+      darkmode: 'true',
+    }),
   },
-  '.darkmode': {...darkMode(cssVars), ...initVars(darkBrandColors)},
+  '.darkmode': { ...darkMode(cssVars), ...initVars(darkBrandColors) },
   'h1, h2, h3': {
     margin: `${vars.spacing200} 0 ${vars.spacing}`,
     color: vars.textHeadingColor,
@@ -96,7 +99,7 @@ const rules: XinStyleSheet = {
   blockquote: {
     paddingLeft: `${vars.spacing}`,
     paddingRight: `${vars.spacing}`,
-    fontSize: '90%'
+    fontSize: '90%',
   },
   h1: {
     lineHeight: vars.lineHeight200,
@@ -115,19 +118,19 @@ const rules: XinStyleSheet = {
     padding: vars.spacing,
   },
   'ul, ol': {
-    margin: `0 ${vars.spacing200} ${vars.spacing} 0`
+    margin: `0 ${vars.spacing200} ${vars.spacing} 0`,
   },
   li: {
-    margin: `0 0 ${vars.spacing25}`
+    margin: `0 0 ${vars.spacing25}`,
   },
   'labeled-input, labeled-value': {
-    display: 'block'
+    display: 'block',
   },
   label: {
     display: 'flex',
     flexDirection: 'column',
     gap: vars.spacing50,
-    marginTop: vars.spacing
+    marginTop: vars.spacing,
   },
   'label label': {
     marginTop: 0,
@@ -144,27 +147,27 @@ const rules: XinStyleSheet = {
   },
   button: {
     borderRadius: vars.roundedRadius,
-    background: vars.buttonBg
+    background: vars.buttonBg,
   },
   table: {
     borderCollapse: 'collapse',
-    borderBottom: `1px solid ${brandColor.opacity(0.2).html}`
+    borderBottom: `1px solid ${brandColor.opacity(0.2).html}`,
   },
   a: {
     color: vars.textHeadingColor,
     textDecoration: 'none',
     borderRadius: vars.roundedRadius50,
     padding: `${vars.spacing25} ${vars.spacing50}`,
-    margin: `${vars.spacing_25} ${vars.spacing_50}`
+    margin: `${vars.spacing_25} ${vars.spacing_50}`,
   },
   'nav a': {
     padding: `${vars.spacing25} ${vars.spacing}`,
-    margin: 0
+    margin: 0,
   },
   '.current-route': {
     background: vars.inputBg,
     zIndex: 1,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
   },
   th: {
     background: brandColor.opacity(0.2).html,
@@ -179,41 +182,40 @@ const rules: XinStyleSheet = {
     background: vars.inputBg,
   },
   'input, textarea, select, button, .field': {
-    boxShadow: vars.inputBorderShadow
+    boxShadow: vars.inputBorderShadow,
   },
   'input, textarea, .field': {
     borderRadius: vars.roundedRadius50,
   },
   'select, button': {
-    borderRadius: vars.roundedRadius
+    borderRadius: vars.roundedRadius,
   },
   'select[multiple]': {
-    padding: `${vars.spacing50} 0`
+    padding: `${vars.spacing50} 0`,
   },
   'select[multiple] option': {
-    padding: `${vars.spacing50} ${vars.spacing}`
+    padding: `${vars.spacing50} ${vars.spacing}`,
   },
   'input[type="range"], input[type="checkbox"], input[type="radio"]': {
-    boxShadow: 'none'
+    boxShadow: 'none',
   },
   'input:disabled, .field.readonly': {
-    opacity: 0.75
+    opacity: 0.75,
   },
   'button:not(:disabled):hover, a:not(:disabled):hover': {
-    background: vars.hoverBg
+    background: vars.hoverBg,
   },
   'button:not(:disabled):active, a:not(:disabled):active': {
-    background: vars.activeBg
+    background: vars.activeBg,
   },
   'a:not(:disabled):visited': {
-    opacity: 0.8
+    opacity: 0.8,
   },
   '[hidden]': {
-    // @ts-expect-error
-    display: 'none !important'
+    display: 'none !important',
   },
   'code, pre': {
-    fontFamily: vars.codeFont
+    fontFamily: vars.codeFont,
   },
   '.icon-button': {
     fontSize: vars.fontSize200,
@@ -226,47 +228,47 @@ const rules: XinStyleSheet = {
   },
   'dialog::backdrop': {
     backgroundColor: '#0004',
-    backdropFilter: 'blur(2px)'
+    backdropFilter: 'blur(2px)',
   },
   form: {
     minWidth: '300px',
     padding: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: vars.spacing
+    gap: vars.spacing,
   },
   'form *': {
-    margin: 0
+    margin: 0,
   },
   '.primary': {
     backgroundColor: vars.primaryColor,
   },
   '.page-padded': {
-    padding: `${vars.spacing} ${vars.spacing200}`
+    padding: `${vars.spacing} ${vars.spacing200}`,
   },
   'option:checked': {
     background: vars.brandColor,
-    color: vars.brandTextColor
+    color: vars.brandTextColor,
   },
   'tool-bar button': {
     background: 'transparent',
     padding: `${vars.spacing25} ${vars.spacing50}`,
     boxShadow: 'none',
-    color: vars.brandColor
+    color: vars.brandColor,
   },
   '::placeholder': {
-    opacity: vars.placeholderOpacity
+    opacity: vars.placeholderOpacity,
   },
   ':focus-visible': {
     outline: 'none',
-    boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5).html}`
+    boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5).html}`,
   },
   '.show-after-empty:not(.-xin-empty-list+*)': {
-    display: 'none'
+    display: 'none',
   },
   '::selection': {
     background: vars.brandColor,
-    color: vars.brandTextColor
+    color: vars.brandTextColor,
   },
   '*::-webkit-scrollbar': {
     background: '#fff6',
@@ -280,10 +282,14 @@ const rules: XinStyleSheet = {
   '*::-webkit-scrollbar-thumb:hover': {
     background: vars.brandColor,
     borderRadius: vars.spacing25,
-  }
+  },
+  'color-swatch::part(idSpan)': {
+    fontSize: vars.fontSize80,
+    opacity: 0.5,
+  },
 }
 
-document.head.append(style({id: 'base-style'}, css(rules))) 
+document.head.append(style({ id: 'base-style' }, css(rules)))
 
 // adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
 const setTrueHeight = () => {

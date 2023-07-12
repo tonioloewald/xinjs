@@ -40,23 +40,23 @@ type CSSWhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'br
 type CSSWordBreak = 'normal' | 'break-all' | 'keep-all';
 export interface XinStyleRule {
     accentColor?: string;
-    alignContent?: CSSBasicAlign | CSSBaselineAlign | CSSDistributedAlign | CSSPositionalAlign | CSSGlobalValues;
-    alignItems?: CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | CSSSelfAlign;
-    alignSelf?: 'auto' | CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues;
-    all?: CSSGlobalValues;
+    alignContent?: CSSBasicAlign | CSSBaselineAlign | CSSDistributedAlign | CSSPositionalAlign | CSSGlobalValues | string;
+    alignItems?: CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | CSSSelfAlign | string;
+    alignSelf?: 'auto' | CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | string;
+    all?: CSSGlobalValues | string;
     animation?: string;
     animationDelay?: string;
-    animationDirection?: CSSAnimationDirection;
+    animationDirection?: CSSAnimationDirection | string;
     animationDuration?: string;
-    animationFillMode?: CSSAnimationFillMode;
+    animationFillMode?: CSSAnimationFillMode | string;
     animationIterationCount?: string | number;
     animationName?: string;
-    animationPlayState?: CSSAnimationPlayState | CSSGlobalValues;
+    animationPlayState?: CSSAnimationPlayState | CSSGlobalValues | string;
     animationTimingFunction?: CSSAnimationTimingFunction | CSSGlobalValues | string;
     appearance?: CSSAppearance | CSSGlobalValues | string;
     aspectRatio?: 'auto' | CSSGlobalValues | string;
-    backdropFilter?: 'none' | string | CSSGlobalValues;
-    backfaceVisibility?: CSSVisibility | CSSGlobalValues;
+    backdropFilter?: 'none' | string | CSSGlobalValues | string;
+    backfaceVisibility?: CSSVisibility | CSSGlobalValues | string;
     background?: string;
     backgroundAttachment?: string | number;
     backgroundBlendMode?: string;
@@ -122,14 +122,14 @@ export interface XinStyleRule {
     content?: string | number;
     counterIncrement?: string | number;
     counterReset?: string | number;
-    cursor?: CSSCursor | CSSCursorDrag | CSSCursorLink | CSSCursorResize | CSSCursorCompass | CSSCursorSelection | CSSCursorScroll | CSSCursorZoom | CSSGlobalValues;
+    cursor?: CSSCursor | CSSCursorDrag | CSSCursorLink | CSSCursorResize | CSSCursorCompass | CSSCursorSelection | CSSCursorScroll | CSSCursorZoom | CSSGlobalValues | string;
     direction?: string | number;
-    display?: CSSDisplay | CSSDisplayOther | CSSDisplayMulti | CSSGlobalValues;
-    emptyCells?: 'show' | 'hide' | CSSGlobalValues;
-    filter?: string | CSSGlobalValues;
+    display?: CSSDisplay | CSSDisplayOther | CSSDisplayMulti | CSSGlobalValues | string;
+    emptyCells?: 'show' | 'hide' | CSSGlobalValues | string;
+    filter?: string | CSSGlobalValues | string;
     flex?: string | number;
     flexBasis?: string | number;
-    flexDirection?: CSSFlexDirection | CSSGlobalValues;
+    flexDirection?: CSSFlexDirection | CSSGlobalValues | string;
     flexFlow?: CSSFlexFlow | CSSGlobalValues;
     flexGrow?: string | number;
     flexShrink?: string | number;
@@ -190,9 +190,9 @@ export interface XinStyleRule {
     outlineOffset?: string | number;
     outlineStyle?: string | number;
     outlineWidth?: string | number;
-    overflow?: CSSOverflow | CSSGlobalValues;
-    overflowX?: CSSOverflow | CSSGlobalValues;
-    overflowY?: CSSOverflow | CSSGlobalValues;
+    overflow?: CSSOverflow | CSSGlobalValues | string;
+    overflowX?: CSSOverflow | CSSGlobalValues | string;
+    overflowY?: CSSOverflow | CSSGlobalValues | string;
     padding?: string | number;
     paddingBottom?: string | number;
     paddingLeft?: string | number;
@@ -203,8 +203,8 @@ export interface XinStyleRule {
     pageBreakInside?: string | number;
     perspective?: string | number;
     perspectiveOrigin?: string | number;
-    pointerEvents?: CSSPointerEvents | CSSSVGPointerEvents | CSSGlobalValues;
-    position?: CSSPosition | CSSGlobalValues;
+    pointerEvents?: CSSPointerEvents | CSSSVGPointerEvents | CSSGlobalValues | string;
+    position?: CSSPosition | CSSGlobalValues | string;
     quotes?: string;
     right?: string | number;
     scrollBehavior?: string | number;
@@ -221,7 +221,7 @@ export interface XinStyleRule {
     textShadow?: string | number;
     textTransform?: string | number;
     top?: string | number;
-    touchAction?: CSSTouchAction | CSSGlobalValues;
+    touchAction?: CSSTouchAction | CSSGlobalValues | string;
     transform?: string;
     transformOrigin?: string;
     transformStyle?: string;
@@ -232,11 +232,11 @@ export interface XinStyleRule {
     transitionTimingFunction?: string;
     userSelect?: string | number;
     verticalAlign?: string;
-    visibility?: CSSVisibility | 'collapse' | CSSGlobalValues;
-    whiteSpace?: CSSWhiteSpace | CSSGlobalValues;
+    visibility?: CSSVisibility | 'collapse' | CSSGlobalValues | string;
+    whiteSpace?: CSSWhiteSpace | CSSGlobalValues | string;
     width?: string | number;
     widows?: string | number;
-    wordBreak?: CSSWordBreak | CSSGlobalValues;
+    wordBreak?: CSSWordBreak | CSSGlobalValues | string;
     wordSpacing?: string | number;
     wordWrap?: string | number;
     writingMode?: string;
@@ -532,7 +532,6 @@ export abstract class Component extends HTMLElement {
     instanceId: string;
     styleNode?: HTMLStyleElement;
     content: ContentType | (() => ContentType) | null;
-    value?: any;
     isSlotted?: boolean;
     [key: string]: any;
     static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement;
@@ -541,6 +540,9 @@ export abstract class Component extends HTMLElement {
     }): ElementCreator;
     initAttributes(...attributeNames: string[]): void;
     get refs(): {
+        [key: string]: SwissArmyElement;
+    };
+    get parts(): {
         [key: string]: SwissArmyElement;
     };
     constructor();

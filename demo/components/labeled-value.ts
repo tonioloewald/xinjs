@@ -1,5 +1,5 @@
 import { Component } from '../../src'
-const {label, slot, span} = Component.elements
+const { label, slot, span } = Component.elements
 
 class LabeledValue extends Component {
   styleNode = Component.StyleNode({
@@ -7,17 +7,17 @@ class LabeledValue extends Component {
       display: 'inline-flex',
       gap: 'calc(0.5 * var(--item-spacing))',
       lineHeight: 'var(--line-height)',
-      flexDirection: 'var(--flex-direction, row)'
+      flexDirection: 'var(--flex-direction, row)',
     },
     ':host *': {
-      fontSize: 'var(--font-size)'
-    }
+      fontSize: 'var(--font-size)',
+    },
   })
-  content = label(slot(), span({dataRef: 'field'}))
+  content = label(slot(), span({ part: 'field' }))
   value = ''
   render() {
     super.render()
-    const {field} = this.refs
+    const { field } = this.parts
     field.textContent = this.value
   }
 }

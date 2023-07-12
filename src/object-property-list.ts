@@ -3,14 +3,14 @@ interface KeyProp {
   value: any
 }
 
-export function makePropList (obj: { [key: string]: any }): KeyProp[] {
-  return Object.keys(obj).map(key => ({
+export function makePropList(obj: { [key: string]: any }): KeyProp[] {
+  return Object.keys(obj).map((key) => ({
     key,
-    get value () {
+    get value() {
       return obj[key]
     },
-    set value (newValue) {
+    set value(newValue) {
       obj[key] = newValue
-    }
+    },
   }))
 }

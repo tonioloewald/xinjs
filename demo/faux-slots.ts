@@ -15,11 +15,20 @@ class FauxSlots extends Component {
   isSlotted = true
   content = fragment(
     // this will automatically be converted to a `<xin-slot>` on hydration
-    h1(slot({name: 'heading'})),
+    h1(slot({ name: 'heading' })),
     // in order to style this slot, we will explicitly create a `<xin-slot>`.
-    div(xinSlot({style: { display: 'flex', gap: '10px', flexDirection: 'column', alignItems: 'flex-start' }})),
-    button({dataRef: 'clicker'}, 'I belong to the component'),
-    span({dataRef: 'clickCount', style: { padding: '10px' }})
+    div(
+      xinSlot({
+        style: {
+          display: 'flex',
+          gap: '10px',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+        },
+      })
+    ),
+    button({ part: 'clicker' }, 'I belong to the component'),
+    span({ part: 'clickCount', style: { padding: '10px' } })
   )
 
   constructor() {
@@ -39,14 +48,14 @@ class FauxSlots extends Component {
   connectedCallback() {
     super.connectedCallback()
 
-    const {clicker} = this.refs
+    const { clicker } = this.parts
     clicker.addEventListener('click', this.countClicks)
   }
 
   render(): void {
     super.render()
 
-    const {clickCount} = this.refs
+    const { clickCount } = this.parts
 
     if (this.clicks > 0) {
       clickCount.textContent = `I have been clicked ${this.clicks} times`

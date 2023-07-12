@@ -1,4 +1,4 @@
-import {Component, vars} from '../../src/index'
+import { Component, vars } from '../../src/index'
 
 class ToolBar extends Component {
   styleNode = Component.StyleNode({
@@ -13,15 +13,15 @@ class ToolBar extends Component {
       flex: `0 0 ${vars.toolbarHeight}`,
       flexWrap: 'wrap',
       overflow: 'hidden',
-      overflowX: 'scroll'
+      overflowX: 'scroll',
     },
     ':host > *': {
       whiteSpace: 'nowrap',
-      lineHeight: vars.lineHeight
+      lineHeight: vars.lineHeight,
     },
     ':Host > * + *': {
-      marginLeft: vars.itemSpacing50
-    }
+      marginLeft: vars.itemSpacing50,
+    },
   })
 }
 

@@ -1,44 +1,153 @@
 type CSSBasicAlign = 'nomal' | 'stretch'
 type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end'
-type CSSDistributedAlign = 'space-between' | 'space-around' | 'space-evenly' | 'stretch'
+type CSSDistributedAlign =
+  | 'space-between'
+  | 'space-around'
+  | 'space-evenly'
+  | 'stretch'
 type CSSSelfAlign = 'self-start' | 'self-end'
 type CSSBaselineAlign = 'baseline' | 'first baseline' | 'last baseline'
 type CSSOverflowAlign = 'safe center' | 'unsafe center'
-type CSSGlobalValues = 'inherit' | 'initial' | 'revert' | 'unset' | 'revert-layer'
-type CSSAnimationDirection = 'normal' | 'reverse' | 'alternate' | 'aternate-reverse'
+type CSSGlobalValues =
+  | 'inherit'
+  | 'initial'
+  | 'revert'
+  | 'unset'
+  | 'revert-layer'
+type CSSAnimationDirection =
+  | 'normal'
+  | 'reverse'
+  | 'alternate'
+  | 'aternate-reverse'
 type CSSAnimationFillMode = 'node' | 'forwards' | 'backwards' | 'both'
 type CSSAnimationPlayState = 'paused' | 'running'
-type CSSAnimationTimingFunction = 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | 'step-start' | 'step-end'
+type CSSAnimationTimingFunction =
+  | 'ease'
+  | 'ease-in'
+  | 'ease-out'
+  | 'ease-in-out'
+  | 'linear'
+  | 'step-start'
+  | 'step-end'
 type CSSAppearance = 'none' | 'auto'
 type CSSCursor = 'auto' | 'default' | 'none'
 type CSSCursorLink = 'context-menu' | 'help' | 'pointer' | 'progress' | 'wait'
 type CSSCursorSelection = 'cell' | 'crosshair' | 'text' | 'vertical-text'
-type CSSCursorDrag = 'alias' | 'copy' | 'move' | 'no-drop' | 'not-allowed' | 'grap' | 'grabbing'
-type CSSCursorCompass = 'n-resize' | 'e-resize' | 's-resize' | 'w-resize' | 'ne-resize' | 'se-resize' | 'sw-resize' | 'nw-resize' | 'nesw-resize' | 'nwse-resize'
+type CSSCursorDrag =
+  | 'alias'
+  | 'copy'
+  | 'move'
+  | 'no-drop'
+  | 'not-allowed'
+  | 'grap'
+  | 'grabbing'
+type CSSCursorCompass =
+  | 'n-resize'
+  | 'e-resize'
+  | 's-resize'
+  | 'w-resize'
+  | 'ne-resize'
+  | 'se-resize'
+  | 'sw-resize'
+  | 'nw-resize'
+  | 'nesw-resize'
+  | 'nwse-resize'
 type CSSCursorResize = 'col-resize' | 'row-resize'
 type CSSCursorScroll = 'all-scroll'
 type CSSCursorZoom = 'zoom-in' | 'zoom-out'
-type CSSDisplay = 'block' | 'inline-block' | 'none' | 'flex' | 'inline-flex' | 'grid' | 'inline-grid' | 'flow-root' | 'contents'
+type CSSDisplay =
+  | 'block'
+  | 'inline-block'
+  | 'none'
+  | 'flex'
+  | 'inline-flex'
+  | 'grid'
+  | 'inline-grid'
+  | 'flow-root'
+  | 'contents'
 type CSSDisplayOther = 'table' | 'table-row' | 'list-item'
-type CSSDisplayMulti = 'block flow' | 'inline flow' | 'inline flow-root' | 'block-flex' | 'block-grid' | 'inline grid' | 'block flow-root'
+type CSSDisplayMulti =
+  | 'block flow'
+  | 'inline flow'
+  | 'inline flow-root'
+  | 'block-flex'
+  | 'block-grid'
+  | 'inline grid'
+  | 'block flow-root'
 type CSSFloat = 'left' | 'right' | 'none' | 'inline-start' | 'inline-end'
 type CSSFlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse'
-type CSSFlexFlow = CSSFlexDirection | CSSFlexWrap | 'row nowrap' | 'column wrap' | 'column-reverse wrap-reverse'
+type CSSFlexFlow =
+  | CSSFlexDirection
+  | CSSFlexWrap
+  | 'row nowrap'
+  | 'column wrap'
+  | 'column-reverse wrap-reverse'
 type CSSFlexWrap = 'nowrap' | 'wrap' | 'wrap-reverse'
 type CSSPointerEvents = 'auto' | 'none'
-type CSSSVGPointerEvents = 'stroke' | 'fill' | 'visibleFill' | 'visibleStroke' | 'visible' | 'painted' | 'fill' | 'stroke' | 'all'
-type CSSOverflow = 'visible' | 'hidden' | 'clip' | 'scroll' | 'auto' | 'hidden visible'
+type CSSSVGPointerEvents =
+  | 'stroke'
+  | 'fill'
+  | 'visibleFill'
+  | 'visibleStroke'
+  | 'visible'
+  | 'painted'
+  | 'fill'
+  | 'stroke'
+  | 'all'
+type CSSOverflow =
+  | 'visible'
+  | 'hidden'
+  | 'clip'
+  | 'scroll'
+  | 'auto'
+  | 'hidden visible'
 type CSSPosition = 'static' | 'relative' | 'absolute' | 'fixed' | 'sticky'
-type CSSTouchAction = 'auto' | 'none' | 'pan-x' | 'pan-left' | 'pan-right' | 'pan-y' | 'pan-up' | 'pan-down' | 'pinch-zoom' | 'manipulation'
+type CSSTouchAction =
+  | 'auto'
+  | 'none'
+  | 'pan-x'
+  | 'pan-left'
+  | 'pan-right'
+  | 'pan-y'
+  | 'pan-up'
+  | 'pan-down'
+  | 'pinch-zoom'
+  | 'manipulation'
 type CSSVisibility = 'visible' | 'hidden'
-type CSSWhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces'
+type CSSWhiteSpace =
+  | 'normal'
+  | 'nowrap'
+  | 'pre'
+  | 'pre-wrap'
+  | 'pre-line'
+  | 'break-spaces'
 type CSSWordBreak = 'normal' | 'break-all' | 'keep-all'
 
 export interface XinStyleRule {
   accentColor?: string
-  alignContent?: CSSBasicAlign | CSSBaselineAlign | CSSDistributedAlign | CSSPositionalAlign | CSSGlobalValues | string
-  alignItems?: CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | CSSSelfAlign | string
-  alignSelf?: 'auto' | CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | string
+  alignContent?:
+    | CSSBasicAlign
+    | CSSBaselineAlign
+    | CSSDistributedAlign
+    | CSSPositionalAlign
+    | CSSGlobalValues
+    | string
+  alignItems?:
+    | CSSBasicAlign
+    | CSSPositionalAlign
+    | CSSBaselineAlign
+    | CSSOverflowAlign
+    | CSSGlobalValues
+    | CSSSelfAlign
+    | string
+  alignSelf?:
+    | 'auto'
+    | CSSBasicAlign
+    | CSSPositionalAlign
+    | CSSBaselineAlign
+    | CSSOverflowAlign
+    | CSSGlobalValues
+    | string
   all?: CSSGlobalValues | string
   animation?: string
   animationDelay?: string
@@ -48,7 +157,10 @@ export interface XinStyleRule {
   animationIterationCount?: string | number
   animationName?: string
   animationPlayState?: CSSAnimationPlayState | CSSGlobalValues | string
-  animationTimingFunction?: CSSAnimationTimingFunction | CSSGlobalValues | string
+  animationTimingFunction?:
+    | CSSAnimationTimingFunction
+    | CSSGlobalValues
+    | string
   appearance?: CSSAppearance | CSSGlobalValues | string
   aspectRatio?: 'auto' | CSSGlobalValues | string
   backdropFilter?: 'none' | string | CSSGlobalValues | string
@@ -118,9 +230,24 @@ export interface XinStyleRule {
   content?: string | number
   counterIncrement?: string | number
   counterReset?: string | number
-  cursor?: CSSCursor | CSSCursorDrag | CSSCursorLink | CSSCursorResize | CSSCursorCompass | CSSCursorSelection | CSSCursorScroll | CSSCursorZoom | CSSGlobalValues | string
+  cursor?:
+    | CSSCursor
+    | CSSCursorDrag
+    | CSSCursorLink
+    | CSSCursorResize
+    | CSSCursorCompass
+    | CSSCursorSelection
+    | CSSCursorScroll
+    | CSSCursorZoom
+    | CSSGlobalValues
+    | string
   direction?: string | number
-  display?: CSSDisplay | CSSDisplayOther | CSSDisplayMulti | CSSGlobalValues | string
+  display?:
+    | CSSDisplay
+    | CSSDisplayOther
+    | CSSDisplayMulti
+    | CSSGlobalValues
+    | string
   emptyCells?: 'show' | 'hide' | CSSGlobalValues | string
   filter?: string | CSSGlobalValues | string
   flex?: string | number
@@ -199,7 +326,11 @@ export interface XinStyleRule {
   pageBreakInside?: string | number
   perspective?: string | number
   perspectiveOrigin?: string | number
-  pointerEvents?: CSSPointerEvents | CSSSVGPointerEvents | CSSGlobalValues | string
+  pointerEvents?:
+    | CSSPointerEvents
+    | CSSSVGPointerEvents
+    | CSSGlobalValues
+    | string
   position?: CSSPosition | CSSGlobalValues | string
   quotes?: string
   right?: string | number

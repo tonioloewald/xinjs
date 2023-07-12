@@ -469,13 +469,13 @@ const $3c20fb09d41b8da8$export$966034e6c6823eb0 = new Proxy($3c20fb09d41b8da8$va
 
 
 
-const { document: $fc64c421299f5d54$var$document , MutationObserver: $fc64c421299f5d54$var$MutationObserver  } = globalThis;
+const { document: $fc64c421299f5d54$var$document, MutationObserver: $fc64c421299f5d54$var$MutationObserver } = globalThis;
 const $fc64c421299f5d54$export$80bf2f765c31be6a = (element, changedPath)=>{
     const dataBindings = (0, $3f1d78706f6d8212$export$1f922de8d0ecbb7e).get(element);
     if (dataBindings == null) return;
     for (const dataBinding of dataBindings){
-        let { path: path , binding: binding , options: options  } = dataBinding;
-        const { toDOM: toDOM  } = binding;
+        let { path: path, binding: binding, options: options } = dataBinding;
+        const { toDOM: toDOM } = binding;
         if (toDOM != null) {
             if (path.startsWith("^")) {
                 const dataSource = (0, $3f1d78706f6d8212$export$4c309843c07ce679)(element);
@@ -517,8 +517,8 @@ const $fc64c421299f5d54$var$handleChange = (event)=>{
     while(target != null){
         const dataBindings = (0, $3f1d78706f6d8212$export$1f922de8d0ecbb7e).get(target);
         for (const dataBinding of dataBindings){
-            const { binding: binding , path: path  } = dataBinding;
-            const { fromDOM: fromDOM  } = binding;
+            const { binding: binding, path: path } = dataBinding;
+            const { fromDOM: fromDOM } = binding;
             if (fromDOM != null) {
                 let value;
                 try {
@@ -532,8 +532,8 @@ const $fc64c421299f5d54$var$handleChange = (event)=>{
                     // eslint-disable-next-line
                     if (existing == null) (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[path] = value;
                     else {
-                        // @ts-expect-error-error
-                        const existingActual = existing[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a] != null ? existing[0, $3f1d78706f6d8212$export$bdd0d039ad781534] : existing;
+                        const existingActual = // @ts-expect-error-error
+                        existing[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a] != null ? existing[0, $3f1d78706f6d8212$export$bdd0d039ad781534] : existing;
                         const valueActual = value[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a] != null ? value[0, $3f1d78706f6d8212$export$bdd0d039ad781534] : value;
                         if (existingActual !== valueActual) (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[path] = valueActual;
                     }
@@ -551,13 +551,13 @@ function $fc64c421299f5d54$export$2385a24977818dd0(element, what, binding, optio
     if (element instanceof DocumentFragment) throw new Error("bind cannot bind to a DocumentFragment");
     let path;
     if (typeof what === "object" && what[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a] === undefined && options === undefined) {
-        const { value: value  } = what;
+        const { value: value } = what;
         path = typeof value === "string" ? value : value[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a];
         options = what;
         delete options.value;
     } else path = typeof what === "string" ? what : what[0, $3f1d78706f6d8212$export$a3622eb3b5dd592a];
     if (path == null) throw new Error("bind requires a path or object with xin Proxy");
-    const { toDOM: toDOM  } = binding;
+    const { toDOM: toDOM } = binding;
     element.classList.add((0, $3f1d78706f6d8212$export$c6592bbc1eebb717));
     let dataBindings = (0, $3f1d78706f6d8212$export$1f922de8d0ecbb7e).get(element);
     if (dataBindings == null) {
@@ -684,7 +684,7 @@ const $2f96dbadf81a4e19$export$bf7199a9ebcb84a9 = (element)=>{
             return element.value;
     }
 };
-/* global ResizeObserver */ const { ResizeObserver: $2f96dbadf81a4e19$var$ResizeObserver  } = globalThis;
+/* global ResizeObserver */ const { ResizeObserver: $2f96dbadf81a4e19$var$ResizeObserver } = globalThis;
 const $2f96dbadf81a4e19$export$b13421f1ae71d316 = $2f96dbadf81a4e19$var$ResizeObserver != null ? new $2f96dbadf81a4e19$var$ResizeObserver((entries)=>{
     for (const entry of entries){
         const element = entry.target;
@@ -757,8 +757,8 @@ function $30c2e647bc2c31d1$var$updateRelativeBindings(element, path) {
     }
 }
 class $30c2e647bc2c31d1$var$ListBinding {
-    _array = [];
     constructor(boundElement, options = {}){
+        this._array = [];
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
         if (boundElement.children.length !== 1) throw new Error("ListBinding expects an element with exactly one child element");
@@ -785,7 +785,7 @@ class $30c2e647bc2c31d1$var$ListBinding {
         }
     }
     visibleSlice() {
-        const { virtual: virtual , hiddenProp: hiddenProp , visibleProp: visibleProp  } = this.options;
+        const { virtual: virtual, hiddenProp: hiddenProp, visibleProp: visibleProp } = this.options;
         let visibleArray = this._array;
         if (hiddenProp !== undefined) visibleArray = visibleArray.filter((item)=>item[hiddenProp] !== true);
         if (visibleProp !== undefined) visibleArray = visibleArray.filter((item)=>item[visibleProp] === true);
@@ -818,13 +818,13 @@ class $30c2e647bc2c31d1$var$ListBinding {
     update(array, isSlice) {
         if (array == null) array = [];
         this._array = array;
-        const { initInstance: initInstance , updateInstance: updateInstance , hiddenProp: hiddenProp , visibleProp: visibleProp  } = this.options;
+        const { initInstance: initInstance, updateInstance: updateInstance, hiddenProp: hiddenProp, visibleProp: visibleProp } = this.options;
         // @ts-expect-error
         const arrayPath = (0, $3f1d78706f6d8212$export$40700dafb97c3799)(array);
         const slice = this.visibleSlice();
         this.boundElement.classList.toggle("-xin-empty-list", slice.items.length === 0);
         const previousSlice = this._previousSlice;
-        const { firstItem: firstItem , lastItem: lastItem , topBuffer: topBuffer , bottomBuffer: bottomBuffer  } = slice;
+        const { firstItem: firstItem, lastItem: lastItem, topBuffer: topBuffer, bottomBuffer: bottomBuffer } = slice;
         if (hiddenProp === undefined && visibleProp === undefined && isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) return;
         this._previousSlice = slice;
         let removed = 0;
@@ -850,7 +850,7 @@ class $30c2e647bc2c31d1$var$ListBinding {
         this.listBottom.style.height = String(bottomBuffer) + "px";
         // build a complete new set of elements in the right order
         const elements = [];
-        const { idPath: idPath  } = this.options;
+        const { idPath: idPath } = this.options;
         for(let i = firstItem; i <= lastItem; i++){
             const item = slice.items[i];
             if (item === undefined) continue;
@@ -924,7 +924,6 @@ const $e49806807158e47d$export$97a1a3e6f39778d2 = {
     },
     enabled: {
         toDOM (element, value) {
-            // eslint-disable-next-line
             element.disabled = !value;
         }
     },
@@ -1009,15 +1008,15 @@ class $dde521108530e806$export$892596cec99bc70e {
         return new $dde521108530e806$export$892596cec99bc70e(255 - this.r, 255 - this.g, 255 - this.b, this.a);
     }
     get inverseLuminance() {
-        const { h: h , s: s , l: l  } = this._hsl;
+        const { h: h, s: s, l: l } = this._hsl;
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, 1 - l, this.a);
     }
     get rgb() {
-        const { r: r , g: g , b: b  } = this;
+        const { r: r, g: g, b: b } = this;
         return `rgb(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)})`;
     }
     get rgba() {
-        const { r: r , g: g , b: b , a: a  } = this;
+        const { r: r, g: g, b: b, a: a } = this;
         return `rgba(${r.toFixed(0)},${g.toFixed(0)},${b.toFixed(0)},${a.toFixed(2)})`;
     }
     get RGBA() {
@@ -1041,11 +1040,11 @@ class $dde521108530e806$export$892596cec99bc70e {
         return this._hslCached;
     }
     get hsl() {
-        const { h: h , s: s , l: l  } = this._hsl;
+        const { h: h, s: s, l: l } = this._hsl;
         return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%)`;
     }
     get hsla() {
-        const { h: h , s: s , l: l  } = this._hsl;
+        const { h: h, s: s, l: l } = this._hsl;
         return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(0)}%, ${this.a.toFixed(2)})`;
     }
     get mono() {
@@ -1060,36 +1059,36 @@ class $dde521108530e806$export$892596cec99bc70e {
         return this.a === 1 ? "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) : "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) + $dde521108530e806$var$hex2(Math.floor(255 * this.a));
     }
     brighten(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
+        let { h: h, s: s, l: l } = this._hsl;
         l = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
     }
     darken(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
+        let { h: h, s: s, l: l } = this._hsl;
         l = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
     }
     saturate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
+        let { h: h, s: s, l: l } = this._hsl;
         s = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
     }
     desaturate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
+        let { h: h, s: s, l: l } = this._hsl;
         s = (0, $64a1e022735c9832$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
     }
     rotate(amount) {
-        let { h: h , s: s , l: l  } = this._hsl;
+        let { h: h, s: s, l: l } = this._hsl;
         h = (h + 360 + amount) % 360;
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
     }
     opacity(alpha) {
-        const { h: h , s: s , l: l  } = this._hsl;
+        const { h: h, s: s, l: l } = this._hsl;
         return $dde521108530e806$export$892596cec99bc70e.fromHsl(h, s, l, alpha);
     }
     swatch() {
-        const { r: r , g: g , b: b , a: a  } = this;
+        const { r: r, g: g, b: b, a: a } = this;
         console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
     }
     blend(otherColor, t) {
@@ -1343,8 +1342,9 @@ function $8c7b36581a3597bc$var$anonElementTag() {
 }
 let $8c7b36581a3597bc$var$instanceCount = 0;
 class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
-    static elements = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
-    content = (0, $c004c420133596e3$export$7a5d735b2ab6389d).slot();
+    static #_ = (()=>{
+        this.elements = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
+    })();
     static StyleNode(styleSpec) {
         return (0, $c004c420133596e3$export$7a5d735b2ab6389d).style((0, $db77bb2de3733b56$export$dbf350e5966cf602)(styleSpec));
     }
@@ -1358,6 +1358,10 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
                 } else tagName = $8c7b36581a3597bc$var$anonElementTag();
             }
             if (customElements.get(tagName) != null) console.warn(`${tagName} is already defined`);
+            if (tagName.match(/\w+(-\w+)+/) == null) {
+                console.warn(`${tagName} is not a legal tag for a custom-element`);
+                tagName = $8c7b36581a3597bc$var$anonElementTag();
+            }
             while(customElements.get(tagName) !== undefined)tagName = $8c7b36581a3597bc$var$anonElementTag();
             window.customElements.define(tagName, this, options);
             this._elementCreator = (0, $c004c420133596e3$export$7a5d735b2ab6389d)[tagName];
@@ -1436,11 +1440,28 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
         });
     }
     get refs() {
+        console.warn("refs and data-ref are deprecated, use the part attribute and .parts instead");
         const root = this.shadowRoot != null ? this.shadowRoot : this;
         if (this._refs == null) this._refs = new Proxy({}, {
             get (target, ref) {
                 if (target[ref] === undefined) {
-                    let element = root.querySelector(`[data-ref="${ref}"]`);
+                    let element = root.querySelector(`[part="${ref}"],[data-ref="${ref}"]`);
+                    if (element == null) element = root.querySelector(ref);
+                    if (element == null) throw new Error(`elementRef "${ref}" does not exist!`);
+                    element.removeAttribute("data-ref");
+                    target[ref] = element;
+                }
+                return target[ref];
+            }
+        });
+        return this._refs;
+    }
+    get parts() {
+        const root = this.shadowRoot != null ? this.shadowRoot : this;
+        if (this._refs == null) this._refs = new Proxy({}, {
+            get (target, ref) {
+                if (target[ref] === undefined) {
+                    let element = root.querySelector(`[part="${ref}"]`);
                     if (element == null) element = root.querySelector(ref);
                     if (element == null) throw new Error(`elementRef "${ref}" does not exist!`);
                     element.removeAttribute("data-ref");
@@ -1453,6 +1474,10 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     }
     constructor(){
         super();
+        this.content = (0, $c004c420133596e3$export$7a5d735b2ab6389d).slot();
+        this._changeQueued = false;
+        this._renderQueued = false;
+        this._hydrated = false;
         $8c7b36581a3597bc$var$instanceCount += 1;
         this.initAttributes("hidden");
         this.instanceId = `${this.tagName.toLocaleLowerCase()}-${$8c7b36581a3597bc$var$instanceCount}`;
@@ -1473,8 +1498,6 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     disconnectedCallback() {
         (0, $2f96dbadf81a4e19$export$b13421f1ae71d316).unobserve(this);
     }
-    _changeQueued = false;
-    _renderQueued = false;
     queueRender(triggerChangeEvent = false) {
         if (!this._hydrated) return;
         if (!this._changeQueued) this._changeQueued = triggerChangeEvent;
@@ -1490,7 +1513,6 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
             });
         }
     }
-    _hydrated = false;
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
@@ -1534,8 +1556,6 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
     render() {}
 }
 class $8c7b36581a3597bc$var$XinSlot extends $8c7b36581a3597bc$export$16fa2f45be04daa8 {
-    name = "";
-    content = null;
     static replaceSlot(slot) {
         const _slot = document.createElement("xin-slot");
         if (slot.name !== "") _slot.setAttribute("name", slot.name);
@@ -1543,6 +1563,8 @@ class $8c7b36581a3597bc$var$XinSlot extends $8c7b36581a3597bc$export$16fa2f45be0
     }
     constructor(){
         super();
+        this.name = "";
+        this.content = null;
         this.initAttributes("name");
     }
 }

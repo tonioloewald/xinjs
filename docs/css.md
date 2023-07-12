@@ -201,6 +201,6 @@ Where I am always looking to improve this module (and all of `xinjs`) is to
 do a better job of **declaring** things to improve autocomplete behavior and
 minimize casting and other Typescript antipatterns. E.g. adding a ton of 
 declarations to `elements` and `css` has done wonders to reduce the need for
-stuff like `const nameElement = this.refs.nameField as unknown as HTMLInputElement`
+stuff like `const nameElement = this.parts.nameField as unknown as HTMLInputElement`
 and prevent css property typos without adding a single byte to the size of
 the javascript payload.

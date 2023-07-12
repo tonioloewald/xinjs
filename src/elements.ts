@@ -1,11 +1,15 @@
 import { bind, on } from './bind'
 import { bindings } from './bindings'
-import { ElementPart, ElementProps, ElementCreator, SwissArmyElement } from './xin-types'
+import {
+  ElementPart,
+  ElementProps,
+  ElementCreator,
+  SwissArmyElement,
+} from './xin-types'
 import { camelToKabob } from './string-case'
 
 const MATH = 'http://www.w3.org/1998/Math/MathML'
 const SVG = 'http://www.w3.org/2000/svg'
-
 export interface ElementsProxy {
   a: ElementCreator<HTMLAnchorElement>
   abbr: ElementCreator
@@ -135,7 +139,10 @@ export interface ElementsProxy {
 
 const templates: { [key: string]: Element } = {}
 
-const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement => {
+const create = (
+  tagType: string,
+  ...contents: ElementPart[]
+): SwissArmyElement => {
   if (templates[tagType] === undefined) {
     const [tag, namespace] = tagType.split('|')
     if (namespace === undefined) {
@@ -147,7 +154,12 @@ const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement =
   const elt = templates[tagType].cloneNode() as SwissArmyElement
   const elementProps: ElementProps = {}
   for (const item of contents) {
-    if (item instanceof Element || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
+    if (
+      item instanceof Element ||
+      item instanceof DocumentFragment ||
+      typeof item === 'string' ||
+      typeof item === 'number'
+    ) {
       if (elt instanceof HTMLTemplateElement) {
         elt.content.append(item as Node)
       } else {
@@ -183,9 +195,11 @@ const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement =
       if (binding !== undefined) {
         bind(elt, value, binding)
       } else {
-        throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`)
+        throw new Error(
+          `${key} is not allowed, bindings.${bindingType} is not defined`
+        )
       }
-    // @ts-expect-error
+      // @ts-expect-error
     } else if (elt[key] !== undefined) {
       if (elt instanceof SVGElement || elt instanceof MathMLElement) {
         elt.setAttribute(key, value)
@@ -200,7 +214,7 @@ const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement =
         value.split(' ').forEach((className: string) => {
           elt.classList.add(className)
         })
-      // @ts-expect-error-error
+        // @ts-expect-error-error
       } else if (elt[attr] !== undefined) {
         // @ts-expect-error-error
         elt[attr] = value
@@ -214,7 +228,9 @@ const create = (tagType: string, ...contents: ElementPart[]): SwissArmyElement =
   return elt
 }
 
-const fragment: ElementCreator<DocumentFragment> = (...contents: ElementPart[]) => {
+const fragment: ElementCreator<DocumentFragment> = (
+  ...contents: ElementPart[]
+) => {
   const frag = globalThis.document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)
@@ -227,56 +243,68 @@ const fragment: ElementCreator<DocumentFragment> = (...contents: ElementPart[]) 
  * elements.div() creates <div> elements and
  * elements.myElement() creatres <my-element> elements.
  */
-export const elements = new Proxy({ fragment }, {
-  get (target, tagName: string) {
-    tagName = tagName.replace(/[A-Z]/g, c => `-${c.toLocaleLowerCase()}`)
-    // @ts-expect-error
-    if (target[tagName] === undefined) {
+export const elements = new Proxy(
+  { fragment },
+  {
+    get(target, tagName: string) {
+      tagName = tagName.replace(/[A-Z]/g, (c) => `-${c.toLocaleLowerCase()}`)
       // @ts-expect-error
-      target[tagName] = (...contents: ElementPart[]) => create(tagName, ...contents)
-    }
-    // @ts-expect-error
-    return target[tagName]
-  },
-  set () {
-    throw new Error('You may not add new properties to elements')
+      if (target[tagName] === undefined) {
+        // @ts-expect-error
+        target[tagName] = (...contents: ElementPart[]) =>
+          create(tagName, ...contents)
+      }
+      // @ts-expect-error
+      return target[tagName]
+    },
+    set() {
+      throw new Error('You may not add new properties to elements')
+    },
   }
-}) as unknown as ElementsProxy
+) as unknown as ElementsProxy
 
 interface SVGElementsProxy {
   [key: string]: ElementCreator<SVGElement>
 }
 
-export const svgElements = new Proxy({ fragment }, {
-  get (target, tagName: string) {
-    // @ts-expect-error
-    if (target[tagName] === undefined) {
+export const svgElements = new Proxy(
+  { fragment },
+  {
+    get(target, tagName: string) {
       // @ts-expect-error
-      target[tagName] = (...contents: ElementPart[]) => create(`${tagName}|${SVG}`, ...contents)
-    }
-    // @ts-expect-error
-    return target[tagName]
-  },
-  set () {
-    throw new Error('You may not add new properties to elements')
+      if (target[tagName] === undefined) {
+        // @ts-expect-error
+        target[tagName] = (...contents: ElementPart[]) =>
+          create(`${tagName}|${SVG}`, ...contents)
+      }
+      // @ts-expect-error
+      return target[tagName]
+    },
+    set() {
+      throw new Error('You may not add new properties to elements')
+    },
   }
-}) as unknown as SVGElementsProxy
+) as unknown as SVGElementsProxy
 
 interface MathMLElementsProxy {
   [key: string]: ElementCreator<MathMLElement>
 }
 
-export const mathML = new Proxy({ fragment }, {
-  get (target, tagName: string) {
-    // @ts-expect-error
-    if (target[tagName] === undefined) {
+export const mathML = new Proxy(
+  { fragment },
+  {
+    get(target, tagName: string) {
       // @ts-expect-error
-      target[tagName] = (...contents: ElementPart[]) => create(`${tagName}|${MATH}`, ...contents)
-    }
-    // @ts-expect-error
-    return target[tagName]
-  },
-  set () {
-    throw new Error('You may not add new properties to elements')
+      if (target[tagName] === undefined) {
+        // @ts-expect-error
+        target[tagName] = (...contents: ElementPart[]) =>
+          create(`${tagName}|${MATH}`, ...contents)
+      }
+      // @ts-expect-error
+      return target[tagName]
+    },
+    set() {
+      throw new Error('You may not add new properties to elements')
+    },
   }
-}) as unknown as MathMLElementsProxy
+) as unknown as MathMLElementsProxy

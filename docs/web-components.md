@@ -57,7 +57,7 @@ it works internally.
 
       connectedCallback() {
         super.connectedCallback()
-        const {input} = this.refs
+        const {input} = this.parts
         input.addEventListener('input', () => {
           this.value = input.value
         })
@@ -65,7 +65,7 @@ it works internally.
 
       render() {
         super.render()
-        const {span, input} = this.refs
+        const {span, input} = this.parts
         span.textContent = this.caption
         if (input.value !== this.value) {
           input.value = this.value
@@ -164,7 +164,7 @@ which will then penetrate the `shadowDOM`.
 
     render() {
       super.render() // see note
-      const {span, input} = this.refs
+      const {span, input} = this.parts
       span.textContent = this.caption
       if (input.value !== this.value) {
         input.value = this.value
@@ -177,15 +177,15 @@ which will then penetrate the `shadowDOM`.
 > It is *necessary* however to call `super.connectedCallback`, `super.disconnectedCallback`
 > and `super()` in the `constructor()` should you override them.
 
-`this.refs` returns a proxy that provides elements conveniently and efficiently. It
+`this.parts` returns a proxy that provides elements conveniently and efficiently. It
 is intended to facilitate access to static elements (it memoizes its values the
 first time they are computed).
 
-`this.refs.foo` will return a content element with `data-ref="foo"`. If no such
-element is found it tries it as a css selector, so `this.refs['.foo']` would find
-a content element with `class="foo"` while `this.refs.h1` will find an `<h1>`.
+`this.parts.foo` will return a content element with `data-ref="foo"`. If no such
+element is found it tries it as a css selector, so `this.parts['.foo']` would find
+a content element with `class="foo"` while `this.parts.h1` will find an `<h1>`.
 
-`this.refs` will also remove a `data-ref` attribute once it has been used to find
+`this.parts` will also remove a `data-ref` attribute once it has been used to find
 the element. This means that if you use all your refs in `render` or `connectedCallback`
 then no trace will remain in the DOM for a mounted element.
 

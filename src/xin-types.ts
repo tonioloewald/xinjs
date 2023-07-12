@@ -19,14 +19,25 @@ export interface XinProps {
 }
 
 export type XinProxyObject = XinProps & {
-  [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar
+  [key: string]:
+    | XinProxyObject
+    | XinProxyArray
+    | XinObject
+    | XinArray
+    | XinScalar
 }
 
-export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (XinProxyObject[] | XinScalar[])
+export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (
+    | XinProxyObject[]
+    | XinScalar[]
+  )
 export type XinProxy = XinProps & (XinObject | XinArray)
 export type XinProxyValue = XinProxy | XinScalar | null | undefined
 export type XinTouchableType = string | XinProps
-export type XinEventHandler<T=Event> = ((evt: T) => void) | ((evt: T) => Promise<void>) | string
+export type XinEventHandler<T = Event> =
+  | ((evt: T) => void)
+  | ((evt: T) => Promise<void>)
+  | string
 export type XinBindingShortcut = XinTouchableType | XinBindingSpec
 
 type _BooleanFunction = () => boolean
@@ -35,7 +46,9 @@ export type PathTestFunction = _BooleanFunction | _PathTestFunction
 
 type OptionalSymbol = Symbol | undefined
 type _CallbackFunction = (() => void) | (() => OptionalSymbol)
-type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol)
+type _PathCallbackFunction =
+  | ((path: string) => void)
+  | ((path: string) => OptionalSymbol)
 export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction
 
 export interface XinBindingSpec {
@@ -64,11 +77,23 @@ export interface ElementProps {
   [key: string]: any
 }
 
-export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+export type ValueElement =
+  | HTMLInputElement
+  | HTMLSelectElement
+  | HTMLTextAreaElement
 export type SwissArmyElement = Element & HTMLInputElement & HTMLCanvasElement
-export type ElementPart = Element | DocumentFragment | ElementProps | string | number
-export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
+export type ElementPart =
+  | Element
+  | DocumentFragment
+  | ElementProps
+  | string
+  | number
+export type HTMLElementCreator<T extends Node = SwissArmyElement> = (
+  ...contents: ElementPart[]
+) => T
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
-export type ElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T
+export type ElementCreator<T extends Node = SwissArmyElement> = (
+  ...contents: ElementPart[]
+) => T
 export type ContentPart = Element | DocumentFragment | string
 export type ContentType = ContentPart | ContentPart[]

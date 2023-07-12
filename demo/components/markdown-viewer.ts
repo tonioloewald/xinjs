@@ -1,4 +1,4 @@
-import { Component } from "../../src";
+import { Component } from '../../src'
 import { marked } from 'marked'
 
 class MarkdownViewer extends Component {
@@ -11,7 +11,7 @@ class MarkdownViewer extends Component {
   connectedCallback(): void {
     super.connectedCallback()
     if (this.src !== '') {
-      (async () => {
+      ;(async () => {
         const request = await fetch(this.src)
         this.value = await request.text()
       })()

@@ -8,7 +8,7 @@ import { ElementCreator, SwissArmyElement, ContentType } from './xin-types'
 
 let anonymousElementCount = 0
 
-function anonElementTag (): string {
+function anonElementTag(): string {
   return `custom-elt${(anonymousElementCount++).toString(36)}`
 }
 let instanceCount = 0
@@ -19,14 +19,16 @@ export abstract class Component extends HTMLElement {
   instanceId: string
   styleNode?: HTMLStyleElement
   content: ContentType | (() => ContentType) | null = elements.slot()
-  isSlotted?: boolean
+  isSlotted?: boolean;
   [key: string]: any
 
-  static StyleNode (styleSpec: XinStyleSheet): HTMLStyleElement {
+  static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement {
     return elements.style(css(styleSpec))
   }
 
-  static elementCreator (options?: ElementDefinitionOptions & { tag?: string }): ElementCreator {
+  static elementCreator(
+    options?: ElementDefinitionOptions & { tag?: string }
+  ): ElementCreator {
     if (this._elementCreator == null) {
       let tagName = options != null ? options.tag : null
       if (tagName == null) {
@@ -42,33 +44,45 @@ export abstract class Component extends HTMLElement {
       if (customElements.get(tagName) != null) {
         console.warn(`${tagName} is already defined`)
       }
+      if (tagName.match(/\w+(-\w+)+/) == null) {
+        console.warn(`${tagName} is not a legal tag for a custom-element`)
+        tagName = anonElementTag()
+      }
       while (customElements.get(tagName) !== undefined) {
         tagName = anonElementTag()
       }
-      window.customElements.define(tagName, this as unknown as CustomElementConstructor, options)
+      window.customElements.define(
+        tagName,
+        this as unknown as CustomElementConstructor,
+        options
+      )
       this._elementCreator = elements[tagName]
     }
     return this._elementCreator
   }
 
-  initAttributes (...attributeNames: string[]): void {
+  initAttributes(...attributeNames: string[]): void {
     const attributes: { [key: string]: any } = {}
     const attributeValues = {}
     const observer = new MutationObserver((mutationsList) => {
       let triggerRender = false
       mutationsList.forEach((mutation) => {
         // eslint-disable-next-line
-        triggerRender = !!(mutation.attributeName && attributeNames.includes(kabobToCamel(mutation.attributeName)))
+        triggerRender = !!(
+          mutation.attributeName &&
+          attributeNames.includes(kabobToCamel(mutation.attributeName))
+        )
       })
-      if (triggerRender && this.queueRender !== undefined) this.queueRender(false)
+      if (triggerRender && this.queueRender !== undefined)
+        this.queueRender(false)
     })
     observer.observe(this, { attributes: true })
-    attributeNames.forEach(attributeName => {
+    attributeNames.forEach((attributeName) => {
       attributes[attributeName] = deepClone(this[attributeName])
       const attributeKabob = camelToKabob(attributeName)
       Object.defineProperty(this, attributeName, {
         enumerable: false,
-        get () {
+        get() {
           if (typeof attributes[attributeName] === 'boolean') {
             return this.hasAttribute(attributeKabob)
           } else {
@@ -77,16 +91,16 @@ export abstract class Component extends HTMLElement {
               return typeof attributes[attributeName] === 'number'
                 ? parseFloat(this.getAttribute(attributeKabob))
                 : this.getAttribute(attributeKabob)
-            // @ts-expect-error
+              // @ts-expect-error
             } else if (attributeValues[attributeName] !== undefined) {
-            // @ts-expect-error
+              // @ts-expect-error
               return attributeValues[attributeName]
             } else {
               return attributes[attributeName]
             }
           }
         },
-        set (value) {
+        set(value) {
           if (typeof attributes[attributeName] === 'boolean') {
             if (value !== this[attributeName]) {
               // eslint-disable-next-line
@@ -103,8 +117,15 @@ export abstract class Component extends HTMLElement {
               this.queueRender()
             }
           } else {
-            if (typeof value === 'object' || `${value as string}` !== `${this[attributeName] as string}`) {
-              if (value === null || value === undefined || typeof value === 'object') {
+            if (
+              typeof value === 'object' ||
+              `${value as string}` !== `${this[attributeName] as string}`
+            ) {
+              if (
+                value === null ||
+                value === undefined ||
+                typeof value === 'object'
+              ) {
                 this.removeAttribute(attributeKabob)
               } else {
                 this.setAttribute(attributeKabob, value)
@@ -114,59 +135,95 @@ export abstract class Component extends HTMLElement {
               attributeValues[attributeName] = value
             }
           }
-        }
+        },
       })
     })
   }
 
-  private initValue (): void {
+  private initValue(): void {
     const valueDescriptor = Object.getOwnPropertyDescriptor(this, 'value')
-    if (valueDescriptor === undefined || valueDescriptor.get !== undefined || valueDescriptor.set !== undefined) {
+    if (
+      valueDescriptor === undefined ||
+      valueDescriptor.get !== undefined ||
+      valueDescriptor.set !== undefined
+    ) {
       return
     }
-    let value = this.hasAttribute('value') ? this.getAttribute('value') : deepClone(this.value)
+    let value = this.hasAttribute('value')
+      ? this.getAttribute('value')
+      : deepClone(this.value)
     delete this.value
     Object.defineProperty(this, 'value', {
       enumerable: false,
-      get () {
+      get() {
         return value
       },
-      set (newValue: any) {
+      set(newValue: any) {
         if (value !== newValue) {
           value = newValue
           this.queueRender(true)
         }
-      }
+      },
     })
   }
 
   private _refs?: { [key: string]: SwissArmyElement }
-  get refs (): { [key: string]: SwissArmyElement } {
+  get refs(): { [key: string]: SwissArmyElement } {
+    console.warn(
+      'refs and data-ref are deprecated, use the part attribute and .parts instead'
+    )
     const root = this.shadowRoot != null ? this.shadowRoot : this
     if (this._refs == null) {
-      this._refs = new Proxy({}, {
-        get (target: { [key: string]: SwissArmyElement }, ref: string) {
-          if (target[ref] === undefined) {
-            let element = root.querySelector(`[part="${ref}"],[data-ref="${ref}"]`)
-            if (element == null) {
-              element = root.querySelector(ref)
+      this._refs = new Proxy(
+        {},
+        {
+          get(target: { [key: string]: SwissArmyElement }, ref: string) {
+            if (target[ref] === undefined) {
+              let element = root.querySelector(
+                `[part="${ref}"],[data-ref="${ref}"]`
+              )
+              if (element == null) {
+                element = root.querySelector(ref)
+              }
+              if (element == null)
+                throw new Error(`elementRef "${ref}" does not exist!`)
+              element.removeAttribute('data-ref')
+              target[ref] = element as SwissArmyElement
             }
-            if (element == null) throw new Error(`elementRef "${ref}" does not exist!`)
-            element.removeAttribute('data-ref')
-            target[ref] = element as SwissArmyElement
-          }
-          return target[ref]
+            return target[ref]
+          },
         }
-      })
+      )
     }
     return this._refs
   }
 
-  get parts (): { [key: string]: SwissArmyElement } {
-    return this.refs
+  get parts(): { [key: string]: SwissArmyElement } {
+    const root = this.shadowRoot != null ? this.shadowRoot : this
+    if (this._refs == null) {
+      this._refs = new Proxy(
+        {},
+        {
+          get(target: { [key: string]: SwissArmyElement }, ref: string) {
+            if (target[ref] === undefined) {
+              let element = root.querySelector(`[part="${ref}"]`)
+              if (element == null) {
+                element = root.querySelector(ref)
+              }
+              if (element == null)
+                throw new Error(`elementRef "${ref}" does not exist!`)
+              element.removeAttribute('data-ref')
+              target[ref] = element as SwissArmyElement
+            }
+            return target[ref]
+          },
+        }
+      )
+    }
+    return this._refs
   }
 
-  constructor () {
+  constructor() {
     super()
     instanceCount += 1
     this.initAttributes('hidden')
@@ -174,7 +231,7 @@ export abstract class Component extends HTMLElement {
     this._value = deepClone(this.defaultValue)
   }
 
-  connectedCallback (): void {
+  connectedCallback(): void {
     this.hydrate()
     // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
     if (this.role != null) this.setAttribute('role', this.role)
@@ -191,13 +248,13 @@ export abstract class Component extends HTMLElement {
     this.queueRender()
   }
 
-  disconnectedCallback (): void {
+  disconnectedCallback(): void {
     resizeObserver.unobserve(this)
   }
 
   private _changeQueued = false
   private _renderQueued = false
-  queueRender (triggerChangeEvent = false): void {
+  queueRender(triggerChangeEvent = false): void {
     if (!this._hydrated) return
     if (!this._changeQueued) this._changeQueued = triggerChangeEvent
     if (!this._renderQueued) {
@@ -214,11 +271,12 @@ export abstract class Component extends HTMLElement {
   }
 
   private _hydrated = false
-  private hydrate (): void {
+  private hydrate(): void {
     if (!this._hydrated) {
       this.initValue()
       const cloneElements = typeof this.content !== 'function'
-      const _content: ContentType | null = typeof this.content === 'function' ? this.content() : this.content
+      const _content: ContentType | null =
+        typeof this.content === 'function' ? this.content() : this.content
       if (this.styleNode !== undefined) {
         const shadow = this.attachShadow({ mode: 'open' })
         shadow.appendChild(this.styleNode)
@@ -236,9 +294,10 @@ export abstract class Component extends HTMLElement {
           ;[...this.querySelectorAll('xin-slot')].forEach((slot) => {
             slotMap[(slot as XinSlot).name] = slot
           })
-          existingChildren.forEach(child => {
+          existingChildren.forEach((child) => {
             const defaultSlot = slotMap['']
-            const destSlot = child instanceof Element ? slotMap[child.slot] : defaultSlot
+            const destSlot =
+              child instanceof Element ? slotMap[child.slot] : defaultSlot
             ;(destSlot !== undefined ? destSlot : defaultSlot).append(child)
           })
         }
@@ -247,14 +306,14 @@ export abstract class Component extends HTMLElement {
     }
   }
 
-  render (): void {}
+  render(): void {}
 }
 
 class XinSlot extends Component {
   name = ''
   content = null
 
-  static replaceSlot (slot: HTMLSlotElement): void {
+  static replaceSlot(slot: HTMLSlotElement): void {
     const _slot = document.createElement('xin-slot')
     if (slot.name !== '') {
       _slot.setAttribute('name', slot.name)
@@ -262,7 +321,7 @@ class XinSlot extends Component {
     slot.replaceWith(_slot)
   }
 
-  constructor () {
+  constructor() {
     super()
     this.initAttributes('name')
   }

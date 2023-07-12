@@ -13,9 +13,13 @@ export const xinPath = (x: any): string | undefined => {
   return x[XIN_PATH]
 }
 
-export function xinValue<T extends {}> (x: T): T {
+export function xinValue<T extends {}>(x: T): T {
   // eslint-disable-next-line
-  return (typeof x === 'object' && x !== null ? (x as unknown as XinProxy)[XIN_VALUE] || x : x) as T
+  return (
+    typeof x === 'object' && x !== null
+      ? (x as unknown as XinProxy)[XIN_VALUE] || x
+      : x
+  ) as T
 }
 
 export interface DataBinding<T = HTMLElement> {
@@ -30,7 +34,8 @@ export interface XinEventBindings {
   [eventType: string]: XinEventHandler[]
 }
 
-export const elementToHandlers: WeakMap<Element, XinEventBindings> = new WeakMap()
+export const elementToHandlers: WeakMap<Element, XinEventBindings> =
+  new WeakMap()
 export const elementToBindings: WeakMap<Element, DataBindings> = new WeakMap()
 
 interface ElementMetadata {
@@ -41,7 +46,7 @@ interface ElementMetadata {
 export const getElementBindings = (element: Element): ElementMetadata => {
   return {
     eventBindings: elementToHandlers.get(element),
-    dataBindings: elementToBindings.get(element)
+    dataBindings: elementToBindings.get(element),
   }
 }
 
@@ -59,7 +64,9 @@ export const cloneWithBindings = (element: Node): Node => {
       elementToHandlers.set(cloned, deepClone(eventHandlers))
     }
   }
-  for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes) {
+  for (const node of element instanceof HTMLTemplateElement
+    ? element.content.childNodes
+    : element.childNodes) {
     if (node instanceof HTMLElement || node instanceof DocumentFragment) {
       cloned.appendChild(cloneWithBindings(node))
     } else {

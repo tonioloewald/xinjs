@@ -1,6 +1,10 @@
 import { xin, observe } from './xin'
 import { XIN_VALUE } from './metadata'
-import { XinObject, PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import {
+  XinObject,
+  PathTestFunction,
+  ObserverCallbackFunction,
+} from './xin-types'
 import { debounce } from './throttle'
 
 // TODO reimplement using IndexedDB

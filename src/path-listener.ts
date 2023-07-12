@@ -14,11 +14,20 @@ export class Listener {
   test: PathTestFunction
   callback: ObserverCallbackFunction
 
-  constructor (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) {
-    const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`
+  constructor(
+    test: string | RegExp | PathTestFunction,
+    callback: string | ObserverCallbackFunction
+  ) {
+    const callbackDescription =
+      typeof callback === 'string'
+        ? `"${callback}"`
+        : `function ${callback.name}`
     let testDescription
     if (typeof test === 'string') {
-      this.test = t => typeof t === 'string' && t !== '' && (test.startsWith(t) || t.startsWith(test))
+      this.test = (t) =>
+        typeof t === 'string' &&
+        t !== '' &&
+        (test.startsWith(t) || t.startsWith(test))
       testDescription = `test = "${test}"`
     } else if (test instanceof RegExp) {
       this.test = test.test.bind(test)
@@ -56,12 +65,16 @@ const update = (): void => {
 
   for (const path of paths) {
     listeners
-      .filter(listener => {
+      .filter((listener) => {
         let heard
         try {
           heard = listener.test(path)
         } catch (e) {
-          throw new Error(`Listener ${listener.description} threw "${e as string}" at "${path}"`)
+          throw new Error(
+            `Listener ${listener.description} threw "${
+              e as string
+            }" at "${path}"`
+          )
         }
         if (heard === observerShouldBeRemoved) {
           unobserve(listener)
@@ -69,12 +82,16 @@ const update = (): void => {
         }
         return heard as boolean
       })
-      .forEach(listener => {
+      .forEach((listener) => {
         let outcome
         try {
           outcome = listener.callback(path)
         } catch (e) {
-          console.error(`Listener ${listener.description} threw "${e as string}" handling "${path}"`)
+          console.error(
+            `Listener ${listener.description} threw "${
+              e as string
+            }" handling "${path}"`
+          )
         }
         if (outcome === observerShouldBeRemoved) {
           unobserve(listener)
@@ -101,18 +118,23 @@ export const touch = (touchable: any): void => {
   }
 
   if (updateTriggered === false) {
-    updatePromise = new Promise(resolve => {
+    updatePromise = new Promise((resolve) => {
       resolveUpdate = resolve
     })
     updateTriggered = setTimeout(update)
   }
 
-  if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
+  if (
+    touchedPaths.find((touchedPath) => path.startsWith(touchedPath)) == null
+  ) {
     touchedPaths.push(path)
   }
 }
 
-export const observe = (test: string | RegExp | PathTestFunction, callback: ObserverCallbackFunction): Listener => {
+export const observe = (
+  test: string | RegExp | PathTestFunction,
+  callback: ObserverCallbackFunction
+): Listener => {
   return new Listener(test, callback)
 }
 

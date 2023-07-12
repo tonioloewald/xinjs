@@ -1,30 +1,30 @@
-import {elements, Component} from '../../src/index'
-const {fragment, slot, div} = elements
+import { elements, Component } from '../../src/index'
+const { fragment, slot, div } = elements
 
 class AppLayout extends Component {
   styleNode = Component.StyleNode({
     ':host': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     },
     ':host .body': {
       display: 'flex',
       flex: '1 1 auto',
-      width: '100%'
+      width: '100%',
     },
     '::slotted(:not([slot]))': {
-      flex: '1 1 auto'
-    }
+      flex: '1 1 auto',
+    },
   })
   content = fragment(
-    slot({name: 'header'}),
+    slot({ name: 'header' }),
     div(
       { class: 'body' },
-      slot({name: 'left'}),
+      slot({ name: 'left' }),
       slot(),
-      slot({name: 'right'})
+      slot({ name: 'right' })
     ),
-    slot({name: 'footer'})
+    slot({ name: 'footer' })
   )
 }
 

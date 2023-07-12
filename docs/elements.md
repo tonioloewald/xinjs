@@ -40,10 +40,10 @@ E.g.
 
 ## camelCase conversion
 
-Attributes in camelCase, e.g. `dataRef`, will be converted to kebab-case,
+Attributes in camelCase, e.g. `dataInfo`, will be converted to kebab-case,
 so:
 
-    span({dataRef: 'foo'})        // produces <span data-ref="foo"></span>
+    span({dataInfo: 'foo'})        // produces <span data-ref="foo"></span>
 
 ## style properties
 

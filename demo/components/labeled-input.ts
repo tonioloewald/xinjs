@@ -1,5 +1,5 @@
-import {elements, Component, vars} from '../../src/index'
-const {label, slot, input} = elements
+import { elements, Component, vars } from '../../src/index'
+const { label, slot, input } = elements
 
 class LabeledInput extends Component {
   styleNode = Component.StyleNode({
@@ -22,16 +22,16 @@ class LabeledInput extends Component {
       color: vars.textColor,
       lineHeight: vars.lineHeight,
       borderRadius: vars.roundedRadius50,
-      width: vars.inputWidth
+      width: vars.inputWidth,
     },
     '::placeholder': {
-      opacity: vars.placeHolderOpacity
+      opacity: vars.placeHolderOpacity,
     },
     ':host input[type="number"]': {
-      paddingRight: vars.spacing50
-    }
+      paddingRight: vars.spacing50,
+    },
   })
-  content = label({dataRef: 'label'}, slot(), input({dataRef: 'field'}))
+  content = label({ part: 'label' }, slot(), input({ part: 'field' }))
   type = ''
   placeholder = ''
   input = false
@@ -43,12 +43,12 @@ class LabeledInput extends Component {
   connectedCallback() {
     super.connectedCallback()
     const self = this
-    const {field} = self.refs
+    const { field } = self.parts
     field.addEventListener(this.input ? 'input' : 'change', () => {
       self.value = this.type !== 'checkbox' ? field.value : field.checked
     })
-    field.addEventListener('keydown', (evt) => {
-      if(evt.code === 'Enter') {
+    field.addEventListener('keydown', (evt: KeyboardEvent) => {
+      if (evt.code === 'Enter') {
         const form = this.closest('form')
         if (form) {
           form.dispatchEvent(new Event('submit'))
@@ -58,20 +58,22 @@ class LabeledInput extends Component {
   }
   render() {
     super.render()
-    const {field, label} = this.refs
+    const { field, label } = this.parts
     if (this.type !== '') {
       field.setAttribute('type', this.type)
     } else {
       field.removeAttribute('type')
     }
-    label.style.flexDirection = ['radio', 'checkbox'].includes(this.type) ? 'row-reverse' : ''
+    label.style.flexDirection = ['radio', 'checkbox'].includes(this.type)
+      ? 'row-reverse'
+      : ''
     if (this.placeholder !== '') {
       field.setAttribute('placeholder', this.placeholder)
     } else {
       field.removeAttribute('placeholder')
     }
     if (this.type === 'checkbox') {
-      if(field.checked !== this.value) {
+      if (field.checked !== this.value) {
         field.checked = this.value as boolean
       }
     } else {
