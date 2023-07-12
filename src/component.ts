@@ -19,7 +19,6 @@ export abstract class Component extends HTMLElement {
   instanceId: string
   styleNode?: HTMLStyleElement
   content: ContentType | (() => ContentType) | null = elements.slot()
-  value?: any
   isSlotted?: boolean
   [key: string]: any
 
@@ -148,7 +147,7 @@ export abstract class Component extends HTMLElement {
       this._refs = new Proxy({}, {
         get (target: { [key: string]: SwissArmyElement }, ref: string) {
           if (target[ref] === undefined) {
-            let element = root.querySelector(`[data-ref="${ref}"]`)
+            let element = root.querySelector(`[part="${ref}"],[data-ref="${ref}"]`)
             if (element == null) {
               element = root.querySelector(ref)
             }
@@ -161,6 +160,10 @@ export abstract class Component extends HTMLElement {
       })
     }
     return this._refs
+  }
+
+  get parts (): { [key: string]: SwissArmyElement } {
+    return this.refs
   }
 
   constructor () {
