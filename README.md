@@ -319,7 +319,7 @@ To create a local package (for experimenting with a build) run `bun pack`.
 
 ### Parcel Occasionally Gets Screwed Up
 
-- remove all the parcel transformer dependencies @parcel/*
+- remove all the parcel transformer dependencies @parcel/\*
 - rm -rf node_modules
 - run the update script
 - npx parcel build (which restores needed parcel transformers)

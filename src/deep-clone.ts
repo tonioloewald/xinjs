@@ -8,7 +8,6 @@ export function deepClone(obj: Cloneable): Cloneable | Cloneable[] {
     return obj
   }
   if (Array.isArray(obj)) {
-    // @ts-expect-error-error
     return obj.map(deepClone)
   }
   const clone: XinObject = {}

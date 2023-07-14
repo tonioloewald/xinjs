@@ -1,12 +1,12 @@
 import { XIN_PATH, XIN_VALUE } from './metadata'
 import { XinStyleRule } from './css-types'
 
-export type XinScalar = string | boolean | number | Function
+export type XinScalar = string | boolean | number | symbol | Function
 
-export type XinArray = XinObject[] | XinScalar[]
+export type XinArray = any[]
 
 export interface XinObject {
-  [key: string]: XinObject | XinArray | XinScalar
+  [key: string | number | symbol]: any
 }
 
 export type XinProxyTarget = XinObject | XinArray
@@ -77,11 +77,15 @@ export interface ElementProps {
   [key: string]: any
 }
 
+export interface StringMap {
+  [key: string]: any
+}
+
 export type ValueElement =
   | HTMLInputElement
   | HTMLSelectElement
   | HTMLTextAreaElement
-export type SwissArmyElement = Element & HTMLInputElement & HTMLCanvasElement
+export type SwissArmyElement = HTMLElement
 export type ElementPart =
   | Element
   | DocumentFragment

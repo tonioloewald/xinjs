@@ -63,7 +63,7 @@ export abstract class Component extends HTMLElement {
 
   initAttributes(...attributeNames: string[]): void {
     const attributes: { [key: string]: any } = {}
-    const attributeValues = {}
+    const attributeValues: { [key: string]: any } = {}
     const observer = new MutationObserver((mutationsList) => {
       let triggerRender = false
       mutationsList.forEach((mutation) => {
@@ -91,9 +91,7 @@ export abstract class Component extends HTMLElement {
               return typeof attributes[attributeName] === 'number'
                 ? parseFloat(this.getAttribute(attributeKabob))
                 : this.getAttribute(attributeKabob)
-              // @ts-expect-error
             } else if (attributeValues[attributeName] !== undefined) {
-              // @ts-expect-error
               return attributeValues[attributeName]
             } else {
               return attributes[attributeName]
@@ -131,7 +129,6 @@ export abstract class Component extends HTMLElement {
                 this.setAttribute(attributeKabob, value)
               }
               this.queueRender()
-              // @ts-expect-error
               attributeValues[attributeName] = value
             }
           }

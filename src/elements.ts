@@ -5,6 +5,7 @@ import {
   ElementProps,
   ElementCreator,
   SwissArmyElement,
+  StringMap,
 } from './xin-types'
 import { camelToKabob } from './string-case'
 
@@ -179,8 +180,10 @@ const create = (
           if (prop.startsWith('--')) {
             elt.style.setProperty(prop, value[prop])
           } else {
-            // @ts-expect-error
-            elt.style[prop] = value[prop]
+            // worst case, the style won't work
+            ;(elt.style as unknown as { [key: string]: string })[prop] = value[
+              prop
+            ] as string
           }
         }
       } else {
@@ -199,13 +202,16 @@ const create = (
           `${key} is not allowed, bindings.${bindingType} is not defined`
         )
       }
-      // @ts-expect-error
-    } else if (elt[key] !== undefined) {
-      if (elt instanceof SVGElement || elt instanceof MathMLElement) {
+    } else if ((elt as { [key: string]: any })[key] !== undefined) {
+      // MathML is only supported on 91% of browsers, and not on the Raspberry Pi Chromium
+      const { MathMLElement } = globalThis
+      if (
+        elt instanceof SVGElement ||
+        (MathMLElement !== undefined && elt instanceof MathMLElement)
+      ) {
         elt.setAttribute(key, value)
       } else {
-        // @ts-expect-error
-        elt[key] = value
+        ;(elt as { [key: string]: any })[key] = value
       }
     } else {
       const attr = camelToKabob(key)
@@ -214,10 +220,8 @@ const create = (
         value.split(' ').forEach((className: string) => {
           elt.classList.add(className)
         })
-        // @ts-expect-error-error
-      } else if (elt[attr] !== undefined) {
-        // @ts-expect-error-error
-        elt[attr] = value
+      } else if ((elt as { [key: string]: any })[attr] !== undefined) {
+        ;(elt as StringMap)[attr] = value
       } else if (typeof value === 'boolean') {
         value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr)
       } else {
@@ -248,14 +252,11 @@ export const elements = new Proxy(
   {
     get(target, tagName: string) {
       tagName = tagName.replace(/[A-Z]/g, (c) => `-${c.toLocaleLowerCase()}`)
-      // @ts-expect-error
-      if (target[tagName] === undefined) {
-        // @ts-expect-error
-        target[tagName] = (...contents: ElementPart[]) =>
+      if ((target as StringMap)[tagName] === undefined) {
+        ;(target as StringMap)[tagName] = (...contents: ElementPart[]) =>
           create(tagName, ...contents)
       }
-      // @ts-expect-error
-      return target[tagName]
+      return (target as StringMap)[tagName]
     },
     set() {
       throw new Error('You may not add new properties to elements')
@@ -271,14 +272,11 @@ export const svgElements = new Proxy(
   { fragment },
   {
     get(target, tagName: string) {
-      // @ts-expect-error
-      if (target[tagName] === undefined) {
-        // @ts-expect-error
-        target[tagName] = (...contents: ElementPart[]) =>
+      if ((target as StringMap)[tagName] === undefined) {
+        ;(target as StringMap)[tagName] = (...contents: ElementPart[]) =>
           create(`${tagName}|${SVG}`, ...contents)
       }
-      // @ts-expect-error
-      return target[tagName]
+      return (target as StringMap)[tagName]
     },
     set() {
       throw new Error('You may not add new properties to elements')
@@ -294,14 +292,11 @@ export const mathML = new Proxy(
   { fragment },
   {
     get(target, tagName: string) {
-      // @ts-expect-error
-      if (target[tagName] === undefined) {
-        // @ts-expect-error
-        target[tagName] = (...contents: ElementPart[]) =>
+      if ((target as StringMap)[tagName] === undefined) {
+        ;(target as StringMap)[tagName] = (...contents: ElementPart[]) =>
           create(`${tagName}|${MATH}`, ...contents)
       }
-      // @ts-expect-error
-      return target[tagName]
+      return (target as StringMap)[tagName]
     },
     set() {
       throw new Error('You may not add new properties to elements')

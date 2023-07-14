@@ -212,6 +212,7 @@ This is an in-browser test of key functionality including:
               gap: vars.spacing25,
             },
             '.test': {
+              color: vars.background,
               borderRadius: vars.lineHeight,
               lineHeight: vars.lineHeight,
               padding: `0 ${vars.spacing50}`,

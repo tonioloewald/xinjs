@@ -249,10 +249,10 @@ export interface XinStyleMap {
 export interface XinStyleSheet {
     [key: string]: XinStyleRule | XinStyleMap | string;
 }
-export type XinScalar = string | boolean | number | Function;
-export type XinArray = XinObject[] | XinScalar[];
+export type XinScalar = string | boolean | number | symbol | Function;
+export type XinArray = any[];
 export interface XinObject {
-    [key: string]: XinObject | XinArray | XinScalar;
+    [key: string | number | symbol]: any;
 }
 export type XinProxyTarget = XinObject | XinArray;
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined;
@@ -302,8 +302,11 @@ export interface ElementProps {
     apply?: (element: HTMLElement) => void | Promise<void>;
     [key: string]: any;
 }
+export interface StringMap {
+    [key: string]: any;
+}
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-export type SwissArmyElement = Element & HTMLInputElement & HTMLCanvasElement;
+export type SwissArmyElement = HTMLElement;
 export type ElementPart = Element | DocumentFragment | ElementProps | string | number;
 export type HTMLElementCreator<T extends Node = SwissArmyElement> = (...contents: ElementPart[]) => T;
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;

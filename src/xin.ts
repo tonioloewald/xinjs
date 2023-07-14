@@ -77,8 +77,7 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
       return target
     }
     if (typeof _prop === 'symbol') {
-      // @ts-expect-error
-      return target[_prop]
+      return (target as XinObject)[_prop]
     }
     let prop = _prop
     const compoundProp =
@@ -128,7 +127,7 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
       const value = target[prop as unknown as number]
       return typeof value === 'function'
         ? (...items: any[]) => {
-            // @ts-expect-error
+            // @ts-ignore-error
             const result = Array.prototype[prop].apply(target, items)
             if (ARRAY_MUTATIONS.includes(prop)) {
               touch(path)

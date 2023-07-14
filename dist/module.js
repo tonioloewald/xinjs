@@ -15,8 +15,7 @@
 
 function $5165f04a46b33615$export$b7d58db314e0ac27(obj) {
     if (obj == null || typeof obj !== "object") return obj;
-    if (Array.isArray(obj)) // @ts-expect-error-error
-    return obj.map($5165f04a46b33615$export$b7d58db314e0ac27);
+    if (Array.isArray(obj)) return obj.map($5165f04a46b33615$export$b7d58db314e0ac27);
     const clone = {};
     for(const key in obj){
         const val = obj[key];
@@ -366,8 +365,7 @@ const $547f11326d897190$var$regHandler = (path = "")=>({
                 while((0, $e921b0bd4f6415ab$export$40700dafb97c3799)(target) !== undefined)target = (0, $e921b0bd4f6415ab$export$5dcba2d45033d435)(target);
                 return target;
             }
-            if (typeof _prop === "symbol") // @ts-expect-error
-            return target[_prop];
+            if (typeof _prop === "symbol") return target[_prop];
             let prop = _prop;
             const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) ?? // basePath.subPath (omit '.')
             prop.match(/^([^\]]+)(\[.+)/) ?? // basePath[subPath
@@ -395,7 +393,7 @@ const $547f11326d897190$var$regHandler = (path = "")=>({
             } else if (Array.isArray(target)) {
                 const value = target[prop];
                 return typeof value === "function" ? (...items)=>{
-                    // @ts-expect-error
+                    // @ts-ignore-error
                     const result = Array.prototype[prop].apply(target, items);
                     if ($547f11326d897190$var$ARRAY_MUTATIONS.includes(prop)) (0, $f0b099915f91bd21$export$d0b7ea69ab6056df)(path);
                     return result;
@@ -1085,8 +1083,7 @@ const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
         else if (key === "style") {
             if (typeof value === "object") {
                 for (const prop of Object.keys(value))if (prop.startsWith("--")) elt.style.setProperty(prop, value[prop]);
-                else // @ts-expect-error
-                elt.style[prop] = value[prop];
+                else elt.style[prop] = value[prop];
             } else elt.setAttribute("style", value);
         } else if (key.match(/^on[A-Z]/) != null) {
             const eventType = key.substring(2).toLowerCase();
@@ -1096,18 +1093,17 @@ const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
             const binding = (0, $7d9f6326e1d5d994$export$97a1a3e6f39778d2)[bindingType];
             if (binding !== undefined) (0, $b5796eaeba5c782e$export$2385a24977818dd0)(elt, value, binding);
             else throw new Error(`${key} is not allowed, bindings.${bindingType} is not defined`);
-        // @ts-expect-error
         } else if (elt[key] !== undefined) {
-            if (elt instanceof SVGElement || elt instanceof MathMLElement) elt.setAttribute(key, value);
-            else // @ts-expect-error
-            elt[key] = value;
+            // MathML is only supported on 91% of browsers, and not on the Raspberry Pi Chromium
+            const { MathMLElement: MathMLElement } = globalThis;
+            if (elt instanceof SVGElement || MathMLElement !== undefined && elt instanceof MathMLElement) elt.setAttribute(key, value);
+            else elt[key] = value;
         } else {
             const attr = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(key);
             if (attr === "class") value.split(" ").forEach((className)=>{
                 elt.classList.add(className);
             });
-            else if (elt[attr] !== undefined) // @ts-expect-error-error
-            elt[attr] = value;
+            else if (elt[attr] !== undefined) elt[attr] = value;
             else if (typeof value === "boolean") value ? elt.setAttribute(attr, "") : elt.removeAttribute(attr);
             else elt.setAttribute(attr, value);
         }
@@ -1124,10 +1120,7 @@ const $9e0c0b8784c80412$export$7a5d735b2ab6389d = new Proxy({
 }, {
     get (target, tagName) {
         tagName = tagName.replace(/[A-Z]/g, (c)=>`-${c.toLocaleLowerCase()}`);
-        // @ts-expect-error
-        if (target[tagName] === undefined) // @ts-expect-error
-        target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(tagName, ...contents);
-        // @ts-expect-error
+        if (target[tagName] === undefined) target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(tagName, ...contents);
         return target[tagName];
     },
     set () {
@@ -1138,10 +1131,7 @@ const $9e0c0b8784c80412$export$cf20112a1bc148da = new Proxy({
     fragment: $9e0c0b8784c80412$var$fragment
 }, {
     get (target, tagName) {
-        // @ts-expect-error
-        if (target[tagName] === undefined) // @ts-expect-error
-        target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(`${tagName}|${$9e0c0b8784c80412$var$SVG}`, ...contents);
-        // @ts-expect-error
+        if (target[tagName] === undefined) target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(`${tagName}|${$9e0c0b8784c80412$var$SVG}`, ...contents);
         return target[tagName];
     },
     set () {
@@ -1152,10 +1142,7 @@ const $9e0c0b8784c80412$export$8ec252cfdd664597 = new Proxy({
     fragment: $9e0c0b8784c80412$var$fragment
 }, {
     get (target, tagName) {
-        // @ts-expect-error
-        if (target[tagName] === undefined) // @ts-expect-error
-        target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(`${tagName}|${$9e0c0b8784c80412$var$MATH}`, ...contents);
-        // @ts-expect-error
+        if (target[tagName] === undefined) target[tagName] = (...contents)=>$9e0c0b8784c80412$var$create(`${tagName}|${$9e0c0b8784c80412$var$MATH}`, ...contents);
         return target[tagName];
     },
     set () {
@@ -1345,8 +1332,7 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                     else {
                         // eslint-disable-next-line
                         if (this.hasAttribute(attributeKabob)) return typeof attributes[attributeName] === "number" ? parseFloat(this.getAttribute(attributeKabob)) : this.getAttribute(attributeKabob);
-                        else if (attributeValues[attributeName] !== undefined) // @ts-expect-error
-                        return attributeValues[attributeName];
+                        else if (attributeValues[attributeName] !== undefined) return attributeValues[attributeName];
                         else return attributes[attributeName];
                     }
                 },
@@ -1367,7 +1353,6 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                         if (value === null || value === undefined || typeof value === "object") this.removeAttribute(attributeKabob);
                         else this.setAttribute(attributeKabob, value);
                         this.queueRender();
-                        // @ts-expect-error
                         attributeValues[attributeName] = value;
                     }
                 }
