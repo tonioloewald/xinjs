@@ -324,6 +324,7 @@ declare class Listener {
     callback: ObserverCallbackFunction;
     constructor(test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction);
 }
+export const updates: () => Promise<void>;
 export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;

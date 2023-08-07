@@ -44,6 +44,7 @@ $parcel$export(module.exports, "observe", () => $3c20fb09d41b8da8$export$d120356
 $parcel$export(module.exports, "unobserve", () => $287d4a4db165612d$export$23a2283368c55ea2);
 $parcel$export(module.exports, "touch", () => $287d4a4db165612d$export$d0b7ea69ab6056df);
 $parcel$export(module.exports, "observerShouldBeRemoved", () => $287d4a4db165612d$export$253d09664e30b967);
+$parcel$export(module.exports, "updates", () => $287d4a4db165612d$export$1c2919332513559b);
 $parcel$export(module.exports, "xinProxy", () => $fce641fe9ed990db$export$95a552d2395ab4c4);
 /*
   Note that re-exported types should be explicitly and separately exported

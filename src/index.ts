@@ -22,6 +22,13 @@ export { getListItem, xinPath, xinValue } from './metadata'
 export { MoreMath } from './more-math'
 export { settings } from './settings'
 export { throttle, debounce } from './throttle'
-export { xin, observe, unobserve, touch, observerShouldBeRemoved } from './xin'
+export {
+  xin,
+  observe,
+  unobserve,
+  touch,
+  observerShouldBeRemoved,
+  updates,
+} from './xin'
 export * from './xin-types'
 export { xinProxy } from './xin-proxy'
