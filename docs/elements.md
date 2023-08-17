@@ -40,10 +40,10 @@ E.g.
 
 ## camelCase conversion
 
-Attributes in camelCase, e.g. `dataRef`, will be converted to kebab-case,
+Attributes in camelCase, e.g. `dataInfo`, will be converted to kebab-case,
 so:
 
-    span({dataRef: 'foo'})        // produces <span data-ref="foo"></span>
+    span({dataInfo: 'foo'})        // produces <span data-ref="foo"></span>
 
 ## style properties
 
@@ -109,3 +109,27 @@ on the element.
 
 `elements.fragment` is produces `DocumentFragment`s, but is otherwise
 just like other element factory functions.
+
+## svgElements
+
+`svgElements` is a proxy just like `elements` but it produces **SVG** elements in
+the appropriate namespace.
+
+## mathML
+
+`mathML` is a proxy just like `elements` but it products **MathML** elements in
+the appropriate namespace.
+
+> ### Caution
+>
+> Both `svgElements` and `mathML` are experimental and do not have anything like  the
+> degree of testing behind them as `elements`. In particular, the properties of 
+> SVG elements (and possible MathML elements) are quite different from ordinary 
+> elements, so the underlying `ElementCreator` will never try to set properties
+> directly and will always use `setAttribute(...)`.
+>
+> E.g. `svgElements.svg({viewBox: '0 0 100 100'})` will call `setAttribute()` and
+> not set the property directly, because the `viewBox` property is… weird, but
+> setting the attribute works.
+>
+> Again, use with caution!

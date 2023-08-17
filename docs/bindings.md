@@ -15,6 +15,8 @@ The `fromDOM` function is only needed for bindings to elements that trigger `cha
 events, typically `<input>`, `<textarea>`, and `<select>` elements, and of course your
 own [Custom Elements](web-components.md).
 
+You can see examples of these bindings in the [kitchen sink demo](../demo/components/kitchen-sink.ts).
+
 ## value
 
 The `value` binding syncs state from `xin` to the bound element's `value` property.
@@ -30,7 +32,7 @@ for every item in the bound `Array`.
 
 It uses the existing **single** child element it finds inside the bound element
 as its `template`. If the child is a `<template>` (which is a good idea) then it
-expects that `template` to have a single child element.
+expects that `template` to have a *single child element*.
 
 E.g. if you have a simple unordered list:
 
@@ -46,12 +48,49 @@ The `list` binding accepts as options:
 - `initInstance: (element, item: any) => void`
 - `updateInstance: (element, item: any) => void` 
 - `virtual: {width?: number, height: number}`
+- `hiddenProp: symbol | string`
+- `visibleProp: symbol | string`
 
 `initInstance` is called once for each element created, and is passed
 that element and the array value that it represents.
 
 Meanwhile, `updateInstance` is called once on creation and then any time the 
 array value is updated.
+
+### Virtual List Binding
+
+If you want to bind large arrays with minimal performance impact, you can make a list
+binding `virtual` by passing the `height` (and optionally `width`) of an item.
+Only visible elements will be rendered. Just make sure the values passed represent
+the *minimum* dimensions of the individual rendered items if they can vary in size.
+
+You can find examples of large, virtual bound arrays in [ArrayBindingsTest.ts](../demo/ArrayBindingTest.ts)
+and [list-filters.ts](../demo/components/list-filters.ts)
+
+### Filtered Lists and Detail Views
+
+You can **filter** the elements you wish to display in a bound list by using the
+`hiddenProp` (to hide elements of the list) and/or `visibleProp` (to show elements
+of the list).
+
+You can pass a `path` or a `symbol` as either the `hiddenProp` or `visibleProp`.
+
+Typically, you can use `hiddenProp` to power filters and `visibleProp` to power
+detail views. The beautfy of using symbols is that it won't impact the serialized
+values of the array and different views of the array can use different selection
+and filtering criteria.
+
+An example of a large array bound to a filtered list view using `hiddenProp`
+and a detail view using `visibleProp` can be found in [list-filters.ts](../demo/components/list-filters.ts).
+
+> **Note** for a given list-binding, if you specify `hiddenProp` (but not `visibleProp`),
+> then all items in the array will be shown *unless* `item[hiddenProp] === true`.
+>
+> Conversely, if you specify `visibleProp` (but not `hiddenProp`), then all items
+> in the array will be ignored *unless* `item[visibleProp] === true`.
+>
+> If, for some reason, you specify both then an item will only be visible if
+> it `item[visibleProp] === true` and `item[hiddenProp] !== true`.
 
 ### Binding custom-elements using idPath
 
@@ -61,8 +100,8 @@ custom-element.
 
 See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
 
-### Virtual List Binding
+### xin-empty-list class
 
-If you want to bind large lists and maintain performance, you can make a list
-binding `virtual` by passing the `height` (and optionally `width`) of an item.
-Only visible elements will be rendered.
+The `list` binding will automatically add the class `-xin-empty-list` to a 
+container bound to an empty array, making it easier to conditionally render
+instructions or explanations when a list is empty.

@@ -173143,5 +173143,5 @@ export default [
   'zymotic',
   'zymurgies',
   'zymurgy',
-  'zyzzyva'
+  'zyzzyva',
 ]

@@ -3,9 +3,14 @@
 import { XinObject, XinArray, XinScalar } from './xin-types'
 import { makeError } from './make-error'
 
-const now36 = (): string => new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1)
+const now36 = (): string =>
+  new Date(parseInt('1000000000', 36) + Date.now())
+    .valueOf()
+    .toString(36)
+    .slice(1)
 let _seq = 0
-const seq = (): string => (parseInt('10000', 36) + (++_seq)).toString(36).slice(-5)
+const seq = (): string =>
+  (parseInt('10000', 36) + ++_seq).toString(36).slice(-5)
 const id = (): string => now36() + seq()
 
 const _delete_ = {}
@@ -14,7 +19,7 @@ const _newObject_ = {}
 type Part = string | string[]
 type PartArray = Part[]
 
-function pathParts (path: string | PartArray): PartArray {
+function pathParts(path: string | PartArray): PartArray {
   if (path === '') {
     return []
   }
@@ -53,7 +58,7 @@ interface IdPathMap {
   [key: string]: number
 }
 
-function buildIdPathValueMap (array: XinObject[], idPath: string): IdPathMap {
+function buildIdPathValueMap(array: XinObject[], idPath: string): IdPathMap {
   if (idPathMaps.get(array) === undefined) {
     idPathMaps.set(array, {})
   }
@@ -65,41 +70,52 @@ function buildIdPathValueMap (array: XinObject[], idPath: string): IdPathMap {
   if (idPath === '_auto_') {
     array.forEach((item, idx) => {
       if (item._auto_ === undefined) item._auto_ = id()
-      map[item._auto_ as string + ''] = idx
+      map[(item._auto_ as string) + ''] = idx
     })
   } else {
     array.forEach((item, idx) => {
-      map[getByPath(item, idPath) as string + ''] = idx
+      map[(getByPath(item, idPath) as string) + ''] = idx
     })
   }
   return map
 }
 
-function getIdPathMap (array: XinObject[], idPath: string): IdPathMap {
-  if (idPathMaps.get(array) === undefined || idPathMaps.get(array)[idPath] === undefined) {
+function getIdPathMap(array: XinObject[], idPath: string): IdPathMap {
+  if (
+    idPathMaps.get(array) === undefined ||
+    idPathMaps.get(array)[idPath] === undefined
+  ) {
     return buildIdPathValueMap(array, idPath)
   } else {
     return idPathMaps.get(array)[idPath]
   }
 }
 
-function keyToIndex (array: XinObject[], idPath: string, idValue: any): number {
-  idValue = idValue as string + ''
+function keyToIndex(array: XinObject[], idPath: string, idValue: any): number {
+  idValue = (idValue as string) + ''
   let idx = getIdPathMap(array, idPath)[idValue]
-  if (idx === undefined || getByPath(array[idx], idPath) as string + '' !== idValue) {
+  if (
+    idx === undefined ||
+    (getByPath(array[idx], idPath) as string) + '' !== idValue
+  ) {
     idx = buildIdPathValueMap(array, idPath)[idValue]
   }
   return idx
 }
 
-function byKey (obj: XinObject, key: string, valueToInsert?: any): any {
+function byKey(obj: XinObject, key: string, valueToInsert?: any): any {
   if (obj[key] === undefined && valueToInsert !== undefined) {
     obj[key] = valueToInsert
   }
   return obj[key]
 }
 
-function byIdPath (array: any[], idPath: string, idValue: string, valueToInsert?: any): any {
+function byIdPath(
+  array: any[],
+  idPath: string,
+  idValue: string,
+  valueToInsert?: any
+): any {
   let idx = idPath !== '' ? keyToIndex(array, idPath, idValue) : idValue
   if (valueToInsert === _delete_) {
     array.splice(idx as number, 1)
@@ -112,7 +128,10 @@ function byIdPath (array: any[], idPath: string, idValue: string, valueToInsert?
   } else if (valueToInsert !== undefined) {
     if (idx !== undefined) {
       array[idx as number] = valueToInsert
-    } else if (idPath !== '' && getByPath(valueToInsert, idPath) as string + '' === idValue + '') {
+    } else if (
+      idPath !== '' &&
+      (getByPath(valueToInsert, idPath) as string) + '' === idValue + ''
+    ) {
       array.push(valueToInsert)
       idx = array.length - 1
     } else {
@@ -122,19 +141,19 @@ function byIdPath (array: any[], idPath: string, idValue: string, valueToInsert?
   return array[idx as number]
 }
 
-function expectArray (obj: any): void {
+function expectArray(obj: any): void {
   if (!Array.isArray(obj)) {
     throw makeError('setByPath failed: expected array, found', obj)
   }
 }
 
-function expectObject (obj: any): void {
-  if ((obj == null) || obj.constructor !== Object) {
+function expectObject(obj: any): void {
+  if (obj == null || !(obj instanceof Object)) {
     throw makeError('setByPath failed: expected Object, found', obj)
   }
 }
 
-function getByPath (obj: XinObject | XinArray, path: string): any {
+function getByPath(obj: XinObject | XinArray, path: string): any {
   const parts = pathParts(path)
   let found: XinObject | XinArray | XinScalar = obj
   let i, iMax, j, jMax
@@ -164,11 +183,15 @@ function getByPath (obj: XinObject | XinArray, path: string): any {
   return found
 }
 
-function setByPath (orig: XinObject | XinArray, path: string, val: any): boolean {
+function setByPath(
+  orig: XinObject | XinArray,
+  path: string,
+  val: any
+): boolean {
   let obj: XinObject | XinArray | XinScalar = orig
   const parts = pathParts(path)
 
-  while ((obj != null) && (parts.length > 0)) {
+  while (obj != null && parts.length > 0) {
     const part = parts.shift()
     if (typeof part === 'string') {
       const equalsOffset = part.indexOf('=')
@@ -180,7 +203,12 @@ function setByPath (orig: XinObject | XinArray, path: string, val: any): boolean
         }
         const idPath = part.slice(0, equalsOffset)
         const idValue = part.slice(equalsOffset + 1)
-        obj = byIdPath(obj as any[], idPath, idValue, (parts.length > 0) ? _newObject_ : val)
+        obj = byIdPath(
+          obj as any[],
+          idPath,
+          idValue,
+          parts.length > 0 ? _newObject_ : val
+        )
         if (parts.length === 0) {
           return true
         }
@@ -194,26 +222,26 @@ function setByPath (orig: XinObject | XinArray, path: string, val: any): boolean
             if ((obj as XinArray)[idx] === val) {
               return false
             }
-            (obj as XinArray)[idx] = val
+            ;(obj as XinArray)[idx] = val
           } else {
-            (obj as XinArray).splice(idx, 1)
+            ;(obj as XinArray).splice(idx, 1)
           }
           return true
         }
       }
-    } else if (Array.isArray(part) && (part.length > 0)) {
+    } else if (Array.isArray(part) && part.length > 0) {
       expectObject(obj)
       while (part.length > 0) {
         const key = part.shift() as string
-        if ((part.length > 0) || (parts.length > 0)) {
+        if (part.length > 0 || parts.length > 0) {
           // if we're at the end of part.length then we need to insert an array
-          obj = byKey((obj as XinObject), key, (part.length > 0) ? {} : [])
+          obj = byKey(obj as XinObject, key, part.length > 0 ? {} : [])
         } else {
           if (val !== _delete_) {
             if ((obj as XinObject)[key] === val) {
               return false
             }
-            (obj as XinObject)[key] = val
+            ;(obj as XinObject)[key] = val
           } else {
             if (!Object.prototype.hasOwnProperty.call(obj, key)) {
               return false
@@ -233,7 +261,7 @@ function setByPath (orig: XinObject | XinArray, path: string, val: any): boolean
   throw new Error(`setByPath(${orig}, ${path}, ${val}) failed`)
 }
 
-function deleteByPath (orig: XinObject, path: string): void {
+function deleteByPath(orig: XinObject, path: string): void {
   if (getByPath(orig, path) !== null) {
     setByPath(orig, path, _delete_)
   }

@@ -1,45 +1,39 @@
-import { XinObject, XinBinding } from './xin-types'
+import { XinObject, XinBinding, ValueElement } from './xin-types'
 import { getListBinding } from './list-binding'
+import { getValue, setValue } from './dom'
 
 export const bindings: { [key: string | symbol]: XinBinding } = {
   value: {
-    toDOM (element: HTMLElement, value: any) {
-      // @ts-expect-error
-      if (element.value !== undefined) {
-        // @ts-expect-error
-        element.value = value
-      } else {
-        throw new Error(`cannot set value of <${element.tagName}>`)
-      }
+    toDOM(element: HTMLElement, value: any) {
+      setValue(element, value)
     },
 
-    fromDOM (element: HTMLElement) {
-      // @ts-expect-error
-      return element.value
-    }
+    fromDOM(element: HTMLElement) {
+      return getValue(element as ValueElement)
+    },
   },
 
   text: {
-    toDOM (element: HTMLElement, value: any) {
+    toDOM(element: HTMLElement, value: any) {
       element.textContent = value
-    }
+    },
   },
 
   enabled: {
-    toDOM (element: HTMLElement, value: any) {
+    toDOM(element: HTMLElement, value: any) {
       // eslint-disable-next-line
-      (element as HTMLInputElement).disabled = !value
-    }
+      ;(element as HTMLInputElement).disabled = !value
+    },
   },
 
   disabled: {
-    toDOM (element: HTMLElement, value: any) {
-      (element as HTMLInputElement).disabled = Boolean(value)
-    }
+    toDOM(element: HTMLElement, value: any) {
+      ;(element as HTMLInputElement).disabled = Boolean(value)
+    },
   },
 
   style: {
-    toDOM (element: HTMLElement, value: any) {
+    toDOM(element: HTMLElement, value: any) {
       if (typeof value === 'object') {
         for (const prop of Object.keys(value)) {
           // @ts-expect-error
@@ -50,13 +44,13 @@ export const bindings: { [key: string | symbol]: XinBinding } = {
       } else {
         throw new Error('style binding expects either a string or object')
       }
-    }
+    },
   },
 
   list: {
-    toDOM (element: HTMLElement, value: any[], options?: XinObject) {
+    toDOM(element: HTMLElement, value: any[], options?: XinObject) {
       const listBinding = getListBinding(element, options)
       listBinding.update(value)
-    }
-  }
+    },
+  },
 }

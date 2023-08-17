@@ -6,9 +6,11 @@
   </a>
 </div>
 
-[xinjs.net](https://xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme) | [discord](https://discord.gg/ramJ9rgky5)
+[xinjs.net](https://xinjs.net) | [xinjs-ui](https://ui.xinjs.net) | [docs](https://github.com/tonioloewald/xinjs/blob/main/docs/_contents_.md) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme) | [discord](https://discord.gg/ramJ9rgky5)
 
-![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)
+[![xinjs is on NPM](https://badge.fury.io/js/xinjs.svg)](https://www.npmjs.com/package/xinjs)
+[![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
+[![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
 
 ### Path-based State for Web Apps
 
@@ -17,74 +19,174 @@
 - lightweight
 - works anywhere (browsers, node, bun, electron etc.)
 
-In particular, this means that you can do your state management *anywhere*,
-including on either side of the "browser" divide in Electron / nwjs and
-similar applications. You can also efficiently implement "stateful-stateless" servers by
-sending mutations to complex state to the server and use GraphQL-like queries to
-"shape" the response from a service.
+If you want to build a web-application that's performant, robust, and maintainable,
+`xinjs` lets you:
+
+- implement your business logic however you like (or reuse existing code),
+- build your UI with pure `React` components (using `useXin`)
+- and/or `web-component`s,
+- and neatly _bind_ the state of your business objects to the user-interface _directly_.
+
+In general, `xinjs` is able to accomplish the same or better compactness, expressiveness,
+and simplicity as you get with highly-refined React-centric toolchains, but without transpilation,
+domain-specific-languages, or other tricks that provide convenience at the cost of becoming locked-in
+to React, a specific state-management system (which permeats your business logic), and UI framework.
+
+Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts).
+
+The standard [React Todo List Example](https://codesandbox.io/s/xinjs-react-reminders-demo-v0-4-2-l46k52?file=/src/App.tsx)
+becomes shorter and simpler with `xinjs` and _cleanly separates_ business logic from presentation. `xinjs` **paths** route data to/from UI elements, and events from the UI to methods, and those paths are _exactly what you expect_.
+
+But xinjs lets you work with pure HTML components as cleanly—more cleanly—and efficiently than
+React toolchains let you work with JSX.
+
+    export default function App() {
+      return (
+        <div className="App">
+          <h1>Hello React</h1>
+          <h2>Start editing to see some magic happen!</h2>
+        </div>
+      );
+    }
+
+Becomes:
+
+    const { div, h1, h2 } = elements // exported from xinjs
+    export const App = () => div(
+      { class: 'App' },
+      h1('Hello xinjs'),
+      h2('Start editing to see some magic happen!')
+    )
+
+Except this reusable component outputs native DOM nodes. No transpilation, spooky magic at a distance,
+or virtual DOM required. And it all works just as well with web-components. This is you get when
+you run App() in the console:
+
+    ▼ <div class="App">
+        <h1>Hello xinjs</h1>
+        <h2>Start editing to see some magic happen!</h2>
+      </div>
+
+The ▼ is there to show that's **DOM nodes**, not HTML.
+
+`xinjs` lets you lean into web-standards and native browser functionality while writing less code that's
+easier to run, debug, deploy, and maintain. Bind data direct to standard input elements—without having
+to fight their basic behavior—and now you're using _native_ functionality with _deep accessibility_ support
+as opposed to whatever the folks who wrote the library you're using have gotten around to implementing.
+
+> **Aside**: `xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't
+> bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
+> me.
+
+If you want to build your own `web-components` versus use something off-the-rack like
+[Shoelace](https://shoelace.style), `xinjs` offers a `Component` base class that, along with
+its `elements` and `css` libraries allows you to implement component views in pure Javascript
+more compactly than with `jsx` (and without a virtual DOM).
+
+    import { Component, elements, css } from 'xinjs'
+
+    const { style, h1, slot } = elements
+    export class MyComponent extends Component {
+      styleNode = style(css({
+        h1: {
+          color: 'blue'
+        }
+      }))
+      content = [ h1('hello world'), slot() ]
+    }
+
+The difference is that `web-components` are drop-in replacements for standard HTML elements
+and interoperate happily with one-another and other libraries, load asynchronously,
+and are natively supported by all modern browsers.
 
 ## What `xinjs` does
 
 ### Observe Object State
 
-`xinjs` tracks the state of objects you assign to it using `paths` allowing economical 
+`xinjs` tracks the state of objects you assign to it using `paths` allowing economical
 and direct updates to application state.
 
-    import {xin, observe} from 'xinjs'
+    import { xinProxy, observe } from 'xinjs'
 
-    xin.app = {
-      prefs: {
-        darkmode: false
-      },
-      docs: [
-        {
-          id: 1234,
-          title: 'title',
-          body: 'markdown goes here'
-        }
-      ]
-    }
+    const { app } = xinProxy({
+      app: {
+        prefs: {
+          darkmode: false
+        },
+        docs: [
+          {
+            id: 1234,
+            title: 'title',
+            body: 'markdown goes here'
+          }
+        ]
+      }
+    })
 
     observe('app.prefs.darkmode', () => {
-      document.body.classList.toggle('dark-mode', xin.app.prefs.darkmode)
+      document.body.classList.toggle('dark-mode', app.prefs.darkmode)
     })
 
     observe('app.docs', () => {
       // render docs
     })
 
+> #### What does `xinProxy` do, and what is a `XinProxy`?
+>
+> `xinProxy` is syntax sugar for assigning something to `xin` (which is a `XinProxyObject`)
+> and then getting it back out again.
+>
+> A `XinProxy` is an [ES Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+> wrapped around an `object` (which in Javascript means anything
+> that has a `constructor` which in particular includes `Array`s, `class` instances, `function`s
+> and so on, but not "scalars" like `number`s, `string`s, `boolean`s, `null`, and `undefined`)
+>
+> All you need to know about a `XinProxy` is that it's Proxy wrapped around your original
+> object that allows you to interact with the object normally, but which allows `xinjs` to
+> **observe** changes made to the wrapped object and tell interested parties about the changes.
+>
+> If you want to original object back you can just hold on to a reference or use `xinValue(someProxy)`
+> to unwrap it.
+
 ### No Tax, No Packaging
 
-`xinjs` does not modify the stuff you hand over to it… it just wraps objects 
+`xinjs` does not modify the stuff you hand over to it… it just wraps objects
 with a `Proxy` and then if you use `xin` to make changes to those objects,
 `xinjs` will notify any interested observers.
 
-    import {xin, observe} from 'xinjs'
-    xin.foo = {bar: 17}
+**Note** `xinProxy({foo: {...}})` is syntax sugar for `xin.foo = {...}`.
+
+    import { xinProxy, observe } from 'xinjs'
+    const { foo } = xinProxy({
+      foo: {
+        bar: 17
+      }
+    })
+
     observe('foo.bar', v => {
       console.log('foo.bar was changed to', xin.foo.bar)
     })
-    
-    xin.foo.bar = 17        // does not trigger the observer
-    xin.foo.bar = Math.PI   // triggers the observer
+
+    foo.bar = 17        // does not trigger the observer
+    foo.bar = Math.PI   // triggers the observer
 
 ### Paths are like JavaScript
 
 `xin` is designed to behave just like a JavaScript `Object`. What you put
 into it is what you get out of it:
 
-    import {xin} from 'xinjs'
-    
+    import { xin, xinValue } from 'xinjs'
+
     const foo = {bar: 'baz'}
     xin.foo = foo
-    
+
     // xin.foo returns a Proxy wrapped around foo (without touching foo)
-    xin.foo._xinValue === foo
-    
+    xinValue(xin.foo) === foo
+
     // really, it's just the original object
     xin.foo.bar = 'lurman'
     foo.bar === 'lurman' // true
-    
+
     // seriously, it's just the original object
     foo.bar = 'luhrman'
     xin.foo.bar === 'luhrman' // true
@@ -92,139 +194,43 @@ into it is what you get out of it:
 ### …but better!
 
 It's very common to deal with arrays of objects that have unique id values,
-so xin supports the idea of id-paths
+so `xinjs` supports the idea of id-paths
 
-    const app = {
-      list: [
-        {
-          id: '1234abcd',
-          text: 'hello world'
-        },
-        {
-          id: '5678efgh',
-          text: 'so long, redux'
-        }
-      ]
-    }
-    xin.app = app
-    console.log(xin.app.list[0].text)          // hello world
-    console.log(xin.app.list['id=5678efgh']    // so long, redux
-    console.log(xin['app.list[id=1234abcd]')   // hello world
+    import { xinProxy, xin } from 'xinjs
+
+    const { app } = xinProxy ({
+      app: {
+        list: [
+          {
+            id: '1234abcd',
+            text: 'hello world'
+          },
+          {
+            id: '5678efgh',
+            text: 'so long, redux'
+          }
+        ]
+      }
+    })
+
+    console.log(app.list[0].text)              // hello world
+    console.log(app.list['id=5678efgh'])       // so long, redux
+    console.log(xin['app.list[id=1234abcd'])   // hello world
 
 ### Telling `xin` about changes using `touch()`
 
 Sometimes you will modify an object behind `xin`'s back (e.g. for efficiency).
 When you want to trigger updates, simply touch the path.
 
-    import {xin, observe, touch} from 'xinjs'
-    
-    const foo = {bar: 17}
+    import { xin, observe, touch } from 'xinjs'
+
+    const foo = { bar: 17 }
     xin.foo = foo
     observe('foo.bar', path => console.log(path, '->', xin[path])
     xin.foo.bar = -2              // console will show: foo.bar -> -2
-    
+
     foo.bar = 100                 // nothing happens
     touch('foo.bar')              // console will show: foo.bar -> 100
-
-### Types
-
-`xinjs` provides a type system that allows you to efficiently check types
-at runtime. Types are *just javascript* and can be *serialized* as JSON, used
-as mock data, and so on. The `matchType` function tells you exactly what's
-wrong with a given value:
-
-    const userType = {
-      name: 'name',
-      age: 17,
-      address: {
-        street: 'somewhere',
-        city: 'city',
-        zipcode: '12345'
-      }
-    }
-
-    matchType(userType, {
-      name: 'Juanita Citizen',
-      age: '17',
-      address: {
-        street: '123 Sesame',
-        zipcode: 10001
-      }
-    }) // returns a list of problems...
-
-The exact response from `matchType` in this example is:
-
-    [
-      '.age was "17", expected number',
-      '.address.city was undefined, expected string',
-      '.address.zipcode was 10001, expected string'
-    ]
-
-### Specific numeric and string types, unions, optionals, etc.
-
-`matchType` supports very specific types, including optional values, and despite this
-all types are "just javascript" and serializable as JSON.
-
-E.g. object properties can be specified as optional:
-
-    const positionType = {
-      lat: 0,
-      long: 0,
-      'altitude?': 0
-    }
-
-And numeric values can be restricted to whole numbers or ranges:
-
-    const positionType = {
-      lat: '#number [-90,90]',
-      long: '#number [-180,180]',
-      'altitude?': 0
-    }
-
-    const arrayIndexType = '#int [0,∞)'
-
-Enumerations can be specified:
-
-    const method = '#enum "HEAD"|"INFO"|"GET"|"POST"|"PUT"|"DELETE"'
-
-And strings can be restricted to regular expressions:
-
-    const zipcodeType = '#regexp ^\\d{5,5}(-\\d{4,4})?$'
-
-### TypeSafe functions
-
-You can build hardened functions that will throw an error if they receive the wrong
-input or would produce the wrong output.
-
-    import {typeSafe} from 'xinjs'
-    const unsafeAdd(a, b) => a + b
-    const safeAdd = typeSafe(unsafeAdd, [0, 0], 0)
-
-If the function receives the wrong input or produces the wrong output, it throws a
-type error (specifying exactly what went wrong). If it receives an error, it passes
-it straight through (like a [monad](https://en.wikipedia.org/wiki/Monad_(functional_programming))).
-Basically, if you chain typesafe functions and there's an error somewhere in the chain,
-you'll receive *that* error at the far end, and no further work will be done.
-
-### Filter
-
-If you want to pare down an object to a specific shape, e.g. to optimize bandwidth-usage,
-the `filter` function lets you use a `type` object to extract exactly what you want, and
-the way you specify what you want is with the same type objects used by matchType:
-
-    filter(1, 17)                               // 17
-    filter(1, 'hello')                          // undefined
-    filter({x: 0, y: 0}, {x: 1, y: 2, z: 17})   // {x: 1, y: 2}
-    filter({x: 0, y: 0}, {y: 1, z: 2})          // undefined
-
-Note that you can filter heterogeneous arrays to only include the specified elements.
-
-
-    filter([1], ['this', 4, 'that', 17])        // [4, 17]
-    filter([], ['this', true, 17])              // ['this', true, 17]
-    filter(['', 0], ['this', true, 17])         // ['this', 17]
-    filter([{x: 0, y: 0}], [{x: 1, y: 2}, {lat: 10, long: -30}])
-                                                // [{x: 1, y: 2}]
 
 ### CSS
 
@@ -241,10 +247,10 @@ Note that you can filter heterogeneous arrays to only include the specified elem
     initVars(cssVars) // emits { --text-font: "sans-serif", --color: "#111" }
 
 `darkMode()` processes an object, taking only the color properties and inverting their luminance values:
-    darkMode(cssVars) // emits { color: '#ededed' }
+darkMode(cssVars) // emits { color: '#ededed' }
 
 The `vars` simply converts its camelCase properties into css variable references
-    
+
     vars.fooBar // emits 'var(--foo-bar)'
     calc(`${vars.width} + 2 * ${vars.spacing}`) // emits 'calc(var(--width) + 2 * var(--spacing))'
 
@@ -275,33 +281,48 @@ One of the nice things about working with the React toolchain is hot reloading.
 function:
 
     import {xin, hotReload} from 'xinjs'
-    
+
     xin.app = {
       ...
     }
-    
-    hotReload() 
+
+    hotReload()
 
 `hotReload` stores serializable state managed by `xin` in localStorage and restores
 it (by overlay) on reload. Because any functions (for example) won't be persisted,
 simply call `hotReload` after initializing your app state and you're good to go.
 
-`hotReload` accepts a test function (path => boolean) as a parameter. 
+`hotReload` accepts a test function (path => boolean) as a parameter.
 Only top-level properties in `xin` that pass the test will be persisted.
 
 To completely reset the app, run `localStorage.clear()` in the console.
 
+### Types
+
+`xinjs` [type-by-example](https://www.npmjs.com/package/type-by-example) has been
+broken out into a separate standalone library. (Naturally it works very well with
+xinjs but they are completely independent.)
+
 ## Development Notes
 
-You'll need to install [bun](https://bun.sh/) and probably [nodejs](https://nodejs.org)).
+You'll need to install [bun](https://bun.sh/) and [nodejs](https://nodejs.org)),
+and then run `npm install` and `bun install`. `bun` is used because it's
+**fast** and is a really nice test-runner.
 
-To work interactively on the demo code, use `bun start`.
+To work interactively on the demo code, use `bun start`. This runs the demo
+site on localhost.
 
-To build you will need to `chmod +x build.command` before running `bun pack`.
+To build everything run `bun run make` which builds production versions of the
+demo site (in `www`) and the `dist` and `cdn` directories.
 
-> `xinjs` is currently built using a bespoke script (`build.command`) rather than
-> `parceljs` which is used to build the demo site. This is becasue parceljs 
-> produces markedly less efficient code.
+To create a local package (for experimenting with a build) run `bun pack`.
+
+### Parcel Occasionally Gets Screwed Up
+
+- remove all the parcel transformer dependencies @parcel/\*
+- rm -rf node_modules
+- run the update script
+- npx parcel build (which restores needed parcel transformers)
 
 ## Credits
 
@@ -310,6 +331,6 @@ of removing cruft, supporting more use-cases, and eliminating functionality
 that has been made redundant by improvements to the JavaScript language and
 DOM APIs.
 
-`xinjs` is being developed using [bun](https://bun.sh/). 
+`xinjs` is being developed using [bun](https://bun.sh/).
 `bun` is crazy fast (based on Webkit's JS engine, vs. V8), does a lot of stuff
 natively, and runs TypeScript (with import and require) directly.

@@ -1,7 +1,7 @@
 # by-path
-## object queryies using string paths
+## object queries using string paths
 
-> Note that these are low-level methods that `xinjs` does not expose.
+> Note that these are low-level methods that `xinjs` does not (currently) expose.
 
     getByPath(obj, 'path.to.value')
 

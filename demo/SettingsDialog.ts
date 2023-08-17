@@ -1,91 +1,88 @@
-import {elements, vars} from '../src'
-import {labeledInput} from './components'
+import { elements, vars } from '../src'
 
-const {form, dialog, h2, span, button } = elements
+const { form, dialog, h2, span, button, label, input, select, option } =
+  elements
 
-export const settingsDialog = () => dialog(
+export const settingsDialog = () =>
+  dialog(
     {
       class: 'settings',
       style: {
         background: vars.background,
         color: vars.textColor,
         border: 0,
-        borderRadius: 'calc(var(--rounded-radius) * 2)',
+        borderRadius: vars.roundedRadius200,
         boxShadow: '0 10px 20px #0008',
-        padding: 'calc(var(--spacing) * 2)',
-        zIndex: 1 // Safari rendering bug
-      }
+        padding: vars.spacing200,
+        zIndex: 1, // Safari rendering bug
+      },
     },
-    h2(
-      'Settings',
-      {
-        style: {
-          textAlign: 'center',
-          padding: 'var(--spacing)',
-          margin: 'calc(var(--spacing) * -2)',
-          borderBottom: 'var(--dark-border)',
-          marginBottom: 'calc(var(--spacing) * 2)'
-        }
-      }
-    ),
+    h2('Settings', {
+      style: {
+        textAlign: 'center',
+        padding: vars.spacing,
+        margin: vars.spacing_200,
+        borderBottom: vars.brandColor_50b,
+        marginBottom: vars.spacing200,
+        background: vars.brandColor_15b,
+        color: vars.brandTextColor,
+      },
+    }),
     form(
       button(
-        { 
+        {
           style: {
             position: 'absolute',
-            top: 'calc(var(--spacing) * 0.5)',
-            right: 'calc(var(--spacing) * 0.5)',
+            top: vars.spacing50,
+            right: vars.spacing50,
             width: '32px',
             height: '32px',
             lineHeight: '32px',
             border: 0,
             textAlign: 'center',
             fontSize: '18px',
-            padding: 0
-          }
+            padding: 0,
+          },
         },
         '⨉'
       ),
-      labeledInput('App Title', {
-        placeholder: 'enter title',
-        bindValue: 'app.title'
-      }),
-      span(
-        {
-          style: {
-            marginTop: 'calc(var(--spacing) * 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end'
-          }
-        },
+      label(span('App Title'), input({ bindValue: 'app.title' })),
+      label(
+        span('Theme'),
+        select(
+          { bindValue: 'app.darkmode' },
+          option('Light', { value: 'light' }),
+          option('Dark', { value: 'dark' }),
+          option('Auto', { value: 'auto' })
+        )
+      ),
+      label(
         span('Local Storage'),
-        span(' ', { style: {flex: '1 1 auto'}}),
         button('Clear and Reload', {
           onClick() {
             localStorage.clear()
             window.location.reload()
-          }
+          },
         })
       ),
       span(
         {
           style: {
-            marginTop: 'calc(var(--spacing) * 2)',
+            marginTop: vars.spacing,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'flex-end'
-          }
+            justifyContent: 'flex-end',
+          },
         },
-        span(' ', { style: {flex: '1 1 auto'}}),
-        button('OK')
+        span(' ', { style: { flex: '1 1 auto' } }),
+        button('OK', { class: 'primary' })
       ),
       {
-        onSubmit(evt: Event){
+        onSubmit(evt: Event) {
           // @ts-expect-error
           evt.target.closest('dialog').close()
           evt.preventDefault()
-        }
+        },
       }
     )
   )

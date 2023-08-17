@@ -1,23 +1,27 @@
-import {Component, vars} from '../../src/index'
+import { Component, vars } from '../../src/index'
 
 class ToolBar extends Component {
   styleNode = Component.StyleNode({
     ':host': {
       display: 'flex',
-      gap: vars.itemSpacing,
+      gap: vars.itemSpacing50,
       alignItems: 'center',
       background: vars.panelBg,
-      padding: `0 ${vars.spacing} !important`,
+      padding: `${vars.itemSpacing50} ${vars.spacing} !important`,
       margin: 0,
-      height: vars.toolbarHeight,
+      minHeight: vars.toolbarHeight,
       flex: `0 0 ${vars.toolbarHeight}`,
+      flexWrap: 'wrap',
       overflow: 'hidden',
-      overflowX: 'overlay'
+      overflowX: 'scroll',
     },
     ':host > *': {
       whiteSpace: 'nowrap',
-      lineHeight: vars.lineHeight
-    }
+      lineHeight: vars.lineHeight,
+    },
+    ':Host > * + *': {
+      marginLeft: vars.itemSpacing50,
+    },
   })
 }
 

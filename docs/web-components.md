@@ -35,7 +35,7 @@ See [elements](./elements.md) for more information on `ElementCreator` functions
 
 ### Component properties
 
-#### content: Element | Element[] | null
+#### content: Element | Element[] | () => Element | () => Element[] | null
 
 Here's a simple example of a custom-element that simply produces a
 `<label>` wrapped around `<span>` and an `<input>`. Its value is synced
@@ -57,7 +57,7 @@ it works internally.
 
       connectedCallback() {
         super.connectedCallback()
-        const {input} = this.refs
+        const {input} = this.parts
         input.addEventListener('input', () => {
           this.value = input.value
         })
@@ -65,7 +65,7 @@ it works internally.
 
       render() {
         super.render()
-        const {span, input} = this.refs
+        const {span, input} = this.parts
         span.textContent = this.caption
         if (input.value !== this.value) {
           input.value = this.value
@@ -78,6 +78,14 @@ it works internally.
 `content` is, in essence, a template for the internals of the element. By default
 it's a single `<slot>` element. If you explicitly want an element with no content
 you can set your subclass's content to `null` or omit any `<slot>` from its template.
+
+By setting content to be a function that returns elements instead of a collection
+of elements you can take customize elements based on the component's properties.
+In particular, you can use `onXxxx` syntax sugar to bind events.
+
+(Note that you cannot bind to xin paths reliably if your component uses a `shadowDOM`
+because `xin` cannot "see" elements there. As a general rule, you need to take care
+of anything in the `shadowDOM` yourself.)
 
 If you'd like to see a more complex example along the same lines, look at
 [labeled-input.ts](../demo/components/labeled-input.ts).
@@ -106,6 +114,31 @@ slot using the `slot` attribute.
 [app-layout.ts](../demo/components/app-layout.ts) is a more complex example of a
 structural element utilizing multiple named `<slot>`s.
 
+#### `<xin-slot>`
+
+If you put `<slot>` elements inside a `Component` subclass that doesn't have a
+shadowDOM, they will automatically be replaced with `<xin-slot>` elements that
+have the expected behavior (i.e. sucking in children in based on their `<slot>`
+attribute).
+
+`<xin-slot>` doesn't support `:slotted` but since there's no shadowDOM, just 
+style such elements normally, or use `xin-slot` as a CSS-selector.
+
+Note that you cannot give a `<slot>` element attributes (other than `name`) so if
+you want to give a `<xin-slot>` attributes (such as `class` or `style`), create it 
+explicitly (e.g. using `elements.xinSlot()`) rather than using `<slot>` elements
+and letting them be switched out (because they'll lose any attributes you give them).
+
+Also see the [faux-slot example](/demo/faux-slots.ts).
+
+> ##### Background
+>
+> `<slot>` elements do not work as expected in shadowDOM-less components. This is
+> hugely annoying since it prevents components from composing nicely unless they
+> have a shadowDOM, and while the shadowDOM is great for small widgets, it's
+> terrible for composite views and breaks `xinjs`'s bindings (inside the shadow
+> DOM you need to do data- and event- binding manually).
+
 #### styleNode: HTMLStyleElement
 
 `styleNode` is the `<style>` element that will be inserted into the element's
@@ -130,23 +163,29 @@ which will then penetrate the `shadowDOM`.
 #### refs: {[key:string]: Element | undefined}
 
     render() {
-      super.render()
-      const {span, input} = this.refs
+      super.render() // see note
+      const {span, input} = this.parts
       span.textContent = this.caption
       if (input.value !== this.value) {
         input.value = this.value
       }
     }
 
-`this.refs` returns a proxy that provides elements conveniently and efficiently. It
+> **Note**: the `render()` method of the base `Component` class doesn't currently
+> do anything, so calling it is optional (but a good practice in case one day…)
+>
+> It is *necessary* however to call `super.connectedCallback`, `super.disconnectedCallback`
+> and `super()` in the `constructor()` should you override them.
+
+`this.parts` returns a proxy that provides elements conveniently and efficiently. It
 is intended to facilitate access to static elements (it memoizes its values the
 first time they are computed).
 
-`this.refs.foo` will return a content element with `data-ref="foo"`. If no such
-element is found it tries it as a css selector, so `this.refs['.foo']` would find
-a content element with `class="foo"` while `this.refs.h1` will find an `<h1>`.
+`this.parts.foo` will return a content element with `data-ref="foo"`. If no such
+element is found it tries it as a css selector, so `this.parts['.foo']` would find
+a content element with `class="foo"` while `this.parts.h1` will find an `<h1>`.
 
-`this.refs` will also remove a `data-ref` attribute once it has been used to find
+`this.parts` will also remove a `data-ref` attribute once it has been used to find
 the element. This means that if you use all your refs in `render` or `connectedCallback`
 then no trace will remain in the DOM for a mounted element.
 
@@ -194,6 +233,8 @@ to `resize` events.
 
 Also, if the subclass has defined `value`, calls `initValue()`.
 
+`connectedCallback` is a great place to attach **event-handlers** to elements in your component.
+
 Be sure to call `super.connectedCallback()` if you implement `connectedCallback` in the subclass.
 
 #### disconnectedCallback(): void
@@ -233,8 +274,9 @@ strings to CSS property maps) into a `<style>` element with the CSS in it.
     export const toolBar = ToolBar.elementCreator()
 
 Returns a function that creates the custom-element. You can specify the tag and the
-pre-existing element it extends if you like. By default, the tag is produced by
-kabob-casing the class name (so `class FooBar…` implements `<foo-bar>`).
+pre-existing element it extends if you like (this is crucial if you're using scope-hoisting name-mangling
+minifiers). By default, the tag is produced by kabob-casing the class name (so `class FooBar…` 
+implements `<foo-bar>`).
 
 If there's no second bar, then `-elt` is added to the tag. So `class Foo…` implements `<foo-elt>`.
 

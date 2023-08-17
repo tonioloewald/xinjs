@@ -6,4 +6,5 @@ const stringify = (x: any): string => {
   }
 }
 
-export const makeError = (...messages: any[]): Error => new Error(messages.map(stringify).join(' '))
+export const makeError = (...messages: any[]): Error =>
+  new Error(messages.map(stringify).join(' '))

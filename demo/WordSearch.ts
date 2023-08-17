@@ -1,93 +1,118 @@
 import { labeledInput, toolBar } from './components'
-import { xin, elements, touch, bind, bindings, ElementPart, XinObject } from '../src'
+import {
+  xinProxy,
+  elements,
+  touch,
+  bind,
+  bindings,
+  ElementPart,
+  vars,
+} from '../src'
 import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
-import words from './words'
+import wordList from './words'
 
-const {b, span, div, a} = elements
+const { b, span, div, a } = elements
 
-xin.words = new WordList(words) as unknown as XinObject
-console.log((xin.words as unknown as WordList).wordCount, 'words loaded')
+const { words } = xinProxy({
+  words: new WordList(wordList),
+})
+console.log(words.wordCount, 'words loaded')
 
-export const wordSearch = (...args: ElementPart[]) => div(
-  ...args,
-  toolBar(
-    b('Word Search'),
-    span({style: {flex: '1 1 auto'}}),
-    labeledInput('letters', {
-      placeholder: 'letters to use',
-      style: {
-        '--input-width': '160px'
+export const wordSearch = (...args: ElementPart[]) =>
+  div(
+    ...args,
+    toolBar(
+      b('Word Search'),
+      span({ style: { flex: '1 1 auto' } }),
+      labeledInput('letters', {
+        placeholder: 'letters to use',
+        style: {
+          '--input-width': '160px',
+        },
+        input: true,
+        apply(element) {
+          bind(element, 'words.letters', bindings.value)
+        },
+      }),
+      labeledInput('reuse', {
+        type: 'checkbox',
+        input: true,
+        apply(element) {
+          bind(element, 'words.reuseLetters', bindings.value)
+        },
+      }),
+      labeledInput('must contain', {
+        placeholder: 'required',
+        style: {
+          '--input-width': '60px',
+        },
+        input: true,
+        apply(element) {
+          bind(element, 'words.mustContain', bindings.value)
+        },
+      }),
+      labeledInput('min length', {
+        type: 'number',
+        style: {
+          '--input-width': '60px',
+        },
+        input: true,
+        apply(element) {
+          bind(element, 'words.minLength', bindings.value)
+        },
+      }),
+      {
+        onInput: debounce(() => {
+          if (words) {
+            touch('words.list')
+            touch('words.filterCount')
+          }
+        }),
       },
-      input: true,
-      apply(element){
-        bind(element, 'words.letters', bindings.value)
-      }
-    }),
-    labeledInput('reuse', {
-      type: 'checkbox',
-      input: true,
-      apply(element) {
-        bind(element, 'words.reuseLetters', bindings.value)
-      }
-    }),
-    labeledInput('must contain', {
-      placeholder: 'required',
-      style: {
-        '--input-width': '60px'
-      },
-      input: true,
-      apply(element){
-        bind(element, 'words.mustContain', bindings.value)
-      }
-    }),
-    labeledInput('min length', {
-      type: 'number',
-      style: {
-        '--input-width': '60px'
-      },
-      input: true,
-      apply(element){
-        bind(element, 'words.minLength', bindings.value)
-      }
-    }),
-    {
-      onInput: debounce(() => {
-        if (xin.words) {
-          touch('words.list')
-          touch('words.filterCount')
-        }
-      })
-    },
-    span(
-      { style: { flex: '0 0 100px', textAlign: 'right' } },
-      span({ bindText: 'words.filterCount' }),
-      ' words'
-    )
-  ),
-  bind(
+      span(
+        { style: { flex: '0 0 100px', textAlign: 'right' } },
+        span({ bindText: 'words.filterCount' }),
+        ' words'
+      )
+    ),
     div(
+      {
+        bindList: {
+          value: 'words.list',
+          initInstance(element, word) {
+            element.textContent = word
+            element.setAttribute(
+              'href',
+              `https://thefreedictionary.com/${word}`
+            )
+            element.setAttribute('target', `definition`)
+          },
+        },
+      },
       a({
         style: {
           display: 'inline-block',
           padding: '2px 10px',
           margin: '2px',
           borderRadius: '99px',
-          background: '#00f2',
+          background: vars.panelBg,
           fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
           textDecoration: 'none',
-          color: 'var(--text-color)'
-        }
+          color: 'var(--text-color)',
+        },
       })
     ),
-    'words.list',
-    bindings.list,
-    {
-      initInstance(element, word) {
-        element.textContent = word
-        element.setAttribute('href', `https://thefreedictionary.com/${word}`)
-        element.setAttribute('target', `definition`)
-      }
-    }
+    div(
+      {
+        class: 'show-after-empty',
+        style: {
+          lineHeight: '200px',
+          height: '200px',
+          textAlign: 'center',
+          opacity: 0.5,
+        },
+      },
+      'enter criteria to find anagrams'
+    )
   )
-)

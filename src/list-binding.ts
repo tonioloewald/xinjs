@@ -1,34 +1,39 @@
 import { settings } from './settings'
 import { resizeObserver } from './dom'
 import { throttle } from './throttle'
-import { xin, xinValue, xinPath } from './xin'
-import { cloneWithBindings, elementToItem, elementToBindings, BOUND_SELECTOR, DataBinding } from './metadata'
+import { xin } from './xin'
+import {
+  cloneWithBindings,
+  elementToItem,
+  elementToBindings,
+  BOUND_SELECTOR,
+  DataBinding,
+  xinValue,
+  xinPath,
+} from './metadata'
 import { XinObject } from './xin-types'
 
 const listBindingRef = Symbol('list-binding')
 const SLICE_INTERVAL_MS = 16 // 60fps
 
-declare global {
-  interface HTMLElement {
-    [listBindingRef]?: ListBinding
-  }
-}
-
 interface ListBindingOptions {
   idPath?: string
   initInstance?: (element: HTMLElement, value: any) => void
   updateInstance?: (element: HTMLElement, value: any) => void
-  virtual?: { height: number, width?: number }
+  virtual?: { height: number; width?: number }
+  hiddenProp?: symbol | string
+  visibleProp?: symbol | string
 }
 
 interface VirtualListSlice {
+  items: any[]
   firstItem: number
   lastItem: number
   topBuffer: number
   bottomBuffer: number
 }
 
-function updateRelativeBindings (element: HTMLElement, path: string): void {
+function updateRelativeBindings(element: HTMLElement, path: string): void {
   const boundElements = [...element.querySelectorAll(BOUND_SELECTOR)]
   if (element.matches(BOUND_SELECTOR)) {
     boundElements.unshift(element)
@@ -48,7 +53,8 @@ function updateRelativeBindings (element: HTMLElement, path: string): void {
 
 class ListBinding {
   boundElement: HTMLElement
-  listContainer: HTMLElement
+  listTop: HTMLElement
+  listBottom: HTMLElement
   template: HTMLElement
   options: ListBindingOptions
   itemToElement: WeakMap<XinObject, HTMLElement>
@@ -56,24 +62,32 @@ class ListBinding {
   private readonly _update?: VoidFunction
   private _previousSlice?: VirtualListSlice
 
-  constructor (boundElement: HTMLElement, options: ListBindingOptions = {}) {
+  constructor(boundElement: HTMLElement, options: ListBindingOptions = {}) {
     this.boundElement = boundElement
     this.itemToElement = new WeakMap()
     if (boundElement.children.length !== 1) {
-      throw new Error('ListBinding expects an element with exactly one child element')
+      throw new Error(
+        'ListBinding expects an element with exactly one child element'
+      )
     }
     if (boundElement.children[0] instanceof HTMLTemplateElement) {
       const template = boundElement.children[0]
       if (template.content.children.length !== 1) {
-        throw new Error('ListBinding expects a template with exactly one child element')
+        throw new Error(
+          'ListBinding expects a template with exactly one child element'
+        )
       }
-      this.template = cloneWithBindings(template.content.children[0]) as HTMLElement
+      this.template = cloneWithBindings(
+        template.content.children[0]
+      ) as HTMLElement
     } else {
       this.template = boundElement.children[0] as HTMLElement
       this.template.remove()
     }
-    this.listContainer = document.createElement('div')
-    this.boundElement.append(this.listContainer)
+    this.listTop = document.createElement('div')
+    this.listBottom = document.createElement('div')
+    this.boundElement.append(this.listTop)
+    this.boundElement.append(this.listBottom)
     this.options = options
     if (options.virtual != null) {
       resizeObserver.observe(this.boundElement)
@@ -85,10 +99,17 @@ class ListBinding {
     }
   }
 
-  private visibleSlice (): VirtualListSlice {
-    const { virtual } = this.options
+  private visibleSlice(): VirtualListSlice {
+    const { virtual, hiddenProp, visibleProp } = this.options
+    let visibleArray = this._array
+    if (hiddenProp !== undefined) {
+      visibleArray = visibleArray.filter((item) => item[hiddenProp] !== true)
+    }
+    if (visibleProp !== undefined) {
+      visibleArray = visibleArray.filter((item) => item[visibleProp] === true)
+    }
     let firstItem = 0
-    let lastItem = this._array.length - 1
+    let lastItem = visibleArray.length - 1
     let topBuffer = 0
     let bottomBuffer = 0
 
@@ -96,9 +117,12 @@ class ListBinding {
       const width = this.boundElement.offsetWidth
       const height = this.boundElement.offsetHeight
 
-      const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1
+      const visibleColumns =
+        virtual.width != null
+          ? Math.max(1, Math.floor(width / virtual.width))
+          : 1
       const visibleRows = Math.ceil(height / virtual.height) + 1
-      const totalRows = Math.ceil(this._array.length / visibleColumns)
+      const totalRows = Math.ceil(visibleArray.length / visibleColumns)
       const visibleItems = visibleColumns * visibleRows
       let topRow = Math.floor(this.boundElement.scrollTop / virtual.height)
       if (topRow > totalRows - visibleRows + 1) {
@@ -108,31 +132,47 @@ class ListBinding {
       lastItem = firstItem + visibleItems - 1
 
       topBuffer = topRow * virtual.height
-      bottomBuffer = totalRows * virtual.height - height - topBuffer
+      bottomBuffer = Math.max(
+        totalRows * virtual.height - height - topBuffer,
+        0
+      )
     }
 
     return {
+      items: visibleArray,
       firstItem,
       lastItem,
       topBuffer,
-      bottomBuffer
+      bottomBuffer,
     }
   }
 
-  update (array?: any[], isSlice?: boolean): void {
+  update(array?: any[], isSlice?: boolean): void {
     if (array == null) {
       array = []
     }
     this._array = array
 
-    const { initInstance, updateInstance } = this.options
+    const { initInstance, updateInstance, hiddenProp, visibleProp } =
+      this.options
     // @ts-expect-error
-    const arrayPath: string = array[xinPath]
+    const arrayPath: string = xinPath(array)
 
     const slice = this.visibleSlice()
+    this.boundElement.classList.toggle(
+      '-xin-empty-list',
+      slice.items.length === 0
+    )
     const previousSlice = this._previousSlice
     const { firstItem, lastItem, topBuffer, bottomBuffer } = slice
-    if (isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) {
+    if (
+      hiddenProp === undefined &&
+      visibleProp === undefined &&
+      isSlice === true &&
+      previousSlice != null &&
+      firstItem === previousSlice.firstItem &&
+      lastItem === previousSlice.lastItem
+    ) {
       return
     }
     this._previousSlice = slice
@@ -141,12 +181,15 @@ class ListBinding {
     let moved = 0
     let created = 0
 
-    for (const element of [...this.listContainer.children]) {
+    for (const element of [...this.boundElement.children]) {
+      if (element === this.listTop || element === this.listBottom) {
+        continue
+      }
       const proxy = elementToItem.get(element as HTMLElement)
       if (proxy == null) {
         element.remove()
       } else {
-        const idx = array.indexOf(proxy)
+        const idx = slice.items.indexOf(proxy)
         if (idx < firstItem || idx > lastItem) {
           element.remove()
           this.itemToElement.delete(proxy)
@@ -156,29 +199,32 @@ class ListBinding {
       }
     }
 
-    this.listContainer.style.marginTop = String(topBuffer) + 'px'
-    this.listContainer.style.marginBottom = String(bottomBuffer) + 'px'
+    this.listTop.style.height = String(topBuffer) + 'px'
+    this.listBottom.style.height = String(bottomBuffer) + 'px'
 
     // build a complete new set of elements in the right order
     const elements: HTMLElement[] = []
     const { idPath } = this.options
     for (let i = firstItem; i <= lastItem; i++) {
-      const item = array[i]
+      const item = slice.items[i]
       if (item === undefined) {
         continue
       }
-      let element = this.itemToElement.get(item[xinValue])
+      let element = this.itemToElement.get(xinValue(item))
       if (element == null) {
         created++
         element = cloneWithBindings(this.template) as HTMLElement
         if (typeof item === 'object') {
-          this.itemToElement.set(item[xinValue], element)
-          elementToItem.set(element, item[xinValue])
+          this.itemToElement.set(xinValue(item), element)
+          elementToItem.set(element, xinValue(item))
         }
-        this.listContainer.append(element)
+        this.boundElement.insertBefore(element, this.listBottom)
         if (idPath != null) {
           const idValue = item[idPath] as string
           const itemPath = `${arrayPath}[${idPath}=${idValue}]`
+          updateRelativeBindings(element, itemPath)
+        } else {
+          const itemPath = `${arrayPath}[${i}]`
           updateRelativeBindings(element, itemPath)
         }
         if (initInstance != null) {
@@ -199,9 +245,12 @@ class ListBinding {
       if (element.previousElementSibling !== insertionPoint) {
         moved++
         if (insertionPoint?.nextElementSibling != null) {
-          this.listContainer.insertBefore(element, insertionPoint.nextElementSibling)
+          this.boundElement.insertBefore(
+            element,
+            insertionPoint.nextElementSibling
+          )
         } else {
-          this.listContainer.append(element)
+          this.boundElement.insertBefore(element, this.listBottom)
         }
       }
       insertionPoint = element
@@ -213,10 +262,15 @@ class ListBinding {
   }
 }
 
-export const getListBinding = (boundElement: HTMLElement, options?: ListBindingOptions): ListBinding => {
+export const getListBinding = (
+  boundElement: HTMLElement,
+  options?: ListBindingOptions
+): ListBinding => {
+  // @ts-expect-error
   let listBinding = boundElement[listBindingRef]
   if (listBinding == null) {
     listBinding = new ListBinding(boundElement, options)
+    // @ts-expect-error
     boundElement[listBindingRef] = listBinding
   }
   return listBinding

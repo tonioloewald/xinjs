@@ -1,34 +1,88 @@
-import { xin, touch, observe, xinPath, xinValue } from './xin'
-import { getListItem, elementToBindings, elementToHandlers, DataBindings, BOUND_CLASS, BOUND_SELECTOR, EVENT_CLASS, EVENT_SELECTOR, XinEventBindings, XinEventHandler } from './metadata'
-import { XinObject, XinTouchableType, XinBinding, XinProxy, XinBindingSpec } from './xin-types'
+import { xin, touch, observe } from './xin'
+import {
+  getListItem,
+  elementToBindings,
+  elementToHandlers,
+  DataBindings,
+  BOUND_CLASS,
+  BOUND_SELECTOR,
+  EVENT_CLASS,
+  EVENT_SELECTOR,
+  XinEventBindings,
+  XIN_PATH,
+  XIN_VALUE,
+} from './metadata'
+import {
+  XinObject,
+  XinProxy,
+  XinEventHandler,
+  XinTouchableType,
+  XinBinding,
+  XinBindingSpec,
+} from './xin-types'
 
-const { document } = globalThis
+const { document, MutationObserver } = globalThis
 
-observe(() => true, (changedPath: string) => {
-  const boundElements = document.body.querySelectorAll(BOUND_SELECTOR)
-
-  for (const element of boundElements) {
-    const dataBindings = elementToBindings.get(element) as DataBindings
-    for (const dataBinding of dataBindings) {
-      let { path, binding, options } = dataBinding
-      const { toDOM } = binding
-      if (toDOM != null) {
-        if (path.startsWith('^')) {
-          const dataSource = getListItem(element as HTMLElement)
-          if (dataSource != null && (dataSource as XinProxy)[xinPath] != null) {
-            path = dataBinding.path = `${(dataSource as XinProxy)[xinPath]}${path.substring(1)}`
-          } else {
-            console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list')
-            throw new Error(`Cannot resolve relative binding ${path}`)
-          }
+export const touchElement = (
+  element: HTMLElement,
+  changedPath?: string
+): void => {
+  const dataBindings = elementToBindings.get(element)
+  if (dataBindings == null) {
+    return
+  }
+  for (const dataBinding of dataBindings) {
+    let { path, binding, options } = dataBinding
+    const { toDOM } = binding
+    if (toDOM != null) {
+      if (path.startsWith('^')) {
+        const dataSource = getListItem(element)
+        if (dataSource != null && (dataSource as XinProxy)[XIN_PATH] != null) {
+          path = dataBinding.path = `${
+            (dataSource as XinProxy)[XIN_PATH]
+          }${path.substring(1)}`
+        } else {
+          console.error(
+            `Cannot resolve relative binding ${path}`,
+            element,
+            'is not part of a list'
+          )
+          throw new Error(`Cannot resolve relative binding ${path}`)
         }
-        if (path.startsWith(changedPath)) {
-          toDOM(element as HTMLElement, xin[path], options)
-        }
+      }
+      if (changedPath == null || path.startsWith(changedPath)) {
+        toDOM(element, xin[path], options)
       }
     }
   }
-})
+}
+
+// this is just to allow bind to be testable in node
+if (MutationObserver != null) {
+  const observer = new MutationObserver((mutationsList) => {
+    mutationsList.forEach((mutation) => {
+      ;[...mutation.addedNodes].forEach((node) => {
+        if (node instanceof HTMLElement) {
+          ;[...node.querySelectorAll(BOUND_SELECTOR)].forEach((element) =>
+            touchElement(element as HTMLElement)
+          )
+        }
+      })
+    })
+  })
+  observer.observe(document.body, { subtree: true, childList: true })
+}
+
+observe(
+  () => true,
+  (changedPath: string) => {
+    const boundElements = document.querySelectorAll(BOUND_SELECTOR)
+
+    for (const element of boundElements) {
+      touchElement(element as HTMLElement, changedPath)
+    }
+  }
+)
 
 const handleChange = (event: Event): void => {
   // @ts-expect-error-error
@@ -52,9 +106,13 @@ const handleChange = (event: Event): void => {
           if (existing == null) {
             xin[path] = value
           } else {
-            // @ts-expect-error-error
-            const existingActual = existing[xinPath] != null ? (existing as XinProxy)[xinValue] : existing
-            const valueActual = value[xinPath] != null ? value[xinValue] : value
+            const existingActual =
+              // @ts-expect-error-error
+              existing[XIN_PATH] != null
+                ? (existing as XinProxy)[XIN_VALUE]
+                : existing
+            const valueActual =
+              value[XIN_PATH] != null ? value[XIN_VALUE] : value
             if (existingActual !== valueActual) {
               xin[path] = valueActual
             }
@@ -71,18 +129,27 @@ if (globalThis.document != null) {
   document.body.addEventListener('input', handleChange, true)
 }
 
-export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchableType | XinBindingSpec, binding: XinBinding, options?: XinObject): HTMLElement => {
+export function bind<T extends HTMLElement>(
+  element: T,
+  what: XinTouchableType | XinBindingSpec,
+  binding: XinBinding<T>,
+  options?: XinObject
+): T {
   if (element instanceof DocumentFragment) {
     throw new Error('bind cannot bind to a DocumentFragment')
   }
   let path: string
-  if (typeof what === 'object' && (what as XinProxy)[xinPath] === undefined && options === undefined) {
+  if (
+    typeof what === 'object' &&
+    (what as XinProxy)[XIN_PATH] === undefined &&
+    options === undefined
+  ) {
     const { value } = what as XinBindingSpec
-    path = typeof value === 'string' ? value : value[xinPath]
+    path = typeof value === 'string' ? value : value[XIN_PATH]
     options = what as XinObject
     delete options.value
   } else {
-    path = typeof what === 'string' ? what : (what as XinProxy)[xinPath]
+    path = typeof what === 'string' ? what : (what as XinProxy)[XIN_PATH]
   }
   if (path == null) {
     throw new Error('bind requires a path or object with xin Proxy')
@@ -95,7 +162,11 @@ export const bind = (element: HTMLElement | DocumentFragment, what: XinTouchable
     dataBindings = []
     elementToBindings.set(element, dataBindings)
   }
-  dataBindings.push({ path, binding, options })
+  dataBindings.push({
+    path,
+    binding: binding as XinBinding<HTMLElement>,
+    options,
+  })
 
   if (toDOM != null && !path.startsWith('^')) {
     touch(path)
@@ -112,7 +183,7 @@ const handleBoundEvent = (event: Event): void => {
   let propagationStopped = false
 
   const wrappedEvent = new Proxy(event, {
-    get (target, prop) {
+    get(target, prop) {
       if (prop === 'stopPropagation') {
         return () => {
           event.stopPropagation()
@@ -123,15 +194,16 @@ const handleBoundEvent = (event: Event): void => {
         const value = target[prop]
         return typeof value === 'function' ? value.bind(target) : value
       }
-    }
+    },
   })
   // eslint-disable-next-line no-unmodified-loop-condition
   while (!propagationStopped && target != null) {
     const eventBindings = elementToHandlers.get(target) as XinEventBindings
     // eslint-disable-next-line
-    const handlers = eventBindings[event.type] || [] as XinEventHandler[]
+    const handlers = eventBindings[event.type] || ([] as XinEventHandler[])
     for (const handler of handlers) {
       if (typeof handler === 'function') {
+        // eslint-disable-next-line
         handler(wrappedEvent)
       } else {
         const func = xin[handler]
@@ -145,11 +217,18 @@ const handleBoundEvent = (event: Event): void => {
         continue
       }
     }
-    target = target.parentElement.closest(EVENT_SELECTOR)
+    target =
+      target.parentElement != null
+        ? target.parentElement.closest(EVENT_SELECTOR)
+        : null
   }
 }
 
-export const on = (element: HTMLElement, eventType: string, eventHandler: XinEventHandler): void => {
+export const on = (
+  element: HTMLElement,
+  eventType: string,
+  eventHandler: XinEventHandler
+): void => {
   let eventBindings = elementToHandlers.get(element)
   element.classList.add(EVENT_CLASS)
   if (eventBindings == null) {

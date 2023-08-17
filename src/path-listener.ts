@@ -1,4 +1,5 @@
-import { PathTestFunction, ObserverCallbackFunction, XinTouchableType, xinPath } from './xin-types'
+import { PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import { xinPath } from './metadata'
 import { settings } from './settings'
 
 export const observerShouldBeRemoved = Symbol('observer should be removed')
@@ -8,20 +9,25 @@ let updateTriggered: number | boolean = false
 let updatePromise: Promise<undefined>
 let resolveUpdate: Function
 
-const getPath = (what: string | XinTouchableType): string => {
-  return typeof what === 'object' ? what[xinPath] : what
-}
-
 export class Listener {
   description: string
   test: PathTestFunction
   callback: ObserverCallbackFunction
 
-  constructor (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) {
-    const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`
+  constructor(
+    test: string | RegExp | PathTestFunction,
+    callback: string | ObserverCallbackFunction
+  ) {
+    const callbackDescription =
+      typeof callback === 'string'
+        ? `"${callback}"`
+        : `function ${callback.name}`
     let testDescription
     if (typeof test === 'string') {
-      this.test = t => typeof t === 'string' && t !== '' && (test.startsWith(t) || t.startsWith(test))
+      this.test = (t) =>
+        typeof t === 'string' &&
+        t !== '' &&
+        (test.startsWith(t) || t.startsWith(test))
       testDescription = `test = "${test}"`
     } else if (test instanceof RegExp) {
       this.test = test.test.bind(test)
@@ -59,12 +65,16 @@ const update = (): void => {
 
   for (const path of paths) {
     listeners
-      .filter(listener => {
+      .filter((listener) => {
         let heard
         try {
           heard = listener.test(path)
         } catch (e) {
-          throw new Error(`Listener ${listener.description} threw "${e as string}" at "${path}"`)
+          throw new Error(
+            `Listener ${listener.description} threw "${
+              e as string
+            }" at "${path}"`
+          )
         }
         if (heard === observerShouldBeRemoved) {
           unobserve(listener)
@@ -72,12 +82,16 @@ const update = (): void => {
         }
         return heard as boolean
       })
-      .forEach(listener => {
+      .forEach((listener) => {
         let outcome
         try {
           outcome = listener.callback(path)
         } catch (e) {
-          console.error(`Listener ${listener.description} threw "${e as string}" handling "${path}"`)
+          console.error(
+            `Listener ${listener.description} threw "${
+              e as string
+            }" handling "${path}"`
+          )
         }
         if (outcome === observerShouldBeRemoved) {
           unobserve(listener)
@@ -95,22 +109,32 @@ const update = (): void => {
   }
 }
 
-export const touch = (what: XinTouchableType): void => {
-  const path = getPath(what)
+export const touch = (touchable: any): void => {
+  const path = typeof touchable === 'string' ? touchable : xinPath(touchable)
+
+  if (path === undefined) {
+    console.error('touch was called on an invalid target', touchable)
+    throw new Error('touch was called on an invalid target')
+  }
 
   if (updateTriggered === false) {
-    updatePromise = new Promise(resolve => {
+    updatePromise = new Promise((resolve) => {
       resolveUpdate = resolve
     })
     updateTriggered = setTimeout(update)
   }
 
-  if (touchedPaths.find(touchedPath => path.startsWith(touchedPath)) == null) {
+  if (
+    touchedPaths.find((touchedPath) => path.startsWith(touchedPath)) == null
+  ) {
     touchedPaths.push(path)
   }
 }
 
-export const observe = (test: string | RegExp | PathTestFunction, callback: ObserverCallbackFunction): Listener => {
+export const observe = (
+  test: string | RegExp | PathTestFunction,
+  callback: ObserverCallbackFunction
+): Listener => {
   return new Listener(test, callback)
 }
 

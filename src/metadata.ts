@@ -1,4 +1,4 @@
-import { XinBinding, XinObject } from './xin-types'
+import { XinObject, XinProxy, XinBinding, XinEventHandler } from './xin-types'
 import { deepClone } from './deep-clone'
 
 export const BOUND_CLASS = '-xin-data'
@@ -6,13 +6,27 @@ export const BOUND_SELECTOR = `.${BOUND_CLASS}`
 export const EVENT_CLASS = '-xin-event'
 export const EVENT_SELECTOR = `.${EVENT_CLASS}`
 
-export interface DataBinding {
-  path: string
-  binding: XinBinding
-  options?: XinObject
+export const XIN_PATH = Symbol('xin-path')
+export const XIN_VALUE = Symbol('xin-value')
+
+export const xinPath = (x: any): string | undefined => {
+  return x[XIN_PATH]
 }
 
-export type XinEventHandler = ((event: Event) => void) | string
+export function xinValue<T extends {}>(x: T): T {
+  // eslint-disable-next-line
+  return (
+    typeof x === 'object' && x !== null
+      ? (x as unknown as XinProxy)[XIN_VALUE] || x
+      : x
+  ) as T
+}
+
+export interface DataBinding<T = HTMLElement> {
+  path: string
+  binding: XinBinding<T>
+  options?: XinObject
+}
 
 export type DataBindings = DataBinding[]
 
@@ -20,7 +34,8 @@ export interface XinEventBindings {
   [eventType: string]: XinEventHandler[]
 }
 
-export const elementToHandlers: WeakMap<Element, XinEventBindings> = new WeakMap()
+export const elementToHandlers: WeakMap<Element, XinEventBindings> =
+  new WeakMap()
 export const elementToBindings: WeakMap<Element, DataBindings> = new WeakMap()
 
 interface ElementMetadata {
@@ -31,7 +46,7 @@ interface ElementMetadata {
 export const getElementBindings = (element: Element): ElementMetadata => {
   return {
     eventBindings: elementToHandlers.get(element),
-    dataBindings: elementToBindings.get(element)
+    dataBindings: elementToBindings.get(element),
   }
 }
 
@@ -49,7 +64,9 @@ export const cloneWithBindings = (element: Node): Node => {
       elementToHandlers.set(cloned, deepClone(eventHandlers))
     }
   }
-  for (const node of element.childNodes) {
+  for (const node of element instanceof HTMLTemplateElement
+    ? element.content.childNodes
+    : element.childNodes) {
     if (node instanceof HTMLElement || node instanceof DocumentFragment) {
       cloned.appendChild(cloneWithBindings(node))
     } else {
