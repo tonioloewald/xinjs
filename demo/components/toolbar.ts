@@ -10,7 +10,7 @@ class ToolBar extends Component {
       padding: `${vars.itemSpacing50} ${vars.spacing} !important`,
       margin: 0,
       minHeight: vars.toolbarHeight,
-      flex: `1 0 auto`,
+      flex: `0 0 auto`,
       flexWrap: 'wrap',
       overflow: 'hidden',
     },

@@ -65,18 +65,21 @@ class ColorSwatch extends Component {
     span({ part: 'idSpan' }),
     labeledInput(span('color'), { part: 'colorInput' }),
   ]
-  connectedCallback() {
-    super.connectedCallback()
-    const self = this
-    const colorInput = self.parts.colorInput
-    colorInput.addEventListener('change', () => {
-      if (self.value.color !== colorInput.value) {
-        self.value = {
-          ...self.value,
-          color: colorInput.value,
-        }
+
+  changed = () => {
+    const { colorInput } = this.parts as {[key: string]: HTMLInputElement}
+    if (this.value.color !== colorInput.value) {
+      this.value = {
+        ...this.value,
+        color: colorInput.value,
       }
-    })
+    }
+  }
+
+  connectedCallback() {
+    const { colorInput } = this.parts as {[key: string]: HTMLInputElement}
+    super.connectedCallback()
+    colorInput.addEventListener('change', this.changed)
   }
   render() {
     super.render()
@@ -103,7 +106,6 @@ export const arrayBindingTest = (...args) =>
       },
     },
     toolBar(
-      { style: { flex: '1 0 auto' } },
       button('create', {
         onClick() {
           console.log('create')
@@ -136,7 +138,7 @@ export const arrayBindingTest = (...args) =>
       button('swap [4] and [7]', {
         onClick() {
           console.log('swap')
-          let item4 = colors.items[4]
+          const item4 = colors.items[4]
           colors.items[4] = colors.items[7]
           colors.items[7] = item4
           touch(colors.items)
