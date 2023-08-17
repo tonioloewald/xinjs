@@ -1,4 +1,4 @@
-import { xin, touch, elements, Component, vars, css } from '../../src'
+import { xinProxy, touch, elements, Component, vars, css } from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
 const {
@@ -132,30 +132,31 @@ const runTests = async (container: HTMLElement): Promise<void> => {
   )
 }
 
-xin.formTest = {
-  string: 'hello xin',
-  number: 3,
-  date: new Date().toISOString(),
-  check1: false,
-  check2: true,
-  pickOne: 'that',
-  pickAny: { theOther: true, andThat: true },
-  phone: '+1 (666) 555-4321',
-  email: 'anne.example@foobar.baz',
-  autocomplete: 'this',
-  fleet: {
-    name: 'Starfleet',
-    vessels: [
-      { id: 'ncc-1701', name: 'Enterprise' },
-      { id: 'ncc-1031', name: 'Discovery' },
-      { id: 'ncc-74656', name: 'Voyager' },
-    ],
+const { formTest } = xinProxy({
+  formTest: {
+    string: 'hello xin',
+    number: 3,
+    date: new Date().toISOString(),
+    check1: false,
+    check2: true,
+    pickOne: 'that',
+    pickAny: { theOther: true, andThat: true },
+    phone: '+1 (666) 555-4321',
+    email: 'anne.example@foobar.baz',
+    autocomplete: 'this',
+    fleet: {
+      name: 'Starfleet',
+      vessels: [
+        { id: 'ncc-1701', name: 'Enterprise' },
+        { id: 'ncc-1031', name: 'Discovery' },
+        { id: 'ncc-74656', name: 'Voyager' },
+      ],
+    },
+    reset() {
+      formTest.string = 'hello xin'
+    },
   },
-  reset() {
-    // @ts-expect-error
-    xin.formTest.string = 'hello xin'
-  },
-}
+})
 
 const options = [
   'this',
@@ -165,17 +166,6 @@ const options = [
   'and that',
   'and this one last thing',
 ]
-
-const codeblock = `
-import {elements} from 'xinjs'
-
-const {h1, p, fragment} = elements
-
-document.body.append(fragment(
-  h1('heading'),
-  p('here is some text')
-))
-`
 
 export const kitchenSink = () =>
   fragment(

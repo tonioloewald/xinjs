@@ -1,7 +1,11 @@
 import { XIN_PATH, XIN_VALUE } from './metadata'
 import { XinStyleRule } from './css-types'
 
-export type XinScalar = string | boolean | number | symbol | Function
+export type AnyFunction = (...args: any[]) => any | Promise<any>
+
+export type AnyObject = { [key: string | symbol | number]: any }
+
+export type XinScalar = string | boolean | number | symbol | AnyFunction
 
 export type XinArray = any[]
 
@@ -41,10 +45,10 @@ export type XinEventHandler<T = Event> =
 export type XinBindingShortcut = XinTouchableType | XinBindingSpec
 
 type _BooleanFunction = () => boolean
-type _PathTestFunction = (path: string) => boolean | Symbol
+type _PathTestFunction = (path: string) => boolean | symbol
 export type PathTestFunction = _BooleanFunction | _PathTestFunction
 
-type OptionalSymbol = Symbol | undefined
+type OptionalSymbol = symbol | undefined
 type _CallbackFunction = (() => void) | (() => OptionalSymbol)
 type _PathCallbackFunction =
   | ((path: string) => void)

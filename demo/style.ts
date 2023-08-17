@@ -15,11 +15,12 @@ bind(document.body, 'app.darkmode', {
       case 'light':
         elt.classList.remove('darkmode')
         break
-      default:
+      default: {
         const autoSetting = getComputedStyle(document.body).getPropertyValue(
           '--darkmode'
         )
         elt.classList.toggle('darkmode', autoSetting === 'true')
+      }
     }
   },
 })

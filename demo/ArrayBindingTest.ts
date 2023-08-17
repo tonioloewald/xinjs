@@ -67,7 +67,7 @@ class ColorSwatch extends Component {
   ]
 
   changed = () => {
-    const { colorInput } = this.parts as {[key: string]: HTMLInputElement}
+    const { colorInput } = this.parts as { [key: string]: HTMLInputElement }
     if (this.value.color !== colorInput.value) {
       this.value = {
         ...this.value,
@@ -77,7 +77,7 @@ class ColorSwatch extends Component {
   }
 
   connectedCallback() {
-    const { colorInput } = this.parts as {[key: string]: HTMLInputElement}
+    const { colorInput } = this.parts as { [key: string]: HTMLInputElement }
     super.connectedCallback()
     colorInput.addEventListener('change', this.changed)
   }

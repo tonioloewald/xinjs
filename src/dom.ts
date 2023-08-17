@@ -22,27 +22,24 @@ const valueType = (element: HTMLElement): string => {
 export const setValue = (element: HTMLElement, newValue: any): void => {
   switch (valueType(element)) {
     case 'radio':
-      // @ts-expect-error
-      element.checked = element.value === newValue
+      ;(element as HTMLInputElement).checked =
+        (element as HTMLInputElement).value === newValue
       break
     case 'checkbox':
-      // @ts-expect-error
-      element.checked = newValue
+      ;(element as HTMLInputElement).checked = !!newValue
       break
     case 'date':
-      // @ts-expect-error
-      element.valueAsDate = new Date(newValue)
+      ;(element as HTMLInputElement).valueAsDate = new Date(newValue)
       break
     case 'multi-select':
       for (const option of [
-        ...element.querySelectorAll('option'),
+        ...(element as HTMLSelectElement).querySelectorAll('option'),
       ] as HTMLOptionElement[]) {
         option.selected = newValue[option.value]
       }
       break
     default:
-      // @ts-expect-error
-      element.value = newValue
+      ;(element as HTMLInputElement).value = newValue
   }
 }
 
@@ -58,11 +55,9 @@ export const getValue = (element: ValueElement): any => {
       return radio != null ? radio.value : null
     }
     case 'checkbox':
-      // @ts-expect-error
-      return element.checked
+      return (element as HTMLInputElement).checked
     case 'date':
-      // @ts-expect-error
-      return element.valueAsDate.toISOString()
+      return (element as HTMLInputElement).valueAsDate?.toISOString()
     case 'multi-select':
       return [...element.querySelectorAll('option')].reduce(
         (map: PickMap, option: HTMLOptionElement): PickMap => {
@@ -76,7 +71,6 @@ export const getValue = (element: ValueElement): any => {
   }
 }
 
-/* global ResizeObserver */
 const { ResizeObserver } = globalThis
 export const resizeObserver =
   ResizeObserver != null

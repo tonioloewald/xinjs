@@ -13,7 +13,7 @@ export const xinPath = (x: any): string | undefined => {
   return x[XIN_PATH]
 }
 
-export function xinValue<T extends {}>(x: T): T {
+export function xinValue<T>(x: T): T {
   // eslint-disable-next-line
   return (
     typeof x === 'object' && x !== null

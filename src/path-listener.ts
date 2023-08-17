@@ -1,4 +1,8 @@
-import { PathTestFunction, ObserverCallbackFunction } from './xin-types'
+import {
+  PathTestFunction,
+  ObserverCallbackFunction,
+  AnyFunction,
+} from './xin-types'
 import { xinPath } from './metadata'
 import { settings } from './settings'
 
@@ -7,7 +11,7 @@ export const listeners: Listener[] = [] // { path_string_or_test, callback }
 const touchedPaths: string[] = []
 let updateTriggered: number | boolean = false
 let updatePromise: Promise<undefined>
-let resolveUpdate: Function
+let resolveUpdate: AnyFunction
 
 export class Listener {
   description: string

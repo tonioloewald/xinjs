@@ -79,9 +79,9 @@ export const settingsDialog = () =>
       ),
       {
         onSubmit(evt: Event) {
-          // @ts-expect-error
-          evt.target.closest('dialog').close()
           evt.preventDefault()
+          // @ts-expect-error Typescript is wrong
+          evt.target.closest('dialog').close()
         },
       }
     )

@@ -1,6 +1,6 @@
-import { XinObject, XinArray } from './xin-types'
+import { XinObject, XinArray, AnyFunction } from './xin-types'
 
-type Scalar = string | boolean | number | Function
+type Scalar = string | boolean | number | AnyFunction
 type Cloneable = Scalar | XinObject | XinArray
 
 export function deepClone(obj: Cloneable): Cloneable | Cloneable[] {

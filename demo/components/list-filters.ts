@@ -10,19 +10,8 @@ import {
 } from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
-const {
-  div,
-  span,
-  h1,
-  h2,
-  input,
-  template,
-  style,
-  button,
-  label,
-  textarea,
-  p,
-} = elements
+const { div, span, h1, h2, input, template, style, button, label, textarea } =
+  elements
 
 bindings.selected = {
   toDOM(element, value) {

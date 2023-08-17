@@ -107,10 +107,10 @@ export const vars = new Proxy<{ [key: string]: string }>(
     get(target, prop: string) {
       if (target[prop] == null) {
         prop = prop.replace(/[A-Z]/g, (x) => `-${x.toLocaleLowerCase()}`)
-        let [, varName, , isNegative, scaleText, method] = prop.match(
+        const [, _varName, , isNegative, scaleText, method] = prop.match(
           /^([^\d_]*)((_)?(\d+)(\w*))?$/
         ) as string[]
-        varName = `--${varName}`
+        const varName = `--${_varName}`
         if (scaleText != null) {
           const scale =
             isNegative == null

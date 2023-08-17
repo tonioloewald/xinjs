@@ -36,7 +36,7 @@ export const bindings: { [key: string | symbol]: XinBinding } = {
     toDOM(element: HTMLElement, value: any) {
       if (typeof value === 'object') {
         for (const prop of Object.keys(value)) {
-          // @ts-expect-error
+          // @ts-expect-error typescript has a strange/incorrect idea of what element.style is
           element.style[prop] = value[prop]
         }
       } else if (typeof value === 'string') {

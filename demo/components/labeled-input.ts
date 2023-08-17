@@ -40,21 +40,26 @@ class LabeledInput extends Component {
     super()
     this.initAttributes('type', 'placeholder', 'input')
   }
+
+  handleUpdate = () => {
+    const { field } = this.parts as { [key: string]: HTMLInputElement }
+    this.value = this.type !== 'checkbox' ? field.value : field.checked
+  }
+
+  handleKeydown = (evt: KeyboardEvent) => {
+    if (evt.code === 'Enter') {
+      const form = this.closest('form')
+      if (form) {
+        form.dispatchEvent(new Event('submit'))
+      }
+    }
+  }
+
   connectedCallback() {
     super.connectedCallback()
-    const self = this
-    const { field } = self.parts
-    field.addEventListener(this.input ? 'input' : 'change', () => {
-      self.value = this.type !== 'checkbox' ? field.value : field.checked
-    })
-    field.addEventListener('keydown', (evt: KeyboardEvent) => {
-      if (evt.code === 'Enter') {
-        const form = this.closest('form')
-        if (form) {
-          form.dispatchEvent(new Event('submit'))
-        }
-      }
-    })
+    const { field } = this.parts
+    field.addEventListener(this.input ? 'input' : 'change', this.handleUpdate)
+    field.addEventListener('keydown', this.handleKeydown)
   }
   render() {
     super.render()

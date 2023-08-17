@@ -1,7 +1,7 @@
 declare const XIN_PATH: unique symbol;
 declare const XIN_VALUE: unique symbol;
 export const xinPath: (x: any) => string | undefined;
-export function xinValue<T extends {}>(x: T): T;
+export function xinValue<T>(x: T): T;
 export const getListItem: (element: HTMLElement) => any;
 type CSSBasicAlign = 'nomal' | 'stretch';
 type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end';
@@ -249,7 +249,11 @@ export interface XinStyleMap {
 export interface XinStyleSheet {
     [key: string]: XinStyleRule | XinStyleMap | string;
 }
-export type XinScalar = string | boolean | number | symbol | Function;
+export type AnyFunction = (...args: any[]) => any | Promise<any>;
+export type AnyObject = {
+    [key: string | symbol | number]: any;
+};
+export type XinScalar = string | boolean | number | symbol | AnyFunction;
 export type XinArray = any[];
 export interface XinObject {
     [key: string | number | symbol]: any;
@@ -272,9 +276,9 @@ export type XinTouchableType = string | XinProps;
 export type XinEventHandler<T = Event> = ((evt: T) => void) | ((evt: T) => Promise<void>) | string;
 export type XinBindingShortcut = XinTouchableType | XinBindingSpec;
 type _BooleanFunction = () => boolean;
-type _PathTestFunction = (path: string) => boolean | Symbol;
+type _PathTestFunction = (path: string) => boolean | symbol;
 export type PathTestFunction = _BooleanFunction | _PathTestFunction;
-type OptionalSymbol = Symbol | undefined;
+type OptionalSymbol = symbol | undefined;
 type _CallbackFunction = (() => void) | (() => OptionalSymbol);
 type _PathCallbackFunction = ((path: string) => void) | ((path: string) => OptionalSymbol);
 export type ObserverCallbackFunction = _PathCallbackFunction | _CallbackFunction;
@@ -556,6 +560,6 @@ export abstract class Component extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
-export function xinProxy<T extends {}>(obj: T): T;
+export function xinProxy<T extends AnyObject>(obj: T): T;
 
 //# sourceMappingURL=types.d.ts.map

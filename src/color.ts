@@ -139,33 +139,33 @@ export class Color {
   }
 
   brighten(amount: number): Color {
-    let { h, s, l } = this._hsl
-    l = clamp(0, l + amount * (1 - l), 1)
-    return Color.fromHsl(h, s, l, this.a)
+    const { h, s, l } = this._hsl
+    const lClamped = clamp(0, l + amount * (1 - l), 1)
+    return Color.fromHsl(h, s, lClamped, this.a)
   }
 
   darken(amount: number): Color {
-    let { h, s, l } = this._hsl
-    l = clamp(0, l * (1 - amount), 1)
-    return Color.fromHsl(h, s, l, this.a)
+    const { h, s, l } = this._hsl
+    const lClamped = clamp(0, l * (1 - amount), 1)
+    return Color.fromHsl(h, s, lClamped, this.a)
   }
 
   saturate(amount: number): Color {
-    let { h, s, l } = this._hsl
-    s = clamp(0, s + amount * (1 - s), 1)
-    return Color.fromHsl(h, s, l, this.a)
+    const { h, s, l } = this._hsl
+    const sClamped = clamp(0, s + amount * (1 - s), 1)
+    return Color.fromHsl(h, sClamped, l, this.a)
   }
 
   desaturate(amount: number): Color {
-    let { h, s, l } = this._hsl
-    s = clamp(0, s * (1 - amount), 1)
-    return Color.fromHsl(h, s, l, this.a)
+    const { h, s, l } = this._hsl
+    const sClamped = clamp(0, s * (1 - amount), 1)
+    return Color.fromHsl(h, sClamped, l, this.a)
   }
 
   rotate(amount: number): Color {
-    let { h, s, l } = this._hsl
-    h = (h + 360 + amount) % 360
-    return Color.fromHsl(h, s, l, this.a)
+    const { h, s, l } = this._hsl
+    const hClamped = (h + 360 + amount) % 360
+    return Color.fromHsl(hClamped, s, l, this.a)
   }
 
   opacity(alpha: number): Color {

@@ -393,7 +393,7 @@ const $b3e4d800ba46b430$var$regHandler = (path = "")=>({
             } else if (Array.isArray(target)) {
                 const value = target[prop];
                 return typeof value === "function" ? (...items)=>{
-                    // @ts-ignore-error
+                    // @ts-expect-error seriously, eslint?
                     const result = Array.prototype[prop].apply(target, items);
                     if ($b3e4d800ba46b430$var$ARRAY_MUTATIONS.includes(prop)) (0, $26326a5bf69c90fe$export$d0b7ea69ab6056df)(path);
                     return result;
@@ -425,7 +425,8 @@ const $5258c5e951c26004$export$80bf2f765c31be6a = (element, changedPath)=>{
     const dataBindings = (0, $2f9efd8dbae277cd$export$1f922de8d0ecbb7e).get(element);
     if (dataBindings == null) return;
     for (const dataBinding of dataBindings){
-        let { path: path, binding: binding, options: options } = dataBinding;
+        const { binding: binding, options: options } = dataBinding;
+        let { path: path } = dataBinding;
         const { toDOM: toDOM } = binding;
         if (toDOM != null) {
             if (path.startsWith("^")) {
@@ -590,15 +591,12 @@ const $937ce97164a17ff0$var$valueType = (element)=>{
 const $937ce97164a17ff0$export$80746c6bc6142fc8 = (element, newValue)=>{
     switch($937ce97164a17ff0$var$valueType(element)){
         case "radio":
-            // @ts-expect-error
             element.checked = element.value === newValue;
             break;
         case "checkbox":
-            // @ts-expect-error
-            element.checked = newValue;
+            element.checked = !!newValue;
             break;
         case "date":
-            // @ts-expect-error
             element.valueAsDate = new Date(newValue);
             break;
         case "multi-select":
@@ -607,7 +605,6 @@ const $937ce97164a17ff0$export$80746c6bc6142fc8 = (element, newValue)=>{
             ])option.selected = newValue[option.value];
             break;
         default:
-            // @ts-expect-error
             element.value = newValue;
     }
 };
@@ -619,11 +616,9 @@ const $937ce97164a17ff0$export$bf7199a9ebcb84a9 = (element)=>{
                 return radio != null ? radio.value : null;
             }
         case "checkbox":
-            // @ts-expect-error
             return element.checked;
         case "date":
-            // @ts-expect-error
-            return element.valueAsDate.toISOString();
+            return element.valueAsDate?.toISOString();
         case "multi-select":
             return [
                 ...element.querySelectorAll("option")
@@ -635,7 +630,7 @@ const $937ce97164a17ff0$export$bf7199a9ebcb84a9 = (element)=>{
             return element.value;
     }
 };
-/* global ResizeObserver */ const { ResizeObserver: $937ce97164a17ff0$var$ResizeObserver } = globalThis;
+const { ResizeObserver: $937ce97164a17ff0$var$ResizeObserver } = globalThis;
 const $937ce97164a17ff0$export$b13421f1ae71d316 = $937ce97164a17ff0$var$ResizeObserver != null ? new $937ce97164a17ff0$var$ResizeObserver((entries)=>{
     for (const entry of entries){
         const element = entry.target;
@@ -770,7 +765,6 @@ class $17b559bf321bb783$var$ListBinding {
         if (array == null) array = [];
         this._array = array;
         const { initInstance: initInstance, updateInstance: updateInstance, hiddenProp: hiddenProp, visibleProp: visibleProp } = this.options;
-        // @ts-expect-error
         const arrayPath = (0, $2f9efd8dbae277cd$export$40700dafb97c3799)(array);
         const slice = this.visibleSlice();
         this.boundElement.classList.toggle("-xin-empty-list", slice.items.length === 0);
@@ -847,11 +841,9 @@ class $17b559bf321bb783$var$ListBinding {
     }
 }
 const $17b559bf321bb783$export$b0eb386be3b9fed8 = (boundElement, options)=>{
-    // @ts-expect-error
     let listBinding = boundElement[$17b559bf321bb783$var$listBindingRef];
-    if (listBinding == null) {
+    if (listBinding === undefined) {
         listBinding = new $17b559bf321bb783$var$ListBinding(boundElement, options);
-        // @ts-expect-error
         boundElement[$17b559bf321bb783$var$listBindingRef] = listBinding;
     }
     return listBinding;
@@ -885,7 +877,7 @@ const $5c922f2f7914f4ef$export$97a1a3e6f39778d2 = {
     },
     style: {
         toDOM (element, value) {
-            if (typeof value === "object") for (const prop of Object.keys(value))// @ts-expect-error
+            if (typeof value === "object") for (const prop of Object.keys(value))// @ts-expect-error typescript has a strange/incorrect idea of what element.style is
             element.style[prop] = value[prop];
             else if (typeof value === "string") element.setAttribute("style", value);
             else throw new Error("style binding expects either a string or object");
@@ -1010,29 +1002,29 @@ class $16008b2efdc923f4$export$892596cec99bc70e {
         return this.a === 1 ? "#" + $16008b2efdc923f4$var$hex2(this.r) + $16008b2efdc923f4$var$hex2(this.g) + $16008b2efdc923f4$var$hex2(this.b) : "#" + $16008b2efdc923f4$var$hex2(this.r) + $16008b2efdc923f4$var$hex2(this.g) + $16008b2efdc923f4$var$hex2(this.b) + $16008b2efdc923f4$var$hex2(Math.floor(255 * this.a));
     }
     brighten(amount) {
-        let { h: h, s: s, l: l } = this._hsl;
-        l = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+        const { h: h, s: s, l: l } = this._hsl;
+        const lClamped = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l + amount * (1 - l), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, lClamped, this.a);
     }
     darken(amount) {
-        let { h: h, s: s, l: l } = this._hsl;
-        l = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+        const { h: h, s: s, l: l } = this._hsl;
+        const lClamped = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, l * (1 - amount), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, lClamped, this.a);
     }
     saturate(amount) {
-        let { h: h, s: s, l: l } = this._hsl;
-        s = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+        const { h: h, s: s, l: l } = this._hsl;
+        const sClamped = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s + amount * (1 - s), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, sClamped, l, this.a);
     }
     desaturate(amount) {
-        let { h: h, s: s, l: l } = this._hsl;
-        s = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+        const { h: h, s: s, l: l } = this._hsl;
+        const sClamped = (0, $e070b3c758093e25$export$7d15b64cf5a3a4c4)(0, s * (1 - amount), 1);
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, sClamped, l, this.a);
     }
     rotate(amount) {
-        let { h: h, s: s, l: l } = this._hsl;
-        h = (h + 360 + amount) % 360;
-        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(h, s, l, this.a);
+        const { h: h, s: s, l: l } = this._hsl;
+        const hClamped = (h + 360 + amount) % 360;
+        return $16008b2efdc923f4$export$892596cec99bc70e.fromHsl(hClamped, s, l, this.a);
     }
     opacity(alpha) {
         const { h: h, s: s, l: l } = this._hsl;
@@ -1217,8 +1209,8 @@ const $5ce3d7bba914ef8e$export$3cb96c9f6c8d16a4 = new Proxy({}, {
     get (target, prop) {
         if (target[prop] == null) {
             prop = prop.replace(/[A-Z]/g, (x)=>`-${x.toLocaleLowerCase()}`);
-            let [, varName, , isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/);
-            varName = `--${varName}`;
+            const [, _varName, , isNegative, scaleText, method] = prop.match(/^([^\d_]*)((_)?(\d+)(\w*))?$/);
+            const varName = `--${_varName}`;
             if (scaleText != null) {
                 const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100;
                 switch(method){

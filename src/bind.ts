@@ -32,7 +32,8 @@ export const touchElement = (
     return
   }
   for (const dataBinding of dataBindings) {
-    let { path, binding, options } = dataBinding
+    const { binding, options } = dataBinding
+    let { path } = dataBinding
     const { toDOM } = binding
     if (toDOM != null) {
       if (path.startsWith('^')) {

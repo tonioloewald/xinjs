@@ -155,8 +155,8 @@ class ListBinding {
 
     const { initInstance, updateInstance, hiddenProp, visibleProp } =
       this.options
-    // @ts-expect-error
-    const arrayPath: string = xinPath(array)
+
+    const arrayPath: string = xinPath(array) as string
 
     const slice = this.visibleSlice()
     this.boundElement.classList.toggle(
@@ -262,15 +262,17 @@ class ListBinding {
   }
 }
 
+interface ListBoundElement extends HTMLElement {
+  [listBindingRef]?: ListBinding
+}
+
 export const getListBinding = (
-  boundElement: HTMLElement,
+  boundElement: ListBoundElement,
   options?: ListBindingOptions
 ): ListBinding => {
-  // @ts-expect-error
   let listBinding = boundElement[listBindingRef]
-  if (listBinding == null) {
+  if (listBinding === undefined) {
     listBinding = new ListBinding(boundElement, options)
-    // @ts-expect-error
     boundElement[listBindingRef] = listBinding
   }
   return listBinding

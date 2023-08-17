@@ -191,11 +191,11 @@ const appBar = () =>
         ) as HTMLElement
         if (leftSideNav.style.marginLeft) {
           leftSideNav.style.marginLeft = ''
-          // @ts-expect-error
+          // @ts-expect-error Typescript is wrong
           event.target.style.transform = 'rotateZ(180deg)'
         } else {
           leftSideNav.style.marginLeft = '-180px'
-          // @ts-expect-error
+          // @ts-expect-error Typescript is wrong
           event.target.style.transform = ''
         }
       },
@@ -258,7 +258,7 @@ document.body.append(
           },
         },
         ...routes.map((route) =>
-          a(route.path.replace(/\-/g, ' '), {
+          a(route.path.replace(/-/g, ' '), {
             dataRoute: route.path,
             href: `?${route.path}`,
             onClick(event: Event) {

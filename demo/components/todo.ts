@@ -26,7 +26,7 @@ class Todo {
   }
   addItem() {
     const { newItem, list } = this
-    if (!Boolean(newItem.reminder)) {
+    if (!newItem.reminder) {
       return
     }
     list.push({ ...newItem })
@@ -77,7 +77,6 @@ export const todo = (...args: ElementPart[]) =>
             onClick(event) {
               const item = getListItem(event.target as HTMLElement)
               todoApp.deleteItem(item)
-              // @ts-ignore-error
               touch(todoApp)
             },
           })
@@ -90,7 +89,6 @@ export const todo = (...args: ElementPart[]) =>
       {
         onSubmit(event) {
           todoApp.addItem()
-          // @ts-ignore-error
           touch(todoApp)
           event.preventDefault()
         },
