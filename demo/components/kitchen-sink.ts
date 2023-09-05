@@ -19,8 +19,8 @@ const {
   xinSlot,
 } = elements
 
-const wordsToCamelCase = (string) =>
-  string
+const wordsToCamelCase = (s: string) =>
+  s
     .split(/\s+/)
     .map((word, idx) =>
       idx > 0 ? word[0].toLocaleUpperCase() + word.substring(1) : word
@@ -95,7 +95,7 @@ async function test(
     testOutcome.dataset.elapsed = ((Date.now() - testStart) * 0.001).toFixed(1)
   }, 100)
   container.append(testOutcome)
-  let result
+  let result: boolean
   try {
     result = await expr()
   } catch (err) {
@@ -202,7 +202,7 @@ This is an in-browser test of key functionality including:
               gap: vars.spacing25,
             },
             '.test': {
-              color: vars.background,
+              color: 'black',
               borderRadius: vars.lineHeight,
               lineHeight: vars.lineHeight,
               padding: `0 ${vars.spacing50}`,

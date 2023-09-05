@@ -92,7 +92,7 @@ const styles: XinStyleSheet = {
   },
 }
 
-document.head.append(style({ id: 'list-filfter' }, css(styles)))
+document.head.append(style({ id: 'list-filter' }, css(styles)))
 
 const HIDDEN = Symbol('hidden')
 const SELECTED = Symbol('selected')
@@ -127,14 +127,14 @@ const { emoji } = xinProxy({
       delete selected[SELECTED]
       touch('emoji.list')
     },
-    select(event) {
-      if (event.type !== 'click' && event.code !== 'Space') {
+    select(event: Event) {
+      if (event.type !== 'click' && (event as KeyboardEvent).code !== 'Space') {
         return
       }
       if (event.type === 'keydown') {
         event.preventDefault()
       }
-      const selectedItem = getListItem(event.target)
+      const selectedItem = getListItem(event.target as HTMLElement)
       emoji.list.forEach((item) => {
         if (item === selectedItem) {
           if (!item[SELECTED]) {
@@ -165,7 +165,7 @@ getEmoji()
 export const listFilterDemo = () =>
   div(
     h1({ style: { marginTop: 0 } }, 'Filtered Lists'),
-    markdownViewer(`In this example, the **list** and **detail** views are both *filtered* list-bindings bound to the 
+    markdownViewer(`In this example, the **list** and **detail** views are both *filtered* list-bindings bound to the
 same array, and thus the views have a *single source of truth*.
 
 The **list** view uses \`hiddenProp\` to remove non-matches from the list, while the detail view uses \`selectedProp\` to

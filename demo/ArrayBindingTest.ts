@@ -38,25 +38,6 @@ const { colors } = xinProxy({
 const { button, template, div, span } = elements
 
 class ColorSwatch extends Component {
-  styleNode = Component.StyleNode({
-    ':host': {
-      display: 'inline-flex',
-      padding: '10px',
-      margin: '5px',
-      gap: '10px',
-      width: '260px',
-      background: vars.inputBg,
-      ...initVars({ inputWith: '140px' }),
-      alignItems: 'center',
-      overflow: 'hidden',
-    },
-    ':host > span': {
-      display: 'inline-block',
-      flex: '0 0 30px',
-      textAlign: 'right',
-      lineHeight: '27px',
-    },
-  })
   value = {
     id: 0,
     color: 'red',
@@ -77,8 +58,8 @@ class ColorSwatch extends Component {
   }
 
   connectedCallback() {
-    const { colorInput } = this.parts as { [key: string]: HTMLInputElement }
     super.connectedCallback()
+    const { colorInput } = this.parts as { [key: string]: HTMLInputElement }
     colorInput.addEventListener('change', this.changed)
   }
   render() {
@@ -92,7 +73,28 @@ class ColorSwatch extends Component {
   }
 }
 
-const colorSwatch = ColorSwatch.elementCreator()
+const colorSwatch = ColorSwatch.elementCreator({
+  tag: 'color-swatch',
+  styleSpec: {
+    'color-swatch': {
+      display: 'inline-flex',
+      padding: '10px',
+      margin: '5px',
+      gap: '10px',
+      width: '260px',
+      background: vars.inputBg,
+      ...initVars({ inputWith: '140px' }),
+      alignItems: 'center',
+      overflow: 'hidden',
+    },
+    'color-swatch > span': {
+      display: 'inline-block',
+      flex: '0 0 30px',
+      textAlign: 'right',
+      lineHeight: '27px',
+    },
+  },
+})
 
 export const arrayBindingTest = (...args) =>
   div(

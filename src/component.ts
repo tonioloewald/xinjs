@@ -13,6 +13,11 @@ function anonElementTag(): string {
 }
 let instanceCount = 0
 
+interface ElementCreatorOptions extends ElementDefinitionOptions {
+  tag?: string
+  styleSpec?: XinStyleSheet
+}
+
 export abstract class Component extends HTMLElement {
   static elements: ElementsProxy = elements
   private static _elementCreator?: ElementCreator
@@ -26,11 +31,10 @@ export abstract class Component extends HTMLElement {
     return elements.style(css(styleSpec))
   }
 
-  static elementCreator(
-    options?: ElementDefinitionOptions & { tag?: string }
-  ): ElementCreator {
+  static elementCreator(options: ElementCreatorOptions = {}): ElementCreator {
     if (this._elementCreator == null) {
-      let tagName = options != null ? options.tag : null
+      const { tag, styleSpec } = options
+      let tagName = options != null ? tag : null
       if (tagName == null) {
         if (typeof this.name === 'string' && this.name !== '') {
           tagName = camelToKabob(this.name)
@@ -57,6 +61,16 @@ export abstract class Component extends HTMLElement {
         options
       )
       this._elementCreator = elements[tagName]
+      if (styleSpec !== undefined) {
+        let cssSource = css(styleSpec)
+        if (tag !== undefined && tagName !== tag) {
+          cssSource = cssSource.replace(
+            new RegExp(`\\b${tag}\\b`, 'g'),
+            tagName
+          )
+        }
+        document.head.append(elements.style({ id: tagName }, cssSource))
+      }
     }
     return this._elementCreator
   }
@@ -67,7 +81,6 @@ export abstract class Component extends HTMLElement {
     const observer = new MutationObserver((mutationsList) => {
       let triggerRender = false
       mutationsList.forEach((mutation) => {
-        // eslint-disable-next-line
         triggerRender = !!(
           mutation.attributeName &&
           attributeNames.includes(kabobToCamel(mutation.attributeName))

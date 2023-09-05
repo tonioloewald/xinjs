@@ -21,7 +21,7 @@ new component's element and produces instances of it as needed.
       })
     }
 
-    export const toolBar = ToolBar.elementCreator()
+    export const toolBar = ToolBar.elementCreator({ tag: 'tool-bar' })
 
 This component is just a structural element. By default a `Component` subclass will
 comprise itself and a `<slot>`. You can change this by giving your subclass its
@@ -121,11 +121,11 @@ shadowDOM, they will automatically be replaced with `<xin-slot>` elements that
 have the expected behavior (i.e. sucking in children in based on their `<slot>`
 attribute).
 
-`<xin-slot>` doesn't support `:slotted` but since there's no shadowDOM, just 
+`<xin-slot>` doesn't support `:slotted` but since there's no shadowDOM, just
 style such elements normally, or use `xin-slot` as a CSS-selector.
 
 Note that you cannot give a `<slot>` element attributes (other than `name`) so if
-you want to give a `<xin-slot>` attributes (such as `class` or `style`), create it 
+you want to give a `<xin-slot>` attributes (such as `class` or `style`), create it
 explicitly (e.g. using `elements.xinSlot()`) rather than using `<slot>` elements
 and letting them be switched out (because they'll lose any attributes you give them).
 
@@ -142,7 +142,7 @@ Also see the [faux-slot example](/demo/faux-slots.ts).
 #### styleNode: HTMLStyleElement
 
 `styleNode` is the `<style>` element that will be inserted into the element's
-`shadowRoot`. 
+`shadowRoot`.
 
 If a `Component` subclass has no `styleNode`, no `shadowRoot` will be
 created. This reduces the memory and performance cost of the element.
@@ -201,7 +201,7 @@ then no trace will remain in the DOM for a mounted element.
         super()
         this.initAttributes('caption')
       }
-      
+
       ...
     }
 
@@ -275,12 +275,12 @@ strings to CSS property maps) into a `<style>` element with the CSS in it.
 
 Returns a function that creates the custom-element. You can specify the tag and the
 pre-existing element it extends if you like (this is crucial if you're using scope-hoisting name-mangling
-minifiers). By default, the tag is produced by kabob-casing the class name (so `class FooBar…` 
+minifiers). By default, the tag is produced by kabob-casing the class name (so `class FooBar…`
 implements `<foo-bar>`).
 
 If there's no second bar, then `-elt` is added to the tag. So `class Foo…` implements `<foo-elt>`.
 
-Finally, `elementCreator` is memoized and only generated once (and the arguments are 
+Finally, `elementCreator` is memoized and only generated once (and the arguments are
 ignored on all subsequent calls).
 
 ## Examples

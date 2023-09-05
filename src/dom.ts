@@ -99,10 +99,7 @@ export const appendContentToElement = (
           node instanceof Node && cloneElements ? cloneWithBindings(node) : node
         )
       })
-    } else if (
-      content instanceof HTMLElement ||
-      content instanceof DocumentFragment
-    ) {
+    } else if (content instanceof Node) {
       elt.append(cloneElements ? cloneWithBindings(content) : content)
     } else {
       throw new Error('expect text content or document node')

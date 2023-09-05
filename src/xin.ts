@@ -145,14 +145,12 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
     }
   },
   set(_, prop: string, value: any) {
-    // eslint-disable-next-line
     value = xinValue(value)
     const fullPath = extendPath(path, prop)
     if (debugPaths && !isValidPath(fullPath)) {
       throw new Error(`setting invalid path ${fullPath}`)
     }
     const existing = xinValue(xin[fullPath])
-    // eslint-disable-next-line
     if (existing !== value && setByPath(registry, fullPath, value)) {
       touch(fullPath)
     }

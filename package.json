@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -32,8 +32,7 @@
   "devDependencies": {
     "@parcel/packager-ts": "^2.9.3",
     "@parcel/transformer-typescript-types": "^2.9.3",
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
     "bun-types": "latest",
     "eslint": "^8.47.0",
     "marked": "^4.2.2",

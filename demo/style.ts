@@ -134,6 +134,9 @@ const rules: XinStyleSheet = {
     gap: vars.spacing50,
     marginTop: vars.spacing,
   },
+  select: {
+    appearance: 'none',
+  },
   'label label': {
     marginTop: 0,
   },

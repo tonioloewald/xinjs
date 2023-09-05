@@ -89,13 +89,10 @@ test('setByPath adds properties to objects if needed', () => {
   setByPath(obj, 'pi', Math.PI)
   expect(obj.pi).toBe(Math.PI)
   setByPath(obj, 'deep.down.there', true)
-  // @ts-expect-error
   expect(obj.deep.down.there).toBe(true)
   setByPath(obj, 'deep.space', ' ')
-  // @ts-expect-error
   expect(obj.deep.space).toBe(' ')
   setByPath(obj, 'deep', {})
-  // @ts-expect-error
   expect(obj.deep.space).toBe(undefined)
 })
 

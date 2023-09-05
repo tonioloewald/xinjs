@@ -17,11 +17,34 @@ export class WordList {
   reuseLetters = true
   filterCount = 0
 
-  constructor(words) {
+  constructor(words: string[]) {
     this.words = words
   }
 
+  private previous = {
+    letters: null as string | null,
+    mustContain: null as string | null,
+    minLength: null as number | null,
+    reuseLetters: null as boolean | null,
+  }
+  private _filtered: string[] = []
+
   get list() {
+    const { letters, mustContain, minLength, reuseLetters, previous } = this
+    if (
+      previous.letters === letters &&
+      previous.mustContain === mustContain &&
+      previous.minLength === minLength &&
+      previous.reuseLetters === reuseLetters
+    ) {
+      return this._filtered
+    }
+    this.previous = {
+      letters,
+      mustContain,
+      minLength,
+      reuseLetters,
+    }
     if (!this.letters) {
       this.filterCount = 0
       return []
@@ -32,24 +55,24 @@ export class WordList {
         word.includes(this.mustContain.toLocaleLowerCase())
       )
     }
-    if (this.letters) {
-      const regex = new RegExp(`^[${this.letters.toLocaleLowerCase()}]+$`)
-      if (this.reuseLetters) {
-        filtered = filtered.filter((word) => regex.test(word))
-      } else {
-        const maxCounts = countLetters(this.letters.toLocaleLowerCase())
-        filtered = filtered.filter((word) => {
-          if (!regex.test(word)) {
-            return false
-          }
-          const letterCounts = countLetters(word)
-          return !Object.keys(letterCounts).find(
-            (letter) => letterCounts[letter] > maxCounts[letter]
-          )
-        })
-      }
+    const regex = new RegExp(`^[${this.letters.toLocaleLowerCase()}]+$`)
+    if (this.reuseLetters) {
+      filtered = filtered.filter((word) => regex.test(word))
+    } else {
+      const maxCounts = countLetters(this.letters.toLocaleLowerCase())
+      filtered = filtered.filter((word) => {
+        if (!regex.test(word)) {
+          return false
+        }
+        const letterCounts = countLetters(word)
+        return !Object.keys(letterCounts).find(
+          (letter) => letterCounts[letter] > maxCounts[letter]
+        )
+      })
     }
     this.filterCount = filtered.length
+    this._filtered = filtered
+    console.log(filtered)
     return filtered
   }
 
