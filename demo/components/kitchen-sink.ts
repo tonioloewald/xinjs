@@ -89,9 +89,17 @@ class ShadowComponent extends Component {
     '::slotted(div)': {
       textAlign: 'center',
     },
+    '[part="border"]': {
+      content: ' ',
+      background: vars.textColor,
+      height: '1px',
+      width: '100%',
+      opacity: 0.5,
+    },
   })
   content = [
     slot({ part: 'first', name: 'first' }),
+    div({ part: 'border' }),
     slot(),
     slot({ part: 'last', name: 'last' }),
   ]
@@ -292,6 +300,10 @@ This is an in-browser test of key functionality including:
           '::part(first)': {
             color: 'red',
           },
+          '::part(border)': {
+            background: 'green',
+            opacity: 1,
+          },
           '::part(last)': {
             fontWeight: 'bold',
           },
@@ -300,7 +312,7 @@ This is an in-browser test of key functionality including:
       shadowComponent(
         p('This should be under the heading'),
         markdownViewer(
-          'Thanks to `::part()` selectors, the heading should be red and the footer should be bold'
+          'Thanks to `::part()` selectors, the line below the heading should be green, the heading should be red and the footer should be bold'
         ),
         div({ slot: 'last' }, 'This should be centered and shown last'),
         h4('<shadow-component> has a shadowDOM and three slots', {
