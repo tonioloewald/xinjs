@@ -220,6 +220,8 @@ const create = (
         value.split(' ').forEach((className: string) => {
           elt.classList.add(className)
         })
+      } else if (attr === 'part' && elt.tagName === 'part') {
+        elt.setAttribute('part', value)
       } else if ((elt as { [key: string]: any })[attr] !== undefined) {
         ;(elt as StringMap)[attr] = value
       } else if (typeof value === 'boolean') {

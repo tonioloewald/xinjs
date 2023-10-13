@@ -1093,6 +1093,7 @@ const $a20b878345862077$var$create = (tagType, ...contents)=>{
             if (attr === "class") value.split(" ").forEach((className)=>{
                 elt.classList.add(className);
             });
+            else if (attr === "part" && elt.tagName === "part") elt.setAttribute("part", value);
             else if (elt[attr] !== undefined) elt[attr] = value;
             else if (typeof value === "boolean") value ? elt.setAttribute(attr, "") : elt.removeAttribute(attr);
             else elt.setAttribute(attr, value);

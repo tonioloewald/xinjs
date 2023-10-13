@@ -16,6 +16,7 @@ const {
   template,
   fragment,
   style,
+  slot,
   xinSlot,
 } = elements
 
@@ -69,10 +70,30 @@ class LightComponent extends Component {
           padding: vars.spacing,
         },
       },
-      xinSlot({ name: 'first' }),
+      xinSlot({ part: 'first', name: 'first' }),
       xinSlot(),
-      xinSlot({ name: 'last' })
+      xinSlot({ part: 'last', name: 'last' })
     ),
+  ]
+}
+
+class ShadowComponent extends Component {
+  styleNode = Component.StyleNode({
+    ':host': {
+      display: 'flex',
+      flexDirection: 'column',
+      padding: vars.spacing,
+      gap: vars.spacing50,
+      background: vars.panelBg,
+    },
+    '::slotted(div)': {
+      textAlign: 'center',
+    },
+  })
+  content = [
+    slot({ part: 'first', name: 'first' }),
+    slot(),
+    slot({ part: 'last', name: 'last' }),
   ]
 }
 
@@ -80,6 +101,10 @@ const lightComponent = LightComponent.elementCreator({ tag: 'light-component' })
 
 const simpleComponent = SimpleComponent.elementCreator({
   tag: 'simple-component',
+})
+
+const shadowComponent = ShadowComponent.elementCreator({
+  tag: 'shadow-component',
 })
 
 type TestExpression = () => Promise<boolean> | boolean
@@ -261,6 +286,26 @@ This is an in-browser test of key functionality including:
             'this instance of <light-component> is nested and still works'
           )
         )
+      ),
+      style(
+        css({
+          '::part(first)': {
+            color: 'red',
+          },
+          '::part(last)': {
+            fontWeight: 'bold',
+          },
+        })
+      ),
+      shadowComponent(
+        p('This should be under the heading'),
+        markdownViewer(
+          'Thanks to `::part()` selectors, the heading should be red and the footer should be bold'
+        ),
+        div({ slot: 'last' }, 'This should be centered and shown last'),
+        h4('<shadow-component> has a shadowDOM and three slots', {
+          slot: 'first',
+        })
       ),
       lightComponent(
         {
