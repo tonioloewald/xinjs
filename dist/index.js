@@ -1,3 +1,6 @@
+function $parcel$export(e, n, v, s) {
+  Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
+}
 /*
   Note that re-exported types should be explicitly and separately exported
   as types because of issues with parceljs
@@ -540,14 +543,11 @@ const $5258c5e951c26004$var$handleBoundEvent = (event)=>{
             }
         }
     });
-    // eslint-disable-next-line no-unmodified-loop-condition
     while(!propagationStopped && target != null){
         const eventBindings = (0, $2f9efd8dbae277cd$export$fe712848e6e66613).get(target);
-        // eslint-disable-next-line
         const handlers = eventBindings[event.type] || [];
         for (const handler of handlers){
-            if (typeof handler === "function") // eslint-disable-next-line
-            handler(wrappedEvent);
+            if (typeof handler === "function") handler(wrappedEvent);
             else {
                 const func = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[handler];
                 if (typeof func === "function") func(wrappedEvent);
@@ -565,7 +565,6 @@ const $5258c5e951c26004$export$af631764ddc44097 = (element, eventType, eventHand
         eventBindings = {};
         (0, $2f9efd8dbae277cd$export$fe712848e6e66613).set(element, eventBindings);
     }
-    // eslint-disable-next-line
     if (!eventBindings[eventType]) eventBindings[eventType] = [];
     if (!eventBindings[eventType].includes(eventHandler)) eventBindings[eventType].push(eventHandler);
     if (!$5258c5e951c26004$var$handledEventTypes.has(eventType)) {
@@ -1078,6 +1077,10 @@ const $a20b878345862077$var$create = (tagType, ...contents)=>{
         } else if (key.match(/^on[A-Z]/) != null) {
             const eventType = key.substring(2).toLowerCase();
             (0, $5258c5e951c26004$export$af631764ddc44097)(elt, eventType, value);
+        } else if (key === "bind") {
+            const binding = typeof value.binding === "string" ? (0, $5c922f2f7914f4ef$export$97a1a3e6f39778d2)[value.binding] : value.binding;
+            if (binding !== undefined && value.value !== undefined) (0, $5258c5e951c26004$export$2385a24977818dd0)(elt, value.value, value.binding);
+            else throw new Error(`bad binding`);
         } else if (key.match(/^bind[A-Z]/) != null) {
             const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5);
             const binding = (0, $5c922f2f7914f4ef$export$97a1a3e6f39778d2)[bindingType];
@@ -1533,6 +1536,99 @@ const $dbb4e81089a7f491$export$93b87f7746612069 = (test = ()=>true)=>{
 
 
 
+var $c8d63d32a2a98788$exports = {};
+
+$parcel$export($c8d63d32a2a98788$exports, "XinTest", () => $c8d63d32a2a98788$export$e8658328209d5943);
+$parcel$export($c8d63d32a2a98788$exports, "xinTest", () => $c8d63d32a2a98788$export$b1604b020b2ce76d);
+
+
+const { span: $c8d63d32a2a98788$var$span, slot: $c8d63d32a2a98788$var$slot } = (0, $a20b878345862077$export$7a5d735b2ab6389d);
+class $c8d63d32a2a98788$export$e8658328209d5943 extends (0, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8) {
+    static delay(ms) {
+        return new Promise((resolve)=>{
+            setTimeout(resolve, ms);
+        });
+    }
+    constructor(){
+        super();
+        this.test = ()=>true;
+        this.delay = 0;
+        this.statis = "";
+        this.expect = true;
+        this.styleNode = (0, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8).StyleNode({
+            ":host": {
+                display: "flex",
+                gap: "5px",
+                alignItems: "center"
+            },
+            ':host [part="outcome"]': {
+                display: "inline-block",
+                borderRadius: "99px",
+                padding: "0 12px",
+                fontSize: "80%"
+            },
+            ":host .waiting": {
+                background: "#ff04"
+            },
+            ":host .running": {
+                background: "#f804"
+            },
+            ":host .success": {
+                background: "#0f04"
+            },
+            ":host .failed": {
+                background: "#f004"
+            },
+            ":host .exception": {
+                color: "white",
+                background: "red"
+            }
+        });
+        this.content = [
+            $c8d63d32a2a98788$var$span({
+                part: "description"
+            }, $c8d63d32a2a98788$var$slot()),
+            $c8d63d32a2a98788$var$span({
+                part: "outcome"
+            })
+        ];
+        this.run = ()=>{
+            clearTimeout(this.timeout);
+            this.status = "waiting";
+            this.timeout = setTimeout(async ()=>{
+                this.status = "running";
+                try {
+                    const outcome = JSON.stringify(await this.test());
+                    if (outcome === JSON.stringify(this.expect)) this.status = "success";
+                    else this.status = `failed: got ${outcome}, expected ${this.expect}`;
+                } catch (err) {
+                    this.status = `exception: ${err}`;
+                }
+            }, this.delay);
+        };
+        this.initAttributes("description", "delay", "status");
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this.run();
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.class;
+        clearTimeout(this.timeout);
+    }
+    render() {
+        super.render();
+        const { outcome: outcome } = this.parts;
+        outcome.textContent = this.status;
+        outcome.setAttribute("class", this.status.match(/\w+/)[0]);
+    }
+}
+const $c8d63d32a2a98788$export$b1604b020b2ce76d = $c8d63d32a2a98788$export$e8658328209d5943.elementCreator({
+    tag: "xin-test"
+});
+
+
 
 
 var $29ed5e5434553132$exports = {};
@@ -1552,5 +1648,5 @@ function $b43c5f28217f2268$export$95a552d2395ab4c4(obj) {
 
 
 
-export {$5258c5e951c26004$export$2385a24977818dd0 as bind, $5258c5e951c26004$export$af631764ddc44097 as on, $5c922f2f7914f4ef$export$97a1a3e6f39778d2 as bindings, $5ce3d7bba914ef8e$export$dbf350e5966cf602 as css, $5ce3d7bba914ef8e$export$808aaf1b460dc9af as darkMode, $5ce3d7bba914ef8e$export$90d0ea046136e3ed as initVars, $5ce3d7bba914ef8e$export$3cb96c9f6c8d16a4 as vars, $5ce3d7bba914ef8e$export$75c0e6adb3e38f31 as varDefault, $16008b2efdc923f4$export$892596cec99bc70e as Color, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 as Component, $a20b878345862077$export$7a5d735b2ab6389d as elements, $a20b878345862077$export$cf20112a1bc148da as svgElements, $a20b878345862077$export$8ec252cfdd664597 as mathML, $dbb4e81089a7f491$export$93b87f7746612069 as hotReload, $2f9efd8dbae277cd$export$4c309843c07ce679 as getListItem, $2f9efd8dbae277cd$export$40700dafb97c3799 as xinPath, $2f9efd8dbae277cd$export$5dcba2d45033d435 as xinValue, $e070b3c758093e25$export$5e0dd9fd5d74e0c5 as MoreMath, $f5502bd23d7f7c5a$export$a5a6e0b888b2c992 as settings, $b350994d7e7e7767$export$de363e709c412c8a as throttle, $b350994d7e7e7767$export$61fc7d43ac8f84b0 as debounce, $b3e4d800ba46b430$export$966034e6c6823eb0 as xin, $b3e4d800ba46b430$export$d1203567a167490e as observe, $26326a5bf69c90fe$export$23a2283368c55ea2 as unobserve, $26326a5bf69c90fe$export$d0b7ea69ab6056df as touch, $26326a5bf69c90fe$export$253d09664e30b967 as observerShouldBeRemoved, $26326a5bf69c90fe$export$1c2919332513559b as updates, $b43c5f28217f2268$export$95a552d2395ab4c4 as xinProxy};
+export {$5258c5e951c26004$export$2385a24977818dd0 as bind, $5258c5e951c26004$export$af631764ddc44097 as on, $5c922f2f7914f4ef$export$97a1a3e6f39778d2 as bindings, $5ce3d7bba914ef8e$export$dbf350e5966cf602 as css, $5ce3d7bba914ef8e$export$808aaf1b460dc9af as darkMode, $5ce3d7bba914ef8e$export$90d0ea046136e3ed as initVars, $5ce3d7bba914ef8e$export$3cb96c9f6c8d16a4 as vars, $5ce3d7bba914ef8e$export$75c0e6adb3e38f31 as varDefault, $16008b2efdc923f4$export$892596cec99bc70e as Color, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 as Component, $a20b878345862077$export$7a5d735b2ab6389d as elements, $a20b878345862077$export$cf20112a1bc148da as svgElements, $a20b878345862077$export$8ec252cfdd664597 as mathML, $dbb4e81089a7f491$export$93b87f7746612069 as hotReload, $2f9efd8dbae277cd$export$4c309843c07ce679 as getListItem, $2f9efd8dbae277cd$export$40700dafb97c3799 as xinPath, $2f9efd8dbae277cd$export$5dcba2d45033d435 as xinValue, $e070b3c758093e25$export$5e0dd9fd5d74e0c5 as MoreMath, $f5502bd23d7f7c5a$export$a5a6e0b888b2c992 as settings, $b350994d7e7e7767$export$de363e709c412c8a as throttle, $b350994d7e7e7767$export$61fc7d43ac8f84b0 as debounce, $b3e4d800ba46b430$export$966034e6c6823eb0 as xin, $b3e4d800ba46b430$export$d1203567a167490e as observe, $26326a5bf69c90fe$export$23a2283368c55ea2 as unobserve, $26326a5bf69c90fe$export$d0b7ea69ab6056df as touch, $26326a5bf69c90fe$export$253d09664e30b967 as observerShouldBeRemoved, $26326a5bf69c90fe$export$1c2919332513559b as updates, $b43c5f28217f2268$export$95a552d2395ab4c4 as xinProxy, $c8d63d32a2a98788$export$e8658328209d5943 as XinTest, $c8d63d32a2a98788$export$b1604b020b2ce76d as xinTest};
 //# sourceMappingURL=index.js.map

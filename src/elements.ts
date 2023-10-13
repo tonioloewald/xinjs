@@ -192,6 +192,16 @@ const create = (
     } else if (key.match(/^on[A-Z]/) != null) {
       const eventType = key.substring(2).toLowerCase()
       on(elt, eventType, value)
+    } else if (key === 'bind') {
+      const binding =
+        typeof value.binding === 'string'
+          ? bindings[value.binding]
+          : value.binding
+      if (binding !== undefined && value.value !== undefined) {
+        bind(elt, value.value, value.binding)
+      } else {
+        throw new Error(`bad binding`)
+      }
     } else if (key.match(/^bind[A-Z]/) != null) {
       const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5)
       const binding = bindings[bindingType]

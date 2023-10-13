@@ -1,4 +1,13 @@
-import { xinProxy, touch, elements, Component, vars, css } from '../../src'
+import {
+  xinProxy,
+  touch,
+  elements,
+  Component,
+  vars,
+  css,
+  xinTest,
+  XinTest,
+} from '../../src'
 import { markdownViewer } from './markdown-viewer'
 
 const {
@@ -115,60 +124,11 @@ const shadowComponent = ShadowComponent.elementCreator({
   tag: 'shadow-component',
 })
 
-type TestExpression = () => Promise<boolean> | boolean
-
-async function test(
-  container: HTMLElement,
-  description: string,
-  expr: TestExpression
-): Promise<void> {
-  const testOutcome = div({ class: 'test pending' }, description)
-  const testStart = Date.now()
-  const testInterval = setInterval(() => {
-    testOutcome.dataset.elapsed = ((Date.now() - testStart) * 0.001).toFixed(1)
-  }, 100)
-  container.append(testOutcome)
-  let result: boolean
-  try {
-    result = await expr()
-  } catch (err) {
-    result = false
-  }
-  clearInterval(testInterval)
-  testOutcome.classList.remove('pending')
-  testOutcome.classList.add(result ? 'pass' : 'fail')
-}
-
-function delay(ms: number = 100): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
-
-const runTests = async (container: HTMLElement): Promise<void> => {
-  await delay()
-  const simple = document.querySelector('simple-component') as SimpleComponent
-  test(container, 'test should be success', () => true)
-  test(container, 'test should be failure', () => false)
-  test(container, 'test should succeed after 5s', async () => {
-    await delay(5000)
-    return true
-  })
-  test(container, 'test should fail after 10s', async () => {
-    await delay(10000)
-    return false
-  })
-  test(
-    container,
-    'custom element camelCase prop is set',
-    () => simple.exampleProp !== null && simple.exampleProp().word === 'success'
-  )
-}
-
 const { formTest } = xinProxy({
   formTest: {
     string: 'hello xin',
     number: 3,
+    color: 'red',
     date: new Date().toISOString(),
     check1: false,
     check2: true,
@@ -217,6 +177,30 @@ This is an in-browser test of key functionality including:
       },
       label(span('name'), input({ bindValue: 'formTest.string' })),
       div(
+        h4('inline bindings'),
+        p(
+          {
+            class: 'inline-bound',
+            bind: {
+              value: 'formTest.color',
+              binding: {
+                toDOM(elt, value) {
+                  elt.style.color = value
+                },
+              },
+            },
+          },
+          'this should be red'
+        )
+      ),
+      xinTest('inline-bound paragraph should be red', {
+        expect: 'red',
+        test() {
+          return (document.querySelector('p.inline-bound') as HTMLElement).style
+            .color
+        },
+      }),
+      div(
         h4({ bindText: 'formTest.fleet.name' }),
         div(
           {
@@ -240,32 +224,50 @@ This is an in-browser test of key functionality including:
               lineHeight: vars.lineHeight,
               padding: `0 ${vars.spacing50}`,
             },
-            '.pending': {
-              background: '#ff8',
-            },
-            '.fail': {
-              background: '#f88',
-            },
-            '.pass': {
-              background: '#8f8',
-            },
-            '.test[data-elapsed]::after': {
-              fontSize: '75%',
-              background: '#0008',
-              color: '#fff',
-              lineHeight: vars.lineHeight75,
-              padding: `0 ${vars.spacing25}`,
-              borderRadius: vars.roundedRadius50,
-              display: 'inline-block',
-              content: '"[" attr(data-elapsed)"s elapsed]"',
-              marginLeft: vars.spacing50,
-            },
           })
         ),
         h4('Test Results'),
-        div({
-          class: 'test-container',
-          apply: runTests,
+        xinTest('should succeed', {
+          test() {
+            return true
+          },
+        }),
+        xinTest('should run for 2s the fail', {
+          async test() {
+            await XinTest.delay(2000)
+            return false
+          },
+        }),
+        xinTest('should succeed after 2s', {
+          delay: 2000,
+          test() {
+            return true
+          },
+        }),
+        xinTest('should wait 1s then fail after 3s', {
+          delay: 1000,
+          async test() {
+            await XinTest.delay(3000)
+            return false
+          },
+        }),
+        xinTest('should wait 1s, then throw after 1s', {
+          delay: 1000,
+          async test() {
+            await XinTest.delay(1000)
+            throw new Error('drat, foiled again!')
+          },
+        }),
+        xinTest('custom element camelCase prop is set', {
+          test() {
+            const simple = document.querySelector(
+              'simple-component'
+            ) as SimpleComponent
+            return (
+              simple.exampleProp !== null &&
+              simple.exampleProp().word === 'success'
+            )
+          },
         })
       ),
       simpleComponent(

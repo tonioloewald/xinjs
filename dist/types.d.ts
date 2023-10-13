@@ -286,15 +286,22 @@ export interface XinBindingSpec {
     value: XinTouchableType | any;
     [key: string]: any;
 }
+export type XinBindingSetter<T = HTMLElement> = (element: T, value: any, options?: XinObject) => void;
+export type XinBindingGetter<T = HTMLElement> = (element: T, options?: XinObject) => any;
 export interface XinBinding<T = HTMLElement> {
-    toDOM?: (element: T, value: any, options?: XinObject) => void;
-    fromDOM?: (element: T, options?: XinObject) => any;
+    toDOM?: XinBindingSetter<T>;
+    fromDOM?: XinBindingGetter<T>;
+}
+export interface XinInlineBinding {
+    value: XinTouchableType;
+    binding: XinBinding | string;
 }
 export interface ElementProps {
     onClick?: XinEventHandler<MouseEvent>;
     onInput?: XinEventHandler;
     onChange?: XinEventHandler;
     onSubmit?: XinEventHandler;
+    bind?: XinInlineBinding;
     bindValue?: XinBindingShortcut;
     bindText?: XinBindingShortcut;
     bindList?: XinBindingShortcut;
@@ -562,6 +569,22 @@ export abstract class Component extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
+type TestExpression = () => Promise<boolean> | boolean;
+export class XinTest extends Component {
+    test: TestExpression;
+    delay: number;
+    statis: string;
+    expect: boolean;
+    static delay(ms: number): Promise<void>;
+    styleNode: HTMLStyleElement;
+    content: HTMLSpanElement[];
+    constructor();
+    run: () => void;
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    render(): void;
+}
+export const xinTest: import("xin-types").ElementCreator;
 export function xinProxy<T extends AnyObject>(obj: T): T;
 
 //# sourceMappingURL=types.d.ts.map

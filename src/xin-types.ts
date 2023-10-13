@@ -60,15 +60,32 @@ export interface XinBindingSpec {
   [key: string]: any
 }
 
+export type XinBindingSetter<T = HTMLElement> = (
+  element: T,
+  value: any,
+  options?: XinObject
+) => void
+export type XinBindingGetter<T = HTMLElement> = (
+  element: T,
+  options?: XinObject
+) => any
+
 export interface XinBinding<T = HTMLElement> {
-  toDOM?: (element: T, value: any, options?: XinObject) => void
-  fromDOM?: (element: T, options?: XinObject) => any
+  toDOM?: XinBindingSetter<T>
+  fromDOM?: XinBindingGetter<T>
 }
+
+export interface XinInlineBinding {
+  value: XinTouchableType
+  binding: XinBinding | string
+}
+
 export interface ElementProps {
   onClick?: XinEventHandler<MouseEvent>
   onInput?: XinEventHandler
   onChange?: XinEventHandler
   onSubmit?: XinEventHandler
+  bind?: XinInlineBinding
   bindValue?: XinBindingShortcut
   bindText?: XinBindingShortcut
   bindList?: XinBindingShortcut

@@ -197,14 +197,11 @@ const handleBoundEvent = (event: Event): void => {
       }
     },
   })
-  // eslint-disable-next-line no-unmodified-loop-condition
   while (!propagationStopped && target != null) {
     const eventBindings = elementToHandlers.get(target) as XinEventBindings
-    // eslint-disable-next-line
     const handlers = eventBindings[event.type] || ([] as XinEventHandler[])
     for (const handler of handlers) {
       if (typeof handler === 'function') {
-        // eslint-disable-next-line
         handler(wrappedEvent)
       } else {
         const func = xin[handler]
@@ -236,7 +233,6 @@ export const on = (
     eventBindings = {}
     elementToHandlers.set(element, eventBindings)
   }
-  // eslint-disable-next-line
   if (!eventBindings[eventType]) {
     eventBindings[eventType] = []
   }

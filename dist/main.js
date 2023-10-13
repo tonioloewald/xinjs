@@ -588,14 +588,11 @@ const $fc64c421299f5d54$var$handleBoundEvent = (event)=>{
             }
         }
     });
-    // eslint-disable-next-line no-unmodified-loop-condition
     while(!propagationStopped && target != null){
         const eventBindings = (0, $3f1d78706f6d8212$export$fe712848e6e66613).get(target);
-        // eslint-disable-next-line
         const handlers = eventBindings[event.type] || [];
         for (const handler of handlers){
-            if (typeof handler === "function") // eslint-disable-next-line
-            handler(wrappedEvent);
+            if (typeof handler === "function") handler(wrappedEvent);
             else {
                 const func = (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[handler];
                 if (typeof func === "function") func(wrappedEvent);
@@ -613,7 +610,6 @@ const $fc64c421299f5d54$export$af631764ddc44097 = (element, eventType, eventHand
         eventBindings = {};
         (0, $3f1d78706f6d8212$export$fe712848e6e66613).set(element, eventBindings);
     }
-    // eslint-disable-next-line
     if (!eventBindings[eventType]) eventBindings[eventType] = [];
     if (!eventBindings[eventType].includes(eventHandler)) eventBindings[eventType].push(eventHandler);
     if (!$fc64c421299f5d54$var$handledEventTypes.has(eventType)) {
@@ -1126,6 +1122,10 @@ const $c004c420133596e3$var$create = (tagType, ...contents)=>{
         } else if (key.match(/^on[A-Z]/) != null) {
             const eventType = key.substring(2).toLowerCase();
             (0, $fc64c421299f5d54$export$af631764ddc44097)(elt, eventType, value);
+        } else if (key === "bind") {
+            const binding = typeof value.binding === "string" ? (0, $e49806807158e47d$export$97a1a3e6f39778d2)[value.binding] : value.binding;
+            if (binding !== undefined && value.value !== undefined) (0, $fc64c421299f5d54$export$2385a24977818dd0)(elt, value.value, value.binding);
+            else throw new Error(`bad binding`);
         } else if (key.match(/^bind[A-Z]/) != null) {
             const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5);
             const binding = (0, $e49806807158e47d$export$97a1a3e6f39778d2)[bindingType];
@@ -1581,6 +1581,99 @@ const $04b008a736a73fbf$export$93b87f7746612069 = (test = ()=>true)=>{
 
 
 
+var $f7fc83aae282e31a$exports = {};
+
+$parcel$export($f7fc83aae282e31a$exports, "XinTest", () => $f7fc83aae282e31a$export$e8658328209d5943);
+$parcel$export($f7fc83aae282e31a$exports, "xinTest", () => $f7fc83aae282e31a$export$b1604b020b2ce76d);
+
+
+const { span: $f7fc83aae282e31a$var$span, slot: $f7fc83aae282e31a$var$slot } = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
+class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $8c7b36581a3597bc$export$16fa2f45be04daa8) {
+    static delay(ms) {
+        return new Promise((resolve)=>{
+            setTimeout(resolve, ms);
+        });
+    }
+    constructor(){
+        super();
+        this.test = ()=>true;
+        this.delay = 0;
+        this.statis = "";
+        this.expect = true;
+        this.styleNode = (0, $8c7b36581a3597bc$export$16fa2f45be04daa8).StyleNode({
+            ":host": {
+                display: "flex",
+                gap: "5px",
+                alignItems: "center"
+            },
+            ':host [part="outcome"]': {
+                display: "inline-block",
+                borderRadius: "99px",
+                padding: "0 12px",
+                fontSize: "80%"
+            },
+            ":host .waiting": {
+                background: "#ff04"
+            },
+            ":host .running": {
+                background: "#f804"
+            },
+            ":host .success": {
+                background: "#0f04"
+            },
+            ":host .failed": {
+                background: "#f004"
+            },
+            ":host .exception": {
+                color: "white",
+                background: "red"
+            }
+        });
+        this.content = [
+            $f7fc83aae282e31a$var$span({
+                part: "description"
+            }, $f7fc83aae282e31a$var$slot()),
+            $f7fc83aae282e31a$var$span({
+                part: "outcome"
+            })
+        ];
+        this.run = ()=>{
+            clearTimeout(this.timeout);
+            this.status = "waiting";
+            this.timeout = setTimeout(async ()=>{
+                this.status = "running";
+                try {
+                    const outcome = JSON.stringify(await this.test());
+                    if (outcome === JSON.stringify(this.expect)) this.status = "success";
+                    else this.status = `failed: got ${outcome}, expected ${this.expect}`;
+                } catch (err) {
+                    this.status = `exception: ${err}`;
+                }
+            }, this.delay);
+        };
+        this.initAttributes("description", "delay", "status");
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this.run();
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this.class;
+        clearTimeout(this.timeout);
+    }
+    render() {
+        super.render();
+        const { outcome: outcome } = this.parts;
+        outcome.textContent = this.status;
+        outcome.setAttribute("class", this.status.match(/\w+/)[0]);
+    }
+}
+const $f7fc83aae282e31a$export$b1604b020b2ce76d = $f7fc83aae282e31a$export$e8658328209d5943.elementCreator({
+    tag: "xin-test"
+});
+
+
 
 
 var $b66768ad3e594848$exports = {};
@@ -1598,6 +1691,7 @@ function $fce641fe9ed990db$export$95a552d2395ab4c4(obj) {
 }
 
 
+$parcel$exportWildcard(module.exports, $f7fc83aae282e31a$exports);
 $parcel$exportWildcard(module.exports, $b66768ad3e594848$exports);
 
 
