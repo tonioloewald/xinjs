@@ -77,7 +77,7 @@ export interface XinBinding<T = HTMLElement> {
 
 export interface XinInlineBinding {
   value: XinTouchableType
-  binding: XinBinding | string
+  binding: XinBinding | XinBindingSetter | string
 }
 
 export interface ElementProps {
