@@ -519,7 +519,7 @@ export interface ElementsProxy {
 /**
  * elements is a proxy that produces ElementCreators, e.g.
  * elements.div() creates <div> elements and
- * elements.myElement() creatres <my-element> elements.
+ * elements.myElement() creates <my-element> elements.
  */
 export const elements: ElementsProxy;
 interface SVGElementsProxy {

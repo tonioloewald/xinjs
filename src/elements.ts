@@ -198,7 +198,13 @@ const create = (
           ? bindings[value.binding]
           : value.binding
       if (binding !== undefined && value.value !== undefined) {
-        bind(elt, value.value, value.binding)
+        bind(
+          elt,
+          value.value,
+          value.binding instanceof Function
+            ? { toDOM: value.binding }
+            : value.binding
+        )
       } else {
         throw new Error(`bad binding`)
       }
@@ -255,7 +261,7 @@ const fragment: ElementCreator<DocumentFragment> = (
 /**
  * elements is a proxy that produces ElementCreators, e.g.
  * elements.div() creates <div> elements and
- * elements.myElement() creatres <my-element> elements.
+ * elements.myElement() creates <my-element> elements.
  */
 export const elements = new Proxy(
   { fragment },

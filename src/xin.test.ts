@@ -1,5 +1,4 @@
-/* eslint-disable */
-// @ts-expect-error
+// @ts-expect-error bun:test
 import { test, expect } from 'bun:test'
 import { XinObject, XinProxyArray, XinProxyObject, XinArray } from './xin-types'
 import { xin, observe, unobserve, touch, updates, isValidPath } from './xin'
@@ -9,6 +8,10 @@ type Change = { path: string; value: any; observed?: any }
 const changes: Change[] = []
 const recordChange = (change: Change) => {
   changes.push(change)
+}
+async function resetChanges() {
+  await updates()
+  changes.splice(0)
 }
 
 const obj = {
@@ -46,18 +49,20 @@ test('handles arrays', () => {
 
 test('updates simple values', () => {
   const _test = xin.test as XinProxyObject
-  _test.message = 'xin rules'
-  // @ts-ignore-error
+  _test.message = 'xin rules!'
+  // @ts-expect-error it's just a test
   _test.value++
-  expect(_test.message).toBe('xin rules')
+  expect(_test.message).toBe('xin rules!')
   expect(_test.value).toBe(18)
 })
 
 test('array iterators', () => {
   let count = 0
-  // @ts-ignore-error
+  // @ts-expect-error it's just a test
   for (const item of xin.test.people) {
-    count++
+    if (item !== undefined) {
+      count++
+    }
   }
   expect(count).toBe(3)
 })
@@ -93,7 +98,7 @@ test('isValidPath', () => {
 })
 
 test('triggers listeners', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test', (path) => {
     recordChange({ path, value: xin[path] })
   })
@@ -121,15 +126,16 @@ test('triggers listeners', async () => {
   expect(changes[3].path).toBe('test.people')
   // expect map to NOT trigger change
   const ignore = (test.people as XinProxyArray).map(
-    (person) => `hello ${person}`
+    (person) => `hello ${String(person)}`
   )
+  expect(ignore === undefined).toBe(false)
   await updates()
   expect(changes.length).toBe(4)
   unobserve(listener)
 })
 
 test('listener paths are selective', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test.value', (path) => {
     recordChange({ path, value: xin[path] })
   })
@@ -142,7 +148,7 @@ test('listener paths are selective', async () => {
 })
 
 test('listener tests are selective', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe(/message/, (path) => {
     recordChange({ path, value: xin[path] })
   })
@@ -156,7 +162,7 @@ test('listener tests are selective', async () => {
 })
 
 test('async updates skip multiple updates to the same path', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test.value', (path) => {
     recordChange({ path, value: xin[path] })
   })
@@ -173,7 +179,7 @@ test('async updates skip multiple updates to the same path', async () => {
 })
 
 test('listener callback paths work', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test', 'test.cb')
   const test = xin.test as XinProxyObject
   test.message = 'hello'
@@ -186,7 +192,7 @@ test('listener callback paths work', async () => {
 })
 
 test('you can touch objects', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test', (path) => {
     recordChange({ path, value: xin[path] })
   })
@@ -213,7 +219,7 @@ test('you can touch objects', async () => {
 })
 
 test('instance changes trigger observers', async () => {
-  changes.splice(0)
+  await resetChanges()
 
   class Bar {
     parent: Baz
@@ -263,7 +269,7 @@ test('instance changes trigger observers', async () => {
   await updates()
   expect(changes.length).toBe(1)
 
-  changes.splice(0)
+  await resetChanges()
   expect((_test.baz as XinProxyObject)[XIN_VALUE]).toBe(baz)
   expect(_test.baz.x).toBe(17)
   expect(_test.baz.y).toBe(17)
@@ -284,29 +290,28 @@ test('instance changes trigger observers', async () => {
   await updates()
   expect(changes.length).toBe(2)
   expect(changes[1].path).toBe('test.baz.y')
-  ;(_test.baz.inc as Function)()
+  ;(_test.baz.inc as () => void)()
   await updates()
   expect(changes.length).toBe(2)
   expect(_test.baz.x).toBe(-9)
-  // @ts-ignore-error
   _test.baz.child.inc()
   await updates()
   expect(changes.length).toBe(2)
   expect(_test.baz.x).toBe(-8)
-  // @ts-ignore-error
   expect(_test.baz.x).toBe(_test.baz.child.parent.x)
 
   unobserve(listener)
 })
 
 test('handles array changes', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test', (path) => {
     recordChange({ path, value: xin[path] })
   })
   const _test = xin.test as XinProxyObject
   const people = _test.people as XinArray
-  // @ts-ignore-error
+  expect(people === undefined).toBe(false)
+  // @ts-expect-error it's a test
   _test.people.push('stanton')
   await updates()
   expect(changes.length).toBe(1)
@@ -320,7 +325,7 @@ test('handles array changes', async () => {
 
 test('objects are replaced', () => {
   const _test = xin.test as XinProxyObject
-  // @ts-ignore-error
+  // @ts-expect-error it's a test
   expect(_test.sub.foo).toBe('bar')
   _test.sub = {
     bar: 'baz',
@@ -330,7 +335,7 @@ test('objects are replaced', () => {
 })
 
 test('unobserve works', async () => {
-  changes.splice(0)
+  await resetChanges()
   const listener = observe('test', (path) => {
     recordChange({ path, value: xin[path] })
   })
@@ -390,7 +395,7 @@ test('parents and children', async () => {
     parent: { child: 17 },
   } as unknown as XinProxyObject
   const grandparent = xin.grandparent as XinObject
-  changes.splice(0)
+  await resetChanges()
   observe('grandparent.parent', (path) => {
     recordChange({ path, value: xin[path], observed: 'parent' })
   })

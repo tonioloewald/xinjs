@@ -1124,7 +1124,9 @@ const $c004c420133596e3$var$create = (tagType, ...contents)=>{
             (0, $fc64c421299f5d54$export$af631764ddc44097)(elt, eventType, value);
         } else if (key === "bind") {
             const binding = typeof value.binding === "string" ? (0, $e49806807158e47d$export$97a1a3e6f39778d2)[value.binding] : value.binding;
-            if (binding !== undefined && value.value !== undefined) (0, $fc64c421299f5d54$export$2385a24977818dd0)(elt, value.value, value.binding);
+            if (binding !== undefined && value.value !== undefined) (0, $fc64c421299f5d54$export$2385a24977818dd0)(elt, value.value, value.binding instanceof Function ? {
+                toDOM: value.binding
+            } : value.binding);
             else throw new Error(`bad binding`);
         } else if (key.match(/^bind[A-Z]/) != null) {
             const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5);
@@ -1375,7 +1377,6 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
                 get () {
                     if (typeof attributes[attributeName] === "boolean") return this.hasAttribute(attributeKabob);
                     else {
-                        // eslint-disable-next-line
                         if (this.hasAttribute(attributeKabob)) return typeof attributes[attributeName] === "number" ? parseFloat(this.getAttribute(attributeKabob)) : this.getAttribute(attributeKabob);
                         else if (attributeValues[attributeName] !== undefined) return attributeValues[attributeName];
                         else return attributes[attributeName];
@@ -1384,7 +1385,6 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
                 set (value) {
                     if (typeof attributes[attributeName] === "boolean") {
                         if (value !== this[attributeName]) {
-                            // eslint-disable-next-line
                             if (value) this.setAttribute(attributeKabob, "");
                             else this.removeAttribute(attributeKabob);
                             this.queueRender();

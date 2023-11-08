@@ -99,7 +99,6 @@ export abstract class Component extends HTMLElement {
           if (typeof attributes[attributeName] === 'boolean') {
             return this.hasAttribute(attributeKabob)
           } else {
-            // eslint-disable-next-line
             if (this.hasAttribute(attributeKabob)) {
               return typeof attributes[attributeName] === 'number'
                 ? parseFloat(this.getAttribute(attributeKabob))
@@ -114,7 +113,6 @@ export abstract class Component extends HTMLElement {
         set(value) {
           if (typeof attributes[attributeName] === 'boolean') {
             if (value !== this[attributeName]) {
-              // eslint-disable-next-line
               if (value) {
                 this.setAttribute(attributeKabob, '')
               } else {
