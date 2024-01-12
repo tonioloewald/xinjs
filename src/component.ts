@@ -20,7 +20,7 @@ interface ElementCreatorOptions extends ElementDefinitionOptions {
 
 export abstract class Component extends HTMLElement {
   static elements: ElementsProxy = elements
-  private static _elementCreator?: ElementCreator
+  private static _elementCreator?: ElementCreator<Component>
   instanceId: string
   styleNode?: HTMLStyleElement
   content: ContentType | (() => ContentType) | null = elements.slot()
