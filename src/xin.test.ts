@@ -1,8 +1,16 @@
 // @ts-expect-error bun:test
 import { test, expect } from 'bun:test'
 import { XinObject, XinProxyArray, XinProxyObject, XinArray } from './xin-types'
-import { xin, observe, unobserve, touch, updates, isValidPath } from './xin'
-import { XIN_VALUE, XIN_PATH } from './metadata'
+import {
+  xin,
+  boxed,
+  observe,
+  unobserve,
+  touch,
+  updates,
+  isValidPath,
+} from './xin'
+import { XIN_VALUE, XIN_PATH, xinPath } from './metadata'
 
 type Change = { path: string; value: any; observed?: any }
 const changes: Change[] = []
@@ -45,6 +53,22 @@ test('handles arrays', () => {
   const things = _test.things as XinProxyArray
   expect(people[0]).toBe('tomasina')
   expect(things['id=1701'].name).toBe('Enterprise')
+})
+
+test('boxed proxies', () => {
+  const _test = boxed.test as XinProxyObject
+  expect(_test.message.valueOf()).toBe('hello xin')
+  expect(xinPath(_test.message)).toBe('test.message')
+  // @ts-expect-error boxed values
+  expect(_test.people[1].valueOf()).toBe('juanita')
+  // @ts-expect-error boxed values
+  expect(xinPath(_test.people[1])).toBe('test.people[1]')
+  // @ts-expect-error boxed values
+  expect(_test.things['id=1701'].name.valueOf()).toBe('Enterprise')
+  // @ts-expect-error boxed values
+  expect(xinPath(_test.things['id=1701'].name)).toBe(
+    'test.things[id=1701].name'
+  )
 })
 
 test('updates simple values', () => {

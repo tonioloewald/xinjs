@@ -1,12 +1,13 @@
 import { XinProxyObject, AnyObject } from './xin-types'
-import { xin } from './xin'
+import { xin, boxed } from './xin'
 
-export function xinProxy<T extends AnyObject>(obj: T): T {
+export function xinProxy<T extends AnyObject>(obj: T, boxScalars = false): T {
   const registered: { [key: string]: any } = {}
   Object.keys(obj).forEach((key: string) => {
-    // eslint-disable-next-line
     xin[key] = (obj as { [key: string]: any })[key]
-    registered[key] = xin[key] as XinProxyObject
+    registered[key] = boxScalars
+      ? (boxed[key] as XinProxyObject)
+      : (xin[key] as XinProxyObject)
   })
   return registered as T
 }

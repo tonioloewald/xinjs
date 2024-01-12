@@ -64,7 +64,40 @@ const extendPath = (path = '', prop = ''): string => {
   }
 }
 
-const regHandler = (path = ''): ProxyHandler<XinObject> => ({
+const boxes: { [key: string]: (x: any) => any } = {
+  string(s: string) {
+    return new String(s)
+  },
+  boolean(b: boolean) {
+    return new Boolean(b)
+  },
+  bigint(b: BigInt) {
+    return b
+  },
+  symbol(s: Symbol) {
+    return s
+  },
+  number(n: number) {
+    return new Number(n)
+  },
+}
+
+function box<T extends any>(x: T, path: string): T {
+  const t = typeof x
+  if (x === undefined || t === 'object' || t === 'function') {
+    return x
+  } else {
+    return new Proxy<XinProxyTarget, XinObject>(
+      boxes[t](x),
+      regHandler(path, true)
+    ) as T
+  }
+}
+
+const regHandler = (
+  path: string,
+  boxScalars: boolean
+): ProxyHandler<XinObject> => ({
   // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
   // as you'd expect
   get(target: XinObject | XinArray, _prop: string | symbol): XinValue {
@@ -90,9 +123,10 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
       const currentPath = extendPath(path, basePath)
       const value = getByPath(target, basePath)
       return value !== null && typeof value === 'object'
-        ? new Proxy<XinObject, XinProxyObject>(value, regHandler(currentPath))[
-            subPath
-          ]
+        ? new Proxy<XinObject, XinProxyObject>(
+            value,
+            regHandler(currentPath, boxScalars)
+          )[subPath]
         : value
     }
     if (prop.startsWith('[') && prop.endsWith(']')) {
@@ -116,18 +150,18 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
         const currentPath = extendPath(path, prop)
         return new Proxy<XinObject, XinProxyObject>(
           value,
-          regHandler(currentPath)
+          regHandler(currentPath, boxScalars)
         ) as XinValue
       } else if (typeof value === 'function') {
         return value.bind(target)
       } else {
-        return value
+        return boxScalars ? box(value, extendPath(path, prop)) : value
       }
     } else if (Array.isArray(target)) {
       const value = target[prop as unknown as number]
       return typeof value === 'function'
         ? (...items: any[]) => {
-            // @ts-expect-error seriously, eslint?
+            // @ts-expect-error seriously?
             const result = Array.prototype[prop].apply(target, items)
             if (ARRAY_MUTATIONS.includes(prop)) {
               touch(path)
@@ -137,11 +171,15 @@ const regHandler = (path = ''): ProxyHandler<XinObject> => ({
         : typeof value === 'object'
         ? new Proxy<XinProxyTarget, XinObject>(
             value,
-            regHandler(extendPath(path, prop))
+            regHandler(extendPath(path, prop), boxScalars)
           )
+        : boxScalars
+        ? box(value, extendPath(path, prop))
         : value
     } else {
-      return target[prop]
+      return boxScalars
+        ? box(target[prop], extendPath(path, prop))
+        : target[prop]
     }
   },
   set(_, prop: string, value: any) {
@@ -175,10 +213,19 @@ const observe = (
   return _observe(test, func as ObserverCallbackFunction)
 }
 
-const xin = new Proxy<XinObject, XinProxyObject>(registry, regHandler())
+const xin = new Proxy<XinObject, XinProxyObject>(
+  registry,
+  regHandler('', false)
+)
+
+const boxed = new Proxy<XinObject, XinProxyObject>(
+  registry,
+  regHandler('', true)
+)
 
 export {
   xin,
+  boxed,
   updates,
   touch,
   observe,
