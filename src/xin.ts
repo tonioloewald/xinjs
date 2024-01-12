@@ -71,10 +71,10 @@ const boxes: { [key: string]: (x: any) => any } = {
   boolean(b: boolean) {
     return new Boolean(b)
   },
-  bigint(b: BigInt) {
+  bigint(b: bigint) {
     return b
   },
-  symbol(s: Symbol) {
+  symbol(s: symbol) {
     return s
   },
   number(n: number) {
@@ -82,7 +82,7 @@ const boxes: { [key: string]: (x: any) => any } = {
   },
 }
 
-function box<T extends any>(x: T, path: string): T {
+function box<T>(x: T, path: string): T {
   const t = typeof x
   if (x === undefined || t === 'object' || t === 'function') {
     return x

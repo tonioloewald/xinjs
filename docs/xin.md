@@ -2,7 +2,7 @@
 
 > In Mandarin, "xin" has several meanings including "truth" and "message".
 
-`xin` is an path-based implementation of the **observer** or **pub/sub** 
+`xin` is an path-based implementation of the **observer** or **pub/sub**
 pattern designed to be very simple and straightforward to use.
 
 ## In a nutshell
@@ -42,7 +42,7 @@ Once an object is assigned to  `xin`, changing it within `xin` is simple:
 
 But any changes can be observed by writing an observer:
 
-    import { observe } from 'xinjs' 
+    import { observe } from 'xinjs'
 
     observe('app.docs', (path) => {
       console.log(path, 'is now', xin[path])
@@ -77,7 +77,7 @@ in fact it assigns each property of the object passed to `xin` and returns its p
     import { xinProxy } from 'xinjs'
 
     const { foo, bar } = xinProxy({
-      foo: { /* stuff in foo */ }, 
+      foo: { /* stuff in foo */ },
       bar: { /* stuff in bar */ }
     })
 
@@ -95,7 +95,7 @@ The difference is that now Typescript automatically understands the types of `fo
 
 `xin` is a `Proxy` wrapped around a bare object: effectively a map of strings to values.
 
-When you access the properties of an object assigned to `xin` it wraps the values in 
+When you access the properties of an object assigned to `xin` it wraps the values in
 similar proxies, and tracks the **path** that got you there:
 
     xin.foo = {
@@ -121,6 +121,45 @@ If you **change** a value in a wrapped object, e.g.
 Then it will trigger any observers looking for relevant changes. And each change will fire the observer
 and tell it the `path` that was changed. E.g. an observer watching `lurman` will be fired if `lurman`
 or one of `lurman`'s properties is changed.
+
+## Boxed Proxies
+
+`boxed` is a sister to `xin` that wraps "scalar" values (`boolean`, `number`, `string`) in
+objects. E.g. if you write something like:
+
+    xin.test = { answer: 42 }
+    boxed.box = { pie: 'apple' }
+
+Then:
+
+    xin.test.answer === 42
+    xin.box.pie === 'apple'
+    // box wraps "scalars" in objects
+    boxed.test.answer.valueOf() === 42
+    boxed.box.pie.valueOf() === 'apple'
+    // anything that comes out of boxed has a path!
+    xinPath(boxed.test.answer) === 'test.answer'
+    xinPath(boxed.box.pie) === 'box.pie'
+
+Aside from always "boxing" scalar values, `boxed` works just like `xin`.
+
+And `xinProxy` will return a `boxed` proxy if you pass `true` as a second parameter, so:
+
+    const { prox } = xinProxy({
+        prox: {
+            message: 'hello'
+        }
+    }, true)
+
+Will give you a prox that emits boxed scalars.
+
+### Why?!
+
+As far as Typescript is concerned, `xinProxy` just passes back what you put into it,
+which means that you can now write bindings with type-checking and autocomplete and
+never use string literals. So something like this *just works*:
+
+    const div = elements.div({bindText: prox.message})
 
 ## If you need the thing itself or the path to the thing…
 
@@ -157,6 +196,6 @@ or even buried deeper…
       …
     ]
 
-Instead of referring to the first item in `messages` as `messages[0]` it can be referred to 
+Instead of referring to the first item in `messages` as `messages[0]` it can be referred to
 as `messages[id=1234abcd]`, and this will retrieve the item regardless of its position in messages.
 

@@ -359,7 +359,29 @@ const $b3e4d800ba46b430$var$extendPath = (path = "", prop = "")=>{
         else return `${path}.${prop}`;
     }
 };
-const $b3e4d800ba46b430$var$regHandler = (path = "")=>({
+const $b3e4d800ba46b430$var$boxes = {
+    string (s) {
+        return new String(s);
+    },
+    boolean (b) {
+        return new Boolean(b);
+    },
+    bigint (b) {
+        return b;
+    },
+    symbol (s) {
+        return s;
+    },
+    number (n) {
+        return new Number(n);
+    }
+};
+function $b3e4d800ba46b430$var$box(x, path) {
+    const t = typeof x;
+    if (x === undefined || t === "object" || t === "function") return x;
+    else return new Proxy($b3e4d800ba46b430$var$boxes[t](x), $b3e4d800ba46b430$var$regHandler(path, true));
+}
+const $b3e4d800ba46b430$var$regHandler = (path, boxScalars)=>({
         // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
         // as you'd expect
         get (target, _prop) {
@@ -379,7 +401,7 @@ const $b3e4d800ba46b430$var$regHandler = (path = "")=>({
                 const [, basePath, subPath] = compoundProp;
                 const currentPath = $b3e4d800ba46b430$var$extendPath(path, basePath);
                 const value = (0, $d43c1d4bf4059510$export$44b5bed83342a92f)(target, basePath);
-                return value !== null && typeof value === "object" ? new Proxy(value, $b3e4d800ba46b430$var$regHandler(currentPath))[subPath] : value;
+                return value !== null && typeof value === "object" ? new Proxy(value, $b3e4d800ba46b430$var$regHandler(currentPath, boxScalars))[subPath] : value;
             }
             if (prop.startsWith("[") && prop.endsWith("]")) prop = prop.substring(1, prop.length - 1);
             if (!Array.isArray(target) && target[prop] !== undefined || Array.isArray(target) && prop.includes("=")) {
@@ -390,18 +412,18 @@ const $b3e4d800ba46b430$var$regHandler = (path = "")=>({
                 } else value = target[prop];
                 if (value !== null && typeof value === "object") {
                     const currentPath = $b3e4d800ba46b430$var$extendPath(path, prop);
-                    return new Proxy(value, $b3e4d800ba46b430$var$regHandler(currentPath));
+                    return new Proxy(value, $b3e4d800ba46b430$var$regHandler(currentPath, boxScalars));
                 } else if (typeof value === "function") return value.bind(target);
-                else return value;
+                else return boxScalars ? $b3e4d800ba46b430$var$box(value, $b3e4d800ba46b430$var$extendPath(path, prop)) : value;
             } else if (Array.isArray(target)) {
                 const value = target[prop];
                 return typeof value === "function" ? (...items)=>{
-                    // @ts-expect-error seriously, eslint?
+                    // @ts-expect-error seriously?
                     const result = Array.prototype[prop].apply(target, items);
                     if ($b3e4d800ba46b430$var$ARRAY_MUTATIONS.includes(prop)) (0, $26326a5bf69c90fe$export$d0b7ea69ab6056df)(path);
                     return result;
-                } : typeof value === "object" ? new Proxy(value, $b3e4d800ba46b430$var$regHandler($b3e4d800ba46b430$var$extendPath(path, prop))) : value;
-            } else return target[prop];
+                } : typeof value === "object" ? new Proxy(value, $b3e4d800ba46b430$var$regHandler($b3e4d800ba46b430$var$extendPath(path, prop), boxScalars)) : boxScalars ? $b3e4d800ba46b430$var$box(value, $b3e4d800ba46b430$var$extendPath(path, prop)) : value;
+            } else return boxScalars ? $b3e4d800ba46b430$var$box(target[prop], $b3e4d800ba46b430$var$extendPath(path, prop)) : target[prop];
         },
         set (_, prop, value) {
             value = (0, $2f9efd8dbae277cd$export$5dcba2d45033d435)(value);
@@ -417,7 +439,8 @@ const $b3e4d800ba46b430$export$d1203567a167490e = (test, callback)=>{
     if (typeof func !== "function") throw new Error(`observe expects a function or path to a function, ${callback} is neither`);
     return (0, $26326a5bf69c90fe$export$d1203567a167490e)(test, func);
 };
-const $b3e4d800ba46b430$export$966034e6c6823eb0 = new Proxy($b3e4d800ba46b430$var$registry, $b3e4d800ba46b430$var$regHandler());
+const $b3e4d800ba46b430$export$966034e6c6823eb0 = new Proxy($b3e4d800ba46b430$var$registry, $b3e4d800ba46b430$var$regHandler("", false));
+const $b3e4d800ba46b430$export$fd1b43749dd321e5 = new Proxy($b3e4d800ba46b430$var$registry, $b3e4d800ba46b430$var$regHandler("", true));
 
 
 
@@ -1635,12 +1658,11 @@ var $29ed5e5434553132$exports = {};
 
 
 
-function $b43c5f28217f2268$export$95a552d2395ab4c4(obj) {
+function $b43c5f28217f2268$export$95a552d2395ab4c4(obj, boxScalars = false) {
     const registered = {};
     Object.keys(obj).forEach((key)=>{
-        // eslint-disable-next-line
         (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key] = obj[key];
-        registered[key] = (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key];
+        registered[key] = boxScalars ? (0, $b3e4d800ba46b430$export$fd1b43749dd321e5)[key] : (0, $b3e4d800ba46b430$export$966034e6c6823eb0)[key];
     });
     return registered;
 }

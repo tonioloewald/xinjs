@@ -585,6 +585,6 @@ export class XinTest extends Component {
     render(): void;
 }
 export const xinTest: import("xin-types").ElementCreator;
-export function xinProxy<T extends AnyObject>(obj: T): T;
+export function xinProxy<T extends AnyObject>(obj: T, boxScalars?: boolean): T;
 
 //# sourceMappingURL=types.d.ts.map

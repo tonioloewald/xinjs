@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test'
-import { xin, boxed } from './xin'
+import { xin } from './xin'
 import { xinPath } from './metadata'
 import { xinProxy } from './xin-proxy'
 
