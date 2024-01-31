@@ -255,7 +255,7 @@ This is simply provided as a convenient way to get to [elements](./elements.md)
 
 ### Component static methods
 
-#### Component.StyleNode(styleSpec: StyleSheet): HTMLStyleElement
+#### Component.StyleNode(styleSpec: StyleSheet, addToHead = false): HTMLStyleElement
 
     class ToolBar extends Component {
       styleNode = Component.StyleNode({
@@ -268,6 +268,61 @@ This is simply provided as a convenient way to get to [elements](./elements.md)
 
 A static class function that converts a `StyleSheet` object (think a map of CSS selector
 strings to CSS property maps) into a `<style>` element with the CSS in it.
+
+If you want to provide a global stylesheet, either because your component doesn't use the
+shadowDOM or just as a helper stylesheet, you can call `StyleNode()` with the `true` as the
+second parameter.
+
+You can use ':host' in the style selectors and `StyleNode` will replace it with the `tagName`
+in global stylesheets.
+
+For example, the following produces a component with a shadowDOM and red text:
+
+```
+export class ShadowRed extends Component {
+  styleNode = Component.StyleNode({
+    ':host': {
+      color: 'red'
+    }
+  })
+
+  ...
+}
+
+export const shadowRed = ShadowRed.elementCreator({
+  tag: 'shadow-red'
+}) as ElementCreator<ShadowRed>
+```
+
+On the other hand, this produces a component without a shadowDOM and red text:
+
+```
+export class LightRed extends Component {
+  ...
+}
+
+export const lightRed = LightRed.elementCreator({
+  tag: 'light-red'
+}) as ElementCreator<LightRed>
+
+LightRed.StyleNode({
+  ':host': {
+    color: 'red'
+  }
+}, true)
+```
+
+The `<style>` node will have `id="light-red"` and the CSS will look like this:
+
+```
+light-red {
+  color: red
+}
+```
+
+The advantage of this is that if you end up having a namespace clash with multiple
+web-components wanting to use the same tagName, `xinjs`'s `Component.elementCreator`
+will automatically choose a safe `tagName` and use it in the global stylesheet.
 
 #### Component.elementCreator(options? {extends?: string, tag?: string}): ElementCreator
 

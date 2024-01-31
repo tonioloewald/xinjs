@@ -18,17 +18,54 @@ interface ElementCreatorOptions extends ElementDefinitionOptions {
   styleSpec?: XinStyleSheet
 }
 
+const globalStyleSheets: {
+  [key: string]: HTMLStyleElement[]
+} = {}
+
+function insertGlobalStyles(tagName: string) {
+  for (const styleNode of globalStyleSheets[tagName] || []) {
+    document.head.append(styleNode)
+  }
+  delete globalStyleSheets[tagName]
+}
+
 export abstract class Component extends HTMLElement {
   static elements: ElementsProxy = elements
+  private static globalStyleSheets: HTMLStyleElement[] = []
   private static _elementCreator?: ElementCreator<Component>
   instanceId: string
   styleNode?: HTMLStyleElement
   content: ContentType | (() => ContentType) | null = elements.slot()
-  isSlotted?: boolean;
+  isSlotted?: boolean
+  private static _tagName: null | string = null
+  static get tagName(): null | string {
+    return this._tagName
+  }
   [key: string]: any
 
-  static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement {
-    return elements.style(css(styleSpec))
+  static StyleNode(
+    styleSpec: XinStyleSheet,
+    addToHead = false
+  ): HTMLStyleElement {
+    let cssSource = css(styleSpec)
+    if (addToHead) {
+      if (this.tagName === null) {
+        throw new Error(
+          'Use ComponentClass.elementCreator before creating global stylesheets for a component'
+        )
+      }
+      console.log(this.tagName)
+      cssSource = cssSource.replace(/:host/g, this.tagName)
+    }
+    const node = elements.style(cssSource)
+    if (addToHead) {
+      node.id = this.tagName!
+      const sheets =
+        globalStyleSheets[this.tagName!] ||
+        (globalStyleSheets[this.tagName!] = [])
+      sheets.push(node)
+    }
+    return node
   }
 
   static elementCreator(options: ElementCreatorOptions = {}): ElementCreator {
@@ -60,6 +97,7 @@ export abstract class Component extends HTMLElement {
         this as unknown as CustomElementConstructor,
         options
       )
+      this._tagName = tagName
       this._elementCreator = elements[tagName]
       if (styleSpec !== undefined) {
         let cssSource = css(styleSpec)
@@ -240,6 +278,7 @@ export abstract class Component extends HTMLElement {
   }
 
   connectedCallback(): void {
+    insertGlobalStyles(this.constructor.tagName!)
     this.hydrate()
     // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
     if (this.role != null) this.setAttribute('role', this.role)
