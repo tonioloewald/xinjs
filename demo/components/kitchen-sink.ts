@@ -41,7 +41,7 @@ class SimpleComponent extends Component {
   exampleProp: (() => { word: string }) | null = null
   undefinedProp: string | undefined
 
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host': {
       display: 'flex',
       flexDirection: 'column',
@@ -50,7 +50,7 @@ class SimpleComponent extends Component {
       gap: vars.spacing50,
       borderRadius: vars.roundedRadius,
     },
-  })
+  }
 }
 
 class LightComponent extends Component {
@@ -87,7 +87,7 @@ class LightComponent extends Component {
 }
 
 class ShadowComponent extends Component {
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host': {
       display: 'flex',
       flexDirection: 'column',
@@ -105,7 +105,8 @@ class ShadowComponent extends Component {
       width: '100%',
       opacity: 0.5,
     },
-  })
+  }
+
   content = [
     slot({ part: 'first', name: 'first' }),
     div({ part: 'border' }),
@@ -123,6 +124,35 @@ const simpleComponent = SimpleComponent.elementCreator({
 const shadowComponent = ShadowComponent.elementCreator({
   tag: 'shadow-component',
 })
+
+class ShadowRed extends Component {
+  static styleSpec = {
+    ':host': { color: 'red' },
+  }
+
+  content = div(
+    "this text should be red — it is styled by a styleNode in the component's shadowDOM"
+  )
+}
+
+const shadowRed = ShadowRed.elementCreator({ tag: 'shadow-red' })
+
+class LightBlue extends Component {
+  content = div(
+    'this text should be white on blue — it is styled using a global helper stylesheet'
+  )
+}
+
+const lightBlue = LightBlue.elementCreator({
+  tag: 'shadow-red',
+  styleSpec: {
+    ':host': {
+      color: 'white',
+      background: 'blue',
+    },
+  },
+})
+console.warn('^^^ this is intentional')
 
 const { formTest } = xinProxy({
   formTest: {
@@ -362,7 +392,7 @@ This is an in-browser test of key functionality including:
         span('select an option'),
         ...options.map((item) =>
           label(
-            { style: { flexDirection: 'row' } },
+            { class: 'row' },
             input({
               type: 'radio',
               name: 'radio-options',
@@ -392,12 +422,12 @@ This is an in-browser test of key functionality including:
         )
       ),
       label(
-        { style: { flexDirection: 'row' } },
+        { class: 'row' },
         input({ type: 'checkbox', bindValue: 'formTest.check1' }),
         span('checkbox 1')
       ),
       label(
-        { style: { flexDirection: 'row' } },
+        { class: 'row' },
         input({ type: 'checkbox', bindValue: 'formTest.check2' }),
         span('checkbox 2')
       ),
@@ -406,9 +436,7 @@ This is an in-browser test of key functionality including:
         ...options.map((item) =>
           label(
             {
-              style: {
-                flexDirection: 'row',
-              },
+              class: 'row',
               onChange() {
                 // this is to sync the multi-select
                 touch('formTest.pickAny')
@@ -435,6 +463,8 @@ This is an in-browser test of key functionality including:
         { id: 'test-options' },
         ...options.map((item) => option({ value: item }))
       ),
+      shadowRed(),
+      lightBlue(),
       div(
         {
           style: {

@@ -19,12 +19,22 @@ interface ElementCreatorOptions extends ElementDefinitionOptions {
 }
 
 const globalStyleSheets: {
-  [key: string]: HTMLStyleElement[]
+  [key: string]: string
 } = {}
 
+function setGlobalStyle(tagName: string, styleSpec: XinStyleSheet) {
+  const existing = globalStyleSheets[tagName]
+  const processed = css(styleSpec).replace(/:host\b/g, tagName)
+  globalStyleSheets[tagName] = existing
+    ? existing + '\n' + processed
+    : processed
+}
+
 function insertGlobalStyles(tagName: string) {
-  for (const styleNode of globalStyleSheets[tagName] || []) {
-    document.head.append(styleNode)
+  if (globalStyleSheets[tagName]) {
+    document.head.append(
+      elements.style({ id: tagName + '-component' }, globalStyleSheets[tagName])
+    )
   }
   delete globalStyleSheets[tagName]
 }
@@ -35,6 +45,8 @@ export abstract class Component extends HTMLElement {
   private static _elementCreator?: ElementCreator<Component>
   instanceId: string
   styleNode?: HTMLStyleElement
+  static styleSpec?: XinStyleSheet
+  static styleNode?: HTMLStyleElement
   content: ContentType | (() => ContentType) | null = elements.slot()
   isSlotted?: boolean
   private static _tagName: null | string = null
@@ -43,29 +55,11 @@ export abstract class Component extends HTMLElement {
   }
   [key: string]: any
 
-  static StyleNode(
-    styleSpec: XinStyleSheet,
-    addToHead = false
-  ): HTMLStyleElement {
-    let cssSource = css(styleSpec)
-    if (addToHead) {
-      if (this.tagName === null) {
-        throw new Error(
-          'Use ComponentClass.elementCreator before creating global stylesheets for a component'
-        )
-      }
-      console.log(this.tagName)
-      cssSource = cssSource.replace(/:host/g, this.tagName)
-    }
-    const node = elements.style(cssSource)
-    if (addToHead) {
-      node.id = this.tagName!
-      const sheets =
-        globalStyleSheets[this.tagName!] ||
-        (globalStyleSheets[this.tagName!] = [])
-      sheets.push(node)
-    }
-    return node
+  static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement {
+    console.warn(
+      'StyleNode is deprecated, just assign static styleSpec: XinStyleSheet to the class directly'
+    )
+    return elements.style(css(styleSpec))
   }
 
   static elementCreator(options: ElementCreatorOptions = {}): ElementCreator {
@@ -100,14 +94,7 @@ export abstract class Component extends HTMLElement {
       this._tagName = tagName
       this._elementCreator = elements[tagName]
       if (styleSpec !== undefined) {
-        let cssSource = css(styleSpec)
-        if (tag !== undefined && tagName !== tag) {
-          cssSource = cssSource.replace(
-            new RegExp(`\\b${tag}\\b`, 'g'),
-            tagName
-          )
-        }
-        document.head.append(elements.style({ id: tagName }, cssSource))
+        setGlobalStyle(tagName, styleSpec)
       }
     }
     return this._elementCreator
@@ -278,7 +265,7 @@ export abstract class Component extends HTMLElement {
   }
 
   connectedCallback(): void {
-    insertGlobalStyles(this.constructor.tagName!)
+    insertGlobalStyles((this.constructor as unknown as Component).tagName)
     this.hydrate()
     // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
     if (this.role != null) this.setAttribute('role', this.role)
@@ -324,9 +311,24 @@ export abstract class Component extends HTMLElement {
       const cloneElements = typeof this.content !== 'function'
       const _content: ContentType | null =
         typeof this.content === 'function' ? this.content() : this.content
-      if (this.styleNode !== undefined) {
+
+      const { styleSpec } = this.constructor as unknown as Component
+      let { styleNode } = this.constructor as unknown as Component
+      if (styleSpec) {
+        styleNode = (this.constructor as unknown as Component).styleNode =
+          elements.style(css(styleSpec))
+        delete (this.constructor as unknown as Component).styleNode
+      }
+      if (this.styleNode) {
+        console.warn(
+          this,
+          'styleNode is deprecrated, use static styleNode or statc styleSpec instead'
+        )
+        styleNode = this.styleNode
+      }
+      if (styleNode) {
         const shadow = this.attachShadow({ mode: 'open' })
-        shadow.appendChild(this.styleNode)
+        shadow.appendChild(styleNode.cloneNode(true))
         appendContentToElement(shadow, _content, cloneElements)
       } else if (_content !== null) {
         const existingChildren = [...this.childNodes]

@@ -2,7 +2,7 @@ import { Component } from '../../src'
 const { label, slot, span } = Component.elements
 
 class LabeledValue extends Component {
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host > label': {
       display: 'inline-flex',
       gap: 'calc(0.5 * var(--item-spacing))',
@@ -12,7 +12,7 @@ class LabeledValue extends Component {
     ':host *': {
       fontSize: 'var(--font-size)',
     },
-  })
+  }
   content = label(slot(), span({ part: 'field' }))
   value = ''
   render() {

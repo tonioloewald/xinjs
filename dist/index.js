@@ -1299,11 +1299,33 @@ function $0ea0392c3fe8c9d5$var$anonElementTag() {
     return `custom-elt${($0ea0392c3fe8c9d5$var$anonymousElementCount++).toString(36)}`;
 }
 let $0ea0392c3fe8c9d5$var$instanceCount = 0;
+const $0ea0392c3fe8c9d5$var$globalStyleSheets = {};
+function $0ea0392c3fe8c9d5$var$setGlobalStyle(tagName, styleSpec) {
+    const existing = $0ea0392c3fe8c9d5$var$globalStyleSheets[tagName];
+    const processed = (0, $5ce3d7bba914ef8e$export$dbf350e5966cf602)(styleSpec).replace(/:host\b/g, tagName);
+    $0ea0392c3fe8c9d5$var$globalStyleSheets[tagName] = existing ? existing + "\n" + processed : processed;
+}
+function $0ea0392c3fe8c9d5$var$insertGlobalStyles(tagName) {
+    if ($0ea0392c3fe8c9d5$var$globalStyleSheets[tagName]) document.head.append((0, $a20b878345862077$export$7a5d735b2ab6389d).style({
+        id: tagName + "-component"
+    }, $0ea0392c3fe8c9d5$var$globalStyleSheets[tagName]));
+    delete $0ea0392c3fe8c9d5$var$globalStyleSheets[tagName];
+}
 class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
     static #_ = (()=>{
         this.elements = (0, $a20b878345862077$export$7a5d735b2ab6389d);
     })();
+    static #_1 = (()=>{
+        this.globalStyleSheets = [];
+    })();
+    static #_2 = (()=>{
+        this._tagName = null;
+    })();
+    static get tagName() {
+        return this._tagName;
+    }
     static StyleNode(styleSpec) {
+        console.warn("StyleNode is deprecated, just assign static styleSpec: XinStyleSheet to the class directly");
         return (0, $a20b878345862077$export$7a5d735b2ab6389d).style((0, $5ce3d7bba914ef8e$export$dbf350e5966cf602)(styleSpec));
     }
     static elementCreator(options = {}) {
@@ -1323,14 +1345,9 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
             }
             while(customElements.get(tagName) !== undefined)tagName = $0ea0392c3fe8c9d5$var$anonElementTag();
             window.customElements.define(tagName, this, options);
+            this._tagName = tagName;
             this._elementCreator = (0, $a20b878345862077$export$7a5d735b2ab6389d)[tagName];
-            if (styleSpec !== undefined) {
-                let cssSource = (0, $5ce3d7bba914ef8e$export$dbf350e5966cf602)(styleSpec);
-                if (tag !== undefined && tagName !== tag) cssSource = cssSource.replace(new RegExp(`\\b${tag}\\b`, "g"), tagName);
-                document.head.append((0, $a20b878345862077$export$7a5d735b2ab6389d).style({
-                    id: tagName
-                }, cssSource));
-            }
+            if (styleSpec !== undefined) $0ea0392c3fe8c9d5$var$setGlobalStyle(tagName, styleSpec);
         }
         return this._elementCreator;
     }
@@ -1445,6 +1462,7 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
         this._value = (0, $112629d06f618001$export$b7d58db314e0ac27)(this.defaultValue);
     }
     connectedCallback() {
+        $0ea0392c3fe8c9d5$var$insertGlobalStyles(this.constructor.tagName);
         this.hydrate();
         // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
         if (this.role != null) this.setAttribute("role", this.role);
@@ -1479,11 +1497,21 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
             this.initValue();
             const cloneElements = typeof this.content !== "function";
             const _content = typeof this.content === "function" ? this.content() : this.content;
-            if (this.styleNode !== undefined) {
+            const { styleSpec: styleSpec } = this.constructor;
+            let { styleNode: styleNode } = this.constructor;
+            if (styleSpec) {
+                styleNode = this.constructor.styleNode = (0, $a20b878345862077$export$7a5d735b2ab6389d).style((0, $5ce3d7bba914ef8e$export$dbf350e5966cf602)(styleSpec));
+                delete this.constructor.styleNode;
+            }
+            if (this.styleNode) {
+                console.warn(this, "styleNode is deprecrated, use static styleNode or statc styleSpec instead");
+                styleNode = this.styleNode;
+            }
+            if (styleNode) {
                 const shadow = this.attachShadow({
                     mode: "open"
                 });
-                shadow.appendChild(this.styleNode);
+                shadow.appendChild(styleNode.cloneNode(true));
                 (0, $937ce97164a17ff0$export$6bb13967611cdb1)(shadow, _content, cloneElements);
             } else if (_content !== null) {
                 const existingChildren = [
@@ -1572,13 +1600,8 @@ class $c8d63d32a2a98788$export$e8658328209d5943 extends (0, $0ea0392c3fe8c9d5$ex
             setTimeout(resolve, ms);
         });
     }
-    constructor(){
-        super();
-        this.test = ()=>true;
-        this.delay = 0;
-        this.statis = "";
-        this.expect = true;
-        this.styleNode = (0, $0ea0392c3fe8c9d5$export$16fa2f45be04daa8).StyleNode({
+    static #_ = (()=>{
+        this.styleSpec = {
             ":host": {
                 display: "flex",
                 gap: "5px",
@@ -1606,7 +1629,14 @@ class $c8d63d32a2a98788$export$e8658328209d5943 extends (0, $0ea0392c3fe8c9d5$ex
                 color: "white",
                 background: "red"
             }
-        });
+        };
+    })();
+    constructor(){
+        super();
+        this.test = ()=>true;
+        this.delay = 0;
+        this.statis = "";
+        this.expect = true;
         this.content = [
             $c8d63d32a2a98788$var$span({
                 part: "description"

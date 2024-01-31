@@ -21,8 +21,8 @@ import { wordSearch } from './WordSearch'
 import { listFilterDemo } from './components'
 import { fauxSlots } from './faux-slots'
 import { Color } from '../src/color'
-const logo = './assets/xinjs-logo.svg'
-const readmeMd = './assets/readme.md'
+const logo = '../assets/xinjs-logo.svg'
+const readmeMd = '../assets/readme.md'
 
 xin.app = {
   title: 'docs & tests',

@@ -12,7 +12,7 @@ and reusably in Javascript because:
   and bad in CSS. In Javascript it's simply an error!
 
 The `css` module attempts to implement all this the simplest and most obvious way possible,
-providing syntax sugar to help with best-practices such as `css-variables` and the use of 
+providing syntax sugar to help with best-practices such as `css-variables` and the use of
 `@media` queries to drive consistency, themes, and accessibility.
 
 ## css(styleMap: XinStyleMap): string
@@ -111,7 +111,7 @@ You can write:
       buttonHeight: calc(`vars.lineHeight + vars.spacing200`)
     })
 
-And then render this as CSS and stick it into a StyleNode and it will work.
+And then render this as CSS and stick it into a `<style>` element and it will work.
 
 You *cannot* write:
 
@@ -122,7 +122,7 @@ You *cannot* write:
 
 Because `--background` isn't defined on `document.body` yet, so vars.background_b5
 won't be able to tell what `--background` is going to be yet. So either you need to
-do this in two stags (create a StyleNode that defines the base color `--background`
+do this in two stags (create a `<style>` element that defines the base color `--background`
 then define the computed colors and add thos) OR use a `Color` instance:
 
     const background = Color.fromCss('#fafafa')
@@ -136,10 +136,10 @@ Until browsers support color calculations the way they support dimenion arithmet
 this is the miserable existence we all lead. That, or defining huge arrays of color
 values that we mostly don't use and are often not exactly what we want. You choose!
 
-> **New** color now supports CSS [named colors](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color), 
+> **New** color now supports CSS [named colors](https://developer.mozilla.org/en-US/docs/Web/CSS/named-color),
 such as `black`, `red`, and `aliceblue`.
 
-`vars` also allows you to perform color calculations on css (color) 
+`vars` also allows you to perform color calculations on css (color)
 variables:
 
 #### Change luminance with `b` (for brighten) suffix
@@ -174,7 +174,7 @@ resulting color to the value provided.
 
 The more I use the `css` module, the more I like it and the more ideas I have
 to make it even better, but I have a very tight size/complexity target
-for `xinjs` so these new ideas really have to earn a spot. Perhaps the 
+for `xinjs` so these new ideas really have to earn a spot. Perhaps the
 feature I have come closest to adding and then decided against was providing
 syntax-sugar for classs so that:
 
@@ -197,9 +197,9 @@ look different which violates the "principle of least surprise". So, no.
 
 ### Something to Declare
 
-Where I am always looking to improve this module (and all of `xinjs`) is to 
+Where I am always looking to improve this module (and all of `xinjs`) is to
 do a better job of **declaring** things to improve autocomplete behavior and
-minimize casting and other Typescript antipatterns. E.g. adding a ton of 
+minimize casting and other Typescript antipatterns. E.g. adding a ton of
 declarations to `elements` and `css` has done wonders to reduce the need for
 stuff like `const nameElement = this.parts.nameField as unknown as HTMLInputElement`
 and prevent css property typos without adding a single byte to the size of

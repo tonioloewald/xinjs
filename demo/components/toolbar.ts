@@ -1,7 +1,7 @@
 import { Component, vars } from '../../src/index'
 
 class ToolBar extends Component {
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host': {
       display: 'flex',
       gap: vars.itemSpacing50,
@@ -18,10 +18,10 @@ class ToolBar extends Component {
       whiteSpace: 'nowrap',
       lineHeight: vars.lineHeight,
     },
-    ':Host > * + *': {
+    ':host > * + *': {
       marginLeft: vars.itemSpacing50,
     },
-  })
+  }
 }
 
 export const toolBar = ToolBar.elementCreator()

@@ -2,7 +2,7 @@ import { elements, Component } from '../../src/index'
 const { fragment, slot, div } = elements
 
 class AppLayout extends Component {
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host': {
       display: 'flex',
       flexDirection: 'column',
@@ -15,7 +15,8 @@ class AppLayout extends Component {
     '::slotted(:not([slot]))': {
       flex: '1 1 auto',
     },
-  })
+  }
+
   content = fragment(
     slot({ name: 'header' }),
     div(

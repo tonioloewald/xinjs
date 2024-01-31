@@ -2,7 +2,7 @@ import { elements, Component, vars } from '../../src/index'
 const { label, slot, input } = elements
 
 class LabeledInput extends Component {
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host > label': {
       display: 'inline-flex',
       flexDirection: 'var(--flex-direction, row)',
@@ -30,7 +30,7 @@ class LabeledInput extends Component {
     ':host input[type="number"]': {
       paddingRight: vars.spacing50,
     },
-  })
+  }
   content = label({ part: 'label' }, slot(), input({ part: 'field' }))
   type = ''
   placeholder = ''

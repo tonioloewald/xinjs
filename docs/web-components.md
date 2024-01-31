@@ -13,12 +13,12 @@ new component's element and produces instances of it as needed.
     import {Component} from 'xinjs'
 
     class ToolBar extends Component {
-      styleNode = Component.StyleNode({
+      static styleSpec = {
         ':host': {
           display: 'flex',
           gap: '10px',
         },
-      })
+      }
     }
 
     export const toolBar = ToolBar.elementCreator({ tag: 'tool-bar' })
@@ -94,15 +94,16 @@ If you'd like to see a more complex example along the same lines, look at
 
     const {slot} = Component.elements
     class MenuBar extends Component {
-      styleNode: Component.StyleNode({
+      static styleSpec = {
         ':host, :host > slot': {
           display: 'flex',
         },
         ':host > slot:nth-child(1)': {
           flex: '1 1 auto'
         },
-      })
-      content: [slot(), slot({name: 'gadgets'})]
+      }
+
+      content = [slot(), slot({name: 'gadgets'})]
     }
 
     export menuBar = MenuBar.elementCreator()
@@ -255,85 +256,42 @@ This is simply provided as a convenient way to get to [elements](./elements.md)
 
 ### Component static methods
 
-#### Component.StyleNode(styleSpec: StyleSheet, addToHead = false): HTMLStyleElement
+#### Component.elementCreator(options? {tag?: string, styleSpec: XinStyleSheet}): ElementCreator
 
-    class ToolBar extends Component {
-      styleNode = Component.StyleNode({
-        ':host': {
+    export const toolBar = ToolBar.elementCreator({tag: 'tool-bar'})
+
+Returns a function that creates the custom-element. If you don't pass a `tag` or if the provided tag
+is already in use, a new unique tag will be used.
+
+If no tag is provided, the Component will try to use introspection to "snake-case" the
+"ClassName", but if you're using name mangling this won't work and you'll get something
+pretty meaningless.
+
+If you want to create a global `<style>` sheet for the element (especially useful if
+your component doesn't use the `shadowDOM`) then you can pass `styleSpec`. E.g.
+
+    export const toolBar = ToolBar.elementCreator({
+      tag: 'tool-bar',
+      styleSpec: {
+        ':host': { // note that ':host' will be turned into the tagName automatically!
           display: 'flex',
-          gap: '10px',
-        },
-      })
-    }
+          padding: 'var(--toolbar-padding, 0 8px)',
+          gap: '4px'
+        }
+      }
+    })
 
-A static class function that converts a `StyleSheet` object (think a map of CSS selector
-strings to CSS property maps) into a `<style>` element with the CSS in it.
+This will—assuming "tool-bar" is available—create:
 
-If you want to provide a global stylesheet, either because your component doesn't use the
-shadowDOM or just as a helper stylesheet, you can call `StyleNode()` with the `true` as the
-second parameter.
+    <style id="tool-bar-helper">
+      tool-bar {
+        display: flex;
+        padding: var(--toolbar-padding, 0 8px);
+        gap: 4px;
+      }
+    <style>
 
-You can use ':host' in the style selectors and `StyleNode` will replace it with the `tagName`
-in global stylesheets.
-
-For example, the following produces a component with a shadowDOM and red text:
-
-```
-export class ShadowRed extends Component {
-  styleNode = Component.StyleNode({
-    ':host': {
-      color: 'red'
-    }
-  })
-
-  ...
-}
-
-export const shadowRed = ShadowRed.elementCreator({
-  tag: 'shadow-red'
-}) as ElementCreator<ShadowRed>
-```
-
-On the other hand, this produces a component without a shadowDOM and red text:
-
-```
-export class LightRed extends Component {
-  ...
-}
-
-export const lightRed = LightRed.elementCreator({
-  tag: 'light-red'
-}) as ElementCreator<LightRed>
-
-LightRed.StyleNode({
-  ':host': {
-    color: 'red'
-  }
-}, true)
-```
-
-The `<style>` node will have `id="light-red"` and the CSS will look like this:
-
-```
-light-red {
-  color: red
-}
-```
-
-The advantage of this is that if you end up having a namespace clash with multiple
-web-components wanting to use the same tagName, `xinjs`'s `Component.elementCreator`
-will automatically choose a safe `tagName` and use it in the global stylesheet.
-
-#### Component.elementCreator(options? {extends?: string, tag?: string}): ElementCreator
-
-    export const toolBar = ToolBar.elementCreator()
-
-Returns a function that creates the custom-element. You can specify the tag and the
-pre-existing element it extends if you like (this is crucial if you're using scope-hoisting name-mangling
-minifiers). By default, the tag is produced by kabob-casing the class name (so `class FooBar…`
-implements `<foo-bar>`).
-
-If there's no second bar, then `-elt` is added to the tag. So `class Foo…` implements `<foo-elt>`.
+And append it to `document.head` when the first instance of `<tool-bar>` is inserted in the DOM.
 
 Finally, `elementCreator` is memoized and only generated once (and the arguments are
 ignored on all subsequent calls).

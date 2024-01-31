@@ -550,8 +550,11 @@ export abstract class Component extends HTMLElement {
     static elements: ElementsProxy;
     instanceId: string;
     styleNode?: HTMLStyleElement;
+    static styleSpec?: XinStyleSheet;
+    static styleNode?: HTMLStyleElement;
     content: ContentType | (() => ContentType) | null;
     isSlotted?: boolean;
+    static get tagName(): null | string;
     [key: string]: any;
     static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement;
     static elementCreator(options?: ElementCreatorOptions): ElementCreator;
@@ -576,7 +579,35 @@ export class XinTest extends Component {
     statis: string;
     expect: boolean;
     static delay(ms: number): Promise<void>;
-    styleNode: HTMLStyleElement;
+    static styleSpec: {
+        ':host': {
+            display: string;
+            gap: string;
+            alignItems: string;
+        };
+        ':host [part="outcome"]': {
+            display: string;
+            borderRadius: string;
+            padding: string;
+            fontSize: string;
+        };
+        ':host .waiting': {
+            background: string;
+        };
+        ':host .running': {
+            background: string;
+        };
+        ':host .success': {
+            background: string;
+        };
+        ':host .failed': {
+            background: string;
+        };
+        ':host .exception': {
+            color: string;
+            background: string;
+        };
+    };
     content: HTMLSpanElement[];
     constructor();
     run: () => void;

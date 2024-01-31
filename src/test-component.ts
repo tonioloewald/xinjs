@@ -17,7 +17,7 @@ export class XinTest extends Component {
     })
   }
 
-  styleNode = Component.StyleNode({
+  static styleSpec = {
     ':host': {
       display: 'flex',
       gap: '5px',
@@ -45,7 +45,7 @@ export class XinTest extends Component {
       color: 'white',
       background: 'red',
     },
-  })
+  }
 
   private timeout?: number
 

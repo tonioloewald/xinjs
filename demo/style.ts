@@ -128,11 +128,17 @@ const rules: XinStyleSheet = {
   'labeled-input, labeled-value': {
     display: 'block',
   },
-  label: {
+  'label, .row': {
     display: 'flex',
-    flexDirection: 'column',
     gap: vars.spacing50,
+  },
+  label: {
+    flexDirection: 'column',
     marginTop: vars.spacing,
+  },
+  '.row': {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   select: {
     appearance: 'none',
