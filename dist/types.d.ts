@@ -530,7 +530,8 @@ interface MathMLElementsProxy {
     [key: string]: ElementCreator<MathMLElement>;
 }
 export const mathML: MathMLElementsProxy;
-export const css: (obj: XinStyleSheet | XinStyleMap, indentation?: string) => string;
+export function StyleSheet(id: string, styleSpec: XinStyleSheet): void;
+export const css: (obj: XinStyleSheet, indentation?: string) => string;
 export const initVars: (obj: {
     [key: string]: string | number;
 }) => XinStyleRule;

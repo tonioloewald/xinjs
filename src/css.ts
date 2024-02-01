@@ -1,7 +1,7 @@
 import { Color } from './color'
 import { elements } from './elements'
 import { camelToKabob } from './string-case'
-import { XinStyleSheet, XinStyleRule, XinStyleMap } from './css-types'
+import { XinStyleSheet, XinStyleRule } from './css-types'
 
 export function StyleSheet(id: string, styleSpec: XinStyleSheet) {
   const element = elements.style(css(styleSpec))

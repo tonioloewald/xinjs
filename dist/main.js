@@ -26,6 +26,7 @@ $parcel$export(module.exports, "darkMode", () => $db77bb2de3733b56$export$808aaf
 $parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
 $parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
 $parcel$export(module.exports, "varDefault", () => $db77bb2de3733b56$export$75c0e6adb3e38f31);
+$parcel$export(module.exports, "StyleSheet", () => $db77bb2de3733b56$export$9d753cd7ae895cce);
 $parcel$export(module.exports, "Color", () => $dde521108530e806$export$892596cec99bc70e);
 $parcel$export(module.exports, "Component", () => $8c7b36581a3597bc$export$16fa2f45be04daa8);
 $parcel$export(module.exports, "elements", () => $c004c420133596e3$export$7a5d735b2ab6389d);
@@ -1215,8 +1216,9 @@ const $c004c420133596e3$export$8ec252cfdd664597 = new Proxy({
 
 
 
-function $db77bb2de3733b56$export$bc59121b0a0fcbd3(styleSheet) {
-    return (0, $c004c420133596e3$export$7a5d735b2ab6389d).style($db77bb2de3733b56$export$dbf350e5966cf602(styleSheet));
+function $db77bb2de3733b56$export$9d753cd7ae895cce(id, styleSpec) {
+    const element = (0, $c004c420133596e3$export$7a5d735b2ab6389d).style($db77bb2de3733b56$export$dbf350e5966cf602(styleSpec));
+    element.id = id;
 }
 const $db77bb2de3733b56$var$numericProps = [
     "animation-iteration-count",
