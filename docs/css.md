@@ -1,11 +1,11 @@
 # css
 
-This is a collection of utilities for working with CSS rules.
+This is a collection of utilities for working with CSS.
 
 The basic goal is to be able to implement some or all of our CSS very efficiently, compactly,
 and reusably in Javascript because:
 
-- Javascript quality tooling is really good, CSS quality tooling is terrible
+- Javascript tooling is really good, CSS quality tooling is terrible
 - Having to write CSS in Javascript is *inevitable* so it might as well be consistent and painless
 - It turns out you can get by with *much less* and generally *simpler* CSS this way
 - You get some natural wins this way. E.g. writing two definitions of `body {}` is easy to do
@@ -39,10 +39,10 @@ can remind you that it's `whiteSpace` and not `whitespace`.
     document.head.append(style(css(myStyleMap)))
 
 If a bare, non-zero **number** is assigned to a CSS property it will have 'px' suffixed
-to it automatically. There are *no bare numeric*ele properties in CSS except `0`.
+to it automatically. There are *no bare numeric* properties in CSS except `0`.
 
 Why `px`? Well the other obvious options would be `rem` and `em` but `px` seems the
-least surprising option.
+least surprising option. (I've heard the arguments for `rem` and they make my head spin.)
 
 `css` should render nested rules, such as `@keyframes` and `@media` correctly.
 
@@ -51,9 +51,23 @@ least surprising option.
 This is a convenience function for creating `<style>` elements (with the id provided)
 and appending them to `document.head`.
 
+    StyleSheet('base-style', {
+      '*': {
+        boxSizing: 'border-box'
+      }
+    })
+
+Will insert the following in the `document.head` (with no formatting):
+
+    <style id="base-style">
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+
 ## initVars({[key: string]: any}) => {[key: string]: any}
 
-Given a map of CSS properties (in camelCase) form emit a map of css-variables to
+Given a map of CSS properties (in camelCase) emit a map of css-variables to
 the values, with `px` suffixed to bare numbers where appropriate.
 
     const cssVars = {
@@ -65,6 +79,7 @@ the values, with `px` suffixed to bare numbers where appropriate.
     const myStyleMap = {
       ':root': initVars(cssVars)
     }
+
 ## darkMode({[key: string]: any}) => {[key: string]: string}
 
 Given a map of CSS properties (in camelCase) emit a map of those properties that
@@ -181,7 +196,7 @@ The more I use the `css` module, the more I like it and the more ideas I have
 to make it even better, but I have a very tight size/complexity target
 for `xinjs` so these new ideas really have to earn a spot. Perhaps the
 feature I have come closest to adding and then decided against was providing
-syntax-sugar for classs so that:
+syntax-sugar for classes so that:
 
     css({
       _foo: {
@@ -199,6 +214,26 @@ But looking at the code I and others have written, the case for this is weak as 
 declarations are not just bare classes. This doesn't help with declarations
 for `input.foo` or `.foo::after` or `.foo > *` and now there'd be things that
 look different which violates the "principle of least surprise". So, no.
+
+Another thought:
+
+    css({
+      ':root': {
+        _font: 'Roboto, sans-serif',
+        __textColor: 'red',
+      }
+    })
+
+Could render:
+
+    :root {
+      --font: Roboto, sans-serif,
+      --text-color: var(--text-color, red),
+    }
+
+The idea here is to make defining both css-variables directly and as inherited much easier.
+The main thing holding me back here is that a lot of lint tools complain blue murder about
+leading underscores in property names.
 
 ### Something to Declare
 
