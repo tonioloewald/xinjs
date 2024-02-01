@@ -15,9 +15,9 @@ The `css` module attempts to implement all this the simplest and most obvious wa
 providing syntax sugar to help with best-practices such as `css-variables` and the use of
 `@media` queries to drive consistency, themes, and accessibility.
 
-## css(styleMap: XinStyleMap): string
+## css(styleMap: XinStyleSheet): string
 
-A function that, given a `XinStyleMap` renders CSS code. What is a XinStyleMap?
+A function that, given a `XinStyleSheet` renders CSS code. What is a XinStyleSheet?
 It's kind of what you'd expect if you wanted to represent CSS as Javascript in
 the most straightforward way possible. It allows for things like `@import`,
 `@keyframes` and so forth, but knows just enough about CSS to help with things
@@ -45,6 +45,11 @@ Why `px`? Well the other obvious options would be `rem` and `em` but `px` seems 
 least surprising option.
 
 `css` should render nested rules, such as `@keyframes` and `@media` correctly.
+
+## StyleSheet(id: string, styleSpec: XinStyleSheet)
+
+This is a convenience function for creating `<style>` elements (with the id provided)
+and appending them to `document.head`.
 
 ## initVars({[key: string]: any}) => {[key: string]: any}
 
