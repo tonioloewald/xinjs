@@ -3,8 +3,9 @@ import { elements } from './elements'
 import { camelToKabob } from './string-case'
 import { XinStyleSheet, XinStyleRule, XinStyleMap } from './css-types'
 
-export function StyleNode(styleSheet: XinStyleSheet): HTMLStyleElement {
-  return elements.style(css(styleSheet))
+export function StyleSheet(id: string, styleSpec: XinStyleSheet) {
+  const element = elements.style(css(styleSpec))
+  element.id = id
 }
 
 const numericProps = [
@@ -53,10 +54,7 @@ const renderStatement = (
   }
 }
 
-export const css = (
-  obj: XinStyleSheet | XinStyleMap,
-  indentation = ''
-): string => {
+export const css = (obj: XinStyleSheet, indentation = ''): string => {
   const selectors = Object.keys(obj).map((selector) => {
     const body = obj[selector]
     if (typeof body === 'string') {
