@@ -4,7 +4,7 @@ import { deepClone } from './deep-clone'
 import { appendContentToElement, dispatch, resizeObserver } from './dom'
 import { elements, ElementsProxy } from './elements'
 import { camelToKabob, kabobToCamel } from './string-case'
-import { ElementCreator, SwissArmyElement, ContentType } from './xin-types'
+import { ElementCreator, ContentType, PartsMap } from './xin-types'
 
 let anonymousElementCount = 0
 
@@ -200,44 +200,14 @@ export abstract class Component extends HTMLElement {
     })
   }
 
-  private _refs?: { [key: string]: SwissArmyElement }
-  get refs(): { [key: string]: SwissArmyElement } {
-    console.warn(
-      'refs and data-ref are deprecated, use the part attribute and .parts instead'
-    )
+  private _parts?: PartsMap
+  get parts(): PartsMap {
     const root = this.shadowRoot != null ? this.shadowRoot : this
-    if (this._refs == null) {
-      this._refs = new Proxy(
+    if (this._parts == null) {
+      this._parts = new Proxy(
         {},
         {
-          get(target: { [key: string]: SwissArmyElement }, ref: string) {
-            if (target[ref] === undefined) {
-              let element = root.querySelector(
-                `[part="${ref}"],[data-ref="${ref}"]`
-              )
-              if (element == null) {
-                element = root.querySelector(ref)
-              }
-              if (element == null)
-                throw new Error(`elementRef "${ref}" does not exist!`)
-              element.removeAttribute('data-ref')
-              target[ref] = element as SwissArmyElement
-            }
-            return target[ref]
-          },
-        }
-      )
-    }
-    return this._refs
-  }
-
-  get parts(): { [key: string]: SwissArmyElement } {
-    const root = this.shadowRoot != null ? this.shadowRoot : this
-    if (this._refs == null) {
-      this._refs = new Proxy(
-        {},
-        {
-          get(target: { [key: string]: SwissArmyElement }, ref: string) {
+          get(target: PartsMap, ref: string) {
             if (target[ref] === undefined) {
               let element = root.querySelector(`[part="${ref}"]`)
               if (element == null) {
@@ -246,14 +216,14 @@ export abstract class Component extends HTMLElement {
               if (element == null)
                 throw new Error(`elementRef "${ref}" does not exist!`)
               element.removeAttribute('data-ref')
-              target[ref] = element as SwissArmyElement
+              target[ref] = element as HTMLElement
             }
             return target[ref]
           },
         }
       )
     }
-    return this._refs
+    return this._parts
   }
 
   constructor() {

@@ -874,6 +874,7 @@ const $ea2c6a36710de0a8$export$b0eb386be3b9fed8 = (boundElement, options)=>{
 const $7d9f6326e1d5d994$export$97a1a3e6f39778d2 = {
     value: {
         toDOM (element, value) {
+            console.log(element, value);
             (0, $f314c6851ceb0f9e$export$80746c6bc6142fc8)(element, value);
         },
         fromDOM (element) {
@@ -931,6 +932,10 @@ const $0e50e8a626908591$export$5e0dd9fd5d74e0c5 = {
 };
 
 
+// http://www.itu.int/rec/R-REC-BT.601
+const $72989831e95a2bab$var$bt601 = (r, g, b)=>{
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+};
 const $72989831e95a2bab$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
 class $72989831e95a2bab$var$HslColor {
     constructor(r, g, b){
@@ -999,8 +1004,8 @@ class $72989831e95a2bab$export$892596cec99bc70e {
         ];
     }
     get _hsl() {
-        if (this._hslCached == null) this._hslCached = new $72989831e95a2bab$var$HslColor(this.r, this.g, this.b);
-        return this._hslCached;
+        if (this.hslCached == null) this.hslCached = new $72989831e95a2bab$var$HslColor(this.r, this.g, this.b);
+        return this.hslCached;
     }
     get hsl() {
         const { h: h, s: s, l: l } = this._hsl;
@@ -1015,10 +1020,12 @@ class $72989831e95a2bab$export$892596cec99bc70e {
         return new $72989831e95a2bab$export$892596cec99bc70e(v, v, v);
     }
     get brightness() {
-        // http://www.itu.int/rec/R-REC-BT.601
-        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
+        return $72989831e95a2bab$var$bt601(this.r, this.g, this.b);
     }
     get html() {
+        return this.toString();
+    }
+    toString() {
         return this.a === 1 ? "#" + $72989831e95a2bab$var$hex2(this.r) + $72989831e95a2bab$var$hex2(this.g) + $72989831e95a2bab$var$hex2(this.b) : "#" + $72989831e95a2bab$var$hex2(this.r) + $72989831e95a2bab$var$hex2(this.g) + $72989831e95a2bab$var$hex2(this.b) + $72989831e95a2bab$var$hex2(Math.floor(255 * this.a));
     }
     brighten(amount) {
@@ -1053,9 +1060,15 @@ class $72989831e95a2bab$export$892596cec99bc70e {
     swatch() {
         const { r: r, g: g, b: b, a: a } = this;
         console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
+        return this;
     }
     blend(otherColor, t) {
         return new $72989831e95a2bab$export$892596cec99bc70e((0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(this.r, otherColor.r, t), (0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(this.g, otherColor.g, t), (0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(this.b, otherColor.b, t), (0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
+    }
+    mix(otherColor, t) {
+        const a = this._hsl;
+        const b = otherColor._hsl;
+        return $72989831e95a2bab$export$892596cec99bc70e.fromHsl((0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(a.h, b.h, t), (0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(a.s, b.s, t), (0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(a.l, b.l, t), (0, $0e50e8a626908591$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
     }
 }
 
@@ -1173,6 +1186,7 @@ const $9e0c0b8784c80412$export$8ec252cfdd664597 = new Proxy({
 function $49cee7f7f866c751$export$9d753cd7ae895cce(id, styleSpec) {
     const element = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d).style($49cee7f7f866c751$export$dbf350e5966cf602(styleSpec));
     element.id = id;
+    document.head.append(element);
 }
 const $49cee7f7f866c751$var$numericProps = [
     "animation-iteration-count",
@@ -1189,13 +1203,20 @@ const $49cee7f7f866c751$var$numericProps = [
     "zoom"
 ];
 const $49cee7f7f866c751$var$renderProp = (indentation, cssProp, value)=>{
+    if (value instanceof (0, $72989831e95a2bab$export$892596cec99bc70e)) value = value.html;
     if (value === undefined) return "";
-    else if (typeof value === "string" || $49cee7f7f866c751$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
+    else if (cssProp.startsWith("__")) {
+        const varName = "--" + cssProp.substring(2);
+        return `${indentation}  ${varName}: var(${varName}, ${value});`;
+    } else if (cssProp.startsWith("_")) {
+        const varName = cssProp = "--" + cssProp.substring(1);
+        return `${indentation}  ${varName}: ${value};`;
+    } else if (typeof value === "string" || $49cee7f7f866c751$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
     else return `${indentation}  ${cssProp}: ${value}px;`;
 };
 const $49cee7f7f866c751$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $bed4bed3dcfb6f9a$export$87ae551bf60f4bb)(key);
-    if (typeof value === "object") {
+    if (typeof value === "object" && !(value instanceof (0, $72989831e95a2bab$export$892596cec99bc70e))) {
         const renderedRule = Object.keys(value).map((innerKey)=>$49cee7f7f866c751$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
     } else return $49cee7f7f866c751$var$renderProp(indentation, cssProp, value);
@@ -1213,6 +1234,7 @@ const $49cee7f7f866c751$export$dbf350e5966cf602 = (obj, indentation = "")=>{
     return selectors.join("\n\n");
 };
 const $49cee7f7f866c751$export$90d0ea046136e3ed = (obj)=>{
+    console.warn("initVars is deprecated. Just use _ and __ prefixes instead.");
     const rule = {};
     for (const key of Object.keys(obj)){
         const value = obj[key];
@@ -1418,26 +1440,9 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
             }
         });
     }
-    get refs() {
-        console.warn("refs and data-ref are deprecated, use the part attribute and .parts instead");
-        const root = this.shadowRoot != null ? this.shadowRoot : this;
-        if (this._refs == null) this._refs = new Proxy({}, {
-            get (target, ref) {
-                if (target[ref] === undefined) {
-                    let element = root.querySelector(`[part="${ref}"],[data-ref="${ref}"]`);
-                    if (element == null) element = root.querySelector(ref);
-                    if (element == null) throw new Error(`elementRef "${ref}" does not exist!`);
-                    element.removeAttribute("data-ref");
-                    target[ref] = element;
-                }
-                return target[ref];
-            }
-        });
-        return this._refs;
-    }
     get parts() {
         const root = this.shadowRoot != null ? this.shadowRoot : this;
-        if (this._refs == null) this._refs = new Proxy({}, {
+        if (this._parts == null) this._parts = new Proxy({}, {
             get (target, ref) {
                 if (target[ref] === undefined) {
                     let element = root.querySelector(`[part="${ref}"]`);
@@ -1449,7 +1454,7 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                 return target[ref];
             }
         });
-        return this._refs;
+        return this._parts;
     }
     constructor(){
         super();
@@ -1588,6 +1593,38 @@ const $4c651860c5272284$export$93b87f7746612069 = (test = ()=>true)=>{
 
 
 
+
+
+function $cf96335958b9d6da$export$3bc26eec1cc2439f(tag, blueprint) {
+    const { type: type, styleSpec: styleSpec } = blueprint(tag, {
+        Color: $72989831e95a2bab$export$892596cec99bc70e,
+        Component: $cd387b053feba574$export$16fa2f45be04daa8,
+        elements: $9e0c0b8784c80412$export$7a5d735b2ab6389d,
+        varDefault: $49cee7f7f866c751$export$75c0e6adb3e38f31,
+        vars: $49cee7f7f866c751$export$3cb96c9f6c8d16a4 /*, xinProxy */ 
+    });
+    return {
+        type: type,
+        creator: type.elementCreator({
+            tag: tag,
+            styleSpec: styleSpec
+        })
+    };
+}
+async function $cf96335958b9d6da$export$1c9780fc8943eebd(tag, url) {
+    const blueprint = (await import(url)).default;
+    return blueprint(tag, {
+        Component: $cd387b053feba574$export$16fa2f45be04daa8,
+        elements: $9e0c0b8784c80412$export$7a5d735b2ab6389d,
+        vars: $49cee7f7f866c751$export$3cb96c9f6c8d16a4,
+        varDefault: $49cee7f7f866c751$export$75c0e6adb3e38f31,
+        Color: $72989831e95a2bab$export$892596cec99bc70e
+    });
+}
+
+
+
+
 var $222449ec3acb18f4$exports = {};
 
 $parcel$export($222449ec3acb18f4$exports, "XinTest", () => $222449ec3acb18f4$export$e8658328209d5943);
@@ -1701,5 +1738,5 @@ function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj, boxScalars = false) {
 
 
 
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $cf96335958b9d6da$export$1c9780fc8943eebd as importComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest};
 //# sourceMappingURL=module.js.map

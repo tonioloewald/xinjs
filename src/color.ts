@@ -1,5 +1,10 @@
 import { lerp, clamp } from './more-math'
 
+// http://www.itu.int/rec/R-REC-BT.601
+const bt601 = (r: number, g: number, b: number): number => {
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+}
+
 const hex2 = (n: number): string =>
   ('00' + Math.round(Number(n)).toString(16)).slice(-2)
 
@@ -95,13 +100,13 @@ export class Color {
     return [this.a, this.r / 255, this.g / 255, this.b / 255]
   }
 
-  _hslCached?: HslColor
+  private hslCached?: HslColor
 
   get _hsl(): HslColor {
-    if (this._hslCached == null) {
-      this._hslCached = new HslColor(this.r, this.g, this.b)
+    if (this.hslCached == null) {
+      this.hslCached = new HslColor(this.r, this.g, this.b)
     }
-    return this._hslCached
+    return this.hslCached
   }
 
   get hsl(): string {
@@ -124,11 +129,14 @@ export class Color {
   }
 
   get brightness(): number {
-    // http://www.itu.int/rec/R-REC-BT.601
-    return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255
+    return bt601(this.r, this.g, this.b)
   }
 
   get html(): string {
+    return this.toString()
+  }
+
+  toString(): string {
     return this.a === 1
       ? '#' + hex2(this.r) + hex2(this.g) + hex2(this.b)
       : '#' +
@@ -173,13 +181,14 @@ export class Color {
     return Color.fromHsl(h, s, l, alpha)
   }
 
-  swatch(): void {
+  swatch(): Color {
     const { r, g, b, a } = this
     console.log(
       `%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`,
       `background-color: rgba(${r}, ${g}, ${b}, ${a})`,
       'background-color: #eee'
     )
+    return this
   }
 
   blend(otherColor: Color, t: number): Color {
@@ -187,6 +196,17 @@ export class Color {
       lerp(this.r, otherColor.r, t),
       lerp(this.g, otherColor.g, t),
       lerp(this.b, otherColor.b, t),
+      lerp(this.a, otherColor.a, t)
+    )
+  }
+
+  mix(otherColor: Color, t: number): Color {
+    const a = this._hsl
+    const b = otherColor._hsl
+    return Color.fromHsl(
+      lerp(a.h, b.h, t),
+      lerp(a.s, b.s, t),
+      lerp(a.l, b.l, t),
       lerp(this.a, otherColor.a, t)
     )
   }

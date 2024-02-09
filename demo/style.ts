@@ -1,8 +1,6 @@
-import { XinStyleSheet, bind } from '../src'
-import { initVars, darkMode, css, vars } from '../src/css'
-import { elements } from '../src/elements'
+import { bind } from '../src'
+import { initVars, darkMode, StyleSheet, vars } from '../src/css'
 import { Color } from '../src/color'
-const { style } = elements
 
 const brandColor = Color.fromCss('rgb(8, 131, 88)')
 
@@ -72,7 +70,7 @@ const codeVars = {
   codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1).html,
 }
 
-const rules: XinStyleSheet = {
+StyleSheet('base-style', {
   '@import':
     'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
   body: {
@@ -298,9 +296,7 @@ const rules: XinStyleSheet = {
     fontSize: vars.fontSize80,
     opacity: 0.5,
   },
-}
-
-document.head.append(style({ id: 'base-style' }, css(rules)))
+})
 
 // adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
 const setTrueHeight = () => {

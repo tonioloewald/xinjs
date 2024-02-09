@@ -1,3 +1,5 @@
+import { Color } from './color'
+
 type CSSBasicAlign = 'nomal' | 'stretch'
 type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end'
 type CSSDistributedAlign =
@@ -124,7 +126,7 @@ type CSSWhiteSpace =
 type CSSWordBreak = 'normal' | 'break-all' | 'keep-all'
 
 export interface XinStyleRule {
-  accentColor?: string
+  accentColor?: Color | string
   alignContent?:
     | CSSBasicAlign
     | CSSBaselineAlign
@@ -165,11 +167,11 @@ export interface XinStyleRule {
   aspectRatio?: 'auto' | CSSGlobalValues | string
   backdropFilter?: 'none' | string | CSSGlobalValues | string
   backfaceVisibility?: CSSVisibility | CSSGlobalValues | string
-  background?: string
+  background?: Color | string
   backgroundAttachment?: string | number
   backgroundBlendMode?: string
   backgroundClip?: string | number
-  backgroundColor?: string
+  backgroundColor?: Color | string
   backgroundImage?: string
   backgroundOrigin?: string | number
   backgroundPosition?: string | number
@@ -177,13 +179,13 @@ export interface XinStyleRule {
   backgroundSize?: string | number
   border?: string | number
   borderBottom?: string | number
-  borderBottomColor?: string
+  borderBottomColor?: Color | string
   borderBottomLeftRadius?: string | number
   borderBottomRightRadius?: string | number
   borderBottomStyle?: string | number
   borderBottomWidth?: string | number
   borderCollapse?: string | number
-  borderColor?: string
+  borderColor?: Color | string
   borderImage?: string
   borderImageOutset?: string | number
   borderImageRepeat?: string | number
@@ -191,18 +193,18 @@ export interface XinStyleRule {
   borderImageSource?: string | number
   borderImageWidth?: string | number
   borderLeft?: string | number
-  borderLeftColor?: string
+  borderLeftColor?: Color | string
   borderLeftStyle?: string | number
   borderLeftWidth?: string | number
   borderRadius?: string | number
   borderRight?: string | number
-  borderRightColor?: string
+  borderRightColor?: Color | string
   borderRightStyle?: string | number
   borderRightWidth?: string | number
   borderSpacing?: string | number
   borderStyle?: string | number
   borderTop?: string | number
-  borderTopColor?: string
+  borderTopColor?: Color | string
   borderTopLeftRadius?: string | number
   borderTopRightRadius?: string | number
   borderTopStyle?: string | number
@@ -212,16 +214,16 @@ export interface XinStyleRule {
   boxShadow?: string | number
   boxSizing?: string | number
   captionSide?: string | number
-  caretColor?: string
+  caretColor?: Color | string
   clear?: string | number
   clip?: string | number
   clipPath?: string | number
-  color?: string
+  color?: Color | string
   columnCount?: string | number
   columnFill?: string | number
   columnGap?: string | number
   columnRule?: string | number
-  columnRuleColor?: string
+  columnRuleColor?: Color | string
   columnRuleStyle?: string | number
   columnRuleWidth?: string | number
   columnSpan?: string | number
@@ -309,7 +311,7 @@ export interface XinStyleRule {
   opacity?: string | number
   order?: string | number
   outline?: string | number
-  outlineColor?: string
+  outlineColor?: Color | string
   outlineOffset?: string | number
   outlineStyle?: string | number
   outlineWidth?: string | number
@@ -339,7 +341,7 @@ export interface XinStyleRule {
   textAlign?: string | number
   textAlignLast?: string | number
   textDecoration?: string | number
-  textDecorationColor?: string
+  textDecorationColor?: Color | string
   textDecorationLine?: string | number
   textDecorationStyle?: string | number
   textIndent?: string | number
@@ -368,7 +370,7 @@ export interface XinStyleRule {
   wordWrap?: string | number
   writingMode?: string
   zIndex?: string | number
-  [key: string]: string | number | undefined
+  [key: string]: Color | string | number | undefined
 }
 
 export interface XinStyleMap {

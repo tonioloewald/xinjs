@@ -1,5 +1,6 @@
 import {
   xinProxy,
+  XinProxyObject,
   touch,
   elements,
   Component,
@@ -7,8 +8,12 @@ import {
   css,
   xinTest,
   XinTest,
+  makeComponent,
 } from '../../src'
 import { markdownViewer } from './markdown-viewer'
+import blueprintExample from './blueprint-example'
+
+const bp = makeComponent('blueprint-example', blueprintExample).creator
 
 const {
   div,
@@ -154,32 +159,38 @@ const lightBlue = LightBlue.elementCreator({
 })
 console.warn('^^^ this is intentional')
 
-const { formTest } = xinProxy({
-  formTest: {
-    string: 'hello xin',
-    number: 3,
-    color: 'red',
-    date: new Date().toISOString(),
-    check1: false,
-    check2: true,
-    pickOne: 'that',
-    pickAny: { theOther: true, andThat: true },
-    phone: '+1 (666) 555-4321',
-    email: 'anne.example@foobar.baz',
-    autocomplete: 'this',
-    fleet: {
-      name: 'Starfleet',
-      vessels: [
-        { id: 'ncc-1701', name: 'Enterprise' },
-        { id: 'ncc-1031', name: 'Discovery' },
-        { id: 'ncc-74656', name: 'Voyager' },
-      ],
-    },
-    reset() {
-      formTest.string = 'hello xin'
+const { formTest } = xinProxy(
+  {
+    formTest: {
+      string: 'hello xin',
+      number: 3,
+      color: 'red',
+      date: new Date().toISOString(),
+      check1: false,
+      check2: true,
+      pickOne: 'that',
+      pickAny: { theOther: true, andThat: true },
+      phone: '+1 (666) 555-4321',
+      email: 'anne.example@foobar.baz',
+      autocomplete: 'this',
+      fleet: {
+        name: 'Starfleet',
+        vessels: [
+          { id: 'ncc-1701', name: 'Enterprise' },
+          { id: 'ncc-1031', name: 'Discovery' },
+          { id: 'ncc-74656', name: 'Voyager' },
+        ],
+      },
+      blueprintTest: {
+        caption: 'This one is bound',
+      },
+      reset() {
+        formTest.string = 'hello xin'
+      },
     },
   },
-})
+  true
+)
 
 const options = [
   'this',
@@ -205,7 +216,18 @@ This is an in-browser test of key functionality including:
           event.preventDefault()
         },
       },
-      label(span('name'), input({ bindValue: 'formTest.string' })),
+      label(
+        span('name'),
+        input({ class: 'direct-binding', bindValue: formTest.string })
+      ),
+      xinTest('boxed binding should work', {
+        expect: formTest.string.valueOf(),
+        test() {
+          return (
+            document.querySelector('input.direct-binding') as HTMLInputElement
+          ).value
+        },
+      }),
       div(
         h4('inline bindings'),
         p(
@@ -463,6 +485,23 @@ This is an in-browser test of key functionality including:
         { id: 'test-options' },
         ...options.map((item) => option({ value: item }))
       ),
+      bp(
+        {
+          bindValue: formTest.blueprintTest as unknown as XinProxyObject,
+        },
+        p('This is inside a blueprint component!')
+      ),
+      label(
+        span('Below is the (bound) caption of the previous blueprint'),
+        input({ bindValue: formTest.blueprintTest.caption })
+      ),
+      markdownViewer(
+        `You may notice that editing the caption in the \`<input>\` above does not update the
+        component. This is because \`formTest.blueprint\` is bound to the
+        value of the blueprint (and does not change). The binding of elements inside the
+        blueprint component to \`value.caption\` is "out of \`xinjs\`'s sight".`
+      ),
+      bp(p('This is inside a second instance of the blueprint component!')),
       shadowRed(),
       lightBlue(),
       div(

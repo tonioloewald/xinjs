@@ -4,7 +4,6 @@ import {
   ElementPart,
   ElementProps,
   ElementCreator,
-  SwissArmyElement,
   StringMap,
 } from './xin-types'
 import { camelToKabob } from './string-case'
@@ -140,10 +139,7 @@ export interface ElementsProxy {
 
 const templates: { [key: string]: Element } = {}
 
-const create = (
-  tagType: string,
-  ...contents: ElementPart[]
-): SwissArmyElement => {
+const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   if (templates[tagType] === undefined) {
     const [tag, namespace] = tagType.split('|')
     if (namespace === undefined) {
@@ -152,7 +148,7 @@ const create = (
       templates[tagType] = globalThis.document.createElementNS(namespace, tag)
     }
   }
-  const elt = templates[tagType].cloneNode() as SwissArmyElement
+  const elt = templates[tagType].cloneNode() as HTMLElement
   const elementProps: ElementProps = {}
   for (const item of contents) {
     if (

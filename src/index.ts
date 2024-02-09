@@ -19,6 +19,12 @@ export { elements, svgElements, mathML } from './elements'
 export type { ElementsProxy } from './elements'
 export { hotReload } from './hot-reload'
 export { getListItem, xinPath, xinValue } from './metadata'
+export { makeComponent, importComponent } from './make-component'
+export type {
+  XinBlueprint,
+  XinFactory,
+  XinPackagedComponent,
+} from './make-component'
 export { MoreMath } from './more-math'
 export { settings } from './settings'
 export * from './test-component'

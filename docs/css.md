@@ -65,32 +65,48 @@ Will insert the following in the `document.head` (with no formatting):
       }
     </style>
 
-## initVars({[key: string]: any}) => {[key: string]: any}
+## Color
 
-Given a map of CSS properties (in camelCase) emit a map of css-variables to
-the values, with `px` suffixed to bare numbers where appropriate.
+You can pass `Color` (see [Color](color.md))
 
-    const cssVars = {
-      textColor: '#222',   // --text-color: #222
-      background: '#eee',  // --background: #eee
-      fontSize: 15         // --font-size: 15px
+## CSS-variable definitions
+
+### using `_` and `__`
+
+You can define a css-variable using an `_` prefix, e.g.:
+
+    css({
+      ':root': {
+        _fontFamily: 'Roboto, Sans-serif'
+      }
+    })
+
+generates:
+
+    :root {
+      --font-family: Roboto, Sans-serif;
     }
 
-    const myStyleMap = {
-      ':root': initVars(cssVars)
+Similarly, you can define a variable which defines a default value using `__`, e.g.:
+
+    css({
+      'p': {
+        __color: '#222'
+      }
+    })
+
+generates:
+
+    p {
+      --color: var(--color, #222);
     }
 
-## darkMode({[key: string]: any}) => {[key: string]: string}
+### Deprecated methods
 
-Given a map of CSS properties (in camelCase) emit a map of those properties that
-has color values with their luminance inverted.
+These methods will be removed, but currently generate a (hopefully helpful) warning.
 
-    const myStyleMap = {
-      ':root': cssVars,               // includes --font-size
-      '@media (prefers-color-scheme: dark)': {
-        ':root': darkMode(cssVars)    // omits --font-size
-      },
-    }
+- `initVars({[key: string]: any}) => {[key: string]: any}`
+- `darkMode({[key: string]: any}) => {[key: string]: string}`
 
 ## vars
 

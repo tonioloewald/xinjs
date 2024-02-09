@@ -102,22 +102,25 @@ export interface StringMap {
   [key: string]: any
 }
 
+export interface PartsMap {
+  [key: string]: HTMLElement
+}
+
 export type ValueElement =
   | HTMLInputElement
   | HTMLSelectElement
   | HTMLTextAreaElement
-export type SwissArmyElement = HTMLElement
 export type ElementPart =
   | Element
   | DocumentFragment
   | ElementProps
   | string
   | number
-export type HTMLElementCreator<T extends Node = SwissArmyElement> = (
+export type HTMLElementCreator<T extends Node = HTMLElement> = (
   ...contents: ElementPart[]
 ) => T
 export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
-export type ElementCreator<T extends Node = SwissArmyElement> = (
+export type ElementCreator<T extends Node = HTMLElement> = (
   ...contents: ElementPart[]
 ) => T
 export type ContentPart = Element | DocumentFragment | string

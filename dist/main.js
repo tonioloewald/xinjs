@@ -36,6 +36,8 @@ $parcel$export(module.exports, "hotReload", () => $04b008a736a73fbf$export$93b87
 $parcel$export(module.exports, "getListItem", () => $3f1d78706f6d8212$export$4c309843c07ce679);
 $parcel$export(module.exports, "xinPath", () => $3f1d78706f6d8212$export$40700dafb97c3799);
 $parcel$export(module.exports, "xinValue", () => $3f1d78706f6d8212$export$5dcba2d45033d435);
+$parcel$export(module.exports, "makeComponent", () => $80abd70ad891812f$export$3bc26eec1cc2439f);
+$parcel$export(module.exports, "importComponent", () => $80abd70ad891812f$export$1c9780fc8943eebd);
 $parcel$export(module.exports, "MoreMath", () => $64a1e022735c9832$export$5e0dd9fd5d74e0c5);
 $parcel$export(module.exports, "settings", () => $7c791d4499aeb3a0$export$a5a6e0b888b2c992);
 $parcel$export(module.exports, "throttle", () => $a948014a44fcb9ad$export$de363e709c412c8a);
@@ -920,6 +922,7 @@ const $30c2e647bc2c31d1$export$b0eb386be3b9fed8 = (boundElement, options)=>{
 const $e49806807158e47d$export$97a1a3e6f39778d2 = {
     value: {
         toDOM (element, value) {
+            console.log(element, value);
             (0, $2f96dbadf81a4e19$export$80746c6bc6142fc8)(element, value);
         },
         fromDOM (element) {
@@ -977,6 +980,10 @@ const $64a1e022735c9832$export$5e0dd9fd5d74e0c5 = {
 };
 
 
+// http://www.itu.int/rec/R-REC-BT.601
+const $dde521108530e806$var$bt601 = (r, g, b)=>{
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+};
 const $dde521108530e806$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
 class $dde521108530e806$var$HslColor {
     constructor(r, g, b){
@@ -1045,8 +1052,8 @@ class $dde521108530e806$export$892596cec99bc70e {
         ];
     }
     get _hsl() {
-        if (this._hslCached == null) this._hslCached = new $dde521108530e806$var$HslColor(this.r, this.g, this.b);
-        return this._hslCached;
+        if (this.hslCached == null) this.hslCached = new $dde521108530e806$var$HslColor(this.r, this.g, this.b);
+        return this.hslCached;
     }
     get hsl() {
         const { h: h, s: s, l: l } = this._hsl;
@@ -1061,10 +1068,12 @@ class $dde521108530e806$export$892596cec99bc70e {
         return new $dde521108530e806$export$892596cec99bc70e(v, v, v);
     }
     get brightness() {
-        // http://www.itu.int/rec/R-REC-BT.601
-        return (0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
+        return $dde521108530e806$var$bt601(this.r, this.g, this.b);
     }
     get html() {
+        return this.toString();
+    }
+    toString() {
         return this.a === 1 ? "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) : "#" + $dde521108530e806$var$hex2(this.r) + $dde521108530e806$var$hex2(this.g) + $dde521108530e806$var$hex2(this.b) + $dde521108530e806$var$hex2(Math.floor(255 * this.a));
     }
     brighten(amount) {
@@ -1099,9 +1108,15 @@ class $dde521108530e806$export$892596cec99bc70e {
     swatch() {
         const { r: r, g: g, b: b, a: a } = this;
         console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
+        return this;
     }
     blend(otherColor, t) {
         return new $dde521108530e806$export$892596cec99bc70e((0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.r, otherColor.r, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.g, otherColor.g, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.b, otherColor.b, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
+    }
+    mix(otherColor, t) {
+        const a = this._hsl;
+        const b = otherColor._hsl;
+        return $dde521108530e806$export$892596cec99bc70e.fromHsl((0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(a.h, b.h, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(a.s, b.s, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(a.l, b.l, t), (0, $64a1e022735c9832$export$3a89f8d6f6bf6c9f)(this.a, otherColor.a, t));
     }
 }
 
@@ -1219,6 +1234,7 @@ const $c004c420133596e3$export$8ec252cfdd664597 = new Proxy({
 function $db77bb2de3733b56$export$9d753cd7ae895cce(id, styleSpec) {
     const element = (0, $c004c420133596e3$export$7a5d735b2ab6389d).style($db77bb2de3733b56$export$dbf350e5966cf602(styleSpec));
     element.id = id;
+    document.head.append(element);
 }
 const $db77bb2de3733b56$var$numericProps = [
     "animation-iteration-count",
@@ -1235,13 +1251,20 @@ const $db77bb2de3733b56$var$numericProps = [
     "zoom"
 ];
 const $db77bb2de3733b56$var$renderProp = (indentation, cssProp, value)=>{
+    if (value instanceof (0, $dde521108530e806$export$892596cec99bc70e)) value = value.html;
     if (value === undefined) return "";
-    else if (typeof value === "string" || $db77bb2de3733b56$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
+    else if (cssProp.startsWith("__")) {
+        const varName = "--" + cssProp.substring(2);
+        return `${indentation}  ${varName}: var(${varName}, ${value});`;
+    } else if (cssProp.startsWith("_")) {
+        const varName = cssProp = "--" + cssProp.substring(1);
+        return `${indentation}  ${varName}: ${value};`;
+    } else if (typeof value === "string" || $db77bb2de3733b56$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
     else return `${indentation}  ${cssProp}: ${value}px;`;
 };
 const $db77bb2de3733b56$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
-    if (typeof value === "object") {
+    if (typeof value === "object" && !(value instanceof (0, $dde521108530e806$export$892596cec99bc70e))) {
         const renderedRule = Object.keys(value).map((innerKey)=>$db77bb2de3733b56$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
     } else return $db77bb2de3733b56$var$renderProp(indentation, cssProp, value);
@@ -1259,6 +1282,7 @@ const $db77bb2de3733b56$export$dbf350e5966cf602 = (obj, indentation = "")=>{
     return selectors.join("\n\n");
 };
 const $db77bb2de3733b56$export$90d0ea046136e3ed = (obj)=>{
+    console.warn("initVars is deprecated. Just use _ and __ prefixes instead.");
     const rule = {};
     for (const key of Object.keys(obj)){
         const value = obj[key];
@@ -1464,26 +1488,9 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
             }
         });
     }
-    get refs() {
-        console.warn("refs and data-ref are deprecated, use the part attribute and .parts instead");
-        const root = this.shadowRoot != null ? this.shadowRoot : this;
-        if (this._refs == null) this._refs = new Proxy({}, {
-            get (target, ref) {
-                if (target[ref] === undefined) {
-                    let element = root.querySelector(`[part="${ref}"],[data-ref="${ref}"]`);
-                    if (element == null) element = root.querySelector(ref);
-                    if (element == null) throw new Error(`elementRef "${ref}" does not exist!`);
-                    element.removeAttribute("data-ref");
-                    target[ref] = element;
-                }
-                return target[ref];
-            }
-        });
-        return this._refs;
-    }
     get parts() {
         const root = this.shadowRoot != null ? this.shadowRoot : this;
-        if (this._refs == null) this._refs = new Proxy({}, {
+        if (this._parts == null) this._parts = new Proxy({}, {
             get (target, ref) {
                 if (target[ref] === undefined) {
                     let element = root.querySelector(`[part="${ref}"]`);
@@ -1495,7 +1502,7 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
                 return target[ref];
             }
         });
-        return this._refs;
+        return this._parts;
     }
     constructor(){
         super();
@@ -1630,6 +1637,38 @@ const $04b008a736a73fbf$export$93b87f7746612069 = (test = ()=>true)=>{
     (0, $3c20fb09d41b8da8$export$d1203567a167490e)(test, saveState);
 };
 
+
+
+
+
+
+
+function $80abd70ad891812f$export$3bc26eec1cc2439f(tag, blueprint) {
+    const { type: type, styleSpec: styleSpec } = blueprint(tag, {
+        Color: $dde521108530e806$export$892596cec99bc70e,
+        Component: $8c7b36581a3597bc$export$16fa2f45be04daa8,
+        elements: $c004c420133596e3$export$7a5d735b2ab6389d,
+        varDefault: $db77bb2de3733b56$export$75c0e6adb3e38f31,
+        vars: $db77bb2de3733b56$export$3cb96c9f6c8d16a4 /*, xinProxy */ 
+    });
+    return {
+        type: type,
+        creator: type.elementCreator({
+            tag: tag,
+            styleSpec: styleSpec
+        })
+    };
+}
+async function $80abd70ad891812f$export$1c9780fc8943eebd(tag, url) {
+    const blueprint = (await import(url)).default;
+    return blueprint(tag, {
+        Component: $8c7b36581a3597bc$export$16fa2f45be04daa8,
+        elements: $c004c420133596e3$export$7a5d735b2ab6389d,
+        vars: $db77bb2de3733b56$export$3cb96c9f6c8d16a4,
+        varDefault: $db77bb2de3733b56$export$75c0e6adb3e38f31,
+        Color: $dde521108530e806$export$892596cec99bc70e
+    });
+}
 
 
 

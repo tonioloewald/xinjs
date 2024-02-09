@@ -6,6 +6,7 @@ import { XinStyleSheet, XinStyleRule } from './css-types'
 export function StyleSheet(id: string, styleSpec: XinStyleSheet) {
   const element = elements.style(css(styleSpec))
   element.id = id
+  document.head.append(element)
 }
 
 const numericProps = [
@@ -25,10 +26,19 @@ const numericProps = [
 const renderProp = (
   indentation: string,
   cssProp: string,
-  value: string | number | undefined
+  value: string | number | Color | undefined
 ): string => {
+  if (value instanceof Color) {
+    value = value.html
+  }
   if (value === undefined) {
     return ''
+  } else if (cssProp.startsWith('__')) {
+    const varName = '--' + cssProp.substring(2)
+    return `${indentation}  ${varName}: var(${varName}, ${value});`
+  } else if (cssProp.startsWith('_')) {
+    const varName = (cssProp = '--' + cssProp.substring(1))
+    return `${indentation}  ${varName}: ${value};`
   } else if (typeof value === 'string' || numericProps.includes(cssProp)) {
     return `${indentation}  ${cssProp}: ${value};`
   } else {
@@ -38,11 +48,11 @@ const renderProp = (
 
 const renderStatement = (
   key: string,
-  value: string | number | XinStyleRule | undefined,
+  value: Color | string | number | XinStyleRule | undefined,
   indentation = ''
 ): string => {
   const cssProp = camelToKabob(key)
-  if (typeof value === 'object') {
+  if (typeof value === 'object' && !(value instanceof Color)) {
     const renderedRule = Object.keys(value)
       .map((innerKey) =>
         renderStatement(innerKey, value[innerKey], `${indentation}  `)
@@ -74,6 +84,7 @@ export const css = (obj: XinStyleSheet, indentation = ''): string => {
 export const initVars = (obj: {
   [key: string]: string | number
 }): XinStyleRule => {
+  console.warn('initVars is deprecated. Just use _ and __ prefixes instead.')
   const rule: XinStyleRule = {}
   for (const key of Object.keys(obj)) {
     const value = obj[key]

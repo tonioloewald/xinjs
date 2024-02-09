@@ -25,7 +25,8 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 6. [elements](elements.md) — conveniently creating DOM elements
 7. [css](css.md) — utilities for working with css
 8. [web-components](web-components.md) — creating web-components (a.k.a. "custom-elements")
-9. [throttle and debounce](throttle.md) — useful function wrappers
+9. [blueprints](blueprints.md) — lightweight, dynamically loadable components (**WIP**)
+10. [throttle and debounce](throttle.md) — useful function wrappers
 
 ### Related Libraries
 - [react-xinjs](https://www.npmjs.com/package/react-xinjs) allows you to manage state within
