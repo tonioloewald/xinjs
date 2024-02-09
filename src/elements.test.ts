@@ -2,7 +2,7 @@
 // @ts-expect-error
 import { test, expect } from 'bun:test'
 import { camelToKabob, kabobToCamel } from './string-case'
-import { initVars, vars, css, varDefine, varDefault } from './css'
+import { initVars, vars, css, varDefault } from './css'
 
 test('camelToKabob works', () => {
   expect(camelToKabob('x')).toBe('x')
@@ -11,6 +11,8 @@ test('camelToKabob works', () => {
   expect(camelToKabob('hello world')).toBe('hello world')
   expect(camelToKabob('innerHTML')).toBe('inner-h-t-m-l')
   expect(camelToKabob('InnerHTML')).toBe('-inner-h-t-m-l')
+  expect(camelToKabob('_thisIsATest')).toBe('_this-is-a-test')
+  expect(camelToKabob('__thisIsATest')).toBe('__this-is-a-test')
 })
 
 test('kabobToCamel works', () => {
