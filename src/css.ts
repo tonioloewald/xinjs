@@ -33,12 +33,17 @@ const renderProp = (
   }
   if (value === undefined) {
     return ''
-  } else if (cssProp.startsWith('__')) {
-    const varName = '--' + cssProp.substring(2)
-    return `${indentation}  ${varName}: var(${varName}, ${value});`
   } else if (cssProp.startsWith('_')) {
-    const varName = (cssProp = '--' + cssProp.substring(1))
-    return `${indentation}  ${varName}: ${value};`
+    if (typeof value === 'number') {
+      value = `${value}px`
+    }
+    if (cssProp.startsWith('__')) {
+      const varName = '--' + cssProp.substring(2)
+      return `${indentation}  ${varName}: var(${varName}, ${value});`
+    } else {
+      const varName = '--' + cssProp.substring(1)
+      return `${indentation}  ${varName}: ${value};`
+    }
   } else if (typeof value === 'string' || numericProps.includes(cssProp)) {
     return `${indentation}  ${cssProp}: ${value};`
   } else {
@@ -96,6 +101,7 @@ export const initVars = (obj: {
 }
 
 export const darkMode = (obj: XinStyleRule): XinStyleRule => {
+  console.warn('darkMode is deprecated. Just use Color instances instead.')
   const rule: XinStyleRule = {}
   for (const key of Object.keys(obj)) {
     let value = obj[key]
