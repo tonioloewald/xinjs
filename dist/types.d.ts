@@ -539,6 +539,7 @@ export const initVars: (obj: {
     [key: string]: string | number;
 }) => XinStyleRule;
 export const darkMode: (obj: XinStyleRule) => XinStyleRule;
+export const invertLuminance: (map: XinStyleRule) => XinStyleRule;
 export const vars: {
     [key: string]: string;
 };

@@ -22,6 +22,7 @@ $parcel$export(module.exports, "bind", () => $fc64c421299f5d54$export$2385a24977
 $parcel$export(module.exports, "on", () => $fc64c421299f5d54$export$af631764ddc44097);
 $parcel$export(module.exports, "bindings", () => $e49806807158e47d$export$97a1a3e6f39778d2);
 $parcel$export(module.exports, "css", () => $db77bb2de3733b56$export$dbf350e5966cf602);
+$parcel$export(module.exports, "invertLuminance", () => $db77bb2de3733b56$export$8279dba9b7d4e420);
 $parcel$export(module.exports, "darkMode", () => $db77bb2de3733b56$export$808aaf1b460dc9af);
 $parcel$export(module.exports, "initVars", () => $db77bb2de3733b56$export$90d0ea046136e3ed);
 $parcel$export(module.exports, "vars", () => $db77bb2de3733b56$export$3cb96c9f6c8d16a4);
@@ -922,7 +923,6 @@ const $30c2e647bc2c31d1$export$b0eb386be3b9fed8 = (boundElement, options)=>{
 const $e49806807158e47d$export$97a1a3e6f39778d2 = {
     value: {
         toDOM (element, value) {
-            console.log(element, value);
             (0, $2f96dbadf81a4e19$export$80746c6bc6142fc8)(element, value);
         },
         fromDOM (element) {
@@ -1253,12 +1253,15 @@ const $db77bb2de3733b56$var$numericProps = [
 const $db77bb2de3733b56$var$renderProp = (indentation, cssProp, value)=>{
     if (value instanceof (0, $dde521108530e806$export$892596cec99bc70e)) value = value.html;
     if (value === undefined) return "";
-    else if (cssProp.startsWith("__")) {
-        const varName = "--" + cssProp.substring(2);
-        return `${indentation}  ${varName}: var(${varName}, ${value});`;
-    } else if (cssProp.startsWith("_")) {
-        const varName = cssProp = "--" + cssProp.substring(1);
-        return `${indentation}  ${varName}: ${value};`;
+    else if (cssProp.startsWith("_")) {
+        if (typeof value === "number") value = `${value}px`;
+        if (cssProp.startsWith("__")) {
+            const varName = "--" + cssProp.substring(2);
+            return `${indentation}  ${varName}: var(${varName}, ${value});`;
+        } else {
+            const varName = "--" + cssProp.substring(1);
+            return `${indentation}  ${varName}: ${value};`;
+        }
     } else if (typeof value === "string" || $db77bb2de3733b56$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
     else return `${indentation}  ${cssProp}: ${value}px;`;
 };
@@ -1292,6 +1295,7 @@ const $db77bb2de3733b56$export$90d0ea046136e3ed = (obj)=>{
     return rule;
 };
 const $db77bb2de3733b56$export$808aaf1b460dc9af = (obj)=>{
+    console.warn("darkMode is deprecated. Use inverseLuminance instead.");
     const rule = {};
     for (const key of Object.keys(obj)){
         let value = obj[key];
@@ -1301,6 +1305,15 @@ const $db77bb2de3733b56$export$808aaf1b460dc9af = (obj)=>{
         }
     }
     return rule;
+};
+const $db77bb2de3733b56$export$8279dba9b7d4e420 = (map)=>{
+    const inverted = {};
+    for (const key of Object.keys(map)){
+        const value = map[key];
+        if (value instanceof (0, $dde521108530e806$export$892596cec99bc70e)) inverted[key] = value.inverseLuminance;
+        else if (typeof value === "string" && value.match(/^(#[0-9a-fA-F]{3}|rgba?\(|hsla?\()/)) inverted[key] = (0, $dde521108530e806$export$892596cec99bc70e).fromCss(value).inverseLuminance;
+    }
+    return inverted;
 };
 const $db77bb2de3733b56$export$3cb96c9f6c8d16a4 = new Proxy({}, {
     get (target, prop) {

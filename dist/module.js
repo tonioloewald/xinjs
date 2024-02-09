@@ -874,7 +874,6 @@ const $ea2c6a36710de0a8$export$b0eb386be3b9fed8 = (boundElement, options)=>{
 const $7d9f6326e1d5d994$export$97a1a3e6f39778d2 = {
     value: {
         toDOM (element, value) {
-            console.log(element, value);
             (0, $f314c6851ceb0f9e$export$80746c6bc6142fc8)(element, value);
         },
         fromDOM (element) {
@@ -1205,12 +1204,15 @@ const $49cee7f7f866c751$var$numericProps = [
 const $49cee7f7f866c751$var$renderProp = (indentation, cssProp, value)=>{
     if (value instanceof (0, $72989831e95a2bab$export$892596cec99bc70e)) value = value.html;
     if (value === undefined) return "";
-    else if (cssProp.startsWith("__")) {
-        const varName = "--" + cssProp.substring(2);
-        return `${indentation}  ${varName}: var(${varName}, ${value});`;
-    } else if (cssProp.startsWith("_")) {
-        const varName = cssProp = "--" + cssProp.substring(1);
-        return `${indentation}  ${varName}: ${value};`;
+    else if (cssProp.startsWith("_")) {
+        if (typeof value === "number") value = `${value}px`;
+        if (cssProp.startsWith("__")) {
+            const varName = "--" + cssProp.substring(2);
+            return `${indentation}  ${varName}: var(${varName}, ${value});`;
+        } else {
+            const varName = "--" + cssProp.substring(1);
+            return `${indentation}  ${varName}: ${value};`;
+        }
     } else if (typeof value === "string" || $49cee7f7f866c751$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
     else return `${indentation}  ${cssProp}: ${value}px;`;
 };
@@ -1244,6 +1246,7 @@ const $49cee7f7f866c751$export$90d0ea046136e3ed = (obj)=>{
     return rule;
 };
 const $49cee7f7f866c751$export$808aaf1b460dc9af = (obj)=>{
+    console.warn("darkMode is deprecated. Use inverseLuminance instead.");
     const rule = {};
     for (const key of Object.keys(obj)){
         let value = obj[key];
@@ -1253,6 +1256,15 @@ const $49cee7f7f866c751$export$808aaf1b460dc9af = (obj)=>{
         }
     }
     return rule;
+};
+const $49cee7f7f866c751$export$8279dba9b7d4e420 = (map)=>{
+    const inverted = {};
+    for (const key of Object.keys(map)){
+        const value = map[key];
+        if (value instanceof (0, $72989831e95a2bab$export$892596cec99bc70e)) inverted[key] = value.inverseLuminance;
+        else if (typeof value === "string" && value.match(/^(#[0-9a-fA-F]{3}|rgba?\(|hsla?\()/)) inverted[key] = (0, $72989831e95a2bab$export$892596cec99bc70e).fromCss(value).inverseLuminance;
+    }
+    return inverted;
 };
 const $49cee7f7f866c751$export$3cb96c9f6c8d16a4 = new Proxy({}, {
     get (target, prop) {
@@ -1738,5 +1750,5 @@ function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj, boxScalars = false) {
 
 
 
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $cf96335958b9d6da$export$1c9780fc8943eebd as importComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $cf96335958b9d6da$export$1c9780fc8943eebd as importComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest};
 //# sourceMappingURL=module.js.map

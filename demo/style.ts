@@ -1,5 +1,5 @@
 import { bind } from '../src'
-import { initVars, darkMode, StyleSheet, vars } from '../src/css'
+import { StyleSheet, vars, invertLuminance } from '../src/css'
 import { Color } from '../src/color'
 
 const brandColor = Color.fromCss('rgb(8, 131, 88)')
@@ -24,57 +24,59 @@ bind(document.body, 'app.darkmode', {
 })
 
 const cssVars = {
-  font: "'Roboto Slab', Serif",
-  codeFont: "'Space Mono', monospace",
-  fontSize: 16,
-  codeFontSize: 16,
-  lineHeight: 24,
-  spacing: 16,
-  textColor: '#222',
-  itemSpacing: vars.spacing50,
-  background: '#e8e8e8',
-  panelBg: '#ddd',
-  inputBg: '#fff',
-  buttonBg: '#fff8',
-  currentBg: brandColor.opacity(0.125).html,
-  hoverBg: brandColor.opacity(0.25).html,
-  activeBg: brandColor.opacity(0.5).html,
-  primaryColor: '#ccf8',
-  selectedBg: '#ddf',
-  borderColor: '#0002',
-  darkBorderColor: '#0004',
-  lightBorderColor: '#fff4',
-  inputBorder: '1px solid var(--border-color)',
-  lightBorder: '1px solid var(--light-border-color)',
-  darkBorder: '1px solid var(--dark-border-color)',
-  roundedRadius: vars.lineHeight25,
-  borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
-  inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
-  toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
-  placeHolderOpacity: 0.5,
-  vh: '100vh',
+  _font: "'Roboto Slab', Serif",
+  _codeFont: "'Space Mono', monospace",
+  _fontSize: 16,
+  _codeFontSize: 16,
+  _lineHeight: 24,
+  _spacing: 16,
+  _textColor: '#222',
+  _itemSpacing: vars.spacing50,
+  _background: '#e8e8e8',
+  _panelBg: '#ddd',
+  _inputBg: '#fff',
+  _buttonBg: '#fff8',
+  _currentBg: brandColor.opacity(0.125),
+  _hoverBg: brandColor.opacity(0.25),
+  _activeBg: brandColor.opacity(0.5),
+  _primaryColor: '#ccf8',
+  _selectedBg: '#ddf',
+  _borderColor: '#0002',
+  _darkBorderColor: '#0004',
+  _lightBorderColor: '#fff4',
+  _inputBorder: '1px solid var(--border-color)',
+  _lightBorder: '1px solid var(--light-border-color)',
+  _darkBorder: '1px solid var(--dark-border-color)',
+  _roundedRadius: vars.lineHeight25,
+  _borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
+  _inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
+  _toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
+  _placeHolderOpacity: 0.5,
+  _vh: '100vh',
 }
 
 const brandColors = {
-  brandColor: brandColor.html,
-  brandTextColor: '#ECF3DD',
-  textHeadingColor: vars.brandColor,
+  _brandColor: brandColor,
+  _brandTextColor: '#ECF3DD',
+  _textHeadingColor: vars.brandColor,
 }
 
 const darkBrandColors = {
-  textHeadingColor: vars.brandTextColor,
+  _textHeadingColor: vars.brandTextColor,
 }
 
 const codeVars = {
-  codeColor: vars.textColor,
-  codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1).html,
+  _codeColor: vars.textColor,
+  _codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1).html,
 }
 
 StyleSheet('base-style', {
   '@import':
     'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
   body: {
-    ...initVars({ ...cssVars, ...brandColors, ...codeVars }),
+    ...cssVars,
+    ...brandColors,
+    ...codeVars,
     fontFamily: vars.font,
     background: vars.background,
     color: vars.textColor,
@@ -84,11 +86,11 @@ StyleSheet('base-style', {
     accentColor: vars.brandColor,
   },
   '@media (prefers-color-scheme: dark)': {
-    body: initVars({
-      darkmode: 'true',
-    }),
+    body: {
+      _darkmode: 'true',
+    },
   },
-  '.darkmode': { ...darkMode(cssVars), ...initVars(darkBrandColors) },
+  '.darkmode': { ...invertLuminance(cssVars), ...darkBrandColors },
   'h1, h2, h3': {
     margin: `${vars.spacing200} 0 ${vars.spacing}`,
     color: vars.textHeadingColor,

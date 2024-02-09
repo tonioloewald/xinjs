@@ -11,7 +11,15 @@
 
 export { bind, on } from './bind'
 export { bindings } from './bindings'
-export { css, darkMode, initVars, vars, varDefault, StyleSheet } from './css'
+export {
+  css,
+  invertLuminance,
+  darkMode,
+  initVars,
+  vars,
+  varDefault,
+  StyleSheet,
+} from './css'
 export type { XinStyleSheet, XinStyleMap, XinStyleRule } from './css-types'
 export { Color } from './color'
 export { Component } from './component'

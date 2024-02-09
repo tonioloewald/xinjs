@@ -101,6 +101,33 @@ generates:
       --color: var(--color, #222);
     }
 
+### inverseLuminance(styleRule: XinStyleRule): XinStyleRule
+
+`inverseLuminance` takes a styleRule and tries to find all the color properties and replace them with `inverseLuminance`
+(see [Color](color.md)) versions for easy implementation of "dark mode".
+
+**Note** that the css method is called `invertLuminance` while the `Color` property is `inverseLuminance`.
+
+    import { Color, StyleSheet, invertLuminance } from 'xinjs'
+
+    const textColor = Color.fromCss('#222')
+
+    const cssVars = {
+      _textColor: textColor,
+      _background: '#fafafa',
+      _spacing: 16,
+    }
+
+    StyleSheet({
+      ':root': cssVars,
+      '@media (prefers-color-scheme: dark)': {
+        ':root': invertLuminance(cssVars)
+      } 
+    })
+
+`invertLuminance()` will only output inverted colors (it tries to identify color specifications in strings
+using regular expression matching), skipping variables with non-color values.
+
 ### Deprecated methods
 
 These methods will be removed, but currently generate a (hopefully helpful) warning.

@@ -101,7 +101,7 @@ export const initVars = (obj: {
 }
 
 export const darkMode = (obj: XinStyleRule): XinStyleRule => {
-  console.warn('darkMode is deprecated. Just use Color instances instead.')
+  console.warn('darkMode is deprecated. Use inverseLuminance instead.')
   const rule: XinStyleRule = {}
   for (const key of Object.keys(obj)) {
     let value = obj[key]
@@ -114,6 +114,24 @@ export const darkMode = (obj: XinStyleRule): XinStyleRule => {
     }
   }
   return rule
+}
+
+export const invertLuminance = (map: XinStyleRule): XinStyleRule => {
+  const inverted: XinStyleRule = {}
+
+  for (const key of Object.keys(map)) {
+    const value = map[key]
+    if (value instanceof Color) {
+      inverted[key] = value.inverseLuminance
+    } else if (
+      typeof value === 'string' &&
+      value.match(/^(#[0-9a-fA-F]{3}|rgba?\(|hsla?\()/)
+    ) {
+      inverted[key] = Color.fromCss(value).inverseLuminance
+    }
+  }
+
+  return inverted
 }
 
 export const vars = new Proxy<{ [key: string]: string }>(
