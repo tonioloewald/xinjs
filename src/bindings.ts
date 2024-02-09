@@ -5,7 +5,6 @@ import { getValue, setValue } from './dom'
 export const bindings: { [key: string | symbol]: XinBinding } = {
   value: {
     toDOM(element: HTMLElement, value: any) {
-      console.log(element, value)
       setValue(element, value)
     },
 
