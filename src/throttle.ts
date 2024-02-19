@@ -6,7 +6,7 @@ export const debounce = (origFn: VoidFunc, minInterval = 250): VoidFunc => {
     if (debounceId !== undefined) clearTimeout(debounceId)
     debounceId = setTimeout(() => {
       origFn(...args)
-    }, minInterval)
+    }, minInterval) as unknown as number
   }
 }
 
@@ -19,7 +19,7 @@ export const throttle = (origFn: VoidFunc, minInterval = 250): VoidFunc => {
     debounceId = setTimeout(async () => {
       origFn(...args)
       previousCall = Date.now()
-    }, minInterval)
+    }, minInterval) as unknown as number
     if (!inFlight && Date.now() - previousCall >= minInterval) {
       inFlight = true
       try {

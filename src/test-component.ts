@@ -71,7 +71,7 @@ export class XinTest extends Component {
       } catch (err) {
         this.status = `exception: ${err}`
       }
-    }, this.delay)
+    }, this.delay) as unknown as number
   }
 
   connectedCallback() {
