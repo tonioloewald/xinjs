@@ -12,7 +12,7 @@ import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
 import wordList from './words'
 
-const { b, span, div, a } = elements
+const { b, span, div, a, template } = elements
 
 const { words } = xinProxy({
   words: new WordList(wordList),
@@ -80,28 +80,35 @@ export const wordSearch = (...args: ElementPart[]) =>
       {
         bindList: {
           value: 'words.list',
-          initInstance(element, word) {
-            element.textContent = word
-            element.setAttribute(
-              'href',
-              `https://thefreedictionary.com/${word}`
-            )
-            element.setAttribute('target', `definition`)
-          },
         },
       },
-      a({
-        style: {
-          display: 'inline-block',
-          padding: '2px 10px',
-          margin: '2px',
-          borderRadius: '99px',
-          background: vars.panelBg,
-          fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
-          textDecoration: 'none',
-          color: 'var(--text-color)',
-        },
-      })
+      template(
+        a({
+          style: {
+            display: 'inline-block',
+            padding: '2px 10px',
+            margin: '2px',
+            borderRadius: '99px',
+            background: vars.panelBg,
+            fontFamily: 'Helvetica Neue, Helvetica, Arial, Sans-serif',
+            textDecoration: 'none',
+            color: 'var(--text-color)',
+          },
+          target: '_blank',
+          bindText: '^',
+          bind: {
+            value: '^',
+            binding: {
+              toDOM(element, word) {
+                element.setAttribute(
+                  'href',
+                  `https://thefreedictionary.com/${word}`
+                )
+              },
+            },
+          },
+        })
+      )
     ),
     div(
       {

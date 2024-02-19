@@ -1,70 +1,75 @@
 /* eslint-disable */
 // @ts-expect-error
 import { test, expect } from 'bun:test'
-import { camelToKabob, kabobToCamel } from './string-case'
-import { initVars, vars, css, varDefault } from './css'
+import { xinProxy } from './xin-proxy'
+import { elements } from './elements'
+import { updates } from './path-listener'
 
-test('camelToKabob works', () => {
-  expect(camelToKabob('x')).toBe('x')
-  expect(camelToKabob('X')).toBe('-x')
-  expect(camelToKabob('thisIsATest')).toBe('this-is-a-test')
-  expect(camelToKabob('hello world')).toBe('hello world')
-  expect(camelToKabob('innerHTML')).toBe('inner-h-t-m-l')
-  expect(camelToKabob('InnerHTML')).toBe('-inner-h-t-m-l')
-  expect(camelToKabob('_thisIsATest')).toBe('_this-is-a-test')
-  expect(camelToKabob('__thisIsATest')).toBe('__this-is-a-test')
+test('element creation works', () => {
+  const { div, input } = elements
+  expect(div().tagName).toBe('DIV')
+  expect(input({ value: 17 }).value).toBe('17')
 })
 
-test('kabobToCamel works', () => {
-  expect(kabobToCamel('-a')).toBe('A')
-  expect(kabobToCamel('a')).toBe('a')
-  expect(kabobToCamel('this-is-a-test')).toBe('thisIsATest')
-  expect(kabobToCamel('-wabbit-season')).toBe('WabbitSeason')
-  expect(kabobToCamel('-inner-h-t-m-l')).toBe('InnerHTML')
-  expect(kabobToCamel('inner-h-t-m-l')).toBe('innerHTML')
+test('element attributes work', () => {
+  const { div } = elements
+  expect(div({ dataFoo: 'bar' }).dataset.foo).toBe('bar')
+  expect(div({ id: 'whatevs' }).id).toBe('whatevs')
 })
 
-// these tests belong in css.test.ts but mysteriously putting them there causes other tests to fail
-test('vars works', () => {
-  expect(vars.foo).toBe('var(--foo)')
-  expect(vars.fooBar).toBe('var(--foo-bar)')
-  expect(vars.fooBar50).toBe('calc(var(--foo-bar) * 0.5)')
-  expect(vars.fooBar_50).toBe('calc(var(--foo-bar) * -0.5)')
-})
-
-test('initVars works', () => {
-  expect(
-    initVars({
-      foo: 17,
-    })['--foo']
-  ).toBe('17px')
-})
-
-const cssText = `:root {
-  --foo: 17px;
-  --foo-width: 666px;
-}
-
-bar {
-  baz-lurman: calc(var(--foo-bar) * 0.75);
-  cohen-bros: calc(var(--fargo) * -1);
-}`
-
-test('css works', () => {
-  expect(
-    css({
-      ':root': initVars({
-        foo: 17,
-        fooWidth: 666,
-      }),
-      bar: {
-        bazLurman: vars.fooBar75,
-        cohenBros: vars.fargo_100,
+test('data binding works', async () => {
+  const { test } = xinProxy(
+    {
+      test: {
+        value: 'hello world',
       },
-    })
-  ).toBe(cssText)
+    },
+    true
+  )
+
+  expect(test.value.valueOf()).toBe('hello world')
+
+  const div = elements.div({ bindText: test.value })
+  document.body.append(div)
+
+  await updates()
+  expect(div.textContent).toBe('hello world')
 })
 
-test('varDefault Works', () => {
-  expect(varDefault.fooBar('50px')).toBe('var(--foo-bar, 50px)')
+test('event binding works', async () => {
+  const { test } = xinProxy(
+    {
+      test: {
+        count: 0,
+        handler() {
+          test.count += 1
+        },
+      },
+    },
+    true
+  )
+
+  test.handler()
+  expect(test.count.valueOf()).toBe(1)
+
+  const button = elements.button({ onClick: test.handler })
+  document.body.append(button)
+  button.click()
+  expect(test.count.valueOf()).toBe(2)
+
+  button.remove()
+})
+
+test('style binding works', async () => {
+  const div = elements.div({
+    style: {
+      _fooBar: '17px',
+      __barBaz: 'green',
+      textAlign: 'center',
+    },
+  })
+
+  expect(div.style.textAlign).toBe('center')
+  expect(div.style.getPropertyValue('--foo-bar')).toBe('17px')
+  expect(div.style.getPropertyValue('--bar-baz')).toBe('var(--bar-baz, green)')
 })

@@ -125,7 +125,7 @@ export const touch = (touchable: any): void => {
     updatePromise = new Promise((resolve) => {
       resolveUpdate = resolve
     })
-    updateTriggered = setTimeout(update)
+    updateTriggered = setTimeout(update) as unknown as number
   }
 
   if (

@@ -170,6 +170,7 @@ export function bind<T extends HTMLElement>(
   })
 
   if (toDOM != null && !path.startsWith('^')) {
+    // not calling toDOM directly here allows virtual list bindings to work
     touch(path)
   }
 

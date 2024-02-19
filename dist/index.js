@@ -545,7 +545,8 @@ function $5258c5e951c26004$export$2385a24977818dd0(element, what, binding, optio
         binding: binding,
         options: options
     });
-    if (toDOM != null && !path.startsWith("^")) (0, $26326a5bf69c90fe$export$d0b7ea69ab6056df)(path);
+    if (toDOM != null && !path.startsWith("^")) // not calling toDOM directly here allows virtual list bindings to work
+    (0, $26326a5bf69c90fe$export$d0b7ea69ab6056df)(path);
     return element;
 }
 const $5258c5e951c26004$var$handledEventTypes = new Set();
@@ -784,7 +785,7 @@ class $17b559bf321bb783$var$ListBinding {
     update(array, isSlice) {
         if (array == null) array = [];
         this._array = array;
-        const { initInstance: initInstance, updateInstance: updateInstance, hiddenProp: hiddenProp, visibleProp: visibleProp } = this.options;
+        const { hiddenProp: hiddenProp, visibleProp: visibleProp } = this.options;
         const arrayPath = (0, $2f9efd8dbae277cd$export$40700dafb97c3799)(array);
         const slice = this.visibleSlice();
         this.boundElement.classList.toggle("-xin-empty-list", slice.items.length === 0);
@@ -836,11 +837,7 @@ class $17b559bf321bb783$var$ListBinding {
                     const itemPath = `${arrayPath}[${i}]`;
                     $17b559bf321bb783$var$updateRelativeBindings(element, itemPath);
                 }
-                if (initInstance != null) // eslint-disable-next-line
-                initInstance(element, item);
             }
-            if (updateInstance != null) // eslint-disable-next-line
-            updateInstance(element, item);
             elements.push(element);
         }
         // make sure all the elements are in the DOM and in the correct location
@@ -1105,10 +1102,17 @@ const $a20b878345862077$var$create = (tagType, ...contents)=>{
         const value = elementProps[key];
         if (key === "apply") value(elt);
         else if (key === "style") {
-            if (typeof value === "object") {
-                for (const prop of Object.keys(value))if (prop.startsWith("--")) elt.style.setProperty(prop, value[prop]);
+            if (typeof value === "object") for (const prop of Object.keys(value)){
+                if (prop.startsWith("__")) {
+                    const varName = "--" + (0, $40005b86e623b59d$export$87ae551bf60f4bb)(prop.substring(2));
+                    elt.style.setProperty(varName, `var(${varName}, ${value[prop]})`);
+                } else if (prop.startsWith("_")) {
+                    const varName = "--" + (0, $40005b86e623b59d$export$87ae551bf60f4bb)(prop.substring(1));
+                    elt.style.setProperty(varName, value[prop]);
+                } else if (prop.startsWith("--")) elt.style.setProperty(prop, value[prop]);
                 else elt.style[prop] = value[prop];
-            } else elt.setAttribute("style", value);
+            }
+            else elt.setAttribute("style", value);
         } else if (key.match(/^on[A-Z]/) != null) {
             const eventType = key.substring(2).toLowerCase();
             (0, $5258c5e951c26004$export$af631764ddc44097)(elt, eventType, value);

@@ -153,7 +153,7 @@ function showRoute() {
   if (route == null) {
     route = routes[0]
   }
-  ;[...document.querySelectorAll('a')].forEach((a) => {
+  ;[...window.document.querySelectorAll('a')].forEach((a) => {
     a.classList.toggle('current-route', a.dataset.route === path)
   })
   main!.textContent = ''

@@ -173,7 +173,13 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
     } else if (key === 'style') {
       if (typeof value === 'object') {
         for (const prop of Object.keys(value)) {
-          if (prop.startsWith('--')) {
+          if (prop.startsWith('__')) {
+            const varName = '--' + camelToKabob(prop.substring(2))
+            elt.style.setProperty(varName, `var(${varName}, ${value[prop]})`)
+          } else if (prop.startsWith('_')) {
+            const varName = '--' + camelToKabob(prop.substring(1))
+            elt.style.setProperty(varName, value[prop])
+          } else if (prop.startsWith('--')) {
             elt.style.setProperty(prop, value[prop])
           } else {
             // worst case, the style won't work

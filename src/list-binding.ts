@@ -18,8 +18,6 @@ const SLICE_INTERVAL_MS = 16 // 60fps
 
 interface ListBindingOptions {
   idPath?: string
-  initInstance?: (element: HTMLElement, value: any) => void
-  updateInstance?: (element: HTMLElement, value: any) => void
   virtual?: { height: number; width?: number }
   hiddenProp?: symbol | string
   visibleProp?: symbol | string
@@ -153,8 +151,7 @@ class ListBinding {
     }
     this._array = array
 
-    const { initInstance, updateInstance, hiddenProp, visibleProp } =
-      this.options
+    const { hiddenProp, visibleProp } = this.options
 
     const arrayPath: string = xinPath(array) as string
 
@@ -227,14 +224,6 @@ class ListBinding {
           const itemPath = `${arrayPath}[${i}]`
           updateRelativeBindings(element, itemPath)
         }
-        if (initInstance != null) {
-          // eslint-disable-next-line
-          initInstance(element, item)
-        }
-      }
-      if (updateInstance != null) {
-        // eslint-disable-next-line
-        updateInstance(element, item)
       }
       elements.push(element)
     }
