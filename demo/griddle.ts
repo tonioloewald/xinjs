@@ -1,8 +1,13 @@
-import { Component as WebComponent, ElementCreator, elements, vars, xinProxy, XinTouchableType } from '../src/'
-import { bodymovinPlayer, BodymovinPlayer } from 'xinjs-ui'
+import { Component as WebComponent, ElementCreator, elements, vars, xinProxy, XinTouchableType } from '../src'
+import { bodymovinPlayer, BodymovinPlayer, makeSorter, icons } from 'xinjs-ui'
 import wordList from './words'
 
 const {h1, div, template, button} = elements
+
+interface Word {
+  word: string
+  found: boolean
+}
 
 function shuffle<T>(deck: Array<T>, random = Math.random): Array<T> {
   const shuffled = [] as Array<T>;
@@ -18,6 +23,17 @@ function gridPos(index: number): {row: number, col: number} {
     col: index % 4
   }
 }
+
+function padLeft(s: any, minLength: number, padding = ' ') {
+  s = String(s)
+  return s.length >= minLength ? s : padding.repeat(minLength - s.length) + s
+}
+
+function formatSeconds(s: number): string {
+  return Math.floor(s / 60) + ':' + padLeft(s % 60, 2, '0')
+}
+
+const wordSorter = makeSorter((w: Word): [string] => [w.word])
 
 const DICE = [
   ["R","I","F","O","B","X"],
@@ -37,22 +53,50 @@ const DICE = [
   ["U","W","I","L","R","G"],
   ["P","A","C","E","M","D"]
 ]
-class BoggleGame extends WebComponent {
+class GriddleGame extends WebComponent {
   game = {
-    dice: [] as string[],
+    dice: ' '.repeat(16).split(''),
     wordInProgress: [] as string[],
-    words: [] as string[],
+    words: [] as Array<Word>,
+    timeRemaining: 0,
+    displayTime: ' ',
+    boardRotation: 0
+  }
+
+  private interval?: number
+
+  update = () => {
+    this.game.timeRemaining -= 1
+    this.game.displayTime = formatSeconds(this.game.timeRemaining)
+    console.log(this.game.displayTime)
+    if (this.game.timeRemaining <= 0) {
+      this.game.displayTime = 'Time’s Up!'
+      this.parts.board.toggleAttribute('disabled', true)
+      this.parts.addWord.toggleAttribute('disabled', true)
+      this.parts.cancelWord.toggleAttribute('disabled', true)
+      ;(this.parts.timer as BodymovinPlayer).animation.stop()
+      clearInterval(this.interval)
+    }
   }
 
   init = () => {
+    if (this.interval) {
+      clearInterval(this.interval)
+    }
     const { timer } = this.parts as { timer: BodymovinPlayer}
     this.game.dice = shuffle(DICE.map(die => die[Math.floor(Math.random() * 6)]))
     this.game.words = []
     this.game.wordInProgress = []
     if (timer.animation) {
-      timer.animation.setSpeed(timer.getDuration()/180)
+      timer.animation.setSpeed(0.5)
       timer.animation.play()
     }
+    this.parts.board.toggleAttribute('disabled', false)
+    this.game.timeRemaining = 180
+    this.interval = setInterval(
+      this.update,
+      1000
+    ) as unknown as number
   }
 
   constructor() {
@@ -85,16 +129,25 @@ class BoggleGame extends WebComponent {
   addWord = () => {
     const word = this.parts.word.textContent
     if (word) {
-      if (this.game.words.includes(word)) {
-        alert(`You already found ${word}`)
-      } else if (wordList.includes(word.toLocaleLowerCase())) {
-        this.game.words.push(this.parts.word.textContent as string)
-        this.game.words.sort()
+      if (this.game.words.find(w => w.word === word)) {
+        console.log(`You already found ${word}`)
       } else {
-        alert(`Sorry ${word} is not in my dictionary`)
+        const found = wordList.includes(word.toLocaleLowerCase())
+        this.game.words.push({word, found})
+        this.game.words.sort(wordSorter)
       }
     }
     this.cancelWord()
+  }
+
+  rotate = (event: Event) => {
+    const button = event.target as HTMLButtonElement
+    if (button.getAttribute('part') === 'rotateLeft') {
+      this.game.boardRotation -= 90
+    } else {
+      this.game.boardRotation += 90
+    }
+    console.log(this.game.boardRotation)
   }
 
   connectedCallback() {
@@ -102,37 +155,65 @@ class BoggleGame extends WebComponent {
 
     this.textContent = ''
     this.append(
-      h1('boggle'), 
+      h1('griddle'), 
       bodymovinPlayer({
         part: 'timer',
         src: '/assets/hourglass.json',
         config: {
           autoplay: false,
-          loop: false,
+          loop: true,
         }
       }),
       button('New Game', {part: 'init', onClick: this.init}),
       div(
-        { 
-          part: 'board',
-          bindList: {
-            value: this.game.dice
+        {
+          style: {
+            position: 'relative'
           }
         },
-        template(
-          div({ 
-            class: `die`, 
-            bindText: '^', 
-            onClick: this.addLetter,
+        button(icons.undo(), {
+          part: 'rotateLeft',
+          onClick: this.rotate
+        }),
+        div(
+          { 
+            part: 'board',
+            disabled: true,
+            bindList: {
+              value: this.game.dice
+            },
             bind: {
-              value: '^', 
-              binding(element, value) {
-                element.style.transform = `rotateZ(${Math.floor(Math.random() * 4) * 88 + Math.random() * 4}deg`
-              },
-            } 
-          })
-        )
+              value: this.game.boardRotation as unknown as XinTouchableType,
+              binding: {
+                toDOM(element, value) {
+                  element.style.transform = `rotate(${value}deg)`
+                }
+              }
+            }
+          },
+          template(
+            div({ 
+              class: `die`, 
+              bindText: '^', 
+              onClick: this.addLetter,
+              bind: {
+                value: '^', 
+                binding(element, value) {
+                  element.style.transform = `rotateZ(${Math.floor(Math.random() * 4) * 88 + Math.random() * 4}deg`
+                },
+              } 
+            })
+          )
+        ),
+        button(icons.redo(), {
+          part: 'rotateRight',
+          onClick: this.rotate
+        }),
       ),
+      div({
+        part: 'clock',
+        bindText: this.game.displayTime as unknown as XinTouchableType,
+      }),
       div(
         {
           part: 'wordInProgress',
@@ -156,7 +237,8 @@ class BoggleGame extends WebComponent {
           )
         ),
         div({style: {flex: '1'}}),
-        button('x', {
+        button(icons.x(), {
+          part: 'cancelWord',
           onClick: this.cancelWord,
           bind: {
             value: this.game.wordInProgress as unknown as XinTouchableType,
@@ -168,6 +250,7 @@ class BoggleGame extends WebComponent {
           }
         }),
         button('Add Word', {
+          part: 'addWord',
           onClick: this.addWord,
           bind: {
             value: this.game.wordInProgress as unknown as XinTouchableType,
@@ -183,24 +266,35 @@ class BoggleGame extends WebComponent {
         {
           part: 'words',
           bindList: {
+            idPath: 'word',
             value: this.game.words
           }
         },
         template(
           div(
-            {bindText: '^'}
+            {
+              bindText: '^.word',
+              bind: {
+                value: '^.found',
+                binding: {
+                  toDOM(element, value) {
+                    element.classList.toggle('not-found', !value)
+                  }
+                }
+              }
+            }
           )
         )
       )
     )
 
-    this.init()
+    // this.init()
   }
 }
 
-export const boggleGame = BoggleGame.elementCreator(
+export const griddleGame = GriddleGame.elementCreator(
   {
-    tag: 'boggle-game',
+    tag: 'griddle-game',
     styleSpec: {
       ':host': {
         display: 'flex',
@@ -209,16 +303,35 @@ export const boggleGame = BoggleGame.elementCreator(
         alignItems: 'center',
         padding: vars.spacing
       },
+      ':host svg': {
+        width: 24,
+        height: 24,
+        pointerEvents: 'none'
+      },
       ':host h1': {
         textAlign: 'center'
       },
       ':host [part="board"]': {
         display: 'grid',
         gridTemplateColumns: '64px 64px 64px 64px',
-        gap: '4px'
+        gap: '4px',
+        transformOrigin: '50% 50%',
+        transition: '0.25s ease-out',
       },
       ':host [part="board"] > :first-child': {
-        position: 'absolute'
+        position: 'absolute',
+      },
+      ':host [part="rotateLeft"]': {
+        position: 'absolute',
+        left: vars.spacing_100,
+        top: '50%',
+        transform: 'translateX(-100%) translateY(-50%)'
+      },
+      ':host [part="rotateRight"]': {
+        position: 'absolute',
+        right: vars.spacing_100,
+        top: '50%',
+        transform: 'translateX(100%) translateY(-50%)'
       },
       ':host [part="wordInProgress"]': {
         width: '100%',
@@ -241,6 +354,10 @@ export const boggleGame = BoggleGame.elementCreator(
         height: 128,
         width: 128
       },
+      ':host [part="clock"]': {
+        padding: vars.spacing,
+        fontSize: 24
+      },
       ':host .die': {
         transformOrigin: '50% 50%',
         display: 'block',
@@ -251,8 +368,12 @@ export const boggleGame = BoggleGame.elementCreator(
         width: '64px',
         color: vars.brandTextColor,
         background: vars.brandColor,
-        borderRadius: '4px',
+        borderRadius: '8px',
         position: 'relative',
+        transition: '0.2s ease-out',
+      },
+      ':host .die:active': {
+        boxShadow: `0 0 2px 2px ${vars.brandColor}`
       },
       ':host [part="wordInProgress"] .die': {
         lineHeight: '48px',
@@ -271,7 +392,15 @@ export const boggleGame = BoggleGame.elementCreator(
       ':host [disabled]': {
         opacity: 0.6,
         pointerEvents: 'none'
-      }
+      },
+      ':host [part="wordInProgress"] button': {
+        minWidth: 48,
+        textAlign: 'center'
+      },
+      ':host .not-found': {
+        textDecoration: 'line-through',
+        opacity: 0.6
+      },
     }
   }
-) as ElementCreator<BoggleGame>
+) as ElementCreator<GriddleGame>

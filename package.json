@@ -36,10 +36,11 @@
     "@typescript-eslint/eslint-plugin": "^6.5.0",
     "bun-types": "latest",
     "eslint": "^8.47.0",
-    "marked": "^4.2.2",
+    "marked": "^5.1.0",
     "parcel": "latest",
     "prettier": "^2.8.8",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "xinjs-ui": "^0.6.19"
   },
   "files": [
     "/cdn",
