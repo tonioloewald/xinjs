@@ -21,6 +21,7 @@ import { wordSearch } from './WordSearch'
 import { listFilterDemo } from './components'
 import { fauxSlots } from './faux-slots'
 import { Color } from '../src/color'
+import { boggleGame } from './boggle'
 const logo = '../assets/xinjs-logo.svg'
 const readmeMd = '../assets/readme.md'
 
@@ -69,6 +70,10 @@ const routes: Route[] = [
   {
     path: 'array-binding',
     content: arrayBindingTest,
+  },
+  {
+    path: 'boggle',
+    content: boggleGame,
   },
   {
     path: 'word-search',
