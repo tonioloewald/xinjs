@@ -1,4 +1,5 @@
 import { elements, vars } from '../src'
+import { icons } from 'xinjs-ui'
 
 const { form, dialog, h2, span, button, label, input, select, option } =
   elements
@@ -31,20 +32,15 @@ export const settingsDialog = () =>
     form(
       button(
         {
+          class: 'icon-button',
           style: {
             position: 'absolute',
             top: vars.spacing50,
             right: vars.spacing50,
-            width: '32px',
-            height: '32px',
-            lineHeight: '32px',
-            border: 0,
-            textAlign: 'center',
-            fontSize: '18px',
-            padding: 0,
+            _textColor: vars.brandTextColor,
           },
         },
-        '⨉'
+        icons.x()
       ),
       label(span('App Title'), input({ bindValue: 'app.title' })),
       label(

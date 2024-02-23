@@ -4,7 +4,6 @@ import {
   Component,
   elements,
   vars,
-  initVars,
 } from '../src/index'
 import { xinValue } from '../src/metadata'
 import { toolBar, labeledValue, labeledInput } from './components/index'
@@ -67,7 +66,7 @@ class ColorSwatch extends Component {
     const { idSpan, colorInput } = this.parts
     if (this.value != null) {
       idSpan.textContent = String(this.value.id)
-      colorInput.value = this.value.color
+      ;(colorInput as HTMLInputElement).value = this.value.color
       this.style.border = `2px solid ${this.value.color}`
     }
   }
@@ -83,7 +82,6 @@ const colorSwatch = ColorSwatch.elementCreator({
       gap: '10px',
       width: '260px',
       background: vars.inputBg,
-      ...initVars({ inputWith: '140px' }),
       alignItems: 'center',
       overflow: 'hidden',
     },
@@ -118,17 +116,17 @@ export const arrayBindingTest = (...args) =>
         placeholder: 'items to create',
         reversed: true,
         type: 'number',
-        style: initVars({
-          flexDirection: 'row-reverse',
-          inputWidth: 60,
-        }),
+        style: {
+          _flexDirection: 'row-reverse',
+          _inputWidth: 60,
+        },
         bindValue: 'colors.itemsToCreate',
       }),
       span({ style: { flex: '1 1 auto' } }),
       labeledValue('items', {
-        style: initVars({
-          flexDirection: 'row-reverse',
-        }),
+        style: {
+          _flexDirection: 'row-reverse',
+        },
         bindValue: 'colors.items.length',
       }),
       button('scramble', {

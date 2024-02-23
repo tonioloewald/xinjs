@@ -29,6 +29,7 @@ const cssVars = {
   _fontSize: 16,
   _codeFontSize: 16,
   _lineHeight: 24,
+  _touchSize: 48,
   _spacing: 16,
   _textColor: '#222',
   _itemSpacing: vars.spacing50,
@@ -229,13 +230,17 @@ StyleSheet('base-style', {
     fontFamily: vars.codeFont,
   },
   '.icon-button': {
+    display: 'inline-flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     fontSize: vars.fontSize200,
     background: 'transparent',
-    lineHeight: vars.lineHeight200,
+    lineHeight: vars.touchSize,
     borderRadius: 1000,
     padding: 0,
-    minWidth: vars.lineHeight200,
-    boxShadow: 'none',
+    minWidth: vars.touchSize,
+    minHeight: vars.touchSize,
+    boxShadow: 'none'
   },
   'dialog::backdrop': {
     backgroundColor: '#0004',
@@ -298,6 +303,13 @@ StyleSheet('base-style', {
     fontSize: vars.fontSize80,
     opacity: 0.5,
   },
+  // icons
+  'svg[class*="icon-"]': {
+    width: 24,
+    height: 24,
+    fill: vars.textColor,
+    pointerEvents: 'none'
+  }
 })
 
 // adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/

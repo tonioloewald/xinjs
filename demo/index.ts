@@ -22,6 +22,7 @@ import { listFilterDemo } from './components'
 import { fauxSlots } from './faux-slots'
 import { Color } from '../src/color'
 import { griddleGame } from './griddle'
+import { icons } from 'xinjs-ui'
 const logo = '../assets/xinjs-logo.svg'
 const readmeMd = '../assets/readme.md'
 
@@ -181,13 +182,14 @@ const appBar = () =>
         '--text-heading-color': vars.brandTextColor,
       },
     },
-    button('▸', {
+    button(icons.chevronRight(), {
       title: 'toggle menu',
       class: 'icon-button',
       style: {
         fontSize: vars.fontSize150,
         marginRight: vars.spacing50,
         transition: '0.25s ease-out',
+        transformOrigin: '50% 50%',
         transform: 'rotateZ(180deg)',
       },
       onClick(event) {
@@ -229,7 +231,7 @@ const appBar = () =>
       span({ bindText: 'app.title' })
     ),
     span({ style: { flex: '1 1 auto' } }),
-    button('⚙', {
+    button(icons.settings(), {
       title: 'settings',
       class: 'icon-button',
       onClick() {
