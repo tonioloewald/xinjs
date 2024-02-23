@@ -71,5 +71,5 @@ test('style binding works', async () => {
 
   expect(div.style.textAlign).toBe('center')
   expect(div.style.getPropertyValue('--foo-bar')).toBe('17px')
-  expect(div.style.getPropertyValue('--bar-baz')).toBe('var(--bar-baz, green)')
+  expect(div.style.getPropertyValue('--bar-baz')).toBe('var(--bar-baz-default, green)')
 })

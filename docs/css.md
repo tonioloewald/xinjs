@@ -98,8 +98,12 @@ Similarly, you can define a variable which defines a default value using `__`, e
 generates:
 
     p {
-      --color: var(--color, #222);
+      --color: var(--color-default, #222);
     }
+
+> **Note**: Originally I wanted this to generate `--color: var(--color, #222)` but it turns out
+> that the way CSS is evaluated in browsers, this is considered a cyclic reference (which
+> it is, but it would be easy to resolve and very useful).
 
 ### inverseLuminance(styleRule: XinStyleRule): XinStyleRule
 

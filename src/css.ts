@@ -15,7 +15,6 @@ const numericProps = [
   'flex-base',
   'flex-grow',
   'flex-shrink',
-  'gap',
   'opacity',
   'order',
   'tab-size',
@@ -23,32 +22,38 @@ const numericProps = [
   'z-index',
   'zoom',
 ]
+
+export const processProp = (prop: string, value: string | number): {prop: string, value: string} => {
+  if (typeof value === 'number' && !numericProps.includes(prop)) {
+    value = `${value}px`
+  }
+  if (prop.startsWith('_')) {
+    if (prop.startsWith('__')) {
+      prop = '--' + prop.substring(2)
+      value = `var(${prop}-default, ${value})`
+    } else {
+      prop = '--' + prop.substring(1)
+    }
+  }
+  return {
+    prop,
+    value: String(value)
+  }
+}
+
 const renderProp = (
   indentation: string,
   cssProp: string,
   value: string | number | Color | undefined
 ): string => {
+  if (value === undefined) {
+    return ''
+  }
   if (value instanceof Color) {
     value = value.html
   }
-  if (value === undefined) {
-    return ''
-  } else if (cssProp.startsWith('_')) {
-    if (typeof value === 'number') {
-      value = `${value}px`
-    }
-    if (cssProp.startsWith('__')) {
-      const varName = '--' + cssProp.substring(2)
-      return `${indentation}  ${varName}: var(${varName}, ${value});`
-    } else {
-      const varName = '--' + cssProp.substring(1)
-      return `${indentation}  ${varName}: ${value};`
-    }
-  } else if (typeof value === 'string' || numericProps.includes(cssProp)) {
-    return `${indentation}  ${cssProp}: ${value};`
-  } else {
-    return `${indentation}  ${cssProp}: ${value}px;`
-  }
+  const processed = processProp(cssProp, value)
+  return `${indentation}  ${processed.prop}: ${processed.value};`
 }
 
 const renderStatement = (

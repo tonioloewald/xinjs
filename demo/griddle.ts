@@ -155,16 +155,27 @@ class GriddleGame extends WebComponent {
 
     this.textContent = ''
     this.append(
-      h1('griddle'), 
-      bodymovinPlayer({
-        part: 'timer',
-        src: '/assets/hourglass.json',
-        config: {
-          autoplay: false,
-          loop: true,
-        }
-      }),
-      button('New Game', {part: 'init', onClick: this.init}),
+      div(
+        {
+          style: {
+            width: '100%',
+            display: 'flex'
+          }
+        },
+        bodymovinPlayer({
+          part: 'timer',
+          src: '/assets/hourglass.json',
+          config: {
+            autoplay: false,
+            loop: true,
+          }
+        }),
+        h1(
+          { style: { flex: '1', padding: 0, margin: 0, textAlign: 'center' } },
+          'griddle'
+        ), 
+        button(icons.play(), {title: 'play', part: 'init', onClick: this.init}),
+      ),
       div(
         {
           style: {
@@ -249,7 +260,7 @@ class GriddleGame extends WebComponent {
             }
           }
         }),
-        button('Add Word', {
+        button(icons.check(), {
           part: 'addWord',
           onClick: this.addWord,
           bind: {
@@ -273,6 +284,7 @@ class GriddleGame extends WebComponent {
         template(
           div(
             {
+              class: 'word',
               bindText: '^.word',
               bind: {
                 value: '^.found',
@@ -287,8 +299,6 @@ class GriddleGame extends WebComponent {
         )
       )
     )
-
-    // this.init()
   }
 }
 
@@ -301,7 +311,8 @@ export const griddleGame = GriddleGame.elementCreator(
         flexDirection: 'column',
         position: 'relative',
         alignItems: 'center',
-        padding: vars.spacing
+        padding: vars.spacing,
+        __errorColor: 'crimson',
       },
       ':host svg': {
         width: 24,
@@ -342,17 +353,9 @@ export const griddleGame = GriddleGame.elementCreator(
       ':host [part="word"]': {
         display: 'flex',
       },
-      ':host [part="init"]': {
-        position: 'absolute',
-        top: 4,
-        right: 4,
-      },
       ':host [part="timer"]': {
-        position: 'absolute',
-        top: 4,
-        left: 4,
-        height: 128,
-        width: 128
+        height: 64,
+        width: 64
       },
       ':host [part="clock"]': {
         padding: vars.spacing,
@@ -381,6 +384,9 @@ export const griddleGame = GriddleGame.elementCreator(
         height: '48px',
         width: '48px',
       },
+      ':host [part="wordInProgress"] button': {
+        marginLeft: '4px'
+      },
       ':host .die::after': {
         display: 'block',
         content: '" "',
@@ -393,14 +399,38 @@ export const griddleGame = GriddleGame.elementCreator(
         opacity: 0.6,
         pointerEvents: 'none'
       },
-      ':host [part="wordInProgress"] button': {
-        minWidth: 48,
-        textAlign: 'center'
+      ':host button': {
+        display: 'flex',
+        width: 48,
+        height: 48,
+        lineHeight: 48,
+        padding: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: 'none',
+        background: vars.brandColor,
+        fill: vars.brandTextColor
       },
-      ':host .not-found': {
+      ':host [part="cancelWord"]': {
+        background: vars.errorColor,
+      },
+      ':host .not-found.not-found': {
         textDecoration: 'line-through',
-        opacity: 0.6
+        opacity: 0.6,
+        background: vars.errorColor,
       },
+      ':host [part="words"]': {
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        gap: 8,
+      },
+      ':host .word': {
+        background: vars.brandColor,
+        color: vars.brandTextColor,
+        padding: '4px 8px',
+        borderRadius: 4,
+      }
     }
   }
 ) as ElementCreator<GriddleGame>

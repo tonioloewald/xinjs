@@ -7,6 +7,7 @@ import {
   StringMap,
 } from './xin-types'
 import { camelToKabob } from './string-case'
+import { processProp } from './css'
 
 const MATH = 'http://www.w3.org/1998/Math/MathML'
 const SVG = 'http://www.w3.org/2000/svg'
@@ -173,19 +174,11 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
     } else if (key === 'style') {
       if (typeof value === 'object') {
         for (const prop of Object.keys(value)) {
-          if (prop.startsWith('__')) {
-            const varName = '--' + camelToKabob(prop.substring(2))
-            elt.style.setProperty(varName, `var(${varName}, ${value[prop]})`)
-          } else if (prop.startsWith('_')) {
-            const varName = '--' + camelToKabob(prop.substring(1))
-            elt.style.setProperty(varName, value[prop])
-          } else if (prop.startsWith('--')) {
-            elt.style.setProperty(prop, value[prop])
+          const processed = processProp(camelToKabob(prop), value[prop])
+          if (processed.prop.startsWith('--')) {
+            elt.style.setProperty(processed.prop, processed.value)
           } else {
-            // worst case, the style won't work
-            ;(elt.style as unknown as { [key: string]: string })[prop] = value[
-              prop
-            ] as string
+            ;(elt.style as unknown as { [key: string]: string })[prop] = processed.value
           }
         }
       } else {
