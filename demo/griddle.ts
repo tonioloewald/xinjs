@@ -356,8 +356,8 @@ export const griddleGame = GriddleGame.elementCreator(
         flexWrap: 'wrap',
       },
       ':host [part="timer"]': {
-        height: 64,
-        width: 64
+        height: 48,
+        width: 48
       },
       ':host [part="clock"]': {
         padding: vars.spacing,
