@@ -315,6 +315,7 @@ export const griddleGame = GriddleGame.elementCreator(
         __errorColor: 'crimson',
       },
       ':host svg': {
+        fill: vars.textColor,
         width: 24,
         height: 24,
         pointerEvents: 'none'
@@ -352,6 +353,7 @@ export const griddleGame = GriddleGame.elementCreator(
       },
       ':host [part="word"]': {
         display: 'flex',
+        flexWrap: 'wrap',
       },
       ':host [part="timer"]': {
         height: 64,
@@ -385,7 +387,8 @@ export const griddleGame = GriddleGame.elementCreator(
         width: '48px',
       },
       ':host [part="wordInProgress"] button': {
-        marginLeft: '4px'
+        marginLeft: '4px',
+        flex: '0 0 48px',
       },
       ':host .die::after': {
         display: 'block',
@@ -409,7 +412,16 @@ export const griddleGame = GriddleGame.elementCreator(
         justifyContent: 'center',
         boxShadow: 'none',
         background: vars.brandColor,
-        fill: vars.brandTextColor
+        _textColor: vars.brandTextColor
+      },
+      ':host button:not(:disabled):hover': {
+        background: vars.brandColor,
+        _textColor: vars.brandTextColor
+      },
+      ':host button:not(:disabled):active': {
+        background: vars.brandColor,
+        _textColor: vars.brandTextColor,
+        boxShadow: `0 0 2px 2px ${vars.brandColor}`
       },
       ':host [part="cancelWord"]': {
         background: vars.errorColor,
