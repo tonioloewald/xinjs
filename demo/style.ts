@@ -24,7 +24,7 @@ bind(document.body, 'app.darkmode', {
 })
 
 const cssVars = {
-  _font: "'Roboto Slab', Serif",
+  _font: "'Roboto Slab', Sans-serif",
   _codeFont: "'Space Mono', monospace",
   _fontSize: 16,
   _codeFontSize: 16,

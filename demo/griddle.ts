@@ -333,16 +333,17 @@ export const griddleGame = GriddleGame.elementCreator(
       ':host [part="board"] > :first-child': {
         position: 'absolute',
       },
-      ':host [part="rotateLeft"]': {
+      ':host [part*="rotate"]': {
         position: 'absolute',
-        left: vars.spacing_100,
         top: '50%',
+        borderRadius: '99px',
+      },
+      ':host [part="rotateLeft"]': {
+        left: vars.spacing_50,
         transform: 'translateX(-100%) translateY(-50%)'
       },
       ':host [part="rotateRight"]': {
-        position: 'absolute',
-        right: vars.spacing_100,
-        top: '50%',
+        right: vars.spacing_50,
         transform: 'translateX(100%) translateY(-50%)'
       },
       ':host [part="wordInProgress"]': {
