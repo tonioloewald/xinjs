@@ -18,7 +18,7 @@ import { markdownViewer } from './components/markdown-viewer'
 import { todo } from './components/todo'
 import { kitchenSink } from './components/kitchen-sink'
 import { wordSearch } from './WordSearch'
-import { listFilterDemo } from './components'
+import { listFilterDemo, wordleFilter } from './components'
 import { fauxSlots } from './faux-slots'
 import { Color } from '../src/color'
 import { griddleGame } from './griddle'
@@ -79,6 +79,10 @@ const routes: Route[] = [
   {
     path: 'word-search',
     content: wordSearch,
+  },
+  {
+    path: 'wordle-filter',
+    content: wordleFilter,
   },
   {
     path: 'faux-slots',

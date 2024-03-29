@@ -178,7 +178,8 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
           if (processed.prop.startsWith('--')) {
             elt.style.setProperty(processed.prop, processed.value)
           } else {
-            ;(elt.style as unknown as { [key: string]: string })[prop] = processed.value
+            ;(elt.style as unknown as { [key: string]: string })[prop] =
+              processed.value
           }
         }
       } else {

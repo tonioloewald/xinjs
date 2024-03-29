@@ -23,7 +23,10 @@ const numericProps = [
   'zoom',
 ]
 
-export const processProp = (prop: string, value: string | number): {prop: string, value: string} => {
+export const processProp = (
+  prop: string,
+  value: string | number
+): { prop: string; value: string } => {
   if (typeof value === 'number' && !numericProps.includes(prop)) {
     value = `${value}px`
   }
@@ -37,7 +40,7 @@ export const processProp = (prop: string, value: string | number): {prop: string
   }
   return {
     prop,
-    value: String(value)
+    value: String(value),
   }
 }
 

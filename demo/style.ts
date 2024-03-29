@@ -240,7 +240,7 @@ StyleSheet('base-style', {
     padding: 0,
     minWidth: vars.touchSize,
     minHeight: vars.touchSize,
-    boxShadow: 'none'
+    boxShadow: 'none',
   },
   'dialog::backdrop': {
     backgroundColor: '#0004',
@@ -308,8 +308,8 @@ StyleSheet('base-style', {
     width: 24,
     height: 24,
     fill: vars.textColor,
-    pointerEvents: 'none'
-  }
+    pointerEvents: 'none',
+  },
 })
 
 // adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/

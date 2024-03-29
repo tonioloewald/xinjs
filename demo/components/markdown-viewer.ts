@@ -21,7 +21,7 @@ class MarkdownViewer extends Component {
   }
   render() {
     super.render()
-    this.innerHTML = marked(this.value, {mangle: false, headerIds: false})
+    this.innerHTML = marked(this.value, { mangle: false, headerIds: false })
   }
 }
 

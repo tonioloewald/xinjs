@@ -1,6 +1,7 @@
+
 function $parcel$exportWildcard(dest, source) {
   Object.keys(source).forEach(function(key) {
-    if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) {
+    if (key === 'default' || key === '__esModule' || Object.prototype.hasOwnProperty.call(dest, key)) {
       return;
     }
 
@@ -14,6 +15,7 @@ function $parcel$exportWildcard(dest, source) {
 
   return dest;
 }
+
 function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
@@ -1132,6 +1134,7 @@ function $6d99f825475e91d0$export$fd322201efdc650f(s) {
 }
 
 
+
 const $c004c420133596e3$var$MATH = "http://www.w3.org/1998/Math/MathML";
 const $c004c420133596e3$var$SVG = "http://www.w3.org/2000/svg";
 const $c004c420133596e3$var$templates = {};
@@ -1152,14 +1155,9 @@ const $c004c420133596e3$var$create = (tagType, ...contents)=>{
         if (key === "apply") value(elt);
         else if (key === "style") {
             if (typeof value === "object") for (const prop of Object.keys(value)){
-                if (prop.startsWith("__")) {
-                    const varName = "--" + (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(prop.substring(2));
-                    elt.style.setProperty(varName, `var(${varName}, ${value[prop]})`);
-                } else if (prop.startsWith("_")) {
-                    const varName = "--" + (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(prop.substring(1));
-                    elt.style.setProperty(varName, value[prop]);
-                } else if (prop.startsWith("--")) elt.style.setProperty(prop, value[prop]);
-                else elt.style[prop] = value[prop];
+                const processed = (0, $db77bb2de3733b56$export$4f8a9e649bc1f08b)((0, $6d99f825475e91d0$export$87ae551bf60f4bb)(prop), value[prop]);
+                if (processed.prop.startsWith("--")) elt.style.setProperty(processed.prop, processed.value);
+                else elt.style[prop] = processed.value;
             }
             else elt.setAttribute("style", value);
         } else if (key.match(/^on[A-Z]/) != null) {
@@ -1246,7 +1244,6 @@ const $db77bb2de3733b56$var$numericProps = [
     "flex-base",
     "flex-grow",
     "flex-shrink",
-    "gap",
     "opacity",
     "order",
     "tab-size",
@@ -1254,20 +1251,24 @@ const $db77bb2de3733b56$var$numericProps = [
     "z-index",
     "zoom"
 ];
+const $db77bb2de3733b56$export$4f8a9e649bc1f08b = (prop, value)=>{
+    if (typeof value === "number" && !$db77bb2de3733b56$var$numericProps.includes(prop)) value = `${value}px`;
+    if (prop.startsWith("_")) {
+        if (prop.startsWith("__")) {
+            prop = "--" + prop.substring(2);
+            value = `var(${prop}-default, ${value})`;
+        } else prop = "--" + prop.substring(1);
+    }
+    return {
+        prop: prop,
+        value: String(value)
+    };
+};
 const $db77bb2de3733b56$var$renderProp = (indentation, cssProp, value)=>{
-    if (value instanceof (0, $dde521108530e806$export$892596cec99bc70e)) value = value.html;
     if (value === undefined) return "";
-    else if (cssProp.startsWith("_")) {
-        if (typeof value === "number") value = `${value}px`;
-        if (cssProp.startsWith("__")) {
-            const varName = "--" + cssProp.substring(2);
-            return `${indentation}  ${varName}: var(${varName}, ${value});`;
-        } else {
-            const varName = "--" + cssProp.substring(1);
-            return `${indentation}  ${varName}: ${value};`;
-        }
-    } else if (typeof value === "string" || $db77bb2de3733b56$var$numericProps.includes(cssProp)) return `${indentation}  ${cssProp}: ${value};`;
-    else return `${indentation}  ${cssProp}: ${value}px;`;
+    if (value instanceof (0, $dde521108530e806$export$892596cec99bc70e)) value = value.html;
+    const processed = $db77bb2de3733b56$export$4f8a9e649bc1f08b(cssProp, value);
+    return `${indentation}  ${processed.prop}: ${processed.value};`;
 };
 const $db77bb2de3733b56$var$renderStatement = (key, value, indentation = "")=>{
     const cssProp = (0, $6d99f825475e91d0$export$87ae551bf60f4bb)(key);
@@ -1400,15 +1401,15 @@ function $8c7b36581a3597bc$var$insertGlobalStyles(tagName) {
     delete $8c7b36581a3597bc$var$globalStyleSheets[tagName];
 }
 class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
-    static #_ = (()=>{
+    static{
         this.elements = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
-    })();
-    static #_1 = (()=>{
+    }
+    static{
         this.globalStyleSheets = [];
-    })();
-    static #_2 = (()=>{
+    }
+    static{
         this._tagName = null;
-    })();
+    }
     static get tagName() {
         return this._tagName;
     }
@@ -1703,7 +1704,7 @@ class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $8c7b36581a3597bc$ex
             setTimeout(resolve, ms);
         });
     }
-    static #_ = (()=>{
+    static{
         this.styleSpec = {
             ":host": {
                 display: "flex",
@@ -1733,7 +1734,7 @@ class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $8c7b36581a3597bc$ex
                 background: "red"
             }
         };
-    })();
+    }
     constructor(){
         super();
         this.test = ()=>true;
