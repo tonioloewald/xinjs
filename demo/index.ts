@@ -24,7 +24,7 @@ import { Color } from '../src/color'
 import { griddleGame } from './griddle'
 import { icons } from 'xinjs-ui'
 const logo = '../assets/xinjs-logo.svg'
-const readmeMd = '../assets/readme.md'
+const readmeMd = '../assets/README.md'
 
 xin.app = {
   title: 'docs & tests',
