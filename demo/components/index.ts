@@ -1,5 +1,6 @@
 export { toolBar } from './toolbar'
 export { appLayout } from './app-layout'
+export { guessWord } from './guess-word'
 export { labeledInput } from './labeled-input'
 export { labeledValue } from './labeled-value'
 export { markdownViewer } from './markdown-viewer'

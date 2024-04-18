@@ -22,6 +22,7 @@ import { listFilterDemo, wordleFilter } from './components'
 import { fauxSlots } from './faux-slots'
 import { Color } from '../src/color'
 import { griddleGame } from './griddle'
+import { guessWord } from './components/guess-word'
 import { icons } from 'xinjs-ui'
 const logo = '../assets/xinjs-logo.svg'
 const readmeMd = '../assets/readme.md'
@@ -83,6 +84,10 @@ const routes: Route[] = [
   {
     path: 'wordle-filter',
     content: wordleFilter,
+  },
+  {
+    path: 'guess-word',
+    content: guessWord,
   },
   {
     path: 'faux-slots',
