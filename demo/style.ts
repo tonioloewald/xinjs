@@ -24,8 +24,8 @@ bind(document.body, 'app.darkmode', {
 })
 
 const cssVars = {
-  _font: "'Roboto Slab', Sans-serif",
-  _codeFont: "'Space Mono', monospace",
+  _font: "'Aleo', Sans-serif",
+  _codeFont: "'Spline Sans Mono', monospace",
   _fontSize: 16,
   _codeFontSize: 16,
   _lineHeight: 24,
@@ -73,7 +73,7 @@ const codeVars = {
 
 StyleSheet('base-style', {
   '@import':
-    'https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100;200;300;400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap',
+    'https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&famiSpline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap',
   body: {
     ...cssVars,
     ...brandColors,
