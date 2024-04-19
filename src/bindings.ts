@@ -21,7 +21,6 @@ export const bindings: { [key: string | symbol]: XinBinding } = {
 
   enabled: {
     toDOM(element: HTMLElement, value: any) {
-      // eslint-disable-next-line
       ;(element as HTMLInputElement).disabled = !value
     },
   },

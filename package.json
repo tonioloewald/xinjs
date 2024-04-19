@@ -40,7 +40,7 @@
     "parcel": "latest",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4",
-    "xinjs-ui": "^0.6.19"
+    "xinjs-ui": "^0.6.40"
   },
   "files": [
     "/cdn",
