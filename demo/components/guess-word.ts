@@ -1,13 +1,12 @@
 import {
   Component as WebComponent,
-  ElementCreator,
   elements,
   xinProxy,
   vars,
   touch,
 } from '../../src'
 
-import { icons } from 'xinjs-ui'
+import { icons, postNotification } from 'xinjs-ui'
 import words from '../words'
 
 const ALPHABET = [...'qwertyuiopasdfghjklzxcvbnm']
@@ -36,7 +35,17 @@ const { wordGame } = xinProxy(
         wordGame.length = length
         wordGame.clues = []
         wordGame.possibles = []
-        wordGame.words = words.filter((w) => w.length === length)
+        if (wordGame.words.length === 0) {
+          wordGame.words = words.filter((w) => {
+            if (w.length !== length) {
+              return false
+            } else if (w.slice(-1) !== 's') {
+              return true
+            } else {
+              return !words.includes(w.slice(0, w.length - 1))
+            }
+          })
+        }
         wordGame.word =
           wordGame.words[Math.floor(Math.random() * wordGame.words.length)]
         wordGame.currentGuess = ''
@@ -44,6 +53,49 @@ const { wordGame } = xinProxy(
           char,
           info: 'none' as ClueInfo,
         }))
+      },
+      noInfoChars(): string[] {
+        return wordGame.alphabet
+          .filter((clue) => clue.info === 'none')
+          .map((clue) => clue.char)
+      },
+      negativeClue() {
+        const noInfoChars = wordGame
+          .noInfoChars()
+          .filter((c) => !wordGame.word.includes(c))
+        if (noInfoChars.length === 0) {
+          postNotification({
+            message: 'All unused characters have been eliminated',
+            duration: 2,
+          })
+          return
+        }
+        const test = new RegExp(`[${wordGame.word}]`)
+        const words = wordGame.words.filter((w) => {
+          return !wordGame.possibles.includes(w) && !w.match(test)
+        })
+        wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
+        wordGame.guess()
+      },
+      positiveClue() {
+        const noInfoChars = wordGame
+          .noInfoChars()
+          .filter((c) => wordGame.word.includes(c))
+        if (noInfoChars.length === 0) {
+          postNotification({
+            message: 'All characters have been revealed',
+            duration: 2,
+          })
+          return
+        }
+        const words = wordGame.words.filter((w) => {
+          return (
+            !wordGame.possibles.includes(w) &&
+            noInfoChars.filter((c) => w.includes(c)).length === 1
+          )
+        })
+        wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
+        wordGame.guess()
       },
       guess() {
         const currentGuess = wordGame.currentGuess.toLocaleLowerCase()
@@ -170,7 +222,7 @@ export class GuessWord extends WebComponent {
             wordGame.gameOver == true || value.length === 0 ? 'none' : ''
           element.textContent =
             value.length === 1
-              ? 'one possibility reamins'
+              ? 'one possibility remains'
               : `${value.length} possibilities remain`
         },
         value: wordGame.possibles as any,
@@ -201,7 +253,17 @@ export class GuessWord extends WebComponent {
             display: 'flex',
           },
         },
-
+        // guess a word containing a letter the player doesn't have
+        button('Give me a letter!', {
+          onClick: wordGame.positiveClue,
+        }),
+        // guess a word containing only letters that contain no letters
+        // in common with the word and including at least one letter
+        // the player has no information on that is not in the word
+        button('Hide letters!', {
+          onClick: wordGame.negativeClue,
+        }),
+        span({ style: { flex: 1 } }),
         button(
           {
             style: {
