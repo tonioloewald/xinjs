@@ -6,7 +6,7 @@ import {
   touch,
 } from '../../src'
 
-import { icons, postNotification } from 'xinjs-ui'
+import { icons, postNotification, xinSelect, XinSelect } from 'xinjs-ui'
 import words from '../words'
 
 const ALPHABET = [...'qwertyuiopasdfghjklzxcvbnm']
@@ -24,27 +24,31 @@ const { wordGame } = xinProxy(
     wordGame: {
       length: 6,
       word: '',
+      allowed: [] as string[],
       words: [] as string[],
       possibles: [] as string[],
       alphabet: [] as Clue,
       clues: [] as Clue[],
       currentGuess: '',
       gameOver: false,
-      init(length = 6) {
+      init(length?: number) {
+        if (!length) {
+          length = wordGame.length
+        } else if (Number(wordGame.length) !== length) {
+          wordGame.length = length
+          wordGame.words = []
+        }
         wordGame.gameOver = false
-        wordGame.length = length
         wordGame.clues = []
         wordGame.possibles = []
-        if (wordGame.words.length === 0) {
-          wordGame.words = words.filter((w) => {
-            if (w.length !== length) {
-              return false
-            } else if (w.slice(-1) !== 's') {
-              return true
-            } else {
-              return !words.includes(w.slice(0, w.length - 1))
-            }
-          })
+        if (wordGame.words.length == 0) {
+          wordGame.allowed = words.filter((w) => w.length == length)
+          const shorter = words.filter((w) => w.length === length! - 1)
+
+          wordGame.words = wordGame.allowed.filter(
+            (w) =>
+              w.slice(-1) !== 's' || !shorter.includes(w.slice(0, length! - 1))
+          )
         }
         wordGame.word =
           wordGame.words[Math.floor(Math.random() * wordGame.words.length)]
@@ -193,6 +197,11 @@ export class GuessWord extends WebComponent {
     wordGame.currentGuess = wordGame.currentGuess.slice(0, -1)
   }
 
+  setLength = (event: Event) => {
+    const select = event.target as XinSelect
+    wordGame.init(Number(select.value))
+  }
+
   content = () => [
     h1('Guess Word'),
     button(
@@ -204,9 +213,19 @@ export class GuessWord extends WebComponent {
       'New Game'
     ),
     p(
-      'Guess a ',
-      span({ bindText: wordGame.length as any }),
-      '-letter word, given the clues'
+      'Find the ',
+      xinSelect({
+        style: {
+          _fieldWidth: '60px',
+        },
+        value: wordGame.length.valueOf() + '-letter',
+        options: [4, 5, 6, 7, 8].map((n) => ({
+          caption: `${n}-letter`,
+          value: String(n),
+        })),
+        onChange: this.setLength,
+      }),
+      'word, given the clues'
     ),
     div({
       part: 'clues',
@@ -286,7 +305,7 @@ export class GuessWord extends WebComponent {
                 guess = guess.toLocaleLowerCase()
                 ;(button as HTMLButtonElement).disabled =
                   guess?.length - wordGame.length !== 0 ||
-                  !wordGame.words.includes(guess)
+                  !wordGame.allowed.includes(guess)
               },
               value: wordGame.currentGuess,
             },
@@ -322,10 +341,14 @@ export const guessWord = GuessWord.elementCreator({
       display: 'flex',
       gap: 4,
       flexDirection: 'column',
+      '-webkit-user-select': 'none',
+      userSelect: 'none',
     },
     ':host [part="alphabet"]': {
       display: 'block',
       textAlign: 'center',
+      '-webkit-user-select': 'none',
+      userSelect: 'none',
     },
     ':host [part="clues"] div': {
       display: 'flex',

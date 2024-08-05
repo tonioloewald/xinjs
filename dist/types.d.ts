@@ -2,7 +2,7 @@ declare const XIN_PATH: unique symbol;
 declare const XIN_VALUE: unique symbol;
 export const xinPath: (x: any) => string | undefined;
 export function xinValue<T>(x: T): T;
-export const getListItem: (element: HTMLElement) => any;
+export const getListItem: (element: Element) => any;
 declare function clamp(min: number, v: number, max: number): number;
 declare function lerp(a: number, b: number, t: number): number;
 export const MoreMath: {

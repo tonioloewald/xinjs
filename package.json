@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -40,7 +40,7 @@
     "parcel": "latest",
     "prettier": "^2.8.8",
     "typescript": "^5.0.4",
-    "xinjs-ui": "^0.6.40"
+    "xinjs-ui": "^0.6.41"
   },
   "files": [
     "/cdn",
@@ -80,5 +80,8 @@
       "isLibrary": true,
       "outputFormat": "esmodule"
     }
+  },
+  "dependencies": {
+    "caniuse-lite": "^1.0.30001642"
   }
 }

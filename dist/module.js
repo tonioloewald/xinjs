@@ -1,4 +1,3 @@
-
 function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
@@ -40,7 +39,6 @@ const $e921b0bd4f6415ab$export$40700dafb97c3799 = (x)=>{
     return x[$e921b0bd4f6415ab$export$a3622eb3b5dd592a];
 };
 function $e921b0bd4f6415ab$export$5dcba2d45033d435(x) {
-    // eslint-disable-next-line
     return typeof x === "object" && x !== null ? x[$e921b0bd4f6415ab$export$bdd0d039ad781534] || x : x;
 }
 const $e921b0bd4f6415ab$export$fe712848e6e66613 = new WeakMap();
@@ -53,7 +51,7 @@ const $e921b0bd4f6415ab$export$4cac8128ba61a55f = (element)=>{
 };
 const $e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f = (element)=>{
     const cloned = element.cloneNode();
-    if (cloned instanceof HTMLElement) {
+    if (cloned instanceof Element) {
         const dataBindings = $e921b0bd4f6415ab$export$1f922de8d0ecbb7e.get(element);
         const eventHandlers = $e921b0bd4f6415ab$export$fe712848e6e66613.get(element);
         if (dataBindings != null) // @ts-expect-error-error
@@ -61,7 +59,7 @@ const $e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f = (element)=>{
         if (eventHandlers != null) // @ts-expect-error-error
         $e921b0bd4f6415ab$export$fe712848e6e66613.set(cloned, (0, $5165f04a46b33615$export$b7d58db314e0ac27)(eventHandlers));
     }
-    for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes)if (node instanceof HTMLElement || node instanceof DocumentFragment) cloned.appendChild($e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f(node));
+    for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes)if (node instanceof Element || node instanceof DocumentFragment) cloned.appendChild($e921b0bd4f6415ab$export$fa8cc6a36b1ccd7f(node));
     else cloned.appendChild(node.cloneNode());
     return cloned;
 };
@@ -473,7 +471,7 @@ if ($b5796eaeba5c782e$var$MutationObserver != null) {
             [
                 ...mutation.addedNodes
             ].forEach((node)=>{
-                if (node instanceof HTMLElement) [
+                if (node instanceof Element) [
                     ...node.querySelectorAll((0, $e921b0bd4f6415ab$export$4c0223f67078aeac))
                 ].forEach((element)=>$b5796eaeba5c782e$export$80bf2f765c31be6a(element));
             });
@@ -506,7 +504,6 @@ const $b5796eaeba5c782e$var$handleChange = (event)=>{
                 }
                 if (value != null) {
                     const existing = (0, $547f11326d897190$export$966034e6c6823eb0)[path];
-                    // eslint-disable-next-line
                     if (existing == null) (0, $547f11326d897190$export$966034e6c6823eb0)[path] = value;
                     else {
                         const existingActual = // @ts-expect-error-error
@@ -1351,15 +1348,15 @@ function $cd387b053feba574$var$insertGlobalStyles(tagName) {
     delete $cd387b053feba574$var$globalStyleSheets[tagName];
 }
 class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
-    static{
+    static #_ = (()=>{
         this.elements = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d);
-    }
-    static{
+    })();
+    static #_1 = (()=>{
         this.globalStyleSheets = [];
-    }
-    static{
+    })();
+    static #_2 = (()=>{
         this._tagName = null;
-    }
+    })();
     static get tagName() {
         return this._tagName;
     }
@@ -1654,7 +1651,7 @@ class $222449ec3acb18f4$export$e8658328209d5943 extends (0, $cd387b053feba574$ex
             setTimeout(resolve, ms);
         });
     }
-    static{
+    static #_ = (()=>{
         this.styleSpec = {
             ":host": {
                 display: "flex",
@@ -1684,7 +1681,7 @@ class $222449ec3acb18f4$export$e8658328209d5943 extends (0, $cd387b053feba574$ex
                 background: "red"
             }
         };
-    }
+    })();
     constructor(){
         super();
         this.test = ()=>true;

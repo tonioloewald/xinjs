@@ -23,10 +23,7 @@ import {
 
 const { document, MutationObserver } = globalThis
 
-export const touchElement = (
-  element: HTMLElement,
-  changedPath?: string
-): void => {
+export const touchElement = (element: Element, changedPath?: string): void => {
   const dataBindings = elementToBindings.get(element)
   if (dataBindings == null) {
     return
@@ -63,9 +60,9 @@ if (MutationObserver != null) {
   const observer = new MutationObserver((mutationsList) => {
     mutationsList.forEach((mutation) => {
       ;[...mutation.addedNodes].forEach((node) => {
-        if (node instanceof HTMLElement) {
+        if (node instanceof Element) {
           ;[...node.querySelectorAll(BOUND_SELECTOR)].forEach((element) =>
-            touchElement(element as HTMLElement)
+            touchElement(element as Element)
           )
         }
       })
@@ -103,7 +100,6 @@ const handleChange = (event: Event): void => {
         }
         if (value != null) {
           const existing = xin[path]
-          // eslint-disable-next-line
           if (existing == null) {
             xin[path] = value
           } else {
@@ -165,7 +161,7 @@ export function bind<T extends HTMLElement>(
   }
   dataBindings.push({
     path,
-    binding: binding as XinBinding<HTMLElement>,
+    binding: binding as XinBinding<Element>,
     options,
   })
 

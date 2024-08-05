@@ -35,32 +35,33 @@ class ColorSwatch extends Component {
     id: 0,
     color: 'red',
   }
+
   content = [
     span({ part: 'idSpan' }),
-    labeledInput(span('color'), { part: 'colorInput' }),
+    labeledInput(span('color'), { part: 'colorField' }),
   ]
 
   changed = () => {
-    const { colorInput } = this.parts as { [key: string]: HTMLInputElement }
-    if (this.value.color !== colorInput.value) {
+    const { colorField } = this.parts as { [key: string]: HTMLInputElement }
+    if (this.value.color !== colorField.value) {
       this.value = {
         ...this.value,
-        color: colorInput.value,
+        color: colorField.value,
       }
     }
   }
 
   connectedCallback() {
     super.connectedCallback()
-    const { colorInput } = this.parts as { [key: string]: HTMLInputElement }
-    colorInput.addEventListener('change', this.changed)
+    const { colorField } = this.parts as { [key: string]: HTMLInputElement }
+    colorField.addEventListener('change', this.changed)
   }
   render() {
     super.render()
-    const { idSpan, colorInput } = this.parts
+    const { idSpan, colorField } = this.parts
     if (this.value != null) {
       idSpan.textContent = String(this.value.id)
-      ;(colorInput as HTMLInputElement).value = this.value.color
+      ;(colorField as HTMLInputElement).value = this.value.color
       this.style.border = `2px solid ${this.value.color}`
     }
   }

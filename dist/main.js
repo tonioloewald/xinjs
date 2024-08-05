@@ -1,7 +1,6 @@
-
 function $parcel$exportWildcard(dest, source) {
   Object.keys(source).forEach(function(key) {
-    if (key === 'default' || key === '__esModule' || Object.prototype.hasOwnProperty.call(dest, key)) {
+    if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) {
       return;
     }
 
@@ -15,7 +14,6 @@ function $parcel$exportWildcard(dest, source) {
 
   return dest;
 }
-
 function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
@@ -90,7 +88,6 @@ const $3f1d78706f6d8212$export$40700dafb97c3799 = (x)=>{
     return x[$3f1d78706f6d8212$export$a3622eb3b5dd592a];
 };
 function $3f1d78706f6d8212$export$5dcba2d45033d435(x) {
-    // eslint-disable-next-line
     return typeof x === "object" && x !== null ? x[$3f1d78706f6d8212$export$bdd0d039ad781534] || x : x;
 }
 const $3f1d78706f6d8212$export$fe712848e6e66613 = new WeakMap();
@@ -103,7 +100,7 @@ const $3f1d78706f6d8212$export$4cac8128ba61a55f = (element)=>{
 };
 const $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f = (element)=>{
     const cloned = element.cloneNode();
-    if (cloned instanceof HTMLElement) {
+    if (cloned instanceof Element) {
         const dataBindings = $3f1d78706f6d8212$export$1f922de8d0ecbb7e.get(element);
         const eventHandlers = $3f1d78706f6d8212$export$fe712848e6e66613.get(element);
         if (dataBindings != null) // @ts-expect-error-error
@@ -111,7 +108,7 @@ const $3f1d78706f6d8212$export$fa8cc6a36b1ccd7f = (element)=>{
         if (eventHandlers != null) // @ts-expect-error-error
         $3f1d78706f6d8212$export$fe712848e6e66613.set(cloned, (0, $a97d692bd2382352$export$b7d58db314e0ac27)(eventHandlers));
     }
-    for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes)if (node instanceof HTMLElement || node instanceof DocumentFragment) cloned.appendChild($3f1d78706f6d8212$export$fa8cc6a36b1ccd7f(node));
+    for (const node of element instanceof HTMLTemplateElement ? element.content.childNodes : element.childNodes)if (node instanceof Element || node instanceof DocumentFragment) cloned.appendChild($3f1d78706f6d8212$export$fa8cc6a36b1ccd7f(node));
     else cloned.appendChild(node.cloneNode());
     return cloned;
 };
@@ -523,7 +520,7 @@ if ($fc64c421299f5d54$var$MutationObserver != null) {
             [
                 ...mutation.addedNodes
             ].forEach((node)=>{
-                if (node instanceof HTMLElement) [
+                if (node instanceof Element) [
                     ...node.querySelectorAll((0, $3f1d78706f6d8212$export$4c0223f67078aeac))
                 ].forEach((element)=>$fc64c421299f5d54$export$80bf2f765c31be6a(element));
             });
@@ -556,7 +553,6 @@ const $fc64c421299f5d54$var$handleChange = (event)=>{
                 }
                 if (value != null) {
                     const existing = (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[path];
-                    // eslint-disable-next-line
                     if (existing == null) (0, $3c20fb09d41b8da8$export$966034e6c6823eb0)[path] = value;
                     else {
                         const existingActual = // @ts-expect-error-error
@@ -1401,15 +1397,15 @@ function $8c7b36581a3597bc$var$insertGlobalStyles(tagName) {
     delete $8c7b36581a3597bc$var$globalStyleSheets[tagName];
 }
 class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
-    static{
+    static #_ = (()=>{
         this.elements = (0, $c004c420133596e3$export$7a5d735b2ab6389d);
-    }
-    static{
+    })();
+    static #_1 = (()=>{
         this.globalStyleSheets = [];
-    }
-    static{
+    })();
+    static #_2 = (()=>{
         this._tagName = null;
-    }
+    })();
     static get tagName() {
         return this._tagName;
     }
@@ -1704,7 +1700,7 @@ class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $8c7b36581a3597bc$ex
             setTimeout(resolve, ms);
         });
     }
-    static{
+    static #_ = (()=>{
         this.styleSpec = {
             ":host": {
                 display: "flex",
@@ -1734,7 +1730,7 @@ class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $8c7b36581a3597bc$ex
                 background: "red"
             }
         };
-    }
+    })();
     constructor(){
         super();
         this.test = ()=>true;

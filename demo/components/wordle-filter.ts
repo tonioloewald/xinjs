@@ -4,7 +4,9 @@ import {
   elements,
   xinProxy,
   vars,
+  XinTouchableType,
 } from 'xinjs'
+import { makeSorter } from 'xinjs-ui'
 import words from '../words'
 
 const { wordle } = xinProxy(
@@ -13,6 +15,7 @@ const { wordle } = xinProxy(
       info: '',
       words: words.filter((w) => w.length === 5),
       found: [] as string[],
+      foundLetters: [] as Array<{ letter: string; count: number }>,
       updateFilter(event: Event) {
         const source = (event.target as HTMLTextAreaElement).value
 
@@ -42,6 +45,20 @@ const { wordle } = xinProxy(
           }
         }
 
+        const letters: { [key: string]: number } = {}
+
+        for (const word of found) {
+          for (const char of [...word]) {
+            letters[char] = letters[char] ? letters[char] + 1 : 1
+          }
+        }
+
+        wordle.foundLetters = Object.keys(letters)
+          .map((letter) => ({
+            letter,
+            count: letters[letter],
+          }))
+          .sort(makeSorter((a) => [-a.count]))
         wordle.found = found
       },
     },
@@ -61,12 +78,25 @@ class WordleFilter extends WebComponent {
       textarea({
         placeholder: 'c-r-a?n-e! m-o-l-d?-y-',
         onInput: wordle.updateFilter,
+        style: { resize: 'vertical' },
       })
     ),
     h4(
       'Matching Words — ',
       span({ bindText: wordle.found.length as unknown as string })
     ),
+    div({
+      bind: {
+        binding: {
+          toDOM(element: HTMLElement, value: any) {
+            element.textContent = value
+              .map((c) => `${c.letter}: ${c.count}`)
+              .join(', ')
+          },
+        },
+        value: wordle.foundLetters as unknown as XinTouchableType,
+      },
+    }),
     div(
       {
         class: 'found-words',

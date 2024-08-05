@@ -14,7 +14,6 @@ export const xinPath = (x: any): string | undefined => {
 }
 
 export function xinValue<T>(x: T): T {
-  // eslint-disable-next-line
   return (
     typeof x === 'object' && x !== null
       ? (x as unknown as XinProxy)[XIN_VALUE] || x
@@ -22,7 +21,7 @@ export function xinValue<T>(x: T): T {
   ) as T
 }
 
-export interface DataBinding<T = HTMLElement> {
+export interface DataBinding<T = Element> {
   path: string
   binding: XinBinding<T>
   options?: XinObject
@@ -52,9 +51,9 @@ export const getElementBindings = (element: Element): ElementMetadata => {
 
 export const cloneWithBindings = (element: Node): Node => {
   const cloned = element.cloneNode()
-  if (cloned instanceof HTMLElement) {
-    const dataBindings = elementToBindings.get(element as HTMLElement)
-    const eventHandlers = elementToHandlers.get(element as HTMLElement)
+  if (cloned instanceof Element) {
+    const dataBindings = elementToBindings.get(element as Element)
+    const eventHandlers = elementToHandlers.get(element as Element)
     if (dataBindings != null) {
       // @ts-expect-error-error
       elementToBindings.set(cloned, deepClone(dataBindings))
@@ -67,7 +66,7 @@ export const cloneWithBindings = (element: Node): Node => {
   for (const node of element instanceof HTMLTemplateElement
     ? element.content.childNodes
     : element.childNodes) {
-    if (node instanceof HTMLElement || node instanceof DocumentFragment) {
+    if (node instanceof Element || node instanceof DocumentFragment) {
       cloned.appendChild(cloneWithBindings(node))
     } else {
       cloned.appendChild(node.cloneNode())
@@ -76,9 +75,9 @@ export const cloneWithBindings = (element: Node): Node => {
   return cloned
 }
 
-export const elementToItem: WeakMap<HTMLElement, XinObject> = new WeakMap()
+export const elementToItem: WeakMap<Element, XinObject> = new WeakMap()
 
-export const getListItem = (element: HTMLElement): any => {
+export const getListItem = (element: Element): any => {
   const html = document.body.parentElement
   while (element.parentElement != null && element.parentElement !== html) {
     const item = elementToItem.get(element)
