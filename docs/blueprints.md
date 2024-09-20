@@ -13,8 +13,30 @@ don't want to do it everywhere all at once?
 With blueprints, the *consumer* of the component chooses the `tag`, reducing the
 chance of name-collision.
 
-To address these issues, `xinjs` provides two new functions and some important new
-`interface` and `type` declarations to make them work together.
+To address these issues, `xinjs` provides a `<xin-bp>` loader component and
+a function `makeComponent` that can define a component given a blueprint
+function.
+
+## `<xin-bp>`—the blueprint loader`
+
+`<cin-bp>` is a simple element provided by `xinjs` for the dynamic loading
+of component **blueprints**.
+
+```
+<xin-bp
+  blueprint="https://loewald.com/lib/swiss-clock"
+>
+  <code style="color: var(--brand-color)">xinjs</code> rules!
+</xin-bp>
+```
+
+### Attributes
+
+- `blueprint` is the url of the `blueprint` javascript module (required)
+- `tag` is the tagName you wish to use. If the name of the blueprint is
+  hyphenated, then that will be used by default
+- `property` if the blueprint module exports the blueprint function as
+  a property, you can specify the property here.
 
 ## `makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedCompoent`
 
@@ -37,30 +59,17 @@ You could write:
 
     document.body.append(differentTag())
 
-This seems like more work. Why bother?
-
-First of all, note that the *consumer* of the blueprint decides what tag to assign it.
-
-Next…
-
-## `importComponent(tag: string, url: string): Promise<XinPackagedComponent>`
-
-> **Warning** experimental!
-
-`importComponent` is the async version of `makeComponent` that loads the blueprint
-asynchronously from whereever and then returns the XinPackagedComponent.
-
-This is why all this is worth the effort.
-
 ## `XinBlueprint`
 
     export interface XinFactory {
+      Color: typeof Color
       Component: typeof Component
       elements: typeof elements
+      svgElements: typeof svgElements
+      mathML: typeof mathML
       vars: typeof vars
-      // xinProxy: typeof xinProxy
       varDefault: typeof varDefault
-      Color: typeof Color
+      xinProxy: typeof xinProxy
     }
 
     export interface XinPackagedComponent {
@@ -109,7 +118,7 @@ You can define a "blueprint" like this:
     import { XinBlueprint } from 'xinjs'
 
     const blueprint: XinBlueprint = (
-      tag, 
+      tag,
       { Component, elements, vars, varDefault }
     ) => {
       const {h2, slot} = elements
@@ -136,8 +145,3 @@ You can define a "blueprint" like this:
       }
     }
 
-Again, this is more code. Why bother?
-
-Well, the distributed code is much smaller and you don't need to worry about
-ending up with multiple versions of `xinjs` being baked into a single project.
-Components can be freely mixed and loaded on-the-fly.

@@ -27,7 +27,7 @@ export { elements, svgElements, mathML } from './elements'
 export type { ElementsProxy } from './elements'
 export { hotReload } from './hot-reload'
 export { getListItem, xinPath, xinValue } from './metadata'
-export { makeComponent, importComponent } from './make-component'
+export { makeComponent } from './make-component'
 export type {
   XinBlueprint,
   XinFactory,
@@ -45,5 +45,6 @@ export {
   observerShouldBeRemoved,
   updates,
 } from './xin'
+export * from './blueprint-loader'
 export * from './xin-types'
 export { xinProxy } from './xin-proxy'

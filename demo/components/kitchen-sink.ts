@@ -9,6 +9,7 @@ import {
   xinTest,
   XinTest,
   makeComponent,
+  blueprintLoader,
 } from '../../src'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
@@ -484,6 +485,12 @@ This is an in-browser test of key functionality including:
       datalist(
         { id: 'test-options' },
         ...options.map((item) => option({ value: item }))
+      ),
+      blueprintLoader(
+        {
+          blueprint: 'https://loewald.com/lib/swiss-clock',
+        },
+        span('blueprint', { style: { color: vars.brandColor } })
       ),
       bp(
         {

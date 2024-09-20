@@ -48,11 +48,3 @@ export function makeComponent(
     creator: type.elementCreator({ tag, styleSpec }),
   }
 }
-
-export async function importComponent(
-  tag: string,
-  url: string
-): Promise<XinPackagedComponent> {
-  const blueprint = (await import(url)).default
-  return blueprint(tag, { Component, elements, vars, varDefault, Color })
-}

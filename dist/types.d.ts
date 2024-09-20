@@ -593,7 +593,6 @@ export interface XinPackagedComponent {
 }
 export type XinBlueprint = (tag: string, module: XinFactory) => XinComponentSpec;
 export function makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedComponent;
-export function importComponent(tag: string, url: string): Promise<XinPackagedComponent>;
 type TestExpression = () => Promise<boolean> | boolean;
 export class XinTest extends Component {
     test: TestExpression;
@@ -638,5 +637,13 @@ export class XinTest extends Component {
     render(): void;
 }
 export const xinTest: import("xin-types").ElementCreator;
+export class BlueprintLoader extends Component {
+    tag: string | null;
+    property: string;
+    blueprint: string | null;
+    constructor();
+    render(): void;
+}
+export const blueprintLoader: import("xin-types").ElementCreator;
 
 //# sourceMappingURL=types.d.ts.map
