@@ -1380,10 +1380,10 @@ class $0ea0392c3fe8c9d5$export$16fa2f45be04daa8 extends HTMLElement {
                 tagName = $0ea0392c3fe8c9d5$var$anonElementTag();
             }
             while(customElements.get(tagName) !== undefined)tagName = $0ea0392c3fe8c9d5$var$anonElementTag();
-            window.customElements.define(tagName, this, options);
             this._tagName = tagName;
-            this._elementCreator = (0, $a20b878345862077$export$7a5d735b2ab6389d)[tagName];
             if (styleSpec !== undefined) $0ea0392c3fe8c9d5$var$setGlobalStyle(tagName, styleSpec);
+            window.customElements.define(tagName, this, options);
+            this._elementCreator = (0, $a20b878345862077$export$7a5d735b2ab6389d)[tagName];
         }
         return this._elementCreator;
     }

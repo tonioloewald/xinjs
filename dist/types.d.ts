@@ -360,7 +360,7 @@ export interface StringMap {
     [key: string]: any;
 }
 export interface PartsMap {
-    [key: string]: HTMLElement;
+    [key: string]: Element;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 export type ElementPart = Element | DocumentFragment | ElementProps | string | number;

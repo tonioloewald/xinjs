@@ -1380,10 +1380,10 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                 tagName = $cd387b053feba574$var$anonElementTag();
             }
             while(customElements.get(tagName) !== undefined)tagName = $cd387b053feba574$var$anonElementTag();
-            window.customElements.define(tagName, this, options);
             this._tagName = tagName;
-            this._elementCreator = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d)[tagName];
             if (styleSpec !== undefined) $cd387b053feba574$var$setGlobalStyle(tagName, styleSpec);
+            window.customElements.define(tagName, this, options);
+            this._elementCreator = (0, $9e0c0b8784c80412$export$7a5d735b2ab6389d)[tagName];
         }
         return this._elementCreator;
     }
