@@ -1608,13 +1608,27 @@ const $4c651860c5272284$export$93b87f7746612069 = (test = ()=>true)=>{
 
 
 
+
+function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj, boxScalars = false) {
+    const registered = {};
+    Object.keys(obj).forEach((key)=>{
+        (0, $547f11326d897190$export$966034e6c6823eb0)[key] = obj[key];
+        registered[key] = boxScalars ? (0, $547f11326d897190$export$fd1b43749dd321e5)[key] : (0, $547f11326d897190$export$966034e6c6823eb0)[key];
+    });
+    return registered;
+}
+
+
 function $cf96335958b9d6da$export$3bc26eec1cc2439f(tag, blueprint) {
     const { type: type, styleSpec: styleSpec } = blueprint(tag, {
         Color: $72989831e95a2bab$export$892596cec99bc70e,
         Component: $cd387b053feba574$export$16fa2f45be04daa8,
         elements: $9e0c0b8784c80412$export$7a5d735b2ab6389d,
+        svgElements: $9e0c0b8784c80412$export$cf20112a1bc148da,
+        mathML: $9e0c0b8784c80412$export$8ec252cfdd664597,
         varDefault: $49cee7f7f866c751$export$75c0e6adb3e38f31,
-        vars: $49cee7f7f866c751$export$3cb96c9f6c8d16a4 /*, xinProxy */ 
+        vars: $49cee7f7f866c751$export$3cb96c9f6c8d16a4,
+        xinProxy: $7bb234cc8fd49201$export$95a552d2395ab4c4
     });
     return {
         type: type,
@@ -1737,16 +1751,6 @@ const $222449ec3acb18f4$export$b1604b020b2ce76d = $222449ec3acb18f4$export$e8658
 
 var $526cc5d62ff194fb$exports = {};
 
-
-
-function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj, boxScalars = false) {
-    const registered = {};
-    Object.keys(obj).forEach((key)=>{
-        (0, $547f11326d897190$export$966034e6c6823eb0)[key] = obj[key];
-        registered[key] = boxScalars ? (0, $547f11326d897190$export$fd1b43749dd321e5)[key] : (0, $547f11326d897190$export$966034e6c6823eb0)[key];
-    });
-    return registered;
-}
 
 
 

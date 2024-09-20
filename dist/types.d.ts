@@ -572,12 +572,16 @@ export abstract class Component extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
+export function xinProxy<T extends AnyObject>(obj: T, boxScalars?: boolean): T & XinProxyObject;
 export interface XinFactory {
+    Color: typeof Color;
     Component: typeof Component;
     elements: typeof elements;
+    svgElements: typeof svgElements;
+    mathML: typeof mathML;
     vars: typeof vars;
     varDefault: typeof varDefault;
-    Color: typeof Color;
+    xinProxy: typeof xinProxy;
 }
 interface XinComponentSpec {
     type: typeof Component;
@@ -634,6 +638,5 @@ export class XinTest extends Component {
     render(): void;
 }
 export const xinTest: import("xin-types").ElementCreator;
-export function xinProxy<T extends AnyObject>(obj: T, boxScalars?: boolean): T & XinProxyObject;
 
 //# sourceMappingURL=types.d.ts.map

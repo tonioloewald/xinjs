@@ -2,17 +2,19 @@ import { Color } from './color'
 import { Component } from './component'
 import { vars, varDefault } from './css'
 import { XinStyleSheet } from './css-types'
-import { elements } from './elements'
+import { elements, svgElements, mathML } from './elements'
 import { ElementCreator } from './xin-types'
-// import { xinProxy } from './xin-proxy'
+import { xinProxy } from './xin-proxy'
 
 export interface XinFactory {
+  Color: typeof Color
   Component: typeof Component
   elements: typeof elements
+  svgElements: typeof svgElements
+  mathML: typeof mathML
   vars: typeof vars
-  // xinProxy: typeof xinProxy
   varDefault: typeof varDefault
-  Color: typeof Color
+  xinProxy: typeof xinProxy
 }
 
 export interface XinComponentSpec {
@@ -35,8 +37,11 @@ export function makeComponent(
     Color,
     Component,
     elements,
+    svgElements,
+    mathML,
     varDefault,
-    vars /*, xinProxy */,
+    vars,
+    xinProxy,
   })
   return {
     type,

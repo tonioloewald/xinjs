@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -82,6 +82,6 @@
     }
   },
   "dependencies": {
-    "caniuse-lite": "^1.0.30001642"
+    "caniuse-lite": "^1.0.30001662"
   }
 }
