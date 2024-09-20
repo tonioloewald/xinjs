@@ -103,7 +103,7 @@ export interface StringMap {
 }
 
 export interface PartsMap {
-  [key: string]: HTMLElement
+  [key: string]: Element
 }
 
 export type ValueElement =
