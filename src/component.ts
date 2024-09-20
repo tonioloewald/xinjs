@@ -86,12 +86,12 @@ export abstract class Component extends HTMLElement {
       while (customElements.get(tagName) !== undefined) {
         tagName = anonElementTag()
       }
+      this._tagName = tagName
       window.customElements.define(
         tagName,
         this as unknown as CustomElementConstructor,
         options
       )
-      this._tagName = tagName
       this._elementCreator = elements[tagName]
       if (styleSpec !== undefined) {
         setGlobalStyle(tagName, styleSpec)
