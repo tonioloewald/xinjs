@@ -1,6 +1,8 @@
 import { Color } from './color'
+import { CSSSystemColor } from './css-system-color'
 
-type CSSBasicAlign = 'nomal' | 'stretch'
+type CSSBasicAlign = 'normal' | 'stretch'
+type CSSColor = 'transparent' | 'currentcolor' | CSSSystemColor
 type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end'
 type CSSDistributedAlign =
   | 'space-between'
@@ -126,7 +128,7 @@ type CSSWhiteSpace =
 type CSSWordBreak = 'normal' | 'break-all' | 'keep-all'
 
 export interface XinStyleRule {
-  accentColor?: Color | string
+  accentColor?: Color | CSSColor | CSSGlobalValues | string
   alignContent?:
     | CSSBasicAlign
     | CSSBaselineAlign
@@ -167,11 +169,11 @@ export interface XinStyleRule {
   aspectRatio?: 'auto' | CSSGlobalValues | string
   backdropFilter?: 'none' | string | CSSGlobalValues | string
   backfaceVisibility?: CSSVisibility | CSSGlobalValues | string
-  background?: Color | string
+  background?: Color | CSSColor | CSSGlobalValues | string
   backgroundAttachment?: string | number
   backgroundBlendMode?: string
   backgroundClip?: string | number
-  backgroundColor?: Color | string
+  backgroundColor?: Color | CSSColor | CSSGlobalValues | string
   backgroundImage?: string
   backgroundOrigin?: string | number
   backgroundPosition?: string | number
@@ -179,13 +181,13 @@ export interface XinStyleRule {
   backgroundSize?: string | number
   border?: string | number
   borderBottom?: string | number
-  borderBottomColor?: Color | string
+  borderBottomColor?: Color | CSSColor | CSSGlobalValues | string
   borderBottomLeftRadius?: string | number
   borderBottomRightRadius?: string | number
   borderBottomStyle?: string | number
   borderBottomWidth?: string | number
   borderCollapse?: string | number
-  borderColor?: Color | string
+  borderColor?: Color | CSSColor | CSSGlobalValues | string
   borderImage?: string
   borderImageOutset?: string | number
   borderImageRepeat?: string | number
@@ -193,18 +195,18 @@ export interface XinStyleRule {
   borderImageSource?: string | number
   borderImageWidth?: string | number
   borderLeft?: string | number
-  borderLeftColor?: Color | string
+  borderLeftColor?: Color | CSSColor | CSSGlobalValues | string
   borderLeftStyle?: string | number
   borderLeftWidth?: string | number
   borderRadius?: string | number
   borderRight?: string | number
-  borderRightColor?: Color | string
+  borderRightColor?: Color | CSSColor | CSSGlobalValues | string
   borderRightStyle?: string | number
   borderRightWidth?: string | number
   borderSpacing?: string | number
   borderStyle?: string | number
   borderTop?: string | number
-  borderTopColor?: Color | string
+  borderTopColor?: Color | CSSColor | CSSGlobalValues | string
   borderTopLeftRadius?: string | number
   borderTopRightRadius?: string | number
   borderTopStyle?: string | number
@@ -214,16 +216,16 @@ export interface XinStyleRule {
   boxShadow?: string | number
   boxSizing?: string | number
   captionSide?: string | number
-  caretColor?: Color | string
+  caretColor?: Color | CSSColor | CSSGlobalValues | string
   clear?: string | number
   clip?: string | number
   clipPath?: string | number
-  color?: Color | string
+  color?: Color | CSSColor | CSSGlobalValues | string
   columnCount?: string | number
   columnFill?: string | number
   columnGap?: string | number
   columnRule?: string | number
-  columnRuleColor?: Color | string
+  columnRuleColor?: Color | CSSColor | CSSGlobalValues | string
   columnRuleStyle?: string | number
   columnRuleWidth?: string | number
   columnSpan?: string | number
@@ -311,7 +313,7 @@ export interface XinStyleRule {
   opacity?: string | number
   order?: string | number
   outline?: string | number
-  outlineColor?: Color | string
+  outlineColor?: Color | CSSColor | CSSGlobalValues | string
   outlineOffset?: string | number
   outlineStyle?: string | number
   outlineWidth?: string | number
@@ -341,7 +343,7 @@ export interface XinStyleRule {
   textAlign?: string | number
   textAlignLast?: string | number
   textDecoration?: string | number
-  textDecorationColor?: Color | string
+  textDecorationColor?: Color | CSSColor | CSSGlobalValues | string
   textDecorationLine?: string | number
   textDecorationStyle?: string | number
   textIndent?: string | number
@@ -370,7 +372,13 @@ export interface XinStyleRule {
   wordWrap?: string | number
   writingMode?: string
   zIndex?: string | number
-  [key: string]: Color | string | number | undefined
+  [key: string]:
+    | Color
+    | CSSColor
+    | CSSGlobalValues
+    | string
+    | number
+    | undefined
 }
 
 export interface XinStyleMap {
