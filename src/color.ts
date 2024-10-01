@@ -1,4 +1,5 @@
 import { lerp, clamp } from './more-math'
+import { CSSSystemColor } from './css-system-color'
 
 // http://www.itu.int/rec/R-REC-BT.601
 const bt601 = (r: number, g: number, b: number): number => {
@@ -44,7 +45,7 @@ export class Color {
   b: number
   a: number
 
-  static fromCss(spec: string): Color {
+  static fromCss(spec: CSSSystemColor | string): Color {
     let converted = spec
     if (span instanceof HTMLSpanElement) {
       span.style.color = spec
