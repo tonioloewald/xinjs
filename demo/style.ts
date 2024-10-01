@@ -68,7 +68,7 @@ const darkBrandColors = {
 
 const codeVars = {
   _codeColor: vars.textColor,
-  _codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1).html,
+  _codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1),
 }
 
 StyleSheet('base-style', {
@@ -163,7 +163,7 @@ StyleSheet('base-style', {
   },
   table: {
     borderCollapse: 'collapse',
-    borderBottom: `1px solid ${brandColor.opacity(0.2).html}`,
+    borderBottom: `1px solid ${brandColor.opacity(0.2)}`,
   },
   a: {
     color: vars.textHeadingColor,
@@ -182,13 +182,13 @@ StyleSheet('base-style', {
     pointerEvents: 'none',
   },
   th: {
-    background: brandColor.opacity(0.2).html,
+    background: brandColor.opacity(0.2),
   },
   'td, th': {
     padding: `${vars.spacing25} ${vars.spacing75}`,
   },
   'tr:nth-child(2n+2)': {
-    background: brandColor.opacity(0.05).html,
+    background: brandColor.opacity(0.05),
   },
   'input, textarea, select, .field': {
     background: vars.inputBg,
@@ -277,7 +277,7 @@ StyleSheet('base-style', {
   },
   ':focus-visible': {
     outline: 'none',
-    boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5).html}`,
+    boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5)}`,
   },
   '.show-after-empty:not(.-xin-empty-list+*)': {
     display: 'none',
@@ -292,7 +292,7 @@ StyleSheet('base-style', {
     height: vars.spacing50,
   },
   '*::-webkit-scrollbar-thumb': {
-    background: brandColor.opacity(0.5).html,
+    background: brandColor.opacity(0.5),
     borderRadius: vars.spacing25,
   },
   '*::-webkit-scrollbar-thumb:hover': {
