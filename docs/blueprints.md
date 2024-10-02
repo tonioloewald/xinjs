@@ -11,7 +11,8 @@ and you want to use both of them? Or you want to switch to a new and better one 
 don't want to do it everywhere all at once?
 
 With blueprints, the *consumer* of the component chooses the `tag`, reducing the
-chance of name-collision.
+chance of name-collision. (You can consume the same blueprint multiple times,
+giving each one its own tag.)
 
 To address these issues, `xinjs` provides a `<xin-bp>` loader component and
 a function `makeComponent` that can define a component given a blueprint
@@ -19,7 +20,7 @@ function.
 
 ## `<xin-bp>`—the blueprint loader
 
-`<cin-bp>` is a simple element provided by `xinjs` for the dynamic loading
+`<cin-bp>` is a simple custom-element provided by `xinjs` for the dynamic loading
 of component **blueprints**.
 
 ```
@@ -145,3 +146,7 @@ You can define a "blueprint" like this:
       }
     }
 
+> **Note** that in this example the blueprint is a *pure* function (i.e. it has no side-effects).
+> If this blueprint is consumed twice, each will be completely independent. A non-pure blueprint
+> could be implemented such that the different versions of the blueprint share information.
+> E.g. you could maintain a list of all the instances of any version of the blueprint.
