@@ -17,7 +17,7 @@ To address these issues, `xinjs` provides a `<xin-bp>` loader component and
 a function `makeComponent` that can define a component given a blueprint
 function.
 
-## `<xin-bp>`—the blueprint loader`
+## `<xin-bp>`—the blueprint loader
 
 `<cin-bp>` is a simple element provided by `xinjs` for the dynamic loading
 of component **blueprints**.
