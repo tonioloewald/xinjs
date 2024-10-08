@@ -38,35 +38,58 @@ if (parcelRequire == null) {
 var parcelRegister = parcelRequire.register;
 parcelRegister("3x0mh", function(module, exports) {
 
+$parcel$export(module.exports, "Blueprint", () => Blueprint);
+$parcel$export(module.exports, "blueprint", () => blueprint);
 $parcel$export(module.exports, "BlueprintLoader", () => BlueprintLoader);
 $parcel$export(module.exports, "blueprintLoader", () => blueprintLoader);
 
 var $aVpVG = parcelRequire("aVpVG");
 
 var $lGBgM = parcelRequire("lGBgM");
+class Blueprint extends (0, $aVpVG.Component) {
+    async packaged() {
+        if (!this.loaded) {
+            const { tag, src } = this;
+            const imported = await eval(`import('${src}')`);
+            const blueprint = imported[this.property];
+            this.loaded = (0, $lGBgM.makeComponent)(tag, blueprint);
+        }
+        return this.loaded;
+    }
+    constructor(){
+        super();
+        this.tag = "anon-elt";
+        this.src = "";
+        this.property = "default";
+        this.initAttributes("tag", "src", "property");
+    }
+}
+const blueprint = Blueprint.elementCreator({
+    tag: "xin-blueprint",
+    styleSpec: {
+        ":host": {
+            display: "none"
+        }
+    }
+});
 class BlueprintLoader extends (0, $aVpVG.Component) {
     constructor(){
         super();
-        this.tag = null;
-        this.property = "default";
-        this.blueprint = null;
-        this.initAttributes("tag", "blueprint");
     }
     async load() {
-        if (!this.blueprint) return;
-        const tag = this.tag || this.blueprint.split("/").pop();
-        const imported = await eval(`import('${this.blueprint}')`);
-        const blueprint = imported[this.property];
-        const { creator } = (0, $lGBgM.makeComponent)(tag, blueprint);
-        this.replaceWith(creator(...this.childNodes));
+        const blueprintElements = [
+            ...this.querySelectorAll(Blueprint.tagName)
+        ].filter((elt)=>elt.src);
+        const promises = blueprintElements.map((elt)=>elt.packaged());
+        await Promise.all(promises);
     }
-    render() {
-        super.render();
+    connectedCallback() {
+        super.connectedCallback();
         this.load();
     }
 }
 const blueprintLoader = BlueprintLoader.elementCreator({
-    tag: "xin-bp",
+    tag: "xin-loader",
     styleSpec: {
         ":host": {
             display: "none"
@@ -1817,6 +1840,7 @@ var $2okor = parcelRequire("2okor");
 var $9sLMf = parcelRequire("9sLMf");
 
 var $aNHSH = parcelRequire("aNHSH");
+const $cf96335958b9d6da$export$7564cc5630cf4caa = {};
 function $cf96335958b9d6da$export$3bc26eec1cc2439f(tag, blueprint) {
     const { type: type, styleSpec: styleSpec } = blueprint(tag, {
         Color: $6Jaab.Color,
@@ -1828,13 +1852,15 @@ function $cf96335958b9d6da$export$3bc26eec1cc2439f(tag, blueprint) {
         vars: $2okor.vars,
         xinProxy: $aNHSH.xinProxy
     });
-    return {
+    const packagedComponent = {
         type: type,
         creator: type.elementCreator({
             tag: tag,
             styleSpec: styleSpec
         })
     };
+    $cf96335958b9d6da$export$7564cc5630cf4caa[tag] = packagedComponent;
+    return packagedComponent;
 }
 
 });
@@ -1918,6 +1944,7 @@ var $aVpVG = parcelRequire("aVpVG");
 
 var $9sLMf = parcelRequire("9sLMf");
 const { span: $222449ec3acb18f4$var$span, slot: $222449ec3acb18f4$var$slot } = (0, $9sLMf.elements);
+const $222449ec3acb18f4$var$AsyncFunction = (async ()=>{}).constructor;
 class $222449ec3acb18f4$export$e8658328209d5943 extends (0, $aVpVG.Component) {
     static delay(ms) {
         return new Promise((resolve)=>{
@@ -1957,7 +1984,6 @@ class $222449ec3acb18f4$export$e8658328209d5943 extends (0, $aVpVG.Component) {
     }
     constructor(){
         super();
-        this.test = ()=>true;
         this.delay = 0;
         this.statis = "";
         this.expect = true;
@@ -1971,6 +1997,8 @@ class $222449ec3acb18f4$export$e8658328209d5943 extends (0, $aVpVG.Component) {
         ];
         this.run = ()=>{
             clearTimeout(this.timeout);
+            if (!this.test) // @ts-expect-error eslint is wrong
+            this.test = new $222449ec3acb18f4$var$AsyncFunction(this.textContent);
             this.status = "waiting";
             this.timeout = setTimeout(async ()=>{
                 this.status = "running";
@@ -2049,8 +2077,10 @@ var $f0b099915f91bd21$export$d0b7ea69ab6056df = parcelRequire("5lOGz").touch;
 var $f0b099915f91bd21$export$253d09664e30b967 = parcelRequire("5lOGz").observerShouldBeRemoved;
 var $f0b099915f91bd21$export$1c2919332513559b = parcelRequire("5lOGz").updates;
 var $7bb234cc8fd49201$export$95a552d2395ab4c4 = parcelRequire("aNHSH").xinProxy;
+var Blueprint = parcelRequire("3x0mh").Blueprint;
+var blueprint = parcelRequire("3x0mh").blueprint;
 var BlueprintLoader = parcelRequire("3x0mh").BlueprintLoader;
 var blueprintLoader = parcelRequire("3x0mh").blueprintLoader;
 var $db8c79eba3148e96$exports = parcelRequire("3x0mh")["*"];
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest, BlueprintLoader as BlueprintLoader, blueprintLoader as blueprintLoader, $db8c79eba3148e96$exports as default};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest, Blueprint as Blueprint, blueprint as blueprint, BlueprintLoader as BlueprintLoader, blueprintLoader as blueprintLoader, $db8c79eba3148e96$exports as default};
 //# sourceMappingURL=module.js.map

@@ -14,30 +14,28 @@ With blueprints, the *consumer* of the component chooses the `tag`, reducing the
 chance of name-collision. (You can consume the same blueprint multiple times,
 giving each one its own tag.)
 
-To address these issues, `xinjs` provides a `<xin-bp>` loader component and
+To address these issues, `xinjs` provides a `<xin-loader>` loader component and
 a function `makeComponent` that can define a component given a blueprint
 function.
 
-## `<xin-bp>`—the blueprint loader
+## `<xin-loader>`—the blueprint loader
 
-`<cin-bp>` is a simple custom-element provided by `xinjs` for the dynamic loading
-of component **blueprints**.
+`<xin-loader>` is a simple custom-element provided by `xinjs` for the dynamic loading
+of component **blueprints**. It will load its `<xin-blueprint>`s in parallel.
 
 ```
-<xin-bp
-  blueprint="https://loewald.com/lib/swiss-clock"
->
+<xin-loader>
+  <xin-blueprint tag="swiss-clock" src="https://loewald.com/lib/swiss-clock"></xin-blueprint>
+</xin-loader>
+<swiss-clock>
   <code style="color: var(--brand-color)">xinjs</code> rules!
-</xin-bp>
+</swiss-clock>
 ```
 
 ### Attributes
 
-- `blueprint` is the url of the `blueprint` javascript module (required)
-- `tag` is the tagName you wish to use. If the name of the blueprint is
-  hyphenated, then that will be used by default
-- `property` if the blueprint module exports the blueprint function as
-  a property, you can specify the property here.
+- `src` is the url of the `blueprint` javascript module (required)
+- `tag` is the tagName you wish to use.
 
 ## `makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedCompoent`
 

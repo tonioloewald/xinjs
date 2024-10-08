@@ -5,8 +5,10 @@ const { span, slot } = elements
 
 type TestExpression = () => Promise<boolean> | boolean
 
+const AsyncFunction = (async () => {}).constructor
+
 export class XinTest extends Component {
-  test: TestExpression = () => true
+  test?: TestExpression
   delay = 0
   statis = ''
   expect = true
@@ -58,11 +60,15 @@ export class XinTest extends Component {
 
   run = () => {
     clearTimeout(this.timeout)
+    if (!this.test) {
+      // @ts-expect-error eslint is wrong
+      this.test = new AsyncFunction(this.textContent)
+    }
     this.status = 'waiting'
     this.timeout = setTimeout(async () => {
       this.status = 'running'
       try {
-        const outcome = JSON.stringify(await this.test())
+        const outcome = JSON.stringify(await this.test!())
         if (outcome === JSON.stringify(this.expect)) {
           this.status = 'success'
         } else {
@@ -76,6 +82,7 @@ export class XinTest extends Component {
 
   connectedCallback() {
     super.connectedCallback()
+
     this.run()
   }
 

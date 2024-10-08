@@ -9,6 +9,7 @@ export const MoreMath: {
     clamp: typeof clamp;
     lerp: typeof lerp;
 };
+type CSSSystemColor = 'aliceblue' | 'antiquewhite' | 'aqua' | 'aquamarine' | 'azure' | 'beige' | 'bisque' | 'black' | 'blanchedalmond' | 'blue' | 'blueviolet' | 'brown' | 'burlywood' | 'cadetblue' | 'chartreuse' | 'chocolate' | 'coral' | 'cornflowerblue' | 'cornsilk' | 'crimson' | 'cyan' | 'darkblue' | 'darkcyan' | 'darkgoldenrod' | 'darkgray' | 'darkgreen' | 'darkgrey' | 'darkkhaki' | 'darkmagenta' | 'darkolivegreen' | 'darkorange' | 'darkorchid' | 'darkred' | 'darksalmon' | 'darkseagreen' | 'darkslateblue' | 'darkslategray' | 'darkslategrey' | 'darkturquoise' | 'darkviolet' | 'deeppink' | 'deepskyblue' | 'dimgray' | 'dimgrey' | 'dodgerblue' | 'firebrick' | 'floralwhite' | 'forestgreen' | 'fuchsia' | 'gainsboro' | 'ghostwhite' | 'gold' | 'goldenrod' | 'gray' | 'green' | 'greenyellow' | 'grey' | 'honeydew' | 'hotpink' | 'indianred' | 'indigo' | 'ivory' | 'khaki' | 'lavender' | 'lavenderblush' | 'lawngreen' | 'lemonchiffon' | 'lightblue' | 'lightcoral' | 'lightcyan' | 'lightgoldenrodyellow' | 'lightgray' | 'lightgreen' | 'lightgrey' | 'lightpink' | 'lightsalmon' | 'lightseagreen' | 'lightskyblue' | 'lightslategray' | 'lightslategrey' | 'lightsteelblue' | 'lightyellow' | 'lime' | 'limegreen' | 'linen' | 'magenta' | 'maroon' | 'mediumaquamarine' | 'mediumblue' | 'mediumorchid' | 'mediumpurple' | 'mediumseagreen' | 'mediumslateblue' | 'mediumspringgreen' | 'mediumturquoise' | 'mediumvioletred' | 'midnightblue' | 'mintcream' | 'mistyrose' | 'moccasin' | 'navajowhite' | 'navy' | 'oldlace' | 'olive' | 'olivedrab' | 'orange' | 'orangered' | 'orchid' | 'palegoldenrod' | 'palegreen' | 'paleturquoise' | 'palevioletred' | 'papayawhip' | 'peachpuff' | 'peru' | 'pink' | 'plum' | 'powderblue' | 'purple' | 'red' | 'rosybrown' | 'royalblue' | 'saddlebrown' | 'salmon' | 'sandybrown' | 'seagreen' | 'seashell' | 'sienna' | 'silver' | 'skyblue' | 'slateblue' | 'slategray' | 'slategrey' | 'snow' | 'springgreen' | 'steelblue' | 'tan' | 'teal' | 'thistle' | 'tomato' | 'turquoise' | 'violet' | 'wheat' | 'white' | 'whitesmoke' | 'yellow' | 'yellowgreen';
 declare class HslColor {
     h: number;
     s: number;
@@ -20,7 +21,7 @@ export class Color {
     g: number;
     b: number;
     a: number;
-    static fromCss(spec: string): Color;
+    static fromCss(spec: CSSSystemColor | string): Color;
     static fromHsl(h: number, s: number, l: number, a?: number): Color;
     constructor(r: number, g: number, b: number, a?: number);
     get inverse(): Color;
@@ -46,7 +47,8 @@ export class Color {
     blend(otherColor: Color, t: number): Color;
     mix(otherColor: Color, t: number): Color;
 }
-type CSSBasicAlign = 'nomal' | 'stretch';
+type CSSBasicAlign = 'normal' | 'stretch';
+type CSSColor = 'transparent' | 'currentcolor' | CSSSystemColor;
 type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end';
 type CSSDistributedAlign = 'space-between' | 'space-around' | 'space-evenly' | 'stretch';
 type CSSSelfAlign = 'self-start' | 'self-end';
@@ -82,7 +84,7 @@ type CSSVisibility = 'visible' | 'hidden';
 type CSSWhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces';
 type CSSWordBreak = 'normal' | 'break-all' | 'keep-all';
 export interface XinStyleRule {
-    accentColor?: Color | string;
+    accentColor?: Color | CSSColor | CSSGlobalValues | string;
     alignContent?: CSSBasicAlign | CSSBaselineAlign | CSSDistributedAlign | CSSPositionalAlign | CSSGlobalValues | string;
     alignItems?: CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | CSSSelfAlign | string;
     alignSelf?: 'auto' | CSSBasicAlign | CSSPositionalAlign | CSSBaselineAlign | CSSOverflowAlign | CSSGlobalValues | string;
@@ -100,11 +102,11 @@ export interface XinStyleRule {
     aspectRatio?: 'auto' | CSSGlobalValues | string;
     backdropFilter?: 'none' | string | CSSGlobalValues | string;
     backfaceVisibility?: CSSVisibility | CSSGlobalValues | string;
-    background?: Color | string;
+    background?: Color | CSSColor | CSSGlobalValues | string;
     backgroundAttachment?: string | number;
     backgroundBlendMode?: string;
     backgroundClip?: string | number;
-    backgroundColor?: Color | string;
+    backgroundColor?: Color | CSSColor | CSSGlobalValues | string;
     backgroundImage?: string;
     backgroundOrigin?: string | number;
     backgroundPosition?: string | number;
@@ -112,13 +114,13 @@ export interface XinStyleRule {
     backgroundSize?: string | number;
     border?: string | number;
     borderBottom?: string | number;
-    borderBottomColor?: Color | string;
+    borderBottomColor?: Color | CSSColor | CSSGlobalValues | string;
     borderBottomLeftRadius?: string | number;
     borderBottomRightRadius?: string | number;
     borderBottomStyle?: string | number;
     borderBottomWidth?: string | number;
     borderCollapse?: string | number;
-    borderColor?: Color | string;
+    borderColor?: Color | CSSColor | CSSGlobalValues | string;
     borderImage?: string;
     borderImageOutset?: string | number;
     borderImageRepeat?: string | number;
@@ -126,18 +128,18 @@ export interface XinStyleRule {
     borderImageSource?: string | number;
     borderImageWidth?: string | number;
     borderLeft?: string | number;
-    borderLeftColor?: Color | string;
+    borderLeftColor?: Color | CSSColor | CSSGlobalValues | string;
     borderLeftStyle?: string | number;
     borderLeftWidth?: string | number;
     borderRadius?: string | number;
     borderRight?: string | number;
-    borderRightColor?: Color | string;
+    borderRightColor?: Color | CSSColor | CSSGlobalValues | string;
     borderRightStyle?: string | number;
     borderRightWidth?: string | number;
     borderSpacing?: string | number;
     borderStyle?: string | number;
     borderTop?: string | number;
-    borderTopColor?: Color | string;
+    borderTopColor?: Color | CSSColor | CSSGlobalValues | string;
     borderTopLeftRadius?: string | number;
     borderTopRightRadius?: string | number;
     borderTopStyle?: string | number;
@@ -147,16 +149,16 @@ export interface XinStyleRule {
     boxShadow?: string | number;
     boxSizing?: string | number;
     captionSide?: string | number;
-    caretColor?: Color | string;
+    caretColor?: Color | CSSColor | CSSGlobalValues | string;
     clear?: string | number;
     clip?: string | number;
     clipPath?: string | number;
-    color?: Color | string;
+    color?: Color | CSSColor | CSSGlobalValues | string;
     columnCount?: string | number;
     columnFill?: string | number;
     columnGap?: string | number;
     columnRule?: string | number;
-    columnRuleColor?: Color | string;
+    columnRuleColor?: Color | CSSColor | CSSGlobalValues | string;
     columnRuleStyle?: string | number;
     columnRuleWidth?: string | number;
     columnSpan?: string | number;
@@ -229,7 +231,7 @@ export interface XinStyleRule {
     opacity?: string | number;
     order?: string | number;
     outline?: string | number;
-    outlineColor?: Color | string;
+    outlineColor?: Color | CSSColor | CSSGlobalValues | string;
     outlineOffset?: string | number;
     outlineStyle?: string | number;
     outlineWidth?: string | number;
@@ -255,7 +257,7 @@ export interface XinStyleRule {
     textAlign?: string | number;
     textAlignLast?: string | number;
     textDecoration?: string | number;
-    textDecorationColor?: Color | string;
+    textDecorationColor?: Color | CSSColor | CSSGlobalValues | string;
     textDecorationLine?: string | number;
     textDecorationStyle?: string | number;
     textIndent?: string | number;
@@ -284,7 +286,7 @@ export interface XinStyleRule {
     wordWrap?: string | number;
     writingMode?: string;
     zIndex?: string | number;
-    [key: string]: Color | string | number | undefined;
+    [key: string]: Color | CSSColor | CSSGlobalValues | string | number | undefined;
 }
 export interface XinStyleMap {
     [key: string]: XinStyleRule;
@@ -595,7 +597,7 @@ export type XinBlueprint = (tag: string, module: XinFactory) => XinComponentSpec
 export function makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedComponent;
 type TestExpression = () => Promise<boolean> | boolean;
 export class XinTest extends Component {
-    test: TestExpression;
+    test?: TestExpression;
     delay: number;
     statis: string;
     expect: boolean;
@@ -637,12 +639,18 @@ export class XinTest extends Component {
     render(): void;
 }
 export const xinTest: import("xin-types").ElementCreator;
-export class BlueprintLoader extends Component {
-    tag: string | null;
+export class Blueprint extends Component {
+    tag: string;
+    src: string;
     property: string;
-    blueprint: string | null;
+    loaded?: XinPackagedComponent;
+    packaged(): Promise<XinPackagedComponent>;
     constructor();
-    render(): void;
+}
+export const blueprint: import("xin-types").ElementCreator;
+export class BlueprintLoader extends Component {
+    constructor();
+    connectedCallback(): void;
 }
 export const blueprintLoader: import("xin-types").ElementCreator;
 

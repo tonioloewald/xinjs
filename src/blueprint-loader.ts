@@ -1,38 +1,59 @@
 import { Component } from './component'
-import { makeComponent } from './make-component'
+import {
+  makeComponent,
+  XinBlueprint,
+  XinPackagedComponent,
+} from './make-component'
 
-export class BlueprintLoader extends Component {
-  tag: string | null = null
+export class Blueprint extends Component {
+  tag = 'anon-elt'
+  src = ''
   property = 'default'
-  blueprint: string | null = null
+  loaded?: XinPackagedComponent
+
+  async packaged(): Promise<XinPackagedComponent> {
+    if (!this.loaded) {
+      const { tag, src } = this
+      const imported = await eval(`import('${src}')`)
+      const blueprint = imported[this.property] as XinBlueprint
+      this.loaded = makeComponent(tag, blueprint)
+    }
+    return this.loaded!
+  }
 
   constructor() {
     super()
-    this.initAttributes('tag', 'blueprint')
+
+    this.initAttributes('tag', 'src', 'property')
+  }
+}
+
+export const blueprint = Blueprint.elementCreator({
+  tag: 'xin-blueprint',
+  styleSpec: { ':host': { display: 'none' } },
+})
+
+export class BlueprintLoader extends Component {
+  constructor() {
+    super()
   }
 
   private async load() {
-    if (!this.blueprint) {
-      return
-    }
-    const tag = this.tag || this.blueprint!.split('/').pop()
-    const imported = await eval(`import('${this.blueprint}')`)
-    const blueprint = imported[this.property]
-    const { creator } = makeComponent(tag!, blueprint)
-    this.replaceWith(creator(...this.childNodes))
+    const blueprintElements = (
+      [...this.querySelectorAll(Blueprint.tagName as string)] as Blueprint[]
+    ).filter((elt) => elt.src)
+    const promises = blueprintElements.map((elt) => elt.packaged())
+    await Promise.all(promises)
   }
 
-  render() {
-    super.render()
+  connectedCallback() {
+    super.connectedCallback()
+
     this.load()
   }
 }
 
 export const blueprintLoader = BlueprintLoader.elementCreator({
-  tag: 'xin-bp',
-  styleSpec: {
-    ':host': {
-      display: 'none',
-    },
-  },
+  tag: 'xin-loader',
+  styleSpec: { ':host': { display: 'none' } },
 })

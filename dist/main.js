@@ -55,35 +55,58 @@ if (parcelRequire == null) {
 var parcelRegister = parcelRequire.register;
 parcelRegister("9TCX0", function(module, exports) {
 
+$parcel$export(module.exports, "Blueprint", () => Blueprint);
+$parcel$export(module.exports, "blueprint", () => blueprint);
 $parcel$export(module.exports, "BlueprintLoader", () => BlueprintLoader);
 $parcel$export(module.exports, "blueprintLoader", () => blueprintLoader);
 
 var $gXZVt = parcelRequire("gXZVt");
 
 var $87A3i = parcelRequire("87A3i");
+class Blueprint extends (0, $gXZVt.Component) {
+    async packaged() {
+        if (!this.loaded) {
+            const { tag, src } = this;
+            const imported = await eval(`import('${src}')`);
+            const blueprint = imported[this.property];
+            this.loaded = (0, $87A3i.makeComponent)(tag, blueprint);
+        }
+        return this.loaded;
+    }
+    constructor(){
+        super();
+        this.tag = "anon-elt";
+        this.src = "";
+        this.property = "default";
+        this.initAttributes("tag", "src", "property");
+    }
+}
+const blueprint = Blueprint.elementCreator({
+    tag: "xin-blueprint",
+    styleSpec: {
+        ":host": {
+            display: "none"
+        }
+    }
+});
 class BlueprintLoader extends (0, $gXZVt.Component) {
     constructor(){
         super();
-        this.tag = null;
-        this.property = "default";
-        this.blueprint = null;
-        this.initAttributes("tag", "blueprint");
     }
     async load() {
-        if (!this.blueprint) return;
-        const tag = this.tag || this.blueprint.split("/").pop();
-        const imported = await eval(`import('${this.blueprint}')`);
-        const blueprint = imported[this.property];
-        const { creator } = (0, $87A3i.makeComponent)(tag, blueprint);
-        this.replaceWith(creator(...this.childNodes));
+        const blueprintElements = [
+            ...this.querySelectorAll(Blueprint.tagName)
+        ].filter((elt)=>elt.src);
+        const promises = blueprintElements.map((elt)=>elt.packaged());
+        await Promise.all(promises);
     }
-    render() {
-        super.render();
+    connectedCallback() {
+        super.connectedCallback();
         this.load();
     }
 }
 const blueprintLoader = BlueprintLoader.elementCreator({
-    tag: "xin-bp",
+    tag: "xin-loader",
     styleSpec: {
         ":host": {
             display: "none"
@@ -1834,6 +1857,7 @@ var $9B2zz = parcelRequire("9B2zz");
 var $gqng8 = parcelRequire("gqng8");
 
 var $ky9Rr = parcelRequire("ky9Rr");
+const $80abd70ad891812f$export$7564cc5630cf4caa = {};
 function $80abd70ad891812f$export$3bc26eec1cc2439f(tag, blueprint) {
     const { type: type, styleSpec: styleSpec } = blueprint(tag, {
         Color: $hQNaD.Color,
@@ -1845,13 +1869,15 @@ function $80abd70ad891812f$export$3bc26eec1cc2439f(tag, blueprint) {
         vars: $9B2zz.vars,
         xinProxy: $ky9Rr.xinProxy
     });
-    return {
+    const packagedComponent = {
         type: type,
         creator: type.elementCreator({
             tag: tag,
             styleSpec: styleSpec
         })
     };
+    $80abd70ad891812f$export$7564cc5630cf4caa[tag] = packagedComponent;
+    return packagedComponent;
 }
 
 });
@@ -1967,6 +1993,7 @@ var $gXZVt = parcelRequire("gXZVt");
 
 var $gqng8 = parcelRequire("gqng8");
 const { span: $f7fc83aae282e31a$var$span, slot: $f7fc83aae282e31a$var$slot } = (0, $gqng8.elements);
+const $f7fc83aae282e31a$var$AsyncFunction = (async ()=>{}).constructor;
 class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $gXZVt.Component) {
     static delay(ms) {
         return new Promise((resolve)=>{
@@ -2006,7 +2033,6 @@ class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $gXZVt.Component) {
     }
     constructor(){
         super();
-        this.test = ()=>true;
         this.delay = 0;
         this.statis = "";
         this.expect = true;
@@ -2020,6 +2046,8 @@ class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $gXZVt.Component) {
         ];
         this.run = ()=>{
             clearTimeout(this.timeout);
+            if (!this.test) // @ts-expect-error eslint is wrong
+            this.test = new $f7fc83aae282e31a$var$AsyncFunction(this.textContent);
             this.status = "waiting";
             this.timeout = setTimeout(async ()=>{
                 this.status = "running";

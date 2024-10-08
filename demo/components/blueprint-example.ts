@@ -15,16 +15,30 @@ interface BlueprintParts extends PartsMap {
   captionField: HTMLInputElement
 }
 
-const blueprintExample: XinBlueprint = (
-  tag,
-  { Component, elements, vars, varDefault, Color }
-) => {
+/*
+  tag is the consumer's choice of tag for the custom-element
+  factory is {
+    Color,        // the Color class
+    Component,    // the Component base class
+    elements,     // elements.div() creates an HTMLDivElement
+    svgElements,  // svgElements.path() creates an SVGPathElement
+    mathML,       // mathML.msqrt() creates an `<msqrt>` MathMLElement
+    varDefault,   // varDefault.fooBar('10px') produces `var(--foo-bar, 10px)`
+    vars,         // vars.fooBar produces `var(--foo-bar)`, vars.fooBar50 produces `calc(var(--foo-bar) * 0.5)`
+    xinProxy,     // produces xin proxies, see https://github.com/tonioloewald/xinjs/blob/main/docs/xin.md
+  }
+*/
+const blueprintExample: XinBlueprint = (tag, factory) => {
+  const { Component, elements, vars, varDefault, Color } = factory
   const { h3, p, slot, label, input } = elements
+
   class BpExample extends Component {
     value = {
       caption: 'Blueprint Example',
     }
 
+    // this determines the style inside the shadowDOM. If omitted,
+    // the component won't use a shadowDOM
     static styleSpec = {
       ':host': {
         color: vars.blueprintColor,
@@ -58,6 +72,10 @@ const blueprintExample: XinBlueprint = (
       h3({ part: 'heading', style: { marginTop: 0 } }),
       p('This was made from a blueprint!'),
       label('Edit the caption', input({ part: 'captionField' })),
+
+      // if the component doesn't use the shadowDOM, <xin-slot> elements
+      // will be used instead of <slot> elements, and these provide the same
+      // composability as <slot> elements provide, including supporting named slots.
       slot(),
     ]
 
@@ -71,6 +89,8 @@ const blueprintExample: XinBlueprint = (
       })
     }
 
+    // disconnectedCallback is also supported
+
     render() {
       super.render()
 
@@ -82,7 +102,11 @@ const blueprintExample: XinBlueprint = (
   }
 
   return {
+    // you must return the subclass!
     type: BpExample,
+    // if a stylespec is returned, it will create a global helper stylesheet
+    // for the custom element. Any occurrence of ':host' in the selectors will
+    // be replaced with the element's tag
     styleSpec: {
       ':root': {
         _blueprintColor: new Color(200, 220, 240),

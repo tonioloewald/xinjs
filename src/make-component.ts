@@ -27,6 +27,8 @@ export interface XinPackagedComponent {
   creator: ElementCreator
 }
 
+export const madeComponents: { [key: string]: XinPackagedComponent } = {}
+
 export type XinBlueprint = (tag: string, module: XinFactory) => XinComponentSpec
 
 export function makeComponent(
@@ -43,8 +45,11 @@ export function makeComponent(
     vars,
     xinProxy,
   })
-  return {
+  const packagedComponent = {
     type,
     creator: type.elementCreator({ tag, styleSpec }),
   }
+
+  madeComponents[tag] = packagedComponent
+  return packagedComponent
 }

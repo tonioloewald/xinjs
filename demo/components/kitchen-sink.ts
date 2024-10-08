@@ -10,6 +10,7 @@ import {
   XinTest,
   makeComponent,
   blueprintLoader,
+  blueprint,
 } from '../../src'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
@@ -33,6 +34,7 @@ const {
   style,
   slot,
   xinSlot,
+  swissClock,
 } = elements
 
 const wordsToCamelCase = (s: string) =>
@@ -487,11 +489,12 @@ This is an in-browser test of key functionality including:
         ...options.map((item) => option({ value: item }))
       ),
       blueprintLoader(
-        {
-          blueprint: 'https://loewald.com/lib/swiss-clock',
-        },
-        span('blueprint', { style: { color: vars.brandColor } })
+        blueprint({
+          tag: 'swiss-clock',
+          src: 'https://loewald.com/lib/swiss-clock',
+        })
       ),
+      swissClock(span('blueprint', { style: { color: vars.brandColor } })),
       bp(
         {
           bindValue: formTest.blueprintTest as unknown as XinProxyObject,
