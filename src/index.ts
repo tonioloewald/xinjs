@@ -35,7 +35,6 @@ export type {
 } from './make-component'
 export { MoreMath } from './more-math'
 export { settings } from './settings'
-export * from './test-component'
 export { throttle, debounce } from './throttle'
 export {
   xin,

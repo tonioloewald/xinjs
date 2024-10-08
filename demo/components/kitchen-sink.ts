@@ -6,8 +6,6 @@ import {
   Component,
   vars,
   css,
-  xinTest,
-  XinTest,
   makeComponent,
   blueprintLoader,
   blueprint,
@@ -35,6 +33,7 @@ const {
   slot,
   xinSlot,
   swissClock,
+  xinTest,
 } = elements
 
 const wordsToCamelCase = (s: string) =>
@@ -281,38 +280,6 @@ This is an in-browser test of key functionality including:
             },
           })
         ),
-        h4('Test Results'),
-        xinTest('should succeed', {
-          test() {
-            return true
-          },
-        }),
-        xinTest('should run for 2s the fail', {
-          async test() {
-            await XinTest.delay(2000)
-            return false
-          },
-        }),
-        xinTest('should succeed after 2s', {
-          delay: 2000,
-          test() {
-            return true
-          },
-        }),
-        xinTest('should wait 1s then fail after 3s', {
-          delay: 1000,
-          async test() {
-            await XinTest.delay(3000)
-            return false
-          },
-        }),
-        xinTest('should wait 1s, then throw after 1s', {
-          delay: 1000,
-          async test() {
-            await XinTest.delay(1000)
-            throw new Error('drat, foiled again!')
-          },
-        }),
         xinTest('custom element camelCase prop is set', {
           test() {
             const simple = document.querySelector(
@@ -492,6 +459,10 @@ This is an in-browser test of key functionality including:
         blueprint({
           tag: 'swiss-clock',
           src: 'https://loewald.com/lib/swiss-clock',
+        }),
+        blueprint({
+          tag: 'xin-test',
+          src: 'https://tonioloewald.github.io/xin-test/dist/blueprint.js',
         })
       ),
       swissClock(span('blueprint', { style: { color: vars.brandColor } })),

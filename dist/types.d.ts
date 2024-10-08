@@ -595,50 +595,6 @@ export interface XinPackagedComponent {
 }
 export type XinBlueprint = (tag: string, module: XinFactory) => XinComponentSpec;
 export function makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedComponent;
-type TestExpression = () => Promise<boolean> | boolean;
-export class XinTest extends Component {
-    test?: TestExpression;
-    delay: number;
-    statis: string;
-    expect: boolean;
-    static delay(ms: number): Promise<void>;
-    static styleSpec: {
-        ':host': {
-            display: string;
-            gap: string;
-            alignItems: string;
-        };
-        ':host [part="outcome"]': {
-            display: string;
-            borderRadius: string;
-            padding: string;
-            fontSize: string;
-        };
-        ':host .waiting': {
-            background: string;
-        };
-        ':host .running': {
-            background: string;
-        };
-        ':host .success': {
-            background: string;
-        };
-        ':host .failed': {
-            background: string;
-        };
-        ':host .exception': {
-            color: string;
-            background: string;
-        };
-    };
-    content: HTMLSpanElement[];
-    constructor();
-    run: () => void;
-    connectedCallback(): void;
-    disconnectedCallback(): void;
-    render(): void;
-}
-export const xinTest: import("xin-types").ElementCreator;
 export class Blueprint extends Component {
     tag: string;
     src: string;

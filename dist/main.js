@@ -1984,105 +1984,6 @@ var $87A3i = parcelRequire("87A3i");
 var $9oJ94 = parcelRequire("9oJ94");
 
 var $5BjS8 = parcelRequire("5BjS8");
-var $f7fc83aae282e31a$exports = {};
-
-$parcel$export($f7fc83aae282e31a$exports, "XinTest", () => $f7fc83aae282e31a$export$e8658328209d5943);
-$parcel$export($f7fc83aae282e31a$exports, "xinTest", () => $f7fc83aae282e31a$export$b1604b020b2ce76d);
-
-var $gXZVt = parcelRequire("gXZVt");
-
-var $gqng8 = parcelRequire("gqng8");
-const { span: $f7fc83aae282e31a$var$span, slot: $f7fc83aae282e31a$var$slot } = (0, $gqng8.elements);
-const $f7fc83aae282e31a$var$AsyncFunction = (async ()=>{}).constructor;
-class $f7fc83aae282e31a$export$e8658328209d5943 extends (0, $gXZVt.Component) {
-    static delay(ms) {
-        return new Promise((resolve)=>{
-            setTimeout(resolve, ms);
-        });
-    }
-    static{
-        this.styleSpec = {
-            ":host": {
-                display: "flex",
-                gap: "5px",
-                alignItems: "center"
-            },
-            ':host [part="outcome"]': {
-                display: "inline-block",
-                borderRadius: "99px",
-                padding: "0 12px",
-                fontSize: "80%"
-            },
-            ":host .waiting": {
-                background: "#ff04"
-            },
-            ":host .running": {
-                background: "#f804"
-            },
-            ":host .success": {
-                background: "#0f04"
-            },
-            ":host .failed": {
-                background: "#f004"
-            },
-            ":host .exception": {
-                color: "white",
-                background: "red"
-            }
-        };
-    }
-    constructor(){
-        super();
-        this.delay = 0;
-        this.statis = "";
-        this.expect = true;
-        this.content = [
-            $f7fc83aae282e31a$var$span({
-                part: "description"
-            }, $f7fc83aae282e31a$var$slot()),
-            $f7fc83aae282e31a$var$span({
-                part: "outcome"
-            })
-        ];
-        this.run = ()=>{
-            clearTimeout(this.timeout);
-            if (!this.test) // @ts-expect-error eslint is wrong
-            this.test = new $f7fc83aae282e31a$var$AsyncFunction(this.textContent);
-            this.status = "waiting";
-            this.timeout = setTimeout(async ()=>{
-                this.status = "running";
-                try {
-                    const outcome = JSON.stringify(await this.test());
-                    if (outcome === JSON.stringify(this.expect)) this.status = "success";
-                    else this.status = `failed: got ${outcome}, expected ${this.expect}`;
-                } catch (err) {
-                    this.status = `exception: ${err}`;
-                }
-            }, this.delay);
-        };
-        this.initAttributes("description", "delay", "status");
-    }
-    connectedCallback() {
-        super.connectedCallback();
-        this.run();
-    }
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.class;
-        clearTimeout(this.timeout);
-    }
-    render() {
-        super.render();
-        const { outcome: outcome } = this.parts;
-        outcome.textContent = this.status;
-        outcome.setAttribute("class", this.status.match(/\w+/)[0]);
-    }
-}
-const $f7fc83aae282e31a$export$b1604b020b2ce76d = $f7fc83aae282e31a$export$e8658328209d5943.elementCreator({
-    tag: "xin-test"
-});
-
-
 
 var $eK8lg = parcelRequire("eK8lg");
 
@@ -2095,7 +1996,6 @@ var $b66768ad3e594848$exports = {};
 
 
 var $ky9Rr = parcelRequire("ky9Rr");
-$parcel$exportWildcard(module.exports, $f7fc83aae282e31a$exports);
 $parcel$exportWildcard(module.exports, $9TCX0);
 $parcel$exportWildcard(module.exports, $b66768ad3e594848$exports);
 

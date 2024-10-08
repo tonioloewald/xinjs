@@ -1935,105 +1935,6 @@ var $lGBgM = parcelRequire("lGBgM");
 var $drWRQ = parcelRequire("drWRQ");
 
 var $hv4Z8 = parcelRequire("hv4Z8");
-var $222449ec3acb18f4$exports = {};
-
-$parcel$export($222449ec3acb18f4$exports, "XinTest", () => $222449ec3acb18f4$export$e8658328209d5943);
-$parcel$export($222449ec3acb18f4$exports, "xinTest", () => $222449ec3acb18f4$export$b1604b020b2ce76d);
-
-var $aVpVG = parcelRequire("aVpVG");
-
-var $9sLMf = parcelRequire("9sLMf");
-const { span: $222449ec3acb18f4$var$span, slot: $222449ec3acb18f4$var$slot } = (0, $9sLMf.elements);
-const $222449ec3acb18f4$var$AsyncFunction = (async ()=>{}).constructor;
-class $222449ec3acb18f4$export$e8658328209d5943 extends (0, $aVpVG.Component) {
-    static delay(ms) {
-        return new Promise((resolve)=>{
-            setTimeout(resolve, ms);
-        });
-    }
-    static{
-        this.styleSpec = {
-            ":host": {
-                display: "flex",
-                gap: "5px",
-                alignItems: "center"
-            },
-            ':host [part="outcome"]': {
-                display: "inline-block",
-                borderRadius: "99px",
-                padding: "0 12px",
-                fontSize: "80%"
-            },
-            ":host .waiting": {
-                background: "#ff04"
-            },
-            ":host .running": {
-                background: "#f804"
-            },
-            ":host .success": {
-                background: "#0f04"
-            },
-            ":host .failed": {
-                background: "#f004"
-            },
-            ":host .exception": {
-                color: "white",
-                background: "red"
-            }
-        };
-    }
-    constructor(){
-        super();
-        this.delay = 0;
-        this.statis = "";
-        this.expect = true;
-        this.content = [
-            $222449ec3acb18f4$var$span({
-                part: "description"
-            }, $222449ec3acb18f4$var$slot()),
-            $222449ec3acb18f4$var$span({
-                part: "outcome"
-            })
-        ];
-        this.run = ()=>{
-            clearTimeout(this.timeout);
-            if (!this.test) // @ts-expect-error eslint is wrong
-            this.test = new $222449ec3acb18f4$var$AsyncFunction(this.textContent);
-            this.status = "waiting";
-            this.timeout = setTimeout(async ()=>{
-                this.status = "running";
-                try {
-                    const outcome = JSON.stringify(await this.test());
-                    if (outcome === JSON.stringify(this.expect)) this.status = "success";
-                    else this.status = `failed: got ${outcome}, expected ${this.expect}`;
-                } catch (err) {
-                    this.status = `exception: ${err}`;
-                }
-            }, this.delay);
-        };
-        this.initAttributes("description", "delay", "status");
-    }
-    connectedCallback() {
-        super.connectedCallback();
-        this.run();
-    }
-    disconnectedCallback() {
-        super.disconnectedCallback();
-        this.class;
-        clearTimeout(this.timeout);
-    }
-    render() {
-        super.render();
-        const { outcome: outcome } = this.parts;
-        outcome.textContent = this.status;
-        outcome.setAttribute("class", this.status.match(/\w+/)[0]);
-    }
-}
-const $222449ec3acb18f4$export$b1604b020b2ce76d = $222449ec3acb18f4$export$e8658328209d5943.elementCreator({
-    tag: "xin-test"
-});
-
-
 
 var $9nL7f = parcelRequire("9nL7f");
 
@@ -2082,5 +1983,5 @@ var blueprint = parcelRequire("3x0mh").blueprint;
 var BlueprintLoader = parcelRequire("3x0mh").BlueprintLoader;
 var blueprintLoader = parcelRequire("3x0mh").blueprintLoader;
 var $db8c79eba3148e96$exports = parcelRequire("3x0mh")["*"];
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, $222449ec3acb18f4$export$e8658328209d5943 as XinTest, $222449ec3acb18f4$export$b1604b020b2ce76d as xinTest, Blueprint as Blueprint, blueprint as blueprint, BlueprintLoader as BlueprintLoader, blueprintLoader as blueprintLoader, $db8c79eba3148e96$exports as default};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, Blueprint as Blueprint, blueprint as blueprint, BlueprintLoader as BlueprintLoader, blueprintLoader as blueprintLoader, $db8c79eba3148e96$exports as default};
 //# sourceMappingURL=module.js.map
