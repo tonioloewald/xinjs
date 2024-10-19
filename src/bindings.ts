@@ -4,13 +4,15 @@ import { getValue, setValue } from './dom'
 
 export const bindings: { [key: string | symbol]: XinBinding } = {
   value: {
-    toDOM(element: HTMLElement, value: any) {
-      setValue(element, value)
-    },
+    toDOM: setValue,
 
     fromDOM(element: HTMLElement) {
       return getValue(element as ValueElement)
     },
+  },
+
+  set: {
+    toDOM: setValue,
   },
 
   text: {

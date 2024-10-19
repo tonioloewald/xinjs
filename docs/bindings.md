@@ -17,9 +17,18 @@ own [Custom Elements](web-components.md).
 
 You can see examples of these bindings in the [kitchen sink demo](../demo/components/kitchen-sink.ts).
 
+## set
+
+The `set` binding sends state from `xin` to the bound element's `value` property. It's a
+"one way" version of the `value` binding. It's recommended for handling compound
+UI elements like dialog boxes or composite custom-elements like a code-editor which might
+have all kinds of internal elements generating `change` events.
+
 ## value
 
-The `value` binding syncs state from `xin` to the bound element's `value` property.
+The `value` binding syncs state from `xin` to the bound element's `value` property. In
+general this should only be used for binding simple things, like `<input>` and `<textarea>`
+elements.
 
 ## text
 
@@ -46,7 +55,7 @@ for each item in the source array.
 The `list` binding accepts as options:
 - `idPath: string`
 - `initInstance: (element, item: any) => void`
-- `updateInstance: (element, item: any) => void` 
+- `updateInstance: (element, item: any) => void`
 - `virtual: {width?: number, height: number}`
 - `hiddenProp: symbol | string`
 - `visibleProp: symbol | string`
@@ -54,7 +63,7 @@ The `list` binding accepts as options:
 `initInstance` is called once for each element created, and is passed
 that element and the array value that it represents.
 
-Meanwhile, `updateInstance` is called once on creation and then any time the 
+Meanwhile, `updateInstance` is called once on creation and then any time the
 array value is updated.
 
 ### Virtual List Binding
@@ -95,13 +104,13 @@ and a detail view using `visibleProp` can be found in [list-filters.ts](../demo/
 ### Binding custom-elements using idPath
 
 If you list-bind a custom-element with `bindValue` implemented and providing an
-`idPath` then the list-binding will bind the array items to the value of the 
+`idPath` then the list-binding will bind the array items to the value of the
 custom-element.
 
 See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
 
 ### xin-empty-list class
 
-The `list` binding will automatically add the class `-xin-empty-list` to a 
+The `list` binding will automatically add the class `-xin-empty-list` to a
 container bound to an empty array, making it easier to conditionally render
 instructions or explanations when a list is empty.

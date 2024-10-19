@@ -15,6 +15,16 @@ import blueprintExample from './blueprint-example'
 
 const bp = makeComponent('blueprint-example', blueprintExample).creator
 
+async function delayMS(duration: number) {
+  return new Promise((resolve) => {
+    if (duration) {
+      setTimeout(resolve, duration)
+    } else {
+      requestAnimationFrame(resolve)
+    }
+  })
+}
+
 const {
   div,
   span,
@@ -183,6 +193,7 @@ const { formTest } = xinProxy(
           { id: 'ncc-74656', name: 'Voyager' },
         ],
       },
+      setTest: 'try editing this',
       blueprintTest: {
         caption: 'This one is bound',
       },
@@ -289,6 +300,46 @@ This is an in-browser test of key functionality including:
               simple.exampleProp !== null &&
               simple.exampleProp().word === 'success'
             )
+          },
+        })
+      ),
+      div(
+        h4('set vs value bindings'),
+        p('Both of these fields are bound to formTest.setTest'),
+        label(
+          'value bound',
+          input({ id: 'bindSetValue', bindValue: 'formTest.setTest' })
+        ),
+        label(
+          'set bound',
+          input({ id: 'bindSetSet', bindSet: 'formTest.setTest' })
+        ),
+        xinTest('editing value bound input updates set bound input', {
+          delay: 500,
+          expect: 'editing this field updates both fields',
+          async test() {
+            const input = document.querySelector(
+              '#bindSetValue'
+            ) as HTMLInputElement
+            input.value = 'editing this field updates both fields'
+            input.dispatchEvent(new Event('change'))
+            await delayMS(100)
+            return (document.querySelector('#bindSetSet') as HTMLInputElement)
+              .value
+          },
+        }),
+        xinTest('editing set bound input does not update value bound input', {
+          delay: 1000,
+          expect: 'editing this field updates both fields',
+          async test() {
+            const input = document.querySelector(
+              '#bindSetSet'
+            ) as HTMLInputElement
+            input.value = "editing this field won't trigger an update"
+            input.dispatchEvent(new Event('change'))
+            await delayMS(100)
+            return (document.querySelector('#bindSetValue') as HTMLInputElement)
+              .value
           },
         })
       ),

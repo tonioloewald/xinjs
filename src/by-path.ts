@@ -246,7 +246,6 @@ function setByPath(
             if (!Object.prototype.hasOwnProperty.call(obj, key)) {
               return false
             }
-            // eslint-disable-next-line
             delete (obj as XinObject)[key]
           }
           return true
@@ -257,7 +256,6 @@ function setByPath(
     }
   }
 
-  // eslint-disable-next-line
   throw new Error(`setByPath(${orig}, ${path}, ${val}) failed`)
 }
 
