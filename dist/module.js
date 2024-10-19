@@ -1431,7 +1431,6 @@ function $c62be31ef05b0c90$export$f65a19d15516795e(orig, path, val) {
                         obj[key] = val;
                     } else {
                         if (!Object.prototype.hasOwnProperty.call(obj, key)) return false;
-                        // eslint-disable-next-line
                         delete obj[key];
                     }
                     return true;
@@ -1439,7 +1438,6 @@ function $c62be31ef05b0c90$export$f65a19d15516795e(orig, path, val) {
             }
         } else throw new Error(`setByPath failed, bad path ${path}`);
     }
-    // eslint-disable-next-line
     throw new Error(`setByPath(${orig}, ${path}, ${val}) failed`);
 }
 function $c62be31ef05b0c90$export$102e532907108dad(orig, path) {
@@ -1473,12 +1471,13 @@ var $2dgdI = parcelRequire("2dgdI");
 var $gbrAN = parcelRequire("gbrAN");
 const $7d9f6326e1d5d994$export$97a1a3e6f39778d2 = {
     value: {
-        toDOM (element, value) {
-            (0, $gbrAN.setValue)(element, value);
-        },
+        toDOM: (0, $gbrAN.setValue),
         fromDOM (element) {
             return (0, $gbrAN.getValue)(element);
         }
+    },
+    set: {
+        toDOM: (0, $gbrAN.setValue)
     },
     text: {
         toDOM (element, value) {

@@ -9,17 +9,28 @@ import {
 import { makeSorter } from 'xinjs-ui'
 import words from '../words'
 
+const threeLetterWords = words.filter((w) => w.length === 3)
+const fourLetterWords = words.filter((w) => w.length === 4)
+const fiveLetterWords = words.filter((w) => w.length === 5)
+const wordleWords = fiveLetterWords
+  .filter((w) => w[4] !== 's' || !fourLetterWords.includes(w.substring(0, 4)))
+  .filter(
+    (w) =>
+      w.substring(3, 2) !== 'ed' ||
+      !threeLetterWords.includes(w.substring(0, 3))
+  )
+
 const { wordle } = xinProxy(
   {
     wordle: {
       info: '',
-      words: words.filter((w) => w.length === 5),
+      words: wordleWords,
       found: [] as string[],
       foundLetters: [] as Array<{ letter: string; count: number }>,
       updateFilter(event: Event) {
         const source = (event.target as HTMLTextAreaElement).value
 
-        const clues = source.match(/(\w[-?!]){5}/g)
+        const clues = source.match(/(\w[-?!]?){5}/g)
 
         if (!clues) {
           wordle.found = []
@@ -32,14 +43,14 @@ const { wordle } = xinProxy(
             const char = clue[i * 2]
             const condition = clue[i * 2 + 1]
             switch (condition) {
-              case '-':
-                found = found.filter((w) => !w.includes(char))
-                break
               case '?':
                 found = found.filter((w) => w[i] !== char && w.includes(char))
                 break
               case '!':
                 found = found.filter((w) => w[i] === char)
+                break
+              default:
+                found = found.filter((w) => !w.includes(char))
                 break
             }
           }
