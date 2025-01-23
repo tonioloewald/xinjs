@@ -126,7 +126,7 @@ if (globalThis.document != null) {
   document.body.addEventListener('input', handleChange, true)
 }
 
-export function bind<T extends HTMLElement>(
+export function bind<T extends Element>(
   element: T,
   what: XinTouchableType | XinBindingSpec,
   binding: XinBinding<T>,
@@ -153,7 +153,7 @@ export function bind<T extends HTMLElement>(
   }
   const { toDOM } = binding
 
-  element.classList.add(BOUND_CLASS)
+  element.classList?.add(BOUND_CLASS)
   let dataBindings = elementToBindings.get(element)
   if (dataBindings == null) {
     dataBindings = []

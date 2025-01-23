@@ -331,22 +331,22 @@ export interface XinBindingSpec {
     value: XinTouchableType | any;
     [key: string]: any;
 }
-export type XinBindingSetter<T = HTMLElement> = (element: T, value: any, options?: XinObject) => void;
-export type XinBindingGetter<T = HTMLElement> = (element: T, options?: XinObject) => any;
-export interface XinBinding<T = HTMLElement> {
+export type XinBindingSetter<T = Element> = (element: T, value: any, options?: XinObject) => void;
+export type XinBindingGetter<T = Element> = (element: T, options?: XinObject) => any;
+export interface XinBinding<T = Element> {
     toDOM?: XinBindingSetter<T>;
     fromDOM?: XinBindingGetter<T>;
 }
-export interface XinInlineBinding {
+export interface XinInlineBinding<T = Element> {
     value: XinTouchableType;
-    binding: XinBinding | XinBindingSetter | string;
+    binding: XinBinding<T> | XinBindingSetter<T> | string;
 }
-export interface ElementProps {
+export interface ElementProps<T = Element> {
     onClick?: XinEventHandler<MouseEvent>;
     onInput?: XinEventHandler;
     onChange?: XinEventHandler;
     onSubmit?: XinEventHandler;
-    bind?: XinInlineBinding;
+    bind?: XinInlineBinding<T>;
     bindValue?: XinBindingShortcut;
     bindText?: XinBindingShortcut;
     bindList?: XinBindingShortcut;
@@ -355,7 +355,7 @@ export interface ElementProps {
     bindStyle?: XinBindingShortcut;
     style?: XinStyleRule;
     class?: string;
-    apply?: (element: HTMLElement) => void | Promise<void>;
+    apply?: (element: Element) => void | Promise<void>;
     [key: string]: any;
 }
 export interface StringMap {
@@ -365,10 +365,10 @@ export interface PartsMap {
     [key: string]: Element;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-export type ElementPart = Element | DocumentFragment | ElementProps | string | number;
-export type HTMLElementCreator<T extends Node = HTMLElement> = (...contents: ElementPart[]) => T;
-export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment;
-export type ElementCreator<T extends Node = HTMLElement> = (...contents: ElementPart[]) => T;
+export type ElementPart<T = Element> = Element | DocumentFragment | ElementProps<T> | string | number;
+export type HTMLElementCreator<T = Element> = (...contents: ElementPart<T>[]) => T;
+export type FragmentCreator = (...contents: ElementPart<Element>[]) => DocumentFragment;
+export type ElementCreator<T = Element> = (...contents: ElementPart<T>[]) => T;
 export type ContentPart = Element | DocumentFragment | string;
 export type ContentType = ContentPart | ContentPart[];
 export const settings: {
@@ -387,13 +387,13 @@ export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
-export function bind<T extends HTMLElement>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T;
+export function bind<T extends Element>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T;
 export const on: (element: HTMLElement, eventType: string, eventHandler: XinEventHandler) => void;
 type VoidFunc = (...args: any[]) => void;
 export const debounce: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
 export const throttle: (origFn: VoidFunc, minInterval?: number) => VoidFunc;
 export const bindings: {
-    [key: string | symbol]: XinBinding;
+    [key: string | symbol]: XinBinding<Element>;
 };
 export interface ElementsProxy {
     a: ElementCreator<HTMLAnchorElement>;
@@ -564,7 +564,7 @@ export abstract class Component extends HTMLElement {
     static get tagName(): null | string;
     [key: string]: any;
     static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement;
-    static elementCreator(options?: ElementCreatorOptions): ElementCreator;
+    static elementCreator(options?: ElementCreatorOptions): ElementCreator<Component>;
     initAttributes(...attributeNames: string[]): void;
     get parts(): PartsMap;
     constructor();
@@ -574,7 +574,7 @@ export abstract class Component extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
-export function xinProxy<T extends AnyObject>(obj: T, boxScalars?: boolean): T & XinProxyObject;
+export function xinProxy<T = AnyObject>(obj: object, boxScalars?: boolean): T & XinProxyObject;
 export interface XinFactory {
     Color: typeof Color;
     Component: typeof Component;
@@ -603,11 +603,11 @@ export class Blueprint extends Component {
     packaged(): Promise<XinPackagedComponent>;
     constructor();
 }
-export const blueprint: import("xin-types").ElementCreator;
+export const blueprint: ElementCreator<Component>;
 export class BlueprintLoader extends Component {
     constructor();
     connectedCallback(): void;
 }
-export const blueprintLoader: import("xin-types").ElementCreator;
+export const blueprintLoader: ElementCreator<Component>;
 
 //# sourceMappingURL=types.d.ts.map

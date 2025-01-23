@@ -244,9 +244,7 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   return elt
 }
 
-const fragment: ElementCreator<DocumentFragment> = (
-  ...contents: ElementPart[]
-) => {
+const fragment = (...contents: ElementPart[]): DocumentFragment => {
   const frag = globalThis.document.createDocumentFragment()
   for (const item of contents) {
     frag.append(item as Node)

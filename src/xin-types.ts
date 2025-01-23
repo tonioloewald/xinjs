@@ -60,32 +60,32 @@ export interface XinBindingSpec {
   [key: string]: any
 }
 
-export type XinBindingSetter<T = HTMLElement> = (
+export type XinBindingSetter<T = Element> = (
   element: T,
   value: any,
   options?: XinObject
 ) => void
-export type XinBindingGetter<T = HTMLElement> = (
+export type XinBindingGetter<T = Element> = (
   element: T,
   options?: XinObject
 ) => any
 
-export interface XinBinding<T = HTMLElement> {
+export interface XinBinding<T = Element> {
   toDOM?: XinBindingSetter<T>
   fromDOM?: XinBindingGetter<T>
 }
 
-export interface XinInlineBinding {
+export interface XinInlineBinding<T = Element> {
   value: XinTouchableType
-  binding: XinBinding | XinBindingSetter | string
+  binding: XinBinding<T> | XinBindingSetter<T> | string
 }
 
-export interface ElementProps {
+export interface ElementProps<T = Element> {
   onClick?: XinEventHandler<MouseEvent>
   onInput?: XinEventHandler
   onChange?: XinEventHandler
   onSubmit?: XinEventHandler
-  bind?: XinInlineBinding
+  bind?: XinInlineBinding<T>
   bindValue?: XinBindingShortcut
   bindText?: XinBindingShortcut
   bindList?: XinBindingShortcut
@@ -94,7 +94,7 @@ export interface ElementProps {
   bindStyle?: XinBindingShortcut
   style?: XinStyleRule
   class?: string
-  apply?: (element: HTMLElement) => void | Promise<void>
+  apply?: (element: Element) => void | Promise<void>
   [key: string]: any
 }
 
@@ -110,18 +110,18 @@ export type ValueElement =
   | HTMLInputElement
   | HTMLSelectElement
   | HTMLTextAreaElement
-export type ElementPart =
+export type ElementPart<T = Element> =
   | Element
   | DocumentFragment
-  | ElementProps
+  | ElementProps<T>
   | string
   | number
-export type HTMLElementCreator<T extends Node = HTMLElement> = (
-  ...contents: ElementPart[]
+export type HTMLElementCreator<T = Element> = (
+  ...contents: ElementPart<T>[]
 ) => T
-export type FragmentCreator = (...contents: ElementPart[]) => DocumentFragment
-export type ElementCreator<T extends Node = HTMLElement> = (
-  ...contents: ElementPart[]
-) => T
+export type FragmentCreator = (
+  ...contents: ElementPart<Element>[]
+) => DocumentFragment
+export type ElementCreator<T = Element> = (...contents: ElementPart<T>[]) => T
 export type ContentPart = Element | DocumentFragment | string
 export type ContentType = ContentPart | ContentPart[]

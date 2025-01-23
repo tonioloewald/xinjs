@@ -6,7 +6,7 @@ export const dispatch = (target: Element, type: string): void => {
   target.dispatchEvent(event)
 }
 
-const valueType = (element: HTMLElement): string => {
+const valueType = (element: Element): string => {
   if (element instanceof HTMLInputElement) {
     return element.type
   } else if (
@@ -19,7 +19,7 @@ const valueType = (element: HTMLElement): string => {
   }
 }
 
-export const setValue = (element: HTMLElement, newValue: any): void => {
+export const setValue = (element: Element, newValue: any): void => {
   switch (valueType(element)) {
     case 'radio':
       ;(element as HTMLInputElement).checked =

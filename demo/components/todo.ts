@@ -5,7 +5,7 @@ import {
   getListItem,
   ElementPart,
   vars,
-} from '../../src/index'
+} from '../../src/'
 
 const { h1, div, template, form, span, input, button } = elements
 

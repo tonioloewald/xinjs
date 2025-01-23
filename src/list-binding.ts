@@ -31,7 +31,7 @@ interface VirtualListSlice {
   bottomBuffer: number
 }
 
-function updateRelativeBindings(element: HTMLElement, path: string): void {
+function updateRelativeBindings(element: Element, path: string): void {
   const boundElements = [...element.querySelectorAll(BOUND_SELECTOR)]
   if (element.matches(BOUND_SELECTOR)) {
     boundElements.unshift(element)
@@ -43,24 +43,24 @@ function updateRelativeBindings(element: HTMLElement, path: string): void {
         binding.path = `${path}${binding.path.substring(1)}`
       }
       if (binding.binding.toDOM != null) {
-        binding.binding.toDOM(boundElement as HTMLElement, xin[binding.path])
+        binding.binding.toDOM(boundElement as Element, xin[binding.path])
       }
     }
   }
 }
 
 class ListBinding {
-  boundElement: HTMLElement
+  boundElement: Element
   listTop: HTMLElement
   listBottom: HTMLElement
-  template: HTMLElement
+  template: Element
   options: ListBindingOptions
-  itemToElement: WeakMap<XinObject, HTMLElement>
+  itemToElement: WeakMap<XinObject, Element>
   private _array: any[] = []
   private readonly _update?: VoidFunction
   private _previousSlice?: VirtualListSlice
 
-  constructor(boundElement: HTMLElement, options: ListBindingOptions = {}) {
+  constructor(boundElement: Element, options: ListBindingOptions = {}) {
     this.boundElement = boundElement
     this.itemToElement = new WeakMap()
     if (boundElement.children.length !== 1) {
@@ -111,7 +111,7 @@ class ListBinding {
     let topBuffer = 0
     let bottomBuffer = 0
 
-    if (virtual != null) {
+    if (virtual != null && this.boundElement instanceof HTMLElement) {
       const width = this.boundElement.offsetWidth
       const height = this.boundElement.offsetHeight
 
@@ -200,7 +200,7 @@ class ListBinding {
     this.listBottom.style.height = String(bottomBuffer) + 'px'
 
     // build a complete new set of elements in the right order
-    const elements: HTMLElement[] = []
+    const elements: Element[] = []
     const { idPath } = this.options
     for (let i = firstItem; i <= lastItem; i++) {
       const item = slice.items[i]
@@ -229,7 +229,7 @@ class ListBinding {
     }
 
     // make sure all the elements are in the DOM and in the correct location
-    let insertionPoint: HTMLElement | null = null
+    let insertionPoint: Element | null = null
     for (const element of elements) {
       if (element.previousElementSibling !== insertionPoint) {
         moved++
@@ -251,7 +251,7 @@ class ListBinding {
   }
 }
 
-interface ListBoundElement extends HTMLElement {
+interface ListBoundElement extends Element {
   [listBindingRef]?: ListBinding
 }
 

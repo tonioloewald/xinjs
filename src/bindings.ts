@@ -2,11 +2,11 @@ import { XinObject, XinBinding, ValueElement } from './xin-types'
 import { getListBinding } from './list-binding'
 import { getValue, setValue } from './dom'
 
-export const bindings: { [key: string | symbol]: XinBinding } = {
+export const bindings: { [key: string | symbol]: XinBinding<Element> } = {
   value: {
     toDOM: setValue,
 
-    fromDOM(element: HTMLElement) {
+    fromDOM(element: Element) {
       return getValue(element as ValueElement)
     },
   },
@@ -16,25 +16,25 @@ export const bindings: { [key: string | symbol]: XinBinding } = {
   },
 
   text: {
-    toDOM(element: HTMLElement, value: any) {
+    toDOM(element: Element, value: any) {
       element.textContent = value
     },
   },
 
   enabled: {
-    toDOM(element: HTMLElement, value: any) {
+    toDOM(element: Element, value: any) {
       ;(element as HTMLInputElement).disabled = !value
     },
   },
 
   disabled: {
-    toDOM(element: HTMLElement, value: any) {
-      ;(element as HTMLInputElement).disabled = Boolean(value)
+    toDOM(element: Element, value: any) {
+      ;(element as HTMLButtonElement).disabled = Boolean(value)
     },
   },
 
   style: {
-    toDOM(element: HTMLElement, value: any) {
+    toDOM(element: Element, value: any) {
       if (typeof value === 'object') {
         for (const prop of Object.keys(value)) {
           // @ts-expect-error typescript has a strange/incorrect idea of what element.style is
@@ -49,7 +49,7 @@ export const bindings: { [key: string | symbol]: XinBinding } = {
   },
 
   list: {
-    toDOM(element: HTMLElement, value: any[], options?: XinObject) {
+    toDOM(element: Element, value: any[], options?: XinObject) {
       const listBinding = getListBinding(element, options)
       listBinding.update(value)
     },

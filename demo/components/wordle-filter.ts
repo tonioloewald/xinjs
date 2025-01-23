@@ -30,7 +30,8 @@ const { wordle } = xinProxy(
       updateFilter(event: Event) {
         const source = (event.target as HTMLTextAreaElement).value
 
-        const clues = source.match(/(\w[-?!]?){5}/g)
+        const clues = source.match(/(\w[-?!]?)/g)
+        console.log({ clues })
 
         if (!clues) {
           wordle.found = []

@@ -8,7 +8,7 @@ function $parcel$export(e, n, v, s) {
 var $parcel$modules = {};
 var $parcel$inits = {};
 
-var parcelRequire = $parcel$global["parcelRequire1973"];
+var parcelRequire = $parcel$global["parcelRequire94c2"];
 
 if (parcelRequire == null) {
   parcelRequire = function(id) {
@@ -32,7 +32,7 @@ if (parcelRequire == null) {
     $parcel$inits[id] = init;
   };
 
-  $parcel$global["parcelRequire1973"] = parcelRequire;
+  $parcel$global["parcelRequire94c2"] = parcelRequire;
 }
 
 var parcelRegister = parcelRequire.register;
@@ -57,18 +57,15 @@ class Blueprint extends (0, $aVpVG.Component) {
         return this.loaded;
     }
     constructor(){
-        super();
-        this.tag = "anon-elt";
-        this.src = "";
-        this.property = "default";
-        this.initAttributes("tag", "src", "property");
+        super(), this.tag = 'anon-elt', this.src = '', this.property = 'default';
+        this.initAttributes('tag', 'src', 'property');
     }
 }
 const blueprint = Blueprint.elementCreator({
-    tag: "xin-blueprint",
+    tag: 'xin-blueprint',
     styleSpec: {
-        ":host": {
-            display: "none"
+        ':host': {
+            display: 'none'
         }
     }
 });
@@ -89,10 +86,10 @@ class BlueprintLoader extends (0, $aVpVG.Component) {
     }
 }
 const blueprintLoader = BlueprintLoader.elementCreator({
-    tag: "xin-loader",
+    tag: 'xin-loader',
     styleSpec: {
-        ":host": {
-            display: "none"
+        ':host': {
+            display: 'none'
         }
     }
 });
@@ -120,11 +117,11 @@ const $cd387b053feba574$var$globalStyleSheets = {};
 function $cd387b053feba574$var$setGlobalStyle(tagName, styleSpec) {
     const existing = $cd387b053feba574$var$globalStyleSheets[tagName];
     const processed = (0, $2okor.css)(styleSpec).replace(/:host\b/g, tagName);
-    $cd387b053feba574$var$globalStyleSheets[tagName] = existing ? existing + "\n" + processed : processed;
+    $cd387b053feba574$var$globalStyleSheets[tagName] = existing ? existing + '\n' + processed : processed;
 }
 function $cd387b053feba574$var$insertGlobalStyles(tagName) {
     if ($cd387b053feba574$var$globalStyleSheets[tagName]) document.head.append((0, $9sLMf.elements).style({
-        id: tagName + "-component"
+        id: tagName + '-component'
     }, $cd387b053feba574$var$globalStyleSheets[tagName]));
     delete $cd387b053feba574$var$globalStyleSheets[tagName];
 }
@@ -142,7 +139,7 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
         return this._tagName;
     }
     static StyleNode(styleSpec) {
-        console.warn("StyleNode is deprecated, just assign static styleSpec: XinStyleSheet to the class directly");
+        console.warn('StyleNode is deprecated, just assign static styleSpec: XinStyleSheet to the class directly');
         return (0, $9sLMf.elements).style((0, $2okor.css)(styleSpec));
     }
     static elementCreator(options = {}) {
@@ -150,9 +147,9 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
             const { tag: tag, styleSpec: styleSpec } = options;
             let tagName = options != null ? tag : null;
             if (tagName == null) {
-                if (typeof this.name === "string" && this.name !== "") {
+                if (typeof this.name === 'string' && this.name !== '') {
                     tagName = (0, $5JLBr.camelToKabob)(this.name);
-                    if (tagName.startsWith("-")) tagName = tagName.slice(1);
+                    if (tagName.startsWith('-')) tagName = tagName.slice(1);
                 } else tagName = $cd387b053feba574$var$anonElementTag();
             }
             if (customElements.get(tagName) != null) console.warn(`${tagName} is already defined`);
@@ -187,27 +184,27 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
             Object.defineProperty(this, attributeName, {
                 enumerable: false,
                 get () {
-                    if (typeof attributes[attributeName] === "boolean") return this.hasAttribute(attributeKabob);
+                    if (typeof attributes[attributeName] === 'boolean') return this.hasAttribute(attributeKabob);
                     else {
-                        if (this.hasAttribute(attributeKabob)) return typeof attributes[attributeName] === "number" ? parseFloat(this.getAttribute(attributeKabob)) : this.getAttribute(attributeKabob);
+                        if (this.hasAttribute(attributeKabob)) return typeof attributes[attributeName] === 'number' ? parseFloat(this.getAttribute(attributeKabob)) : this.getAttribute(attributeKabob);
                         else if (attributeValues[attributeName] !== undefined) return attributeValues[attributeName];
                         else return attributes[attributeName];
                     }
                 },
                 set (value) {
-                    if (typeof attributes[attributeName] === "boolean") {
+                    if (typeof attributes[attributeName] === 'boolean') {
                         if (value !== this[attributeName]) {
-                            if (value) this.setAttribute(attributeKabob, "");
+                            if (value) this.setAttribute(attributeKabob, '');
                             else this.removeAttribute(attributeKabob);
                             this.queueRender();
                         }
-                    } else if (typeof attributes[attributeName] === "number") {
+                    } else if (typeof attributes[attributeName] === 'number') {
                         if (value !== parseFloat(this[attributeName])) {
                             this.setAttribute(attributeKabob, value);
                             this.queueRender();
                         }
-                    } else if (typeof value === "object" || `${value}` !== `${this[attributeName]}`) {
-                        if (value === null || value === undefined || typeof value === "object") this.removeAttribute(attributeKabob);
+                    } else if (typeof value === 'object' || `${value}` !== `${this[attributeName]}`) {
+                        if (value === null || value === undefined || typeof value === 'object') this.removeAttribute(attributeKabob);
                         else this.setAttribute(attributeKabob, value);
                         this.queueRender();
                         attributeValues[attributeName] = value;
@@ -217,11 +214,11 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
         });
     }
     initValue() {
-        const valueDescriptor = Object.getOwnPropertyDescriptor(this, "value");
+        const valueDescriptor = Object.getOwnPropertyDescriptor(this, 'value');
         if (valueDescriptor === undefined || valueDescriptor.get !== undefined || valueDescriptor.set !== undefined) return;
-        let value = this.hasAttribute("value") ? this.getAttribute("value") : (0, $19FSF.deepClone)(this.value);
+        let value = this.hasAttribute('value') ? this.getAttribute('value') : (0, $19FSF.deepClone)(this.value);
         delete this.value;
-        Object.defineProperty(this, "value", {
+        Object.defineProperty(this, 'value', {
             enumerable: false,
             get () {
                 return value;
@@ -242,7 +239,7 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                     let element = root.querySelector(`[part="${ref}"]`);
                     if (element == null) element = root.querySelector(ref);
                     if (element == null) throw new Error(`elementRef "${ref}" does not exist!`);
-                    element.removeAttribute("data-ref");
+                    element.removeAttribute('data-ref');
                     target[ref] = element;
                 }
                 return target[ref];
@@ -251,13 +248,9 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
         return this._parts;
     }
     constructor(){
-        super();
-        this.content = (0, $9sLMf.elements).slot();
-        this._changeQueued = false;
-        this._renderQueued = false;
-        this._hydrated = false;
+        super(), this.content = (0, $9sLMf.elements).slot(), this._changeQueued = false, this._renderQueued = false, this._hydrated = false;
         $cd387b053feba574$var$instanceCount += 1;
-        this.initAttributes("hidden");
+        this.initAttributes('hidden');
         this.instanceId = `${this.tagName.toLocaleLowerCase()}-${$cd387b053feba574$var$instanceCount}`;
         this._value = (0, $19FSF.deepClone)(this.defaultValue);
     }
@@ -265,13 +258,13 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
         $cd387b053feba574$var$insertGlobalStyles(this.constructor.tagName);
         this.hydrate();
         // super annoyingly, chrome loses its shit if you set *any* attributes in the constructor
-        if (this.role != null) this.setAttribute("role", this.role);
+        if (this.role != null) this.setAttribute('role', this.role);
         if (this.onResize !== undefined) {
             (0, $gbrAN.resizeObserver).observe(this);
             if (this._onResize == null) this._onResize = this.onResize.bind(this);
-            this.addEventListener("resize", this._onResize);
+            this.addEventListener('resize', this._onResize);
         }
-        if (this.value != null && this.getAttribute("value") != null) this._value = this.getAttribute("value");
+        if (this.value != null && this.getAttribute('value') != null) this._value = this.getAttribute('value');
         this.queueRender();
     }
     disconnectedCallback() {
@@ -285,7 +278,7 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
             requestAnimationFrame(()=>{
                 // TODO add mechanism to allow component developer to have more control over
                 // whether input vs. change events are emitted
-                if (this._changeQueued) (0, $gbrAN.dispatch)(this, "change");
+                if (this._changeQueued) (0, $gbrAN.dispatch)(this, 'change');
                 this._changeQueued = false;
                 this._renderQueued = false;
                 this.render();
@@ -295,8 +288,8 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
     hydrate() {
         if (!this._hydrated) {
             this.initValue();
-            const cloneElements = typeof this.content !== "function";
-            const _content = typeof this.content === "function" ? this.content() : this.content;
+            const cloneElements = typeof this.content !== 'function';
+            const _content = typeof this.content === 'function' ? this.content() : this.content;
             const { styleSpec: styleSpec } = this.constructor;
             let { styleNode: styleNode } = this.constructor;
             if (styleSpec) {
@@ -304,12 +297,12 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                 delete this.constructor.styleNode;
             }
             if (this.styleNode) {
-                console.warn(this, "styleNode is deprecrated, use static styleNode or statc styleSpec instead");
+                console.warn(this, 'styleNode is deprecrated, use static styleNode or statc styleSpec instead');
                 styleNode = this.styleNode;
             }
             if (styleNode) {
                 const shadow = this.attachShadow({
-                    mode: "open"
+                    mode: 'open'
                 });
                 shadow.appendChild(styleNode.cloneNode(true));
                 (0, $gbrAN.appendContentToElement)(shadow, _content, cloneElements);
@@ -318,22 +311,22 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
                     ...this.childNodes
                 ];
                 (0, $gbrAN.appendContentToElement)(this, _content, cloneElements);
-                this.isSlotted = this.querySelector("slot,xin-slot") !== undefined;
+                this.isSlotted = this.querySelector('slot,xin-slot') !== undefined;
                 const slots = [
-                    ...this.querySelectorAll("slot")
+                    ...this.querySelectorAll('slot')
                 ];
                 if (slots.length > 0) slots.forEach($cd387b053feba574$var$XinSlot.replaceSlot);
                 if (existingChildren.length > 0) {
                     const slotMap = {
-                        "": this
+                        '': this
                     };
                     [
-                        ...this.querySelectorAll("xin-slot")
+                        ...this.querySelectorAll('xin-slot')
                     ].forEach((slot)=>{
                         slotMap[slot.name] = slot;
                     });
                     existingChildren.forEach((child)=>{
-                        const defaultSlot = slotMap[""];
+                        const defaultSlot = slotMap[''];
                         const destSlot = child instanceof Element ? slotMap[child.slot] : defaultSlot;
                         (destSlot !== undefined ? destSlot : defaultSlot).append(child);
                     });
@@ -346,19 +339,17 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
 }
 class $cd387b053feba574$var$XinSlot extends $cd387b053feba574$export$16fa2f45be04daa8 {
     static replaceSlot(slot) {
-        const _slot = document.createElement("xin-slot");
-        if (slot.name !== "") _slot.setAttribute("name", slot.name);
+        const _slot = document.createElement('xin-slot');
+        if (slot.name !== '') _slot.setAttribute('name', slot.name);
         slot.replaceWith(_slot);
     }
     constructor(){
-        super();
-        this.name = "";
-        this.content = null;
-        this.initAttributes("name");
+        super(), this.name = '', this.content = null;
+        this.initAttributes('name');
     }
 }
 const $cd387b053feba574$export$a0751b4aa1961d4e = $cd387b053feba574$var$XinSlot.elementCreator({
-    tag: "xin-slot"
+    tag: 'xin-slot'
 });
 
 });
@@ -384,25 +375,25 @@ function $49cee7f7f866c751$export$9d753cd7ae895cce(id, styleSpec) {
     document.head.append(element);
 }
 const $49cee7f7f866c751$var$numericProps = [
-    "animation-iteration-count",
-    "flex",
-    "flex-base",
-    "flex-grow",
-    "flex-shrink",
-    "opacity",
-    "order",
-    "tab-size",
-    "widows",
-    "z-index",
-    "zoom"
+    'animation-iteration-count',
+    'flex',
+    'flex-base',
+    'flex-grow',
+    'flex-shrink',
+    'opacity',
+    'order',
+    'tab-size',
+    'widows',
+    'z-index',
+    'zoom'
 ];
 const $49cee7f7f866c751$export$4f8a9e649bc1f08b = (prop, value)=>{
-    if (typeof value === "number" && !$49cee7f7f866c751$var$numericProps.includes(prop)) value = `${value}px`;
-    if (prop.startsWith("_")) {
-        if (prop.startsWith("__")) {
-            prop = "--" + prop.substring(2);
+    if (typeof value === 'number' && !$49cee7f7f866c751$var$numericProps.includes(prop)) value = `${value}px`;
+    if (prop.startsWith('_')) {
+        if (prop.startsWith('__')) {
+            prop = '--' + prop.substring(2);
             value = `var(${prop}-default, ${value})`;
-        } else prop = "--" + prop.substring(1);
+        } else prop = '--' + prop.substring(1);
     }
     return {
         prop: prop,
@@ -410,46 +401,46 @@ const $49cee7f7f866c751$export$4f8a9e649bc1f08b = (prop, value)=>{
     };
 };
 const $49cee7f7f866c751$var$renderProp = (indentation, cssProp, value)=>{
-    if (value === undefined) return "";
+    if (value === undefined) return '';
     if (value instanceof (0, $6Jaab.Color)) value = value.html;
     const processed = $49cee7f7f866c751$export$4f8a9e649bc1f08b(cssProp, value);
     return `${indentation}  ${processed.prop}: ${processed.value};`;
 };
-const $49cee7f7f866c751$var$renderStatement = (key, value, indentation = "")=>{
+const $49cee7f7f866c751$var$renderStatement = (key, value, indentation = '')=>{
     const cssProp = (0, $5JLBr.camelToKabob)(key);
-    if (typeof value === "object" && !(value instanceof (0, $6Jaab.Color))) {
-        const renderedRule = Object.keys(value).map((innerKey)=>$49cee7f7f866c751$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join("\n");
+    if (typeof value === 'object' && !(value instanceof (0, $6Jaab.Color))) {
+        const renderedRule = Object.keys(value).map((innerKey)=>$49cee7f7f866c751$var$renderStatement(innerKey, value[innerKey], `${indentation}  `)).join('\n');
         return `${indentation}  ${key} {\n${renderedRule}\n${indentation}  }`;
     } else return $49cee7f7f866c751$var$renderProp(indentation, cssProp, value);
 };
-const $49cee7f7f866c751$export$dbf350e5966cf602 = (obj, indentation = "")=>{
+const $49cee7f7f866c751$export$dbf350e5966cf602 = (obj, indentation = '')=>{
     const selectors = Object.keys(obj).map((selector)=>{
         const body = obj[selector];
-        if (typeof body === "string") {
-            if (selector === "@import") return `@import url('${body}');`;
-            throw new Error("top-level string value only allowed for `@import`");
+        if (typeof body === 'string') {
+            if (selector === '@import') return `@import url('${body}');`;
+            throw new Error('top-level string value only allowed for `@import`');
         }
-        const rule = Object.keys(body).map((prop)=>$49cee7f7f866c751$var$renderStatement(prop, body[prop])).join("\n");
+        const rule = Object.keys(body).map((prop)=>$49cee7f7f866c751$var$renderStatement(prop, body[prop])).join('\n');
         return `${indentation}${selector} {\n${rule}\n}`;
     });
-    return selectors.join("\n\n");
+    return selectors.join('\n\n');
 };
 const $49cee7f7f866c751$export$90d0ea046136e3ed = (obj)=>{
-    console.warn("initVars is deprecated. Just use _ and __ prefixes instead.");
+    console.warn('initVars is deprecated. Just use _ and __ prefixes instead.');
     const rule = {};
     for (const key of Object.keys(obj)){
         const value = obj[key];
         const kabobKey = (0, $5JLBr.camelToKabob)(key);
-        rule[`--${kabobKey}`] = typeof value === "number" && value !== 0 ? String(value) + "px" : value;
+        rule[`--${kabobKey}`] = typeof value === 'number' && value !== 0 ? String(value) + 'px' : value;
     }
     return rule;
 };
 const $49cee7f7f866c751$export$808aaf1b460dc9af = (obj)=>{
-    console.warn("darkMode is deprecated. Use inverseLuminance instead.");
+    console.warn('darkMode is deprecated. Use inverseLuminance instead.');
     const rule = {};
     for (const key of Object.keys(obj)){
         let value = obj[key];
-        if (typeof value === "string" && value.match(/^(#|rgb[a]?\(|hsl[a]?\()/) != null) {
+        if (typeof value === 'string' && value.match(/^(#|rgb[a]?\(|hsl[a]?\()/) != null) {
             value = (0, $6Jaab.Color).fromCss(value).inverseLuminance.html;
             rule[`--${(0, $5JLBr.camelToKabob)(key)}`] = value;
         }
@@ -461,7 +452,7 @@ const $49cee7f7f866c751$export$8279dba9b7d4e420 = (map)=>{
     for (const key of Object.keys(map)){
         const value = map[key];
         if (value instanceof (0, $6Jaab.Color)) inverted[key] = value.inverseLuminance;
-        else if (typeof value === "string" && value.match(/^(#[0-9a-fA-F]{3}|rgba?\(|hsla?\()/)) inverted[key] = (0, $6Jaab.Color).fromCss(value).inverseLuminance;
+        else if (typeof value === 'string' && value.match(/^(#[0-9a-fA-F]{3}|rgba?\(|hsla?\()/)) inverted[key] = (0, $6Jaab.Color).fromCss(value).inverseLuminance;
     }
     return inverted;
 };
@@ -474,32 +465,32 @@ const $49cee7f7f866c751$export$3cb96c9f6c8d16a4 = new Proxy({}, {
             if (scaleText != null) {
                 const scale = isNegative == null ? Number(scaleText) / 100 : -Number(scaleText) / 100;
                 switch(method){
-                    case "b":
+                    case 'b':
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
                             target[prop] = scale > 0 ? (0, $6Jaab.Color).fromCss(baseColor).brighten(scale).rgba : (0, $6Jaab.Color).fromCss(baseColor).darken(-scale).rgba;
                         }
                         break;
-                    case "s":
+                    case 's':
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
                             target[prop] = scale > 0 ? (0, $6Jaab.Color).fromCss(baseColor).saturate(scale).rgba : (0, $6Jaab.Color).fromCss(baseColor).desaturate(-scale).rgba;
                         }
                         break;
-                    case "h":
+                    case 'h':
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
                             target[prop] = (0, $6Jaab.Color).fromCss(baseColor).rotate(scale * 100).rgba;
                             console.log((0, $6Jaab.Color).fromCss(baseColor).hsla, (0, $6Jaab.Color).fromCss(baseColor).rotate(scale).hsla);
                         }
                         break;
-                    case "o":
+                    case 'o':
                         {
                             const baseColor = getComputedStyle(document.body).getPropertyValue(varName);
                             target[prop] = (0, $6Jaab.Color).fromCss(baseColor).opacity(scale).rgba;
                         }
                         break;
-                    case "":
+                    case '':
                         target[prop] = `calc(var(${varName}) * ${scale})`;
                         break;
                     default:
@@ -531,7 +522,7 @@ var $drWRQ = parcelRequire("drWRQ");
 const $72989831e95a2bab$var$bt601 = (r, g, b)=>{
     return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 };
-const $72989831e95a2bab$var$hex2 = (n)=>("00" + Math.round(Number(n)).toString(16)).slice(-2);
+const $72989831e95a2bab$var$hex2 = (n)=>('00' + Math.round(Number(n)).toString(16)).slice(-2);
 class $72989831e95a2bab$var$HslColor {
     constructor(r, g, b){
         r /= 255;
@@ -545,7 +536,7 @@ class $72989831e95a2bab$var$HslColor {
         this.l = (2 * l - s) / 2;
     }
 }
-const $72989831e95a2bab$var$span = globalThis.document !== undefined ? globalThis.document.createElement("span") : undefined;
+const $72989831e95a2bab$var$span = globalThis.document !== undefined ? globalThis.document.createElement('span') : undefined;
 class $72989831e95a2bab$export$892596cec99bc70e {
     static fromCss(spec) {
         let converted = spec;
@@ -621,7 +612,7 @@ class $72989831e95a2bab$export$892596cec99bc70e {
         return this.toString();
     }
     toString() {
-        return this.a === 1 ? "#" + $72989831e95a2bab$var$hex2(this.r) + $72989831e95a2bab$var$hex2(this.g) + $72989831e95a2bab$var$hex2(this.b) : "#" + $72989831e95a2bab$var$hex2(this.r) + $72989831e95a2bab$var$hex2(this.g) + $72989831e95a2bab$var$hex2(this.b) + $72989831e95a2bab$var$hex2(Math.floor(255 * this.a));
+        return this.a === 1 ? '#' + $72989831e95a2bab$var$hex2(this.r) + $72989831e95a2bab$var$hex2(this.g) + $72989831e95a2bab$var$hex2(this.b) : '#' + $72989831e95a2bab$var$hex2(this.r) + $72989831e95a2bab$var$hex2(this.g) + $72989831e95a2bab$var$hex2(this.b) + $72989831e95a2bab$var$hex2(Math.floor(255 * this.a));
     }
     brighten(amount) {
         const { h: h, s: s, l: l } = this._hsl;
@@ -654,7 +645,7 @@ class $72989831e95a2bab$export$892596cec99bc70e {
     }
     swatch() {
         const { r: r, g: g, b: b, a: a } = this;
-        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, "background-color: #eee");
+        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, 'background-color: #eee');
         return this;
     }
     blend(otherColor, t) {
@@ -707,36 +698,36 @@ var $buKmK = parcelRequire("buKmK");
 var $5JLBr = parcelRequire("5JLBr");
 
 var $2okor = parcelRequire("2okor");
-const $9e0c0b8784c80412$var$MATH = "http://www.w3.org/1998/Math/MathML";
-const $9e0c0b8784c80412$var$SVG = "http://www.w3.org/2000/svg";
+const $9e0c0b8784c80412$var$MATH = 'http://www.w3.org/1998/Math/MathML';
+const $9e0c0b8784c80412$var$SVG = 'http://www.w3.org/2000/svg';
 const $9e0c0b8784c80412$var$templates = {};
 const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
     if ($9e0c0b8784c80412$var$templates[tagType] === undefined) {
-        const [tag, namespace] = tagType.split("|");
+        const [tag, namespace] = tagType.split('|');
         if (namespace === undefined) $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElement(tag);
         else $9e0c0b8784c80412$var$templates[tagType] = globalThis.document.createElementNS(namespace, tag);
     }
     const elt = $9e0c0b8784c80412$var$templates[tagType].cloneNode();
     const elementProps = {};
-    for (const item of contents)if (item instanceof Element || item instanceof DocumentFragment || typeof item === "string" || typeof item === "number") {
+    for (const item of contents)if (item instanceof Element || item instanceof DocumentFragment || typeof item === 'string' || typeof item === 'number') {
         if (elt instanceof HTMLTemplateElement) elt.content.append(item);
         else elt.append(item);
     } else Object.assign(elementProps, item);
     for (const key of Object.keys(elementProps)){
         const value = elementProps[key];
-        if (key === "apply") value(elt);
-        else if (key === "style") {
-            if (typeof value === "object") for (const prop of Object.keys(value)){
+        if (key === 'apply') value(elt);
+        else if (key === 'style') {
+            if (typeof value === 'object') for (const prop of Object.keys(value)){
                 const processed = (0, $2okor.processProp)((0, $5JLBr.camelToKabob)(prop), value[prop]);
-                if (processed.prop.startsWith("--")) elt.style.setProperty(processed.prop, processed.value);
+                if (processed.prop.startsWith('--')) elt.style.setProperty(processed.prop, processed.value);
                 else elt.style[prop] = processed.value;
             }
-            else elt.setAttribute("style", value);
+            else elt.setAttribute('style', value);
         } else if (key.match(/^on[A-Z]/) != null) {
             const eventType = key.substring(2).toLowerCase();
             (0, $kCu8Y.on)(elt, eventType, value);
-        } else if (key === "bind") {
-            const binding = typeof value.binding === "string" ? (0, $buKmK.bindings)[value.binding] : value.binding;
+        } else if (key === 'bind') {
+            const binding = typeof value.binding === 'string' ? (0, $buKmK.bindings)[value.binding] : value.binding;
             if (binding !== undefined && value.value !== undefined) (0, $kCu8Y.bind)(elt, value.value, value.binding instanceof Function ? {
                 toDOM: value.binding
             } : value.binding);
@@ -753,11 +744,11 @@ const $9e0c0b8784c80412$var$create = (tagType, ...contents)=>{
             else elt[key] = value;
         } else {
             const attr = (0, $5JLBr.camelToKabob)(key);
-            if (attr === "class") value.split(" ").forEach((className)=>{
+            if (attr === 'class') value.split(' ').forEach((className)=>{
                 elt.classList.add(className);
             });
             else if (elt[attr] !== undefined) elt[attr] = value;
-            else if (typeof value === "boolean") value ? elt.setAttribute(attr, "") : elt.removeAttribute(attr);
+            else if (typeof value === 'boolean') value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr);
             else elt.setAttribute(attr, value);
         }
     }
@@ -777,7 +768,7 @@ const $9e0c0b8784c80412$export$7a5d735b2ab6389d = new Proxy({
         return target[tagName];
     },
     set () {
-        throw new Error("You may not add new properties to elements");
+        throw new Error('You may not add new properties to elements');
     }
 });
 const $9e0c0b8784c80412$export$cf20112a1bc148da = new Proxy({
@@ -788,7 +779,7 @@ const $9e0c0b8784c80412$export$cf20112a1bc148da = new Proxy({
         return target[tagName];
     },
     set () {
-        throw new Error("You may not add new properties to elements");
+        throw new Error('You may not add new properties to elements');
     }
 });
 const $9e0c0b8784c80412$export$8ec252cfdd664597 = new Proxy({
@@ -799,7 +790,7 @@ const $9e0c0b8784c80412$export$8ec252cfdd664597 = new Proxy({
         return target[tagName];
     },
     set () {
-        throw new Error("You may not add new properties to elements");
+        throw new Error('You may not add new properties to elements');
     }
 });
 
@@ -822,11 +813,11 @@ const $b5796eaeba5c782e$export$80bf2f765c31be6a = (element, changedPath)=>{
         let { path: path } = dataBinding;
         const { toDOM: toDOM } = binding;
         if (toDOM != null) {
-            if (path.startsWith("^")) {
+            if (path.startsWith('^')) {
                 const dataSource = (0, $5hOlm.getListItem)(element);
                 if (dataSource != null && dataSource[0, $5hOlm.XIN_PATH] != null) path = dataBinding.path = `${dataSource[0, $5hOlm.XIN_PATH]}${path.substring(1)}`;
                 else {
-                    console.error(`Cannot resolve relative binding ${path}`, element, "is not part of a list");
+                    console.error(`Cannot resolve relative binding ${path}`, element, 'is not part of a list');
                     throw new Error(`Cannot resolve relative binding ${path}`);
                 }
             }
@@ -869,8 +860,8 @@ const $b5796eaeba5c782e$var$handleChange = (event)=>{
                 try {
                     value = fromDOM(target, dataBinding.options);
                 } catch (e) {
-                    console.error("Cannot get value from", target, "via", dataBinding);
-                    throw new Error("Cannot obtain value fromDOM");
+                    console.error('Cannot get value from', target, 'via', dataBinding);
+                    throw new Error('Cannot obtain value fromDOM');
                 }
                 if (value != null) {
                     const existing = (0, $eppu5.xin)[path];
@@ -888,21 +879,21 @@ const $b5796eaeba5c782e$var$handleChange = (event)=>{
     }
 };
 if (globalThis.document != null) {
-    $b5796eaeba5c782e$var$document.body.addEventListener("change", $b5796eaeba5c782e$var$handleChange, true);
-    $b5796eaeba5c782e$var$document.body.addEventListener("input", $b5796eaeba5c782e$var$handleChange, true);
+    $b5796eaeba5c782e$var$document.body.addEventListener('change', $b5796eaeba5c782e$var$handleChange, true);
+    $b5796eaeba5c782e$var$document.body.addEventListener('input', $b5796eaeba5c782e$var$handleChange, true);
 }
 function $b5796eaeba5c782e$export$2385a24977818dd0(element, what, binding, options) {
-    if (element instanceof DocumentFragment) throw new Error("bind cannot bind to a DocumentFragment");
+    if (element instanceof DocumentFragment) throw new Error('bind cannot bind to a DocumentFragment');
     let path;
-    if (typeof what === "object" && what[0, $5hOlm.XIN_PATH] === undefined && options === undefined) {
+    if (typeof what === 'object' && what[0, $5hOlm.XIN_PATH] === undefined && options === undefined) {
         const { value: value } = what;
-        path = typeof value === "string" ? value : value[0, $5hOlm.XIN_PATH];
+        path = typeof value === 'string' ? value : value[0, $5hOlm.XIN_PATH];
         options = what;
         delete options.value;
-    } else path = typeof what === "string" ? what : what[0, $5hOlm.XIN_PATH];
-    if (path == null) throw new Error("bind requires a path or object with xin Proxy");
+    } else path = typeof what === 'string' ? what : what[0, $5hOlm.XIN_PATH];
+    if (path == null) throw new Error('bind requires a path or object with xin Proxy');
     const { toDOM: toDOM } = binding;
-    element.classList.add((0, $5hOlm.BOUND_CLASS));
+    element.classList?.add((0, $5hOlm.BOUND_CLASS));
     let dataBindings = (0, $5hOlm.elementToBindings).get(element);
     if (dataBindings == null) {
         dataBindings = [];
@@ -913,7 +904,7 @@ function $b5796eaeba5c782e$export$2385a24977818dd0(element, what, binding, optio
         binding: binding,
         options: options
     });
-    if (toDOM != null && !path.startsWith("^")) // not calling toDOM directly here allows virtual list bindings to work
+    if (toDOM != null && !path.startsWith('^')) // not calling toDOM directly here allows virtual list bindings to work
     (0, $5lOGz.touch)(path);
     return element;
 }
@@ -924,14 +915,14 @@ const $b5796eaeba5c782e$var$handleBoundEvent = (event)=>{
     let propagationStopped = false;
     const wrappedEvent = new Proxy(event, {
         get (target, prop) {
-            if (prop === "stopPropagation") return ()=>{
+            if (prop === 'stopPropagation') return ()=>{
                 event.stopPropagation();
                 propagationStopped = true;
             };
             else {
                 // @ts-expect-error-error
                 const value = target[prop];
-                return typeof value === "function" ? value.bind(target) : value;
+                return typeof value === 'function' ? value.bind(target) : value;
             }
         }
     });
@@ -939,10 +930,10 @@ const $b5796eaeba5c782e$var$handleBoundEvent = (event)=>{
         const eventBindings = (0, $5hOlm.elementToHandlers).get(target);
         const handlers = eventBindings[event.type] || [];
         for (const handler of handlers){
-            if (typeof handler === "function") handler(wrappedEvent);
+            if (typeof handler === 'function') handler(wrappedEvent);
             else {
                 const func = (0, $eppu5.xin)[handler];
-                if (typeof func === "function") func(wrappedEvent);
+                if (typeof func === 'function') func(wrappedEvent);
                 else throw new Error(`no event handler found at path ${handler}`);
             }
             if (propagationStopped) continue;
@@ -985,24 +976,24 @@ var $aMI8M = parcelRequire("aMI8M");
 var $5hOlm = parcelRequire("5hOlm");
 // list of Array functions that change the array
 const $547f11326d897190$var$ARRAY_MUTATIONS = [
-    "sort",
-    "splice",
-    "copyWithin",
-    "fill",
-    "pop",
-    "push",
-    "reverse",
-    "shift",
-    "unshift"
+    'sort',
+    'splice',
+    'copyWithin',
+    'fill',
+    'pop',
+    'push',
+    'reverse',
+    'shift',
+    'unshift'
 ];
 const $547f11326d897190$var$registry = {};
 const $547f11326d897190$var$debugPaths = true;
 const $547f11326d897190$var$validPath = /^\.?([^.[\](),])+(\.[^.[\](),]+|\[\d+\]|\[[^=[\](),]*=[^[\]()]+\])*$/;
 const $547f11326d897190$export$a678af82bf766611 = (path)=>$547f11326d897190$var$validPath.test(path);
-const $547f11326d897190$var$extendPath = (path = "", prop = "")=>{
-    if (path === "") return prop;
+const $547f11326d897190$var$extendPath = (path = '', prop = '')=>{
+    if (path === '') return prop;
     else {
-        if (prop.match(/^\d+$/) !== null || prop.includes("=")) return `${path}[${prop}]`;
+        if (prop.match(/^\d+$/) !== null || prop.includes('=')) return `${path}[${prop}]`;
         else return `${path}.${prop}`;
     }
 };
@@ -1025,7 +1016,7 @@ const $547f11326d897190$var$boxes = {
 };
 function $547f11326d897190$var$box(x, path) {
     const t = typeof x;
-    if (x === undefined || t === "object" || t === "function") return x;
+    if (x === undefined || t === 'object' || t === 'function') return x;
     else return new Proxy($547f11326d897190$var$boxes[t](x), $547f11326d897190$var$regHandler(path, true));
 }
 const $547f11326d897190$var$regHandler = (path, boxScalars)=>({
@@ -1037,7 +1028,7 @@ const $547f11326d897190$var$regHandler = (path, boxScalars)=>({
                 while((0, $5hOlm.xinPath)(target) !== undefined)target = (0, $5hOlm.xinValue)(target);
                 return target;
             }
-            if (typeof _prop === "symbol") return target[_prop];
+            if (typeof _prop === 'symbol') return target[_prop];
             let prop = _prop;
             const compoundProp = prop.match(/^([^.[]+)\.(.+)$/) ?? // basePath.subPath (omit '.')
             prop.match(/^([^\]]+)(\[.+)/) ?? // basePath[subPath
@@ -1048,28 +1039,28 @@ const $547f11326d897190$var$regHandler = (path, boxScalars)=>({
                 const [, basePath, subPath] = compoundProp;
                 const currentPath = $547f11326d897190$var$extendPath(path, basePath);
                 const value = (0, $aMI8M.getByPath)(target, basePath);
-                return value !== null && typeof value === "object" ? new Proxy(value, $547f11326d897190$var$regHandler(currentPath, boxScalars))[subPath] : value;
+                return value !== null && typeof value === 'object' ? new Proxy(value, $547f11326d897190$var$regHandler(currentPath, boxScalars))[subPath] : value;
             }
-            if (prop.startsWith("[") && prop.endsWith("]")) prop = prop.substring(1, prop.length - 1);
-            if (!Array.isArray(target) && target[prop] !== undefined || Array.isArray(target) && prop.includes("=")) {
+            if (prop.startsWith('[') && prop.endsWith(']')) prop = prop.substring(1, prop.length - 1);
+            if (!Array.isArray(target) && target[prop] !== undefined || Array.isArray(target) && prop.includes('=')) {
                 let value;
-                if (prop.includes("=")) {
-                    const [idPath, needle] = prop.split("=");
+                if (prop.includes('=')) {
+                    const [idPath, needle] = prop.split('=');
                     value = target.find((candidate)=>`${(0, $aMI8M.getByPath)(candidate, idPath)}` === needle);
                 } else value = target[prop];
-                if (value !== null && typeof value === "object") {
+                if (value !== null && typeof value === 'object') {
                     const currentPath = $547f11326d897190$var$extendPath(path, prop);
                     return new Proxy(value, $547f11326d897190$var$regHandler(currentPath, boxScalars));
-                } else if (typeof value === "function") return value.bind(target);
+                } else if (typeof value === 'function') return value.bind(target);
                 else return boxScalars ? $547f11326d897190$var$box(value, $547f11326d897190$var$extendPath(path, prop)) : value;
             } else if (Array.isArray(target)) {
                 const value = target[prop];
-                return typeof value === "function" ? (...items)=>{
+                return typeof value === 'function' ? (...items)=>{
                     // @ts-expect-error seriously?
                     const result = Array.prototype[prop].apply(target, items);
                     if ($547f11326d897190$var$ARRAY_MUTATIONS.includes(prop)) (0, $5lOGz.touch)(path);
                     return result;
-                } : typeof value === "object" ? new Proxy(value, $547f11326d897190$var$regHandler($547f11326d897190$var$extendPath(path, prop), boxScalars)) : boxScalars ? $547f11326d897190$var$box(value, $547f11326d897190$var$extendPath(path, prop)) : value;
+                } : typeof value === 'object' ? new Proxy(value, $547f11326d897190$var$regHandler($547f11326d897190$var$extendPath(path, prop), boxScalars)) : boxScalars ? $547f11326d897190$var$box(value, $547f11326d897190$var$extendPath(path, prop)) : value;
             } else return boxScalars ? $547f11326d897190$var$box(target[prop], $547f11326d897190$var$extendPath(path, prop)) : target[prop];
         },
         set (_, prop, value) {
@@ -1082,12 +1073,12 @@ const $547f11326d897190$var$regHandler = (path, boxScalars)=>({
         }
     });
 const $547f11326d897190$export$d1203567a167490e = (test, callback)=>{
-    const func = typeof callback === "function" ? callback : $547f11326d897190$export$966034e6c6823eb0[callback];
-    if (typeof func !== "function") throw new Error(`observe expects a function or path to a function, ${callback} is neither`);
+    const func = typeof callback === 'function' ? callback : $547f11326d897190$export$966034e6c6823eb0[callback];
+    if (typeof func !== 'function') throw new Error(`observe expects a function or path to a function, ${callback} is neither`);
     return (0, $5lOGz.observe)(test, func);
 };
-const $547f11326d897190$export$966034e6c6823eb0 = new Proxy($547f11326d897190$var$registry, $547f11326d897190$var$regHandler("", false));
-const $547f11326d897190$export$fd1b43749dd321e5 = new Proxy($547f11326d897190$var$registry, $547f11326d897190$var$regHandler("", true));
+const $547f11326d897190$export$966034e6c6823eb0 = new Proxy($547f11326d897190$var$registry, $547f11326d897190$var$regHandler('', false));
+const $547f11326d897190$export$fd1b43749dd321e5 = new Proxy($547f11326d897190$var$registry, $547f11326d897190$var$regHandler('', true));
 
 });
 parcelRegister("hv4Z8", function(module, exports) {
@@ -1111,7 +1102,7 @@ $parcel$export(module.exports, "observe", () => $f0b099915f91bd21$export$d120356
 var $5hOlm = parcelRequire("5hOlm");
 
 var $hv4Z8 = parcelRequire("hv4Z8");
-const $f0b099915f91bd21$export$253d09664e30b967 = Symbol("observer should be removed");
+const $f0b099915f91bd21$export$253d09664e30b967 = Symbol('observer should be removed');
 const $f0b099915f91bd21$export$58bed631278dbc67 = [] // { path_string_or_test, callback }
 ;
 const $f0b099915f91bd21$var$touchedPaths = [];
@@ -1120,10 +1111,10 @@ let $f0b099915f91bd21$var$updatePromise;
 let $f0b099915f91bd21$var$resolveUpdate;
 class $f0b099915f91bd21$export$c92b1d5f43586026 {
     constructor(test, callback){
-        const callbackDescription = typeof callback === "string" ? `"${callback}"` : `function ${callback.name}`;
+        const callbackDescription = typeof callback === 'string' ? `"${callback}"` : `function ${callback.name}`;
         let testDescription;
-        if (typeof test === "string") {
-            this.test = (t)=>typeof t === "string" && t !== "" && (test.startsWith(t) || t.startsWith(test));
+        if (typeof test === 'string') {
+            this.test = (t)=>typeof t === 'string' && t !== '' && (test.startsWith(t) || t.startsWith(test));
             testDescription = `test = "${test}"`;
         } else if (test instanceof RegExp) {
             this.test = test.test.bind(test);
@@ -1131,10 +1122,10 @@ class $f0b099915f91bd21$export$c92b1d5f43586026 {
         } else if (test instanceof Function) {
             this.test = test;
             testDescription = `test = function ${test.name}`;
-        } else throw new Error("expect listener test to be a string, RegExp, or test function");
+        } else throw new Error('expect listener test to be a string, RegExp, or test function');
         this.description = `${testDescription}, ${callbackDescription}`;
-        if (typeof callback === "function") this.callback = callback;
-        else throw new Error("expect callback to be a path or function");
+        if (typeof callback === 'function') this.callback = callback;
+        else throw new Error('expect callback to be a path or function');
         $f0b099915f91bd21$export$58bed631278dbc67.push(this);
     }
 }
@@ -1143,7 +1134,7 @@ const $f0b099915f91bd21$export$1c2919332513559b = async ()=>{
     await $f0b099915f91bd21$var$updatePromise;
 };
 const $f0b099915f91bd21$var$update = ()=>{
-    if ((0, $hv4Z8.settings).perf) console.time("xin async update");
+    if ((0, $hv4Z8.settings).perf) console.time('xin async update');
     const paths = [
         ...$f0b099915f91bd21$var$touchedPaths
     ];
@@ -1170,14 +1161,14 @@ const $f0b099915f91bd21$var$update = ()=>{
     });
     $f0b099915f91bd21$var$touchedPaths.splice(0);
     $f0b099915f91bd21$var$updateTriggered = false;
-    if (typeof $f0b099915f91bd21$var$resolveUpdate === "function") $f0b099915f91bd21$var$resolveUpdate();
-    if ((0, $hv4Z8.settings).perf) console.timeEnd("xin async update");
+    if (typeof $f0b099915f91bd21$var$resolveUpdate === 'function') $f0b099915f91bd21$var$resolveUpdate();
+    if ((0, $hv4Z8.settings).perf) console.timeEnd('xin async update');
 };
 const $f0b099915f91bd21$export$d0b7ea69ab6056df = (touchable)=>{
-    const path = typeof touchable === "string" ? touchable : (0, $5hOlm.xinPath)(touchable);
+    const path = typeof touchable === 'string' ? touchable : (0, $5hOlm.xinPath)(touchable);
     if (path === undefined) {
-        console.error("touch was called on an invalid target", touchable);
-        throw new Error("touch was called on an invalid target");
+        console.error('touch was called on an invalid target', touchable);
+        throw new Error('touch was called on an invalid target');
     }
     if ($f0b099915f91bd21$var$updateTriggered === false) {
         $f0b099915f91bd21$var$updatePromise = new Promise((resolve)=>{
@@ -1193,7 +1184,7 @@ const $f0b099915f91bd21$export$d1203567a167490e = (test, callback)=>{
 const $f0b099915f91bd21$export$23a2283368c55ea2 = (listener)=>{
     const index = $f0b099915f91bd21$export$58bed631278dbc67.indexOf(listener);
     if (index > -1) $f0b099915f91bd21$export$58bed631278dbc67.splice(index, 1);
-    else throw new Error("unobserve failed, listener not found");
+    else throw new Error('unobserve failed, listener not found');
 };
 
 });
@@ -1214,17 +1205,17 @@ $parcel$export(module.exports, "elementToItem", () => $e921b0bd4f6415ab$export$8
 $parcel$export(module.exports, "getListItem", () => $e921b0bd4f6415ab$export$4c309843c07ce679);
 
 var $19FSF = parcelRequire("19FSF");
-const $e921b0bd4f6415ab$export$c6592bbc1eebb717 = "-xin-data";
+const $e921b0bd4f6415ab$export$c6592bbc1eebb717 = '-xin-data';
 const $e921b0bd4f6415ab$export$4c0223f67078aeac = `.${$e921b0bd4f6415ab$export$c6592bbc1eebb717}`;
-const $e921b0bd4f6415ab$export$6a7099543a9795c7 = "-xin-event";
+const $e921b0bd4f6415ab$export$6a7099543a9795c7 = '-xin-event';
 const $e921b0bd4f6415ab$export$21d9322c3477441b = `.${$e921b0bd4f6415ab$export$6a7099543a9795c7}`;
-const $e921b0bd4f6415ab$export$a3622eb3b5dd592a = Symbol("xin-path");
-const $e921b0bd4f6415ab$export$bdd0d039ad781534 = Symbol("xin-value");
+const $e921b0bd4f6415ab$export$a3622eb3b5dd592a = Symbol('xin-path');
+const $e921b0bd4f6415ab$export$bdd0d039ad781534 = Symbol('xin-value');
 const $e921b0bd4f6415ab$export$40700dafb97c3799 = (x)=>{
     return x[$e921b0bd4f6415ab$export$a3622eb3b5dd592a];
 };
 function $e921b0bd4f6415ab$export$5dcba2d45033d435(x) {
-    return typeof x === "object" && x !== null ? x[$e921b0bd4f6415ab$export$bdd0d039ad781534] || x : x;
+    return typeof x === 'object' && x !== null ? x[$e921b0bd4f6415ab$export$bdd0d039ad781534] || x : x;
 }
 const $e921b0bd4f6415ab$export$fe712848e6e66613 = new WeakMap();
 const $e921b0bd4f6415ab$export$1f922de8d0ecbb7e = new WeakMap();
@@ -1264,12 +1255,12 @@ parcelRegister("19FSF", function(module, exports) {
 
 $parcel$export(module.exports, "deepClone", () => $5165f04a46b33615$export$b7d58db314e0ac27);
 function $5165f04a46b33615$export$b7d58db314e0ac27(obj) {
-    if (obj == null || typeof obj !== "object") return obj;
+    if (obj == null || typeof obj !== 'object') return obj;
     if (Array.isArray(obj)) return obj.map($5165f04a46b33615$export$b7d58db314e0ac27);
     const clone = {};
     for(const key in obj){
         const val = obj[key];
-        if (obj != null && typeof obj === "object") clone[key] = $5165f04a46b33615$export$b7d58db314e0ac27(val);
+        if (obj != null && typeof obj === 'object') clone[key] = $5165f04a46b33615$export$b7d58db314e0ac27(val);
         else clone[key] = val;
     }
     return clone;
@@ -1286,30 +1277,30 @@ $parcel$export(module.exports, "setByPath", () => $c62be31ef05b0c90$export$f65a1
 // unique tokens passed to set by path to delete or create properties
 
 var $5lDHe = parcelRequire("5lDHe");
-const $c62be31ef05b0c90$var$now36 = ()=>new Date(parseInt("1000000000", 36) + Date.now()).valueOf().toString(36).slice(1);
+const $c62be31ef05b0c90$var$now36 = ()=>new Date(parseInt('1000000000', 36) + Date.now()).valueOf().toString(36).slice(1);
 let $c62be31ef05b0c90$var$_seq = 0;
-const $c62be31ef05b0c90$var$seq = ()=>(parseInt("10000", 36) + ++$c62be31ef05b0c90$var$_seq).toString(36).slice(-5);
+const $c62be31ef05b0c90$var$seq = ()=>(parseInt('10000', 36) + ++$c62be31ef05b0c90$var$_seq).toString(36).slice(-5);
 const $c62be31ef05b0c90$var$id = ()=>$c62be31ef05b0c90$var$now36() + $c62be31ef05b0c90$var$seq();
 const $c62be31ef05b0c90$var$_delete_ = {};
 const $c62be31ef05b0c90$var$_newObject_ = {};
 function $c62be31ef05b0c90$export$f5d2dd4cfd729958(path) {
-    if (path === "") return [];
+    if (path === '') return [];
     if (Array.isArray(path)) return path;
     else {
         const parts = [];
         while(path.length > 0){
             let index = path.search(/\[[^\]]+\]/);
             if (index === -1) {
-                parts.push(path.split("."));
+                parts.push(path.split('.'));
                 break;
             } else {
                 const part = path.slice(0, index);
                 path = path.slice(index);
-                if (part !== "") parts.push(part.split("."));
-                index = path.indexOf("]") + 1;
+                if (part !== '') parts.push(part.split('.'));
+                index = path.indexOf(']') + 1;
                 parts.push(path.slice(1, index - 1));
                 // handle paths dereferencing array element like foo[0].id
-                if (path.slice(index, index + 1) === ".") index += 1;
+                if (path.slice(index, index + 1) === '.') index += 1;
                 path = path.slice(index);
             }
         }
@@ -1321,12 +1312,12 @@ function $c62be31ef05b0c90$var$buildIdPathValueMap(array, idPath) {
     if ($c62be31ef05b0c90$var$idPathMaps.get(array) === undefined) $c62be31ef05b0c90$var$idPathMaps.set(array, {});
     if ($c62be31ef05b0c90$var$idPathMaps.get(array)[idPath] === undefined) $c62be31ef05b0c90$var$idPathMaps.get(array)[idPath] = {};
     const map = $c62be31ef05b0c90$var$idPathMaps.get(array)[idPath];
-    if (idPath === "_auto_") array.forEach((item, idx)=>{
+    if (idPath === '_auto_') array.forEach((item, idx)=>{
         if (item._auto_ === undefined) item._auto_ = $c62be31ef05b0c90$var$id();
-        map[item._auto_ + ""] = idx;
+        map[item._auto_ + ''] = idx;
     });
     else array.forEach((item, idx)=>{
-        map[$c62be31ef05b0c90$export$44b5bed83342a92f(item, idPath) + ""] = idx;
+        map[$c62be31ef05b0c90$export$44b5bed83342a92f(item, idPath) + ''] = idx;
     });
     return map;
 }
@@ -1335,9 +1326,9 @@ function $c62be31ef05b0c90$var$getIdPathMap(array, idPath) {
     else return $c62be31ef05b0c90$var$idPathMaps.get(array)[idPath];
 }
 function $c62be31ef05b0c90$var$keyToIndex(array, idPath, idValue) {
-    idValue = idValue + "";
+    idValue = idValue + '';
     let idx = $c62be31ef05b0c90$var$getIdPathMap(array, idPath)[idValue];
-    if (idx === undefined || $c62be31ef05b0c90$export$44b5bed83342a92f(array[idx], idPath) + "" !== idValue) idx = $c62be31ef05b0c90$var$buildIdPathValueMap(array, idPath)[idValue];
+    if (idx === undefined || $c62be31ef05b0c90$export$44b5bed83342a92f(array[idx], idPath) + '' !== idValue) idx = $c62be31ef05b0c90$var$buildIdPathValueMap(array, idPath)[idValue];
     return idx;
 }
 function $c62be31ef05b0c90$var$byKey(obj, key, valueToInsert) {
@@ -1345,16 +1336,16 @@ function $c62be31ef05b0c90$var$byKey(obj, key, valueToInsert) {
     return obj[key];
 }
 function $c62be31ef05b0c90$var$byIdPath(array, idPath, idValue, valueToInsert) {
-    let idx = idPath !== "" ? $c62be31ef05b0c90$var$keyToIndex(array, idPath, idValue) : idValue;
+    let idx = idPath !== '' ? $c62be31ef05b0c90$var$keyToIndex(array, idPath, idValue) : idValue;
     if (valueToInsert === $c62be31ef05b0c90$var$_delete_) {
         array.splice(idx, 1);
         $c62be31ef05b0c90$var$idPathMaps.delete(array);
-        return Symbol("deleted");
+        return Symbol('deleted');
     } else if (valueToInsert === $c62be31ef05b0c90$var$_newObject_) {
-        if (idPath === "" && array[idx] === undefined) array[idx] = {};
+        if (idPath === '' && array[idx] === undefined) array[idx] = {};
     } else if (valueToInsert !== undefined) {
         if (idx !== undefined) array[idx] = valueToInsert;
-        else if (idPath !== "" && $c62be31ef05b0c90$export$44b5bed83342a92f(valueToInsert, idPath) + "" === idValue + "") {
+        else if (idPath !== '' && $c62be31ef05b0c90$export$44b5bed83342a92f(valueToInsert, idPath) + '' === idValue + '') {
             array.push(valueToInsert);
             idx = array.length - 1;
         } else throw new Error(`byIdPath insert failed at [${idPath}=${idValue}]`);
@@ -1362,10 +1353,10 @@ function $c62be31ef05b0c90$var$byIdPath(array, idPath, idValue, valueToInsert) {
     return array[idx];
 }
 function $c62be31ef05b0c90$var$expectArray(obj) {
-    if (!Array.isArray(obj)) throw (0, $5lDHe.makeError)("setByPath failed: expected array, found", obj);
+    if (!Array.isArray(obj)) throw (0, $5lDHe.makeError)('setByPath failed: expected array, found', obj);
 }
 function $c62be31ef05b0c90$var$expectObject(obj) {
-    if (obj == null || !(obj instanceof Object)) throw (0, $5lDHe.makeError)("setByPath failed: expected Object, found", obj);
+    if (obj == null || !(obj instanceof Object)) throw (0, $5lDHe.makeError)('setByPath failed: expected Object, found', obj);
 }
 function $c62be31ef05b0c90$export$44b5bed83342a92f(obj, path) {
     const parts = $c62be31ef05b0c90$export$f5d2dd4cfd729958(path);
@@ -1381,10 +1372,10 @@ function $c62be31ef05b0c90$export$44b5bed83342a92f(obj, path) {
             if (found.length === 0) {
                 // @ts-expect-error-error
                 found = found[part.slice(1)];
-                if (part[0] !== "=") return undefined;
-            } else if (part.includes("=")) {
-                const [idPath, ...tail] = part.split("=");
-                found = $c62be31ef05b0c90$var$byIdPath(found, idPath, tail.join("="));
+                if (part[0] !== '=') return undefined;
+            } else if (part.includes('=')) {
+                const [idPath, ...tail] = part.split('=');
+                found = $c62be31ef05b0c90$var$byIdPath(found, idPath, tail.join('='));
             } else {
                 j = parseInt(part, 10);
                 found = found[j];
@@ -1398,8 +1389,8 @@ function $c62be31ef05b0c90$export$f65a19d15516795e(orig, path, val) {
     const parts = $c62be31ef05b0c90$export$f5d2dd4cfd729958(path);
     while(obj != null && parts.length > 0){
         const part = parts.shift();
-        if (typeof part === "string") {
-            const equalsOffset = part.indexOf("=");
+        if (typeof part === 'string') {
+            const equalsOffset = part.indexOf('=');
             if (equalsOffset > -1) {
                 if (equalsOffset === 0) $c62be31ef05b0c90$var$expectObject(obj);
                 else $c62be31ef05b0c90$var$expectArray(obj);
@@ -1452,10 +1443,10 @@ const $31366a4b885eb48b$var$stringify = (x)=>{
     try {
         return JSON.stringify(x);
     } catch (_) {
-        return "{has circular references}";
+        return '{has circular references}';
     }
 };
-const $31366a4b885eb48b$export$5a4bb2b1c89bdce7 = (...messages)=>new Error(messages.map($31366a4b885eb48b$var$stringify).join(" "));
+const $31366a4b885eb48b$export$5a4bb2b1c89bdce7 = (...messages)=>new Error(messages.map($31366a4b885eb48b$var$stringify).join(' '));
 
 });
 
@@ -1496,10 +1487,10 @@ const $7d9f6326e1d5d994$export$97a1a3e6f39778d2 = {
     },
     style: {
         toDOM (element, value) {
-            if (typeof value === "object") for (const prop of Object.keys(value))// @ts-expect-error typescript has a strange/incorrect idea of what element.style is
+            if (typeof value === 'object') for (const prop of Object.keys(value))// @ts-expect-error typescript has a strange/incorrect idea of what element.style is
             element.style[prop] = value[prop];
-            else if (typeof value === "string") element.setAttribute("style", value);
-            else throw new Error("style binding expects either a string or object");
+            else if (typeof value === 'string') element.setAttribute('style', value);
+            else throw new Error('style binding expects either a string or object');
         }
     },
     list: {
@@ -1524,7 +1515,7 @@ var $9nL7f = parcelRequire("9nL7f");
 var $eppu5 = parcelRequire("eppu5");
 
 var $5hOlm = parcelRequire("5hOlm");
-const $ea2c6a36710de0a8$var$listBindingRef = Symbol("list-binding");
+const $ea2c6a36710de0a8$var$listBindingRef = Symbol('list-binding');
 const $ea2c6a36710de0a8$var$SLICE_INTERVAL_MS = 16 // 60fps
 ;
 function $ea2c6a36710de0a8$var$updateRelativeBindings(element, path) {
@@ -1535,7 +1526,7 @@ function $ea2c6a36710de0a8$var$updateRelativeBindings(element, path) {
     for (const boundElement of boundElements){
         const bindings = (0, $5hOlm.elementToBindings).get(boundElement);
         for (const binding of bindings){
-            if (binding.path.startsWith("^")) binding.path = `${path}${binding.path.substring(1)}`;
+            if (binding.path.startsWith('^')) binding.path = `${path}${binding.path.substring(1)}`;
             if (binding.binding.toDOM != null) binding.binding.toDOM(boundElement, (0, $eppu5.xin)[binding.path]);
         }
     }
@@ -1545,17 +1536,17 @@ class $ea2c6a36710de0a8$var$ListBinding {
         this._array = [];
         this.boundElement = boundElement;
         this.itemToElement = new WeakMap();
-        if (boundElement.children.length !== 1) throw new Error("ListBinding expects an element with exactly one child element");
+        if (boundElement.children.length !== 1) throw new Error('ListBinding expects an element with exactly one child element');
         if (boundElement.children[0] instanceof HTMLTemplateElement) {
             const template = boundElement.children[0];
-            if (template.content.children.length !== 1) throw new Error("ListBinding expects a template with exactly one child element");
+            if (template.content.children.length !== 1) throw new Error('ListBinding expects a template with exactly one child element');
             this.template = (0, $5hOlm.cloneWithBindings)(template.content.children[0]);
         } else {
             this.template = boundElement.children[0];
             this.template.remove();
         }
-        this.listTop = document.createElement("div");
-        this.listBottom = document.createElement("div");
+        this.listTop = document.createElement('div');
+        this.listBottom = document.createElement('div');
         this.boundElement.append(this.listTop);
         this.boundElement.append(this.listBottom);
         this.options = options;
@@ -1564,8 +1555,8 @@ class $ea2c6a36710de0a8$var$ListBinding {
             this._update = (0, $9nL7f.throttle)(()=>{
                 this.update(this._array, true);
             }, $ea2c6a36710de0a8$var$SLICE_INTERVAL_MS);
-            this.boundElement.addEventListener("scroll", this._update);
-            this.boundElement.addEventListener("resize", this._update);
+            this.boundElement.addEventListener('scroll', this._update);
+            this.boundElement.addEventListener('resize', this._update);
         }
     }
     visibleSlice() {
@@ -1577,7 +1568,7 @@ class $ea2c6a36710de0a8$var$ListBinding {
         let lastItem = visibleArray.length - 1;
         let topBuffer = 0;
         let bottomBuffer = 0;
-        if (virtual != null) {
+        if (virtual != null && this.boundElement instanceof HTMLElement) {
             const width = this.boundElement.offsetWidth;
             const height = this.boundElement.offsetHeight;
             const visibleColumns = virtual.width != null ? Math.max(1, Math.floor(width / virtual.width)) : 1;
@@ -1605,7 +1596,7 @@ class $ea2c6a36710de0a8$var$ListBinding {
         const { hiddenProp: hiddenProp, visibleProp: visibleProp } = this.options;
         const arrayPath = (0, $5hOlm.xinPath)(array);
         const slice = this.visibleSlice();
-        this.boundElement.classList.toggle("-xin-empty-list", slice.items.length === 0);
+        this.boundElement.classList.toggle('-xin-empty-list', slice.items.length === 0);
         const previousSlice = this._previousSlice;
         const { firstItem: firstItem, lastItem: lastItem, topBuffer: topBuffer, bottomBuffer: bottomBuffer } = slice;
         if (hiddenProp === undefined && visibleProp === undefined && isSlice === true && previousSlice != null && firstItem === previousSlice.firstItem && lastItem === previousSlice.lastItem) return;
@@ -1629,8 +1620,8 @@ class $ea2c6a36710de0a8$var$ListBinding {
                 }
             }
         }
-        this.listTop.style.height = String(topBuffer) + "px";
-        this.listBottom.style.height = String(bottomBuffer) + "px";
+        this.listTop.style.height = String(topBuffer) + 'px';
+        this.listBottom.style.height = String(bottomBuffer) + 'px';
         // build a complete new set of elements in the right order
         const elements = [];
         const { idPath: idPath } = this.options;
@@ -1641,7 +1632,7 @@ class $ea2c6a36710de0a8$var$ListBinding {
             if (element == null) {
                 created++;
                 element = (0, $5hOlm.cloneWithBindings)(this.template);
-                if (typeof item === "object") {
+                if (typeof item === 'object') {
                     this.itemToElement.set((0, $5hOlm.xinValue)(item), element);
                     (0, $5hOlm.elementToItem).set(element, (0, $5hOlm.xinValue)(item));
                 }
@@ -1667,7 +1658,7 @@ class $ea2c6a36710de0a8$var$ListBinding {
             }
             insertionPoint = element;
         }
-        if ((0, $hv4Z8.settings).perf) console.log(arrayPath, "updated", {
+        if ((0, $hv4Z8.settings).perf) console.log(arrayPath, 'updated', {
             removed: removed,
             created: created,
             moved: moved
@@ -1699,23 +1690,23 @@ const $f314c6851ceb0f9e$export$635e15bbd66f01ea = (target, type)=>{
 };
 const $f314c6851ceb0f9e$var$valueType = (element)=>{
     if (element instanceof HTMLInputElement) return element.type;
-    else if (element instanceof HTMLSelectElement && element.hasAttribute("multiple")) return "multi-select";
-    else return "other";
+    else if (element instanceof HTMLSelectElement && element.hasAttribute('multiple')) return 'multi-select';
+    else return 'other';
 };
 const $f314c6851ceb0f9e$export$80746c6bc6142fc8 = (element, newValue)=>{
     switch($f314c6851ceb0f9e$var$valueType(element)){
-        case "radio":
+        case 'radio':
             element.checked = element.value === newValue;
             break;
-        case "checkbox":
+        case 'checkbox':
             element.checked = !!newValue;
             break;
-        case "date":
+        case 'date':
             element.valueAsDate = new Date(newValue);
             break;
-        case "multi-select":
+        case 'multi-select':
             for (const option of [
-                ...element.querySelectorAll("option")
+                ...element.querySelectorAll('option')
             ])option.selected = newValue[option.value];
             break;
         default:
@@ -1724,18 +1715,18 @@ const $f314c6851ceb0f9e$export$80746c6bc6142fc8 = (element, newValue)=>{
 };
 const $f314c6851ceb0f9e$export$bf7199a9ebcb84a9 = (element)=>{
     switch($f314c6851ceb0f9e$var$valueType(element)){
-        case "radio":
+        case 'radio':
             {
                 const radio = element.parentElement?.querySelector(`[name="${element.name}"]:checked`);
                 return radio != null ? radio.value : null;
             }
-        case "checkbox":
+        case 'checkbox':
             return element.checked;
-        case "date":
+        case 'date':
             return element.valueAsDate?.toISOString();
-        case "multi-select":
+        case 'multi-select':
             return [
-                ...element.querySelectorAll("option")
+                ...element.querySelectorAll('option')
             ].reduce((map, option)=>{
                 map[option.value] = option.selected;
                 return map;
@@ -1748,7 +1739,7 @@ const { ResizeObserver: $f314c6851ceb0f9e$var$ResizeObserver } = globalThis;
 const $f314c6851ceb0f9e$export$b13421f1ae71d316 = $f314c6851ceb0f9e$var$ResizeObserver != null ? new $f314c6851ceb0f9e$var$ResizeObserver((entries)=>{
     for (const entry of entries){
         const element = entry.target;
-        $f314c6851ceb0f9e$export$635e15bbd66f01ea(element, "resize");
+        $f314c6851ceb0f9e$export$635e15bbd66f01ea(element, 'resize');
     }
 }) : {
     observe () {},
@@ -1756,12 +1747,12 @@ const $f314c6851ceb0f9e$export$b13421f1ae71d316 = $f314c6851ceb0f9e$var$ResizeOb
 };
 const $f314c6851ceb0f9e$export$6bb13967611cdb1 = (elt, content, cloneElements = true)=>{
     if (elt != null && content != null) {
-        if (typeof content === "string") elt.textContent = content;
+        if (typeof content === 'string') elt.textContent = content;
         else if (Array.isArray(content)) content.forEach((node)=>{
             elt.append(node instanceof Node && cloneElements ? (0, $5hOlm.cloneWithBindings)(node) : node);
         });
         else if (content instanceof Node) elt.append(cloneElements ? (0, $5hOlm.cloneWithBindings)(content) : content);
-        else throw new Error("expect text content or document node");
+        else throw new Error('expect text content or document node');
     }
 };
 
@@ -1909,7 +1900,7 @@ var $5hOlm = parcelRequire("5hOlm");
 
 var $9nL7f = parcelRequire("9nL7f");
 const $4c651860c5272284$export$93b87f7746612069 = (test = ()=>true)=>{
-    const savedState = localStorage.getItem("xin-state");
+    const savedState = localStorage.getItem('xin-state');
     if (savedState != null) {
         const state = JSON.parse(savedState);
         for (const key of Object.keys(state).filter(test))if ((0, $eppu5.xin)[key] !== undefined) Object.assign((0, $eppu5.xin)[key], state[key]);
@@ -1919,8 +1910,8 @@ const $4c651860c5272284$export$93b87f7746612069 = (test = ()=>true)=>{
         const obj = {};
         const state = (0, $eppu5.xin)[0, $5hOlm.XIN_VALUE];
         for (const key of Object.keys(state).filter(test))obj[key] = state[key];
-        localStorage.setItem("xin-state", JSON.stringify(obj));
-        console.log("xin state saved to localStorage");
+        localStorage.setItem('xin-state', JSON.stringify(obj));
+        console.log('xin state saved to localStorage');
     }, 500);
     (0, $eppu5.observe)(test, saveState);
 };
@@ -1982,5 +1973,5 @@ var blueprint = parcelRequire("3x0mh").blueprint;
 var BlueprintLoader = parcelRequire("3x0mh").BlueprintLoader;
 var blueprintLoader = parcelRequire("3x0mh").blueprintLoader;
 var $db8c79eba3148e96$exports = parcelRequire("3x0mh")["*"];
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, Blueprint as Blueprint, blueprint as blueprint, BlueprintLoader as BlueprintLoader, blueprintLoader as blueprintLoader, $db8c79eba3148e96$exports as default};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, Blueprint, blueprint, BlueprintLoader, blueprintLoader, $db8c79eba3148e96$exports as default};
 //# sourceMappingURL=module.js.map

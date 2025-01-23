@@ -62,7 +62,9 @@ export abstract class Component extends HTMLElement {
     return elements.style(css(styleSpec))
   }
 
-  static elementCreator(options: ElementCreatorOptions = {}): ElementCreator {
+  static elementCreator(
+    options: ElementCreatorOptions = {}
+  ): ElementCreator<Component> {
     if (this._elementCreator == null) {
       const { tag, styleSpec } = options
       let tagName = options != null ? tag : null
