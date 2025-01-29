@@ -576,7 +576,7 @@ myComponent({ message: 'ruh roh' }) // works as expected
 
 But if you later change the `message` attribute of `<my-component message="ruh roh">` it won't work. Also, it won't work if you just write out HTML and then load the element (which it should!).
 
-The solution leverages the `Component` class's `parts` property, which is a proxy that conveniently locates elements within the component with a `part` property (if you have multiple elements with the same `part` attribute, it gives you the first).
+The solution leverages the `Component` class's `parts` property, which is a proxy that conveniently locates elements within the component with a `part` attribute.
 
 ```
 class MyComponent extends Component {
@@ -607,7 +607,62 @@ When you `initAttributes` you get a bunch of standard behavior for free:
 
 Any property defined with a value (other than `undefined`) is automatically handled as a property, but changing it won't automatically trigger any actions. The usual pattern for handling properties that should trigger behavior if called is to define `get` and `set` for them and then back them with `private` properties as needed. (There's Typescript `private` and then there's Javascript `#private`. Which you use is up to you.)
 
-### value
+### `content`
+
+`content` can be defined as an `Element` or array of elements (it's treated like a `DocumentFragment`) or a function that returns the same.
+
+The problem with defining it as a bunch of content (vs. a function) is that you're defining a template before the component instance
+exists, which means it can't be bound to instance properties. So, typically, unless your component doesn't do anything interesting, use a function.
+
+### `parts`
+
+A `Component`'s `.parts` property is a convenient way to access elements within the component that have a `part` attribute. Especially for custom-elements using a shadowDOM, `.parts` is a convenient way to access key elements and set or update their properties and attach event handlers.
+
+Note that `parts` won't be usable until the `Component` class's `connectedCallback()` has executed.
+
+```
+class CanHazParts extends Component {
+  name = 'Joe Bob'
+
+  content = () => div({ part: 'name' })
+
+  constructor() {
+    this.parts.name.textContent = this.name // Too soon!
+  }
+
+  connectedCallback() {
+    this.parts.name.textContent = this.name // Too soon!
+
+    super.connectedCallback()
+
+    this.parts.name.textContent = this.name // This is fine
+  }
+
+  render() {
+    this.parts.name.textContent = this.name // This is also fine
+  }
+}
+```
+
+For event handlers, the most convenient way to attach them is usually leveraging `elementCreator`'s syntax sugar, e.g.
+
+```
+class MyClicker extends Component {
+  doThing = () => {
+    // do thing
+  }
+
+  content = () => button(
+    'clicker!',
+    { onClick: this.doThing }
+  )
+}
+```
+
+But within the `shadowDOM`, `xin` data-bindings don't work, so if you need to update elements with new data, it's often
+easiest to write something like `this.parts.userName.textContent = this.userName`.
+
+### `value`
 
 If you assign a `Component` subclass a value, it will automatically call the component's `queueRender(true)`.
 
