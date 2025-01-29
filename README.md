@@ -12,6 +12,8 @@
 [![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
 [![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
 
+For a pretty thorough overview of xinjs, you might like to start with [what is xinjs?](https://github.com/tonioloewald/xinjs/blob/main/docs/what-is-xinjs.md)
+
 ### Path-based State for Web Apps
 
 - simple, efficient observer pattern

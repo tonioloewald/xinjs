@@ -185,9 +185,9 @@ export class Color {
   swatch(): Color {
     const { r, g, b, a } = this
     console.log(
-      `%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`,
+      `%c      %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`,
       `background-color: rgba(${r}, ${g}, ${b}, ${a})`,
-      'background-color: #eee'
+      'background-color: transparent'
     )
     return this
   }

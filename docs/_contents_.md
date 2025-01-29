@@ -1,6 +1,6 @@
 # About `xinjs`
 
-Copyright ©2016-2022 Tonio Loewald
+Copyright ©2016-2025 Tonio Loewald
 
 <div style="text-align: center">
   <a href="https://xinjs.net">
@@ -17,7 +17,7 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 
 ## Contents
 
-1. [overview](../README.md) — "read me" overview of xinjs
+1. [what is xinjs?](what-is-xinjs.md) — an overview of xinjs
 2. [xin](xin.md) — path-based observer
 3. [paths](by-path.md) - querying objects by path
 4. [bind](bind.md) — binding state to the DOM
@@ -28,11 +28,13 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 9. [blueprints](blueprints.md) — lightweight, dynamically loadable components (**WIP**)
 10. [throttle and debounce](throttle.md) — useful function wrappers
 
+[README](../README.md) — "read me" overview of xinjs
+
 ### Related Libraries
 - [react-xinjs](https://www.npmjs.com/package/react-xinjs) allows you to manage state within
   React applications, allowing clean separation of logic and presentation.
 - [type-by-example](https://www.npmjs.com/package/type-by-example) supports runtime type
   checking using serializable types, and creation of **typeSafe** functions that detect
   type errors.
-- [filter-shapes](https://www.npmjs.com/package/filter-shapes) allows you to filter and 
+- [filter-shapes](https://www.npmjs.com/package/filter-shapes) allows you to filter and
   pare down objects to save bandwidth and catch errors.

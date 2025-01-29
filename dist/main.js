@@ -662,7 +662,7 @@ class $dde521108530e806$export$892596cec99bc70e {
     }
     swatch() {
         const { r: r, g: g, b: b, a: a } = this;
-        console.log(`%c   %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, 'background-color: #eee');
+        console.log(`%c      %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`, `background-color: rgba(${r}, ${g}, ${b}, ${a})`, 'background-color: transparent');
         return this;
     }
     blend(otherColor, t) {
