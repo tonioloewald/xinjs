@@ -30,6 +30,7 @@ module.exports = {
           String: false,
           Number: false,
           Boolean: false,
+          Function: false,
         },
         extendDefaults: true,
       },

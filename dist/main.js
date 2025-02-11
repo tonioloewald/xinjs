@@ -1870,6 +1870,7 @@ function $80abd70ad891812f$export$3bc26eec1cc2439f(tag, blueprint) {
 });
 parcelRegister("ky9Rr", function(module, exports) {
 
+$parcel$export(module.exports, "boxedProxy", () => $fce641fe9ed990db$export$5ac756d3522a2a00);
 $parcel$export(module.exports, "xinProxy", () => $fce641fe9ed990db$export$95a552d2395ab4c4);
 
 var $cTa2m = parcelRequire("cTa2m");
@@ -1929,6 +1930,7 @@ $parcel$export(module.exports, "touch", () => (parcelRequire("aWNnt")).touch);
 $parcel$export(module.exports, "observerShouldBeRemoved", () => (parcelRequire("aWNnt")).observerShouldBeRemoved);
 $parcel$export(module.exports, "updates", () => (parcelRequire("aWNnt")).updates);
 $parcel$export(module.exports, "xinProxy", () => (parcelRequire("ky9Rr")).xinProxy);
+$parcel$export(module.exports, "boxedProxy", () => (parcelRequire("ky9Rr")).boxedProxy);
 /*
   Note that re-exported types should be explicitly and separately exported
   as types because of issues with parceljs

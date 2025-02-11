@@ -306,7 +306,7 @@ export interface XinProps {
     [XIN_VALUE]: XinObject | XinObject | XinScalar;
     [XIN_PATH]: string;
 }
-export type XinProxy<T> = T extends number ? XinProxy<Number> : T extends string ? XinProxy<String> : T extends boolean ? XinProxy<Boolean> : T extends bigint ? bigint : T extends symbol ? symbol : T extends null | undefined ? null | undefined : T extends Array<infer U> ? Array<XinProxy<U>> : T extends object ? {
+export type XinProxy<T> = T extends number ? XinProxy<Number> : T extends string ? XinProxy<String> : T extends boolean ? XinProxy<Boolean> : T extends Function ? T : T extends null | undefined ? null | undefined : T extends Array<infer U> ? Array<XinProxy<U>> : T extends object ? {
     [K in keyof T]: XinProxy<T[K]>;
 } : T;
 export type XinProxyObject = XinProps & {
@@ -573,6 +573,7 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
+export function boxedProxy<T extends object>(obj: T): XinProxy<T>;
 export function xinProxy<T extends object>(obj: T, boxed?: boolean): T;
 export interface XinFactory {
     Color: typeof Color;
