@@ -6,7 +6,7 @@ As such it provides:
 
 - `elements` and `elementCreator` for creating DOM elements
 - `vars` and `varDefault` and other tools for working with modern CSS, especially CSS variables
-- `xin` and `xinProxy` for managing state across an application using an observer model and the concept of data paths.
+- `xin` and `boxedProxy` for managing state across an application using an observer model and the concept of data paths.
 - `bind` and associated syntax sugar in elementCreator for binding data and event handlers to the DOM and keeping bound data up to date
 - The `Component` class, and **blueprint** system, for creating web-components that can both seamlessly augment the DOM and also high level components with “sockets” that do not use the shadowDOM (which is a big performance and simplicity win)
 - The `Color` class for performing color math
@@ -207,9 +207,9 @@ div({
 
 And, CSS-variables are passed to the **shadowDOM**s of custom elements.
 
-## `xin` and `xinProxy`
+## `xin` and `boxedProxy`
 
-`xin` is a proxy that allows state management to become almost too easy, and `xinProxy` is a wrapper around `xin` that makes it even easier.
+`xin` is a proxy that allows state management to become almost too easy, and `boxedProxy` is a wrapper around `xin` that makes it even easier.
 
 Consider this example:
 
@@ -288,7 +288,7 @@ If you later refer to `xin.foo` or `xin.foo.bar` you'll get a xin `Proxy` wrappe
 1. it knows from whence it came. `xin.foo` knows that its path is `foo` and `xin.foo.bar` knows that its path is `foo.bar`.
 2. if you modify its properties, the `xin` observer will know about it.
 
-So if you go back to the "simple example" and expost `xin` as a global, you can write `xin.text = 'boo'` in the console and it will automatically update the DOM. And if you replace the greet function with some other function, it will call that when you click the button.
+So if you go back to the "simple example" and expose `xin` as a global, you can write `xin.text = 'boo'` in the console and it will automatically update the DOM. And if you replace the greet function with some other function, it will call that when you click the button.
 
 Oh, and if you kept a copy of the original object you assigned to `xin.simpleExample` you'll discover it has been kept up to date.
 
@@ -296,23 +296,27 @@ Oh, and if you kept a copy of the original object you assigned to `xin.simpleExa
 
 But wait, there's more:
 
-### `xinProxy`
+### `boxed` and `boxedProxy`
 
-`xinProxy(obj)` is syntax sugar for:
+`boxed` is another proxy (it is wrapped around the same data as `xin`) but it wraps non-object ("scalar") values in objects.
+This means that even the scalars know from whence they came.
+
+`boxedProxy(obj)` is syntax sugar for:
 
 ```
-( obj: <T = object> ): T => {
-  Object.assign(xin, obj)
-  return xin // proxy containing obj, not really obj
+( obj: <T extends object> ): XinProxy<T> => {
+  Object.assign(boxed, obj)
+  return boxed // proxy containing obj, not really obj
 }
 ```
 
-Note that `xinProxy` lies to Typescript and says it just returns what you put into it, which gives you nice autocompletion. It actually passes back the `xin` proxy now containing the new object's properties.
+And XinProxy<T> is defined as being the same "shape" as T, but with non-object properties "boxed" in object wrappers,
+so a number comes back as a `Number`.
 
 E.g. if you write:
 
 ```
-const { foo } = xinProxy({
+const { foo } = boxedProxy({
   foo: {
     bar: {
       baz: 'luhrmann'
@@ -322,32 +326,18 @@ const { foo } = xinProxy({
 })
 ```
 
-Then ostensibly, `foo` is just the `foo` property of the object you passed to `xinProxy`. But in fact its a proxy wrapped around that value. So, now `foo.bar.baz = 'Spielberg'` will automatically update stuff.
+Then ostensibly, `foo` is just the `foo` property of the object you passed to `boxedProxy`. But in fact its a proxy wrapped around that value. So, now `foo.bar.baz = 'Spielberg'` will automatically update stuff, because `foo.bar` is a proxy and knows what to do when you update one of
+its properties.
 
-But, if you write:
-
-`xinProxy(obj, true)` you get a special `xin` proxy that wraps non-object values in proxies. So if you instead wrote:
-
-```
-const { foo } = xinProxy({
-  foo: {
-    bar: {
-      baz: 'luhrmann'
-    },
-    also: 'strictly ballroom'
-  }
-}, true)
-```
-
-`foo.bar.baz` will give you a proxy wrapped around a `String` object wrapped around the string 'luhrmann', but because it's a proxy, **it knows from whence it came**.
+But, `foo.bar.baz` will give you a proxy of a `String` object wrapped around the string 'luhrmann', but because it's a proxy, **it also knows from whence it came**.
 
 This means you can write:
 
   input({ bindValue: foo.bar.baz })
 
-And you get autocomplete and linting and type-checking.
+And you get autocomplete and linting and type-checking, and the `input(): ElementCreator` function will know where `foo.bar.baz` comes from.
 
-> **Caution!** `foo.bar.baz !== 'luhrmann'` because `foo.bar.baz` is now a proxy wrapped around a `String`. So, `foo.bar.baz == 'luhrmann'`. You can use `xinValue` or `valueOf` on such objects ('==' is frowned upon by linters).
+> **Caution!** `foo.bar.baz !== 'luhrmann'` because `foo.bar.baz` is now a proxy wrapped around a `String`. So, `foo.bar.baz == 'luhrmann'`. You can use `xinValue(foo.bar.baz)` or `foo.bar.baz.valueOf()` on such objects ('==' is frowned upon by linters).
 
 ## `bind`
 
@@ -370,7 +360,7 @@ method, and inline bindings that are passed a single function
 treat it as a `toDOM(element, value): void` function.
 
 ```
-import { bindings, xinProxy } from 'xinjs'
+import { bindings, boxedProxy } from 'xinjs'
 
 bindings.visible = {
   toDOM(element, value) {
@@ -378,13 +368,13 @@ bindings.visible = {
   }
 }
 
-const { user } = xinProxy({
+const { user } = boxedProxy({
   user: {
     photoUrl: '',
     initials: '',
     ...
   }
-}, true)
+})
 
 const avatar = div(
   img({
@@ -416,15 +406,15 @@ work with simple arrays quite happily.
 Here is a very simple example:
 
 ```
-import { xinProxy, elements } from 'xinjs'
+import { boxedProxy, elements } from 'xinjs'
 
-const { options } = xinProxy({
+const { options } = boxedProxy({
   options: [
     'this',
     'that',
     'the other'
   ]
-}, true)
+})
 
 const { select, option, template } = elements
 

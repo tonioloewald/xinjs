@@ -295,9 +295,6 @@ export interface XinStyleSheet {
     [key: string]: XinStyleRule | XinStyleMap | string;
 }
 export type AnyFunction = (...args: any[]) => any | Promise<any>;
-export type AnyObject = {
-    [key: string | symbol | number]: any;
-};
 export type XinScalar = string | boolean | number | symbol | AnyFunction;
 export type XinArray = any[];
 export interface XinObject {
@@ -309,14 +306,15 @@ export interface XinProps {
     [XIN_VALUE]: XinObject | XinObject | XinScalar;
     [XIN_PATH]: string;
 }
+export type XinProxy<T> = T extends number ? XinProxy<Number> : T extends string ? XinProxy<String> : T extends boolean ? XinProxy<Boolean> : T extends bigint ? bigint : T extends symbol ? symbol : T extends null | undefined ? null | undefined : T extends Array<infer U> ? Array<XinProxy<U>> : T extends object ? {
+    [K in keyof T]: XinProxy<T[K]>;
+} : T;
 export type XinProxyObject = XinProps & {
     [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar;
 };
 export type XinProxyArray = XinProps & {
     [key: string]: XinProxyObject;
 } & (XinProxyObject[] | XinScalar[]);
-export type XinProxy = XinProps & (XinObject | XinArray);
-export type XinProxyValue = XinProxy | XinScalar | null | undefined;
 export type XinTouchableType = string | XinProps;
 export type XinEventHandler<T = Event> = ((evt: T) => void) | ((evt: T) => Promise<void>) | string;
 export type XinBindingShortcut = XinTouchableType | XinBindingSpec;
@@ -361,8 +359,8 @@ export interface ElementProps<T = Element> {
 export interface StringMap {
     [key: string]: any;
 }
-export interface PartsMap {
-    [key: string]: Element;
+export interface PartsMap<T = Element> {
+    [key: string]: T;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 export type ElementPart<T = Element> = Element | DocumentFragment | ElementProps<T> | string | number;
@@ -387,6 +385,7 @@ export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
+export const boxed: XinProxy<object>;
 export function bind<T extends Element>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T;
 export const on: (element: HTMLElement, eventType: string, eventHandler: XinEventHandler) => void;
 type VoidFunc = (...args: any[]) => void;
@@ -553,7 +552,7 @@ interface ElementCreatorOptions extends ElementDefinitionOptions {
     tag?: string;
     styleSpec?: XinStyleSheet;
 }
-export abstract class Component extends HTMLElement {
+export abstract class Component<T = PartsMap> extends HTMLElement {
     static elements: ElementsProxy;
     instanceId: string;
     styleNode?: HTMLStyleElement;
@@ -566,7 +565,7 @@ export abstract class Component extends HTMLElement {
     static StyleNode(styleSpec: XinStyleSheet): HTMLStyleElement;
     static elementCreator(options?: ElementCreatorOptions): ElementCreator<Component>;
     initAttributes(...attributeNames: string[]): void;
-    get parts(): PartsMap;
+    get parts(): T;
     constructor();
     connectedCallback(): void;
     disconnectedCallback(): void;
@@ -574,7 +573,7 @@ export abstract class Component extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
-export function xinProxy<T = AnyObject>(obj: object, boxScalars?: boolean): T & XinProxyObject;
+export function xinProxy<T extends object>(obj: T, boxed?: boolean): T;
 export interface XinFactory {
     Color: typeof Color;
     Component: typeof Component;
@@ -603,11 +602,11 @@ export class Blueprint extends Component {
     packaged(): Promise<XinPackagedComponent>;
     constructor();
 }
-export const blueprint: ElementCreator<Component>;
+export const blueprint: ElementCreator<Component<PartsMap<Element>>>;
 export class BlueprintLoader extends Component {
     constructor();
     connectedCallback(): void;
 }
-export const blueprintLoader: ElementCreator<Component>;
+export const blueprintLoader: ElementCreator<Component<PartsMap<Element>>>;
 
 //# sourceMappingURL=types.d.ts.map

@@ -3,8 +3,6 @@ import { XinStyleRule } from './css-types'
 
 export type AnyFunction = (...args: any[]) => any | Promise<any>
 
-export type AnyObject = { [key: string | symbol | number]: any }
-
 export type XinScalar = string | boolean | number | symbol | AnyFunction
 
 export type XinArray = any[]
@@ -22,6 +20,24 @@ export interface XinProps {
   [XIN_PATH]: string
 }
 
+export type XinProxy<T> = T extends number
+  ? XinProxy<Number>
+  : T extends string
+  ? XinProxy<String>
+  : T extends boolean
+  ? XinProxy<Boolean>
+  : T extends bigint
+  ? bigint
+  : T extends symbol
+  ? symbol
+  : T extends null | undefined
+  ? null | undefined
+  : T extends Array<infer U>
+  ? Array<XinProxy<U>>
+  : T extends object
+  ? { [K in keyof T]: XinProxy<T[K]> }
+  : T
+
 export type XinProxyObject = XinProps & {
   [key: string]:
     | XinProxyObject
@@ -35,8 +51,6 @@ export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (
     | XinProxyObject[]
     | XinScalar[]
   )
-export type XinProxy = XinProps & (XinObject | XinArray)
-export type XinProxyValue = XinProxy | XinScalar | null | undefined
 export type XinTouchableType = string | XinProps
 export type XinEventHandler<T = Event> =
   | ((evt: T) => void)
@@ -102,8 +116,8 @@ export interface StringMap {
   [key: string]: any
 }
 
-export interface PartsMap {
-  [key: string]: Element
+export interface PartsMap<T = Element> {
+  [key: string]: T
 }
 
 export type ValueElement =

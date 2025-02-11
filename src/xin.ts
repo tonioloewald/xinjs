@@ -2,6 +2,7 @@ import {
   XinProxyObject,
   XinProxyTarget,
   XinObject,
+  XinProxy,
   XinArray,
   XinValue,
   PathTestFunction,
@@ -221,7 +222,7 @@ const xin = new Proxy<XinObject, XinProxyObject>(
 const boxed = new Proxy<XinObject, XinProxyObject>(
   registry,
   regHandler('', true)
-)
+) as XinProxy<object>
 
 export {
   xin,

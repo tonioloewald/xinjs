@@ -23,5 +23,16 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/ban-types': [
+      'error',
+      {
+        types: {
+          String: false,
+          Number: false,
+          Boolean: false,
+        },
+        extendDefaults: true,
+      },
+    ],
   },
 }

@@ -1,3 +1,6 @@
+# protected from prettier
+src/xin-types.ts
+
 # artifacts
 dist
 www

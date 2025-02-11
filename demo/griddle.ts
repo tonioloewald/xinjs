@@ -3,7 +3,7 @@ import {
   ElementCreator,
   elements,
   vars,
-  xinProxy,
+  boxedProxy,
   XinTouchableType,
 } from '../src'
 import { bodymovinPlayer, BodymovinPlayer, makeSorter, icons } from 'xinjs-ui'
@@ -108,7 +108,7 @@ class GriddleGame extends WebComponent {
   constructor() {
     super()
 
-    this.game = xinProxy({ griddle: this.game }, true).griddle
+    this.game = boxedProxy({ griddle: this.game }).griddle
   }
 
   content = null

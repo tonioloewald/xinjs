@@ -39,9 +39,8 @@ function insertGlobalStyles(tagName: string) {
   delete globalStyleSheets[tagName]
 }
 
-export abstract class Component extends HTMLElement {
+export abstract class Component<T = PartsMap> extends HTMLElement {
   static elements: ElementsProxy = elements
-  private static globalStyleSheets: HTMLStyleElement[] = []
   private static _elementCreator?: ElementCreator<Component>
   instanceId: string
   styleNode?: HTMLStyleElement
@@ -202,14 +201,14 @@ export abstract class Component extends HTMLElement {
     })
   }
 
-  private _parts?: PartsMap
-  get parts(): PartsMap {
+  private _parts?: T
+  get parts(): T {
     const root = this.shadowRoot != null ? this.shadowRoot : this
     if (this._parts == null) {
       this._parts = new Proxy(
         {},
         {
-          get(target: PartsMap, ref: string) {
+          get(target: any, ref: string) {
             if (target[ref] === undefined) {
               let element = root.querySelector(`[part="${ref}"]`)
               if (element == null) {
@@ -218,12 +217,12 @@ export abstract class Component extends HTMLElement {
               if (element == null)
                 throw new Error(`elementRef "${ref}" does not exist!`)
               element.removeAttribute('data-ref')
-              target[ref] = element as HTMLElement
+              target[ref] = element as Element
             }
             return target[ref]
           },
         }
-      )
+      ) as T
     }
     return this._parts
   }

@@ -38,6 +38,7 @@ export { settings } from './settings'
 export { throttle, debounce } from './throttle'
 export {
   xin,
+  boxed,
   observe,
   unobserve,
   touch,

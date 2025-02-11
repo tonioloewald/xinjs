@@ -1,6 +1,7 @@
 import './style'
 import {
   xin,
+  boxed,
   touch,
   xinProxy,
   elements,
@@ -47,6 +48,7 @@ hotReload((path) => {
 
 Object.assign(globalThis, {
   xin,
+  boxed,
   elements,
   vars,
   xinProxy,

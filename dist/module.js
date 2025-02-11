@@ -130,9 +130,6 @@ class $cd387b053feba574$export$16fa2f45be04daa8 extends HTMLElement {
         this.elements = (0, $9sLMf.elements);
     }
     static{
-        this.globalStyleSheets = [];
-    }
-    static{
         this._tagName = null;
     }
     static get tagName() {
@@ -1859,13 +1856,23 @@ parcelRegister("aNHSH", function(module, exports) {
 $parcel$export(module.exports, "xinProxy", () => $7bb234cc8fd49201$export$95a552d2395ab4c4);
 
 var $eppu5 = parcelRequire("eppu5");
-function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj, boxScalars = false) {
-    const registered = {};
+function $7bb234cc8fd49201$export$5ac756d3522a2a00(obj) {
+    Object.assign((0, $eppu5.boxed), obj);
+    return 0, $eppu5.boxed;
+}
+let $7bb234cc8fd49201$var$deprecationMessage = false;
+function $7bb234cc8fd49201$export$95a552d2395ab4c4(obj, boxed = false) {
+    if (boxed) {
+        if (!$7bb234cc8fd49201$var$deprecationMessage) {
+            console.warn(`xinProxy(..., true) is deprecated; use boxedProxy(...) instead`);
+            $7bb234cc8fd49201$var$deprecationMessage = true;
+        }
+        return $7bb234cc8fd49201$export$5ac756d3522a2a00(obj);
+    }
     Object.keys(obj).forEach((key)=>{
         (0, $eppu5.xin)[key] = obj[key];
-        registered[key] = boxScalars ? (0, $eppu5.boxed)[key] : (0, $eppu5.xin)[key];
     });
-    return registered;
+    return 0, $eppu5.xin;
 }
 
 });
@@ -1962,6 +1969,7 @@ var $34b63e9d5b96494c$export$a5a6e0b888b2c992 = parcelRequire("hv4Z8").settings;
 var $fb7e454a17657925$export$de363e709c412c8a = parcelRequire("9nL7f").throttle;
 var $fb7e454a17657925$export$61fc7d43ac8f84b0 = parcelRequire("9nL7f").debounce;
 var $547f11326d897190$export$966034e6c6823eb0 = parcelRequire("eppu5").xin;
+var $547f11326d897190$export$fd1b43749dd321e5 = parcelRequire("eppu5").boxed;
 var $547f11326d897190$export$d1203567a167490e = parcelRequire("eppu5").observe;
 var $f0b099915f91bd21$export$23a2283368c55ea2 = parcelRequire("5lOGz").unobserve;
 var $f0b099915f91bd21$export$d0b7ea69ab6056df = parcelRequire("5lOGz").touch;
@@ -1973,5 +1981,5 @@ var blueprint = parcelRequire("3x0mh").blueprint;
 var BlueprintLoader = parcelRequire("3x0mh").BlueprintLoader;
 var blueprintLoader = parcelRequire("3x0mh").blueprintLoader;
 var $db8c79eba3148e96$exports = parcelRequire("3x0mh")["*"];
-export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, Blueprint, blueprint, BlueprintLoader, blueprintLoader, $db8c79eba3148e96$exports as default};
+export {$b5796eaeba5c782e$export$2385a24977818dd0 as bind, $b5796eaeba5c782e$export$af631764ddc44097 as on, $7d9f6326e1d5d994$export$97a1a3e6f39778d2 as bindings, $49cee7f7f866c751$export$dbf350e5966cf602 as css, $49cee7f7f866c751$export$8279dba9b7d4e420 as invertLuminance, $49cee7f7f866c751$export$808aaf1b460dc9af as darkMode, $49cee7f7f866c751$export$90d0ea046136e3ed as initVars, $49cee7f7f866c751$export$3cb96c9f6c8d16a4 as vars, $49cee7f7f866c751$export$75c0e6adb3e38f31 as varDefault, $49cee7f7f866c751$export$9d753cd7ae895cce as StyleSheet, $72989831e95a2bab$export$892596cec99bc70e as Color, $cd387b053feba574$export$16fa2f45be04daa8 as Component, $9e0c0b8784c80412$export$7a5d735b2ab6389d as elements, $9e0c0b8784c80412$export$cf20112a1bc148da as svgElements, $9e0c0b8784c80412$export$8ec252cfdd664597 as mathML, $4c651860c5272284$export$93b87f7746612069 as hotReload, $e921b0bd4f6415ab$export$4c309843c07ce679 as getListItem, $e921b0bd4f6415ab$export$40700dafb97c3799 as xinPath, $e921b0bd4f6415ab$export$5dcba2d45033d435 as xinValue, $cf96335958b9d6da$export$3bc26eec1cc2439f as makeComponent, $0e50e8a626908591$export$5e0dd9fd5d74e0c5 as MoreMath, $34b63e9d5b96494c$export$a5a6e0b888b2c992 as settings, $fb7e454a17657925$export$de363e709c412c8a as throttle, $fb7e454a17657925$export$61fc7d43ac8f84b0 as debounce, $547f11326d897190$export$966034e6c6823eb0 as xin, $547f11326d897190$export$fd1b43749dd321e5 as boxed, $547f11326d897190$export$d1203567a167490e as observe, $f0b099915f91bd21$export$23a2283368c55ea2 as unobserve, $f0b099915f91bd21$export$d0b7ea69ab6056df as touch, $f0b099915f91bd21$export$253d09664e30b967 as observerShouldBeRemoved, $f0b099915f91bd21$export$1c2919332513559b as updates, $7bb234cc8fd49201$export$95a552d2395ab4c4 as xinProxy, Blueprint, blueprint, BlueprintLoader, blueprintLoader, $db8c79eba3148e96$exports as default};
 //# sourceMappingURL=module.js.map

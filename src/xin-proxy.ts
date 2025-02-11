@@ -1,16 +1,24 @@
-import { XinProxyObject, AnyObject } from './xin-types'
+import { XinProxy } from './xin-types'
 import { xin, boxed } from './xin'
 
-export function xinProxy<T = AnyObject>(
-  obj: object,
-  boxScalars = false
-): T & XinProxyObject {
-  const registered: { [key: string]: any } = {}
+export function boxedProxy<T extends object>(obj: T): XinProxy<T> {
+  Object.assign(boxed, obj)
+  return boxed as XinProxy<T>
+}
+
+let deprecationMessage = false
+export function xinProxy<T extends object>(obj: T, boxed = false): T {
+  if (boxed) {
+    if (!deprecationMessage) {
+      console.warn(
+        `xinProxy(..., true) is deprecated; use boxedProxy(...) instead`
+      )
+      deprecationMessage = true
+    }
+    return boxedProxy(obj) as T
+  }
   Object.keys(obj).forEach((key: string) => {
     xin[key] = (obj as { [key: string]: any })[key]
-    registered[key] = boxScalars
-      ? (boxed[key] as XinProxyObject)
-      : (xin[key] as XinProxyObject)
   })
-  return registered as T & XinProxyObject
+  return xin as T
 }

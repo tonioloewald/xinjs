@@ -65,31 +65,41 @@ impacted:
     import { touch } from 'xinjs'
     touch('emails')
 
-## xinProxy()
+## boxedProxy()
 
 After working with `xin` and using `Typescript` for an extended period, I've tried to
 improve the type declarations to minimize the amount of casting and `// @ts-ignore-error`
-directives needed. This has led to the addition of the `xinProxy` utility function.
+directives needed. The latest result of all this is `boxedProxy`.
 
-`xinProxy(foo)` is simply declared as an identify function that operates on objects,
-in fact it assigns each property of the object passed to `xin` and returns its proxy, so:
+`boxedProxy(foo)` is simply declared as a function that takes an object of type T and
+returns a XinProxy<T>.
 
-    import { xinProxy } from 'xinjs'
+    import { boxedProxy } from 'xinjs'
 
-    const { foo, bar } = xinProxy({
-      foo: { /* stuff in foo */ },
-      bar: { /* stuff in bar */ }
+    const { foo, bar } = boxedProxy({
+      foo: 'bar',
+      bar: {
+        director: 'luhrmann'
+      }
     })
 
-…is syntax sugar for:
+This is syntax sugar for:
 
-    import { xin } from 'xinjs'
+    import { boxed } from 'xinjs'
 
-    const foo = xin.foo = { /* stuff in foo */ }
-    const bar = xin.bar = { /* stuff in bar */ }
+    const stuff = {
+      foo: 'bar',
+      bar: {
+        director: 'luhrmann',
+        born: 1962
+      }
+    }
 
-The difference is that now Typescript automatically understands the types of `foo` and
-`bar` (except for the fact that they're now actually `XinProxys`s, but shhhhh).
+    Object.assign(boxed, stuff)
+
+    const { foo, bar } = boxed as XinProxy<typeof stuff>
+
+So, Typescript will know that `foo` is a `XinProxy<String>`, and `bar.born` is a `XinProxy<Number>`.
 
 ## How it works
 
@@ -151,7 +161,10 @@ And `xinProxy` will return a `boxed` proxy if you pass `true` as a second parame
         }
     }, true)
 
-Will give you a prox that emits boxed scalars.
+> This is deprecated in favor of `boxedProxy(...)` which is declared in such a way
+> that Typescript will be more helpful.
+
+Will give you a proxy that emits boxed scalars.
 
 ### Why?!
 

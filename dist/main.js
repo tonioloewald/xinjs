@@ -147,9 +147,6 @@ class $8c7b36581a3597bc$export$16fa2f45be04daa8 extends HTMLElement {
         this.elements = (0, $gqng8.elements);
     }
     static{
-        this.globalStyleSheets = [];
-    }
-    static{
         this._tagName = null;
     }
     static get tagName() {
@@ -1876,13 +1873,23 @@ parcelRegister("ky9Rr", function(module, exports) {
 $parcel$export(module.exports, "xinProxy", () => $fce641fe9ed990db$export$95a552d2395ab4c4);
 
 var $cTa2m = parcelRequire("cTa2m");
-function $fce641fe9ed990db$export$95a552d2395ab4c4(obj, boxScalars = false) {
-    const registered = {};
+function $fce641fe9ed990db$export$5ac756d3522a2a00(obj) {
+    Object.assign((0, $cTa2m.boxed), obj);
+    return 0, $cTa2m.boxed;
+}
+let $fce641fe9ed990db$var$deprecationMessage = false;
+function $fce641fe9ed990db$export$95a552d2395ab4c4(obj, boxed = false) {
+    if (boxed) {
+        if (!$fce641fe9ed990db$var$deprecationMessage) {
+            console.warn(`xinProxy(..., true) is deprecated; use boxedProxy(...) instead`);
+            $fce641fe9ed990db$var$deprecationMessage = true;
+        }
+        return $fce641fe9ed990db$export$5ac756d3522a2a00(obj);
+    }
     Object.keys(obj).forEach((key)=>{
         (0, $cTa2m.xin)[key] = obj[key];
-        registered[key] = boxScalars ? (0, $cTa2m.boxed)[key] : (0, $cTa2m.xin)[key];
     });
-    return registered;
+    return 0, $cTa2m.xin;
 }
 
 });
@@ -1915,6 +1922,7 @@ $parcel$export(module.exports, "settings", () => (parcelRequire("5BjS8")).settin
 $parcel$export(module.exports, "throttle", () => (parcelRequire("eK8lg")).throttle);
 $parcel$export(module.exports, "debounce", () => (parcelRequire("eK8lg")).debounce);
 $parcel$export(module.exports, "xin", () => (parcelRequire("cTa2m")).xin);
+$parcel$export(module.exports, "boxed", () => (parcelRequire("cTa2m")).boxed);
 $parcel$export(module.exports, "observe", () => (parcelRequire("cTa2m")).observe);
 $parcel$export(module.exports, "unobserve", () => (parcelRequire("aWNnt")).unobserve);
 $parcel$export(module.exports, "touch", () => (parcelRequire("aWNnt")).touch);

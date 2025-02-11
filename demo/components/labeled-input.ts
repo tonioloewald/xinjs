@@ -1,7 +1,12 @@
-import { elements, Component, vars } from '../../src/index'
+import { elements, Component, vars, PartsMap } from '../../src/index'
 const { label, slot, input } = elements
 
-class LabeledInput extends Component {
+interface LabeledInputParts extends PartsMap {
+  label: HTMLLabelElement
+  field: HTMLInputElement
+}
+
+class LabeledInput extends Component<LabeledInputParts> {
   static styleSpec = {
     ':host > label': {
       display: 'inline-flex',
@@ -42,7 +47,7 @@ class LabeledInput extends Component {
   }
 
   handleUpdate = () => {
-    const { field } = this.parts as { [key: string]: HTMLInputElement }
+    const { field } = this.parts
     this.value = this.type !== 'checkbox' ? field.value : field.checked
   }
 

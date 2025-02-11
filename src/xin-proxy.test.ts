@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test'
 import { xin } from './xin'
 import { xinPath } from './metadata'
-import { xinProxy } from './xin-proxy'
+import { xinProxy, boxedProxy } from './xin-proxy'
 
 test('xinProxy works', () => {
   const { test } = xinProxy({
@@ -9,26 +9,31 @@ test('xinProxy works', () => {
       foo: 'bar',
     },
   })
-  expect(test.foo).toBe('bar')
+  expect(test.foo.valueOf()).toBe('bar')
   test.foo = 'baz'
-  expect(test.foo).toBe('baz')
+  expect(test.foo.valueOf()).toBe('baz')
 })
 
-test('xinProxy works with boxed scalars', () => {
-  const { box } = xinProxy(
-    {
-      box: {
-        foo: 'bar',
-        deep: [{ id: 'thought', answer: 42 }],
-      },
+test('boxedProxy works', () => {
+  const { box } = boxedProxy({
+    box: {
+      foo: 'bar',
+      deep: [{ id: 'thought', answer: 42 }],
+      nullity: null,
     },
-    true
-  )
+  })
+  // @ts-expect-error it's a test ffs
   expect(xin.box.foo).toBe('bar')
+  // @ts-expect-error it's a test ffs
   expect(box.foo.valueOf()).toBe('bar')
   expect(xinPath(box.foo)).toBe('box.foo')
+  // @ts-expect-error it's a test ffs
   expect(box.deep['id=thought'].answer.valueOf()).toBe(42)
+  // @ts-expect-error it's a test ffs
   expect(xinPath(box.deep['id=thought'].answer)).toBe(
     'box.deep[id=thought].answer'
   )
+  // @ts-expect-error it's a test ffs
+  expect(box.whatevs).toBe(undefined)
+  expect(box.nullity).toBe(null)
 })

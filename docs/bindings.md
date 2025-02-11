@@ -34,6 +34,42 @@ elements.
 
 The `text` binding copies state from `xin` to the bound element's `textContent` property.
 
+## enabled & disabled
+
+The `enabled` and `disabled` bindings allow you to make a widget's enabled status
+be determined by the truthiness of something in `xin`, e.g.
+
+```
+import { xinProxy, elements } from 'xinjs'
+
+const myDoc = xinProxy({
+    myDoc: {
+        content: ''
+        unsavedChanges: false
+    }
+}, 1)
+
+// this button will only be enabled if there is something in `myList.array`
+document.body.append(
+    elements.textarea({
+        bindValue: myDoc.content,
+        onInput() {
+            myDoc.unsavedChanges = true
+        }
+    }),
+    elements.button(
+        'Save Changes',
+        {
+            bindEnabled: myDoc.unsavedChanges,
+            onClick() {
+                // save the doc
+                myDoc.unsavedChanges = false
+            }
+        }
+    )
+)
+```
+
 ## list
 
 The `list` binding makes a copy of a `template` element inside the bound element
@@ -85,7 +121,7 @@ of the list).
 You can pass a `path` or a `symbol` as either the `hiddenProp` or `visibleProp`.
 
 Typically, you can use `hiddenProp` to power filters and `visibleProp` to power
-detail views. The beautfy of using symbols is that it won't impact the serialized
+detail views. The beauty of using symbols is that it won't impact the serialized
 values of the array and different views of the array can use different selection
 and filtering criteria.
 
