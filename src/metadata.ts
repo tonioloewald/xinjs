@@ -1,4 +1,4 @@
-import { XinObject, XinProxy, XinBinding, XinEventHandler } from './xin-types'
+import { XinObject, XinProps, XinBinding, XinEventHandler } from './xin-types'
 import { deepClone } from './deep-clone'
 
 export const BOUND_CLASS = '-xin-data'
@@ -16,7 +16,7 @@ export const xinPath = (x: any): string | undefined => {
 export function xinValue<T>(x: T): T {
   return (
     typeof x === 'object' && x !== null
-      ? (x as unknown as XinProxy)[XIN_VALUE] || x
+      ? (x as unknown as XinProps)[XIN_VALUE] || x
       : x
   ) as T
 }

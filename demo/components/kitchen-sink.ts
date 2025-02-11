@@ -1,5 +1,5 @@
 import {
-  xinProxy,
+  boxedProxy,
   XinProxyObject,
   touch,
   elements,
@@ -171,39 +171,36 @@ const lightBlue = LightBlue.elementCreator({
 })
 console.warn('^^^ this is intentional')
 
-const { formTest } = xinProxy(
-  {
-    formTest: {
-      string: 'hello xin',
-      number: 3,
-      color: 'red',
-      date: new Date().toISOString(),
-      check1: false,
-      check2: true,
-      pickOne: 'that',
-      pickAny: { theOther: true, andThat: true },
-      phone: '+1 (666) 555-4321',
-      email: 'anne.example@foobar.baz',
-      autocomplete: 'this',
-      fleet: {
-        name: 'Starfleet',
-        vessels: [
-          { id: 'ncc-1701', name: 'Enterprise' },
-          { id: 'ncc-1031', name: 'Discovery' },
-          { id: 'ncc-74656', name: 'Voyager' },
-        ],
-      },
-      setTest: 'try editing this',
-      blueprintTest: {
-        caption: 'This one is bound',
-      },
-      reset() {
-        formTest.string = 'hello xin'
-      },
+const { formTest } = boxedProxy({
+  formTest: {
+    string: 'hello xin',
+    number: 3,
+    color: 'red',
+    date: new Date().toISOString(),
+    check1: false,
+    check2: true,
+    pickOne: 'that',
+    pickAny: { theOther: true, andThat: true },
+    phone: '+1 (666) 555-4321',
+    email: 'anne.example@foobar.baz',
+    autocomplete: 'this',
+    fleet: {
+      name: 'Starfleet',
+      vessels: [
+        { id: 'ncc-1701', name: 'Enterprise' },
+        { id: 'ncc-1031', name: 'Discovery' },
+        { id: 'ncc-74656', name: 'Voyager' },
+      ],
+    },
+    setTest: 'try editing this',
+    blueprintTest: {
+      caption: 'This one is bound',
+    },
+    reset() {
+      formTest.string = 'hello xin'
     },
   },
-  true
-)
+})
 
 const options = [
   'this',

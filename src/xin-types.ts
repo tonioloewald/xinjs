@@ -26,10 +26,8 @@ export type XinProxy<T> = T extends number
   ? XinProxy<String>
   : T extends boolean
   ? XinProxy<Boolean>
-  : T extends bigint
-  ? bigint
-  : T extends symbol
-  ? symbol
+  : T extends Function
+  ? T
   : T extends null | undefined
   ? null | undefined
   : T extends Array<infer U>

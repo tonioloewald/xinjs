@@ -2,10 +2,11 @@ import {
   Component as WebComponent,
   ElementCreator,
   elements,
-  xinProxy,
+  boxedProxy,
   vars,
   XinTouchableType,
-} from 'xinjs'
+  XinEventHandler,
+} from '../../src'
 import { makeSorter } from 'xinjs-ui'
 import words from '../words'
 
@@ -20,63 +21,62 @@ const wordleWords = fiveLetterWords
       !threeLetterWords.includes(w.substring(0, 3))
   )
 
-const { wordle } = xinProxy(
-  {
-    wordle: {
-      info: '',
-      words: wordleWords,
-      found: [] as string[],
-      foundLetters: [] as Array<{ letter: string; count: number }>,
-      updateFilter(event: Event) {
-        const source = (event.target as HTMLTextAreaElement).value
+const { wordle } = boxedProxy({
+  wordle: {
+    info: '',
+    words: wordleWords,
+    found: [] as string[],
+    foundLetters: [] as Array<{ letter: string; count: number }>,
+    updateFilter(event: Event) {
+      const source = (event.target as HTMLTextAreaElement).value
 
-        const clues = source.match(/(\w[-?!]?)/g)
-        console.log({ clues })
+      const clues = source.match(/(\w[-?!]?)/g)
+      console.log({ clues })
 
-        if (!clues) {
-          wordle.found = []
-          return
-        }
-        let found = wordle.words
+      if (!clues) {
+        wordle.found = []
+        return
+      }
+      let found = wordle.words as string[]
 
-        for (const clue of clues) {
-          for (let i = 0; i < 5; i++) {
-            const char = clue[i * 2]
-            const condition = clue[i * 2 + 1]
-            switch (condition) {
-              case '?':
-                found = found.filter((w) => w[i] !== char && w.includes(char))
-                break
-              case '!':
-                found = found.filter((w) => w[i] === char)
-                break
-              default:
-                found = found.filter((w) => !w.includes(char))
-                break
-            }
+      for (const clue of clues) {
+        for (let i = 0; i < 5; i++) {
+          const char = clue[i * 2]
+          const condition = clue[i * 2 + 1]
+          switch (condition) {
+            case '?':
+              found = found.filter(
+                (w: string) => w[i] !== char && w.includes(char)
+              )
+              break
+            case '!':
+              found = found.filter((w) => w[i] === char)
+              break
+            default:
+              found = found.filter((w) => !w.includes(char))
+              break
           }
         }
+      }
 
-        const letters: { [key: string]: number } = {}
+      const letters: { [key: string]: number } = {}
 
-        for (const word of found) {
-          for (const char of [...word]) {
-            letters[char] = letters[char] ? letters[char] + 1 : 1
-          }
+      for (const word of found) {
+        for (const char of [...word]) {
+          letters[char] = letters[char] ? letters[char] + 1 : 1
         }
+      }
 
-        wordle.foundLetters = Object.keys(letters)
-          .map((letter) => ({
-            letter,
-            count: letters[letter],
-          }))
-          .sort(makeSorter((a) => [-a.count]))
-        wordle.found = found
-      },
+      wordle.foundLetters = Object.keys(letters)
+        .map((letter) => ({
+          letter,
+          count: letters[letter],
+        }))
+        .sort(makeSorter((a) => [-a.count]))
+      wordle.found = found
     },
   },
-  true
-)
+})
 
 console.log(`wordle filter has ${wordle.words.length} words`)
 

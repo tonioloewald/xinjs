@@ -47,4 +47,4 @@ export {
 } from './xin'
 export * from './blueprint-loader'
 export * from './xin-types'
-export { xinProxy } from './xin-proxy'
+export { xinProxy, boxedProxy } from './xin-proxy'

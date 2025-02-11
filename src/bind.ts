@@ -14,7 +14,7 @@ import {
 } from './metadata'
 import {
   XinObject,
-  XinProxy,
+  XinProps,
   XinEventHandler,
   XinTouchableType,
   XinBinding,
@@ -35,9 +35,9 @@ export const touchElement = (element: Element, changedPath?: string): void => {
     if (toDOM != null) {
       if (path.startsWith('^')) {
         const dataSource = getListItem(element)
-        if (dataSource != null && (dataSource as XinProxy)[XIN_PATH] != null) {
+        if (dataSource != null && (dataSource as XinProps)[XIN_PATH] != null) {
           path = dataBinding.path = `${
-            (dataSource as XinProxy)[XIN_PATH]
+            (dataSource as XinProps)[XIN_PATH]
           }${path.substring(1)}`
         } else {
           console.error(
@@ -106,7 +106,7 @@ const handleChange = (event: Event): void => {
             const existingActual =
               // @ts-expect-error-error
               existing[XIN_PATH] != null
-                ? (existing as XinProxy)[XIN_VALUE]
+                ? (existing as XinProps)[XIN_VALUE]
                 : existing
             const valueActual =
               value[XIN_PATH] != null ? value[XIN_VALUE] : value
@@ -138,7 +138,7 @@ export function bind<T extends Element>(
   let path: string
   if (
     typeof what === 'object' &&
-    (what as XinProxy)[XIN_PATH] === undefined &&
+    (what as XinProps)[XIN_PATH] === undefined &&
     options === undefined
   ) {
     const { value } = what as XinBindingSpec
@@ -146,7 +146,7 @@ export function bind<T extends Element>(
     options = what as XinObject
     delete options.value
   } else {
-    path = typeof what === 'string' ? what : (what as XinProxy)[XIN_PATH]
+    path = typeof what === 'string' ? what : (what as XinProps)[XIN_PATH]
   }
   if (path == null) {
     throw new Error('bind requires a path or object with xin Proxy')

@@ -1,7 +1,7 @@
 import {
   Component as WebComponent,
   elements,
-  xinProxy,
+  boxedProxy,
   vars,
   touch,
 } from '../../src'
@@ -19,142 +19,139 @@ interface CluePart {
 }
 type Clue = CluePart[]
 
-const { wordGame } = xinProxy(
-  {
-    wordGame: {
-      length: 6,
-      word: '',
-      allowed: [] as string[],
-      words: [] as string[],
-      possibles: [] as string[],
-      alphabet: [] as Clue,
-      clues: [] as Clue[],
-      currentGuess: '',
-      gameOver: false,
-      init(length?: number) {
-        if (!length) {
-          length = wordGame.length
-        } else if (Number(wordGame.length) !== length) {
-          wordGame.length = length
-          wordGame.words = []
-        }
-        wordGame.gameOver = false
-        wordGame.clues = []
-        wordGame.possibles = []
-        if (wordGame.words.length == 0) {
-          wordGame.allowed = words.filter((w) => w.length == length)
-          const shorter = words.filter((w) => w.length === length! - 1)
+const { wordGame } = boxedProxy({
+  wordGame: {
+    length: 6,
+    word: '',
+    allowed: [] as string[],
+    words: [] as string[],
+    possibles: [] as string[],
+    alphabet: [] as Clue,
+    clues: [] as Clue[],
+    currentGuess: '',
+    gameOver: false,
+    init(length?: number) {
+      if (!length) {
+        length = wordGame.length
+      } else if (Number(wordGame.length) !== length) {
+        wordGame.length = length
+        wordGame.words = []
+      }
+      wordGame.gameOver = false
+      wordGame.clues = []
+      wordGame.possibles = []
+      if (wordGame.words.length == 0) {
+        wordGame.allowed = words.filter((w) => w.length == length)
+        const shorter = words.filter((w) => w.length === length! - 1)
 
-          wordGame.words = wordGame.allowed.filter(
-            (w) =>
-              w.slice(-1) !== 's' || !shorter.includes(w.slice(0, length! - 1))
-          )
-        }
-        wordGame.word =
-          wordGame.words[Math.floor(Math.random() * wordGame.words.length)]
-        wordGame.currentGuess = ''
-        wordGame.alphabet = ALPHABET.map((char) => ({
-          char,
-          info: 'none' as ClueInfo,
-        }))
-      },
-      noInfoChars(): string[] {
-        return wordGame.alphabet
-          .filter((clue) => clue.info === 'none')
-          .map((clue) => clue.char)
-      },
-      negativeClue() {
-        const noInfoChars = wordGame
-          .noInfoChars()
-          .filter((c) => !wordGame.word.includes(c))
-        if (noInfoChars.length === 0) {
-          postNotification({
-            message: 'All unused characters have been eliminated',
-            duration: 2,
-          })
-          return
-        }
-        const test = new RegExp(`[${wordGame.word}]`)
-        const words = wordGame.words.filter((w) => {
-          return !wordGame.possibles.includes(w) && !w.match(test)
-        })
-        wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
-        wordGame.guess()
-      },
-      positiveClue() {
-        const noInfoChars = wordGame
-          .noInfoChars()
-          .filter((c) => wordGame.word.includes(c))
-        if (noInfoChars.length === 0) {
-          postNotification({
-            message: 'All characters have been revealed',
-            duration: 2,
-          })
-          return
-        }
-        const words = wordGame.words.filter((w) => {
-          return (
-            !wordGame.possibles.includes(w) &&
-            noInfoChars.filter((c) => w.includes(c)).length === 1
-          )
-        })
-        wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
-        wordGame.guess()
-      },
-      guess() {
-        const currentGuess = wordGame.currentGuess.toLocaleLowerCase()
-        wordGame.currentGuess = ''
-        const word = [...wordGame.word]
-        wordGame.gameOver = true
-        const clue = [...currentGuess].map((char, idx) => {
-          const info =
-            word[idx] === char
-              ? 'correct'
-              : word.includes(char)
-              ? 'used'
-              : ('wrong' as ClueInfo)
-          if (info !== 'correct') {
-            wordGame.gameOver = false
-          }
-          const letter = wordGame.alphabet.find(
-            (letter) => letter.char == char
-          ) as CluePart
-          console.log(letter)
-          if (info === 'correct' && letter.info != 'correct') {
-            letter.info = 'correct'
-          } else if (info === 'used' && letter.info == 'none') {
-            letter.info = 'used'
-          } else if (info === 'wrong' && letter.info == 'none') {
-            letter.info = 'wrong'
-          }
-          return {
-            char,
-            info,
-          }
-        })
-        touch(wordGame.alphabet)
-
-        wordGame.possibles = (
-          wordGame.possibles.length > 0 ? wordGame.possibles : wordGame.words
-        ).filter(
-          (word) =>
-            !clue.find((part, index) => {
-              switch (part.info) {
-                case 'correct':
-                  return word[index] !== part.char
-                case 'used':
-                  return !word.includes(part.char) || word[index] === part.char
-                case 'wrong':
-                  return word.includes(part.char)
-              }
-            })
+        wordGame.words = wordGame.allowed.filter(
+          (w) =>
+            w.slice(-1) !== 's' || !shorter.includes(w.slice(0, length! - 1))
         )
-        wordGame.clues.push(clue)
-      },
+      }
+      wordGame.word =
+        wordGame.words[Math.floor(Math.random() * wordGame.words.length)]
+      wordGame.currentGuess = ''
+      wordGame.alphabet = ALPHABET.map((char) => ({
+        char,
+        info: 'none' as ClueInfo,
+      }))
+    },
+    noInfoChars(): string[] {
+      return wordGame.alphabet
+        .filter((clue) => clue.info === 'none')
+        .map((clue) => clue.char)
+    },
+    negativeClue() {
+      const noInfoChars = wordGame
+        .noInfoChars()
+        .filter((c) => !wordGame.word.includes(c))
+      if (noInfoChars.length === 0) {
+        postNotification({
+          message: 'All unused characters have been eliminated',
+          duration: 2,
+        })
+        return
+      }
+      const test = new RegExp(`[${wordGame.word}]`)
+      const words = wordGame.words.filter((w) => {
+        return !wordGame.possibles.includes(w) && !w.match(test)
+      })
+      wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
+      wordGame.guess()
+    },
+    positiveClue() {
+      const noInfoChars = wordGame
+        .noInfoChars()
+        .filter((c) => wordGame.word.includes(c))
+      if (noInfoChars.length === 0) {
+        postNotification({
+          message: 'All characters have been revealed',
+          duration: 2,
+        })
+        return
+      }
+      const words = wordGame.words.filter((w) => {
+        return (
+          !wordGame.possibles.includes(w) &&
+          noInfoChars.filter((c) => w.includes(c)).length === 1
+        )
+      })
+      wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
+      wordGame.guess()
+    },
+    guess() {
+      const currentGuess = wordGame.currentGuess.toLocaleLowerCase()
+      wordGame.currentGuess = ''
+      const word = [...wordGame.word]
+      wordGame.gameOver = true
+      const clue = [...currentGuess].map((char, idx) => {
+        const info =
+          word[idx] === char
+            ? 'correct'
+            : word.includes(char)
+            ? 'used'
+            : ('wrong' as ClueInfo)
+        if (info !== 'correct') {
+          wordGame.gameOver = false
+        }
+        const letter = wordGame.alphabet.find(
+          (letter) => letter.char == char
+        ) as CluePart
+        console.log(letter)
+        if (info === 'correct' && letter.info != 'correct') {
+          letter.info = 'correct'
+        } else if (info === 'used' && letter.info == 'none') {
+          letter.info = 'used'
+        } else if (info === 'wrong' && letter.info == 'none') {
+          letter.info = 'wrong'
+        }
+        return {
+          char,
+          info,
+        }
+      })
+      touch(wordGame.alphabet)
+
+      wordGame.possibles = (
+        wordGame.possibles.length > 0 ? wordGame.possibles : wordGame.words
+      ).filter(
+        (word) =>
+          !clue.find((part, index) => {
+            switch (part.info) {
+              case 'correct':
+                return word[index] !== part.char
+              case 'used':
+                return !word.includes(part.char) || word[index] === part.char
+              case 'wrong':
+                return word.includes(part.char)
+            }
+          })
+      )
+      wordGame.clues.push(clue)
     },
   },
-  true
-)
+})
 
 wordGame.init()
 
