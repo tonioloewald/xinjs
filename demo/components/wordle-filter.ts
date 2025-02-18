@@ -29,19 +29,19 @@ const { wordle } = boxedProxy({
     updateFilter(event: Event) {
       const source = (event.target as HTMLTextAreaElement).value
 
-      const clues = source.match(/(\w[-?!]?)/g)
-      console.log({ clues })
+      const clues = source.split(/\s+/)
 
-      if (!clues) {
+      if (!clues[0]) {
         wordle.found = []
         return
       }
       let found = wordle.words as string[]
 
       for (const clue of clues) {
-        for (let i = 0; i < 5; i++) {
-          const char = clue[i * 2]
-          const condition = clue[i * 2 + 1]
+        const chars = clue.match(/\w[-?!]?/g) || []
+        for (let i = 0; i < chars.length; i++) {
+          const char = chars[i][0]
+          const condition = chars[i][1] || '-'
           switch (condition) {
             case '?':
               found = found.filter(
