@@ -32,7 +32,7 @@ const { wordGame } = boxedProxy({
     gameOver: false,
     init(length?: number) {
       if (!length) {
-        length = wordGame.length
+        length = wordGame.length.valueOf()
       } else if (Number(wordGame.length) !== length) {
         wordGame.length = length
         wordGame.words = []
@@ -60,7 +60,7 @@ const { wordGame } = boxedProxy({
     noInfoChars(): string[] {
       return wordGame.alphabet
         .filter((clue) => clue.info === 'none')
-        .map((clue) => clue.char)
+        .map((clue) => clue.char) as string[]
     },
     negativeClue() {
       const noInfoChars = wordGame
@@ -75,7 +75,7 @@ const { wordGame } = boxedProxy({
       }
       const test = new RegExp(`[${wordGame.word}]`)
       const words = wordGame.words.filter((w) => {
-        return !wordGame.possibles.includes(w) && !w.match(test)
+        return !wordGame.possibles.includes(w as string) && !w.match(test)
       })
       wordGame.currentGuess = words[Math.floor(Math.random() * words.length)]
       wordGame.guess()
@@ -93,7 +93,7 @@ const { wordGame } = boxedProxy({
       }
       const words = wordGame.words.filter((w) => {
         return (
-          !wordGame.possibles.includes(w) &&
+          !wordGame.possibles.includes(w as string) &&
           noInfoChars.filter((c) => w.includes(c)).length === 1
         )
       })
@@ -186,7 +186,7 @@ export class GuessWord extends WebComponent {
   addLetter = (event: Event) => {
     const keySpan = event.srcElement as HTMLElement
     if (keySpan?.tagName === 'SPAN') {
-      wordGame.currentGuess += keySpan.textContent
+      wordGame.currentGuess += keySpan.textContent!
     }
   }
 
@@ -301,7 +301,7 @@ export class GuessWord extends WebComponent {
               binding(button: HTMLElement, guess: string) {
                 guess = guess.toLocaleLowerCase()
                 ;(button as HTMLButtonElement).disabled =
-                  guess?.length - wordGame.length !== 0 ||
+                  guess?.length - wordGame.length.valueOf() !== 0 ||
                   !wordGame.allowed.includes(guess)
               },
               value: wordGame.currentGuess,

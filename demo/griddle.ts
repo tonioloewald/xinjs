@@ -108,7 +108,7 @@ class GriddleGame extends WebComponent {
   constructor() {
     super()
 
-    this.game = boxedProxy({ griddle: this.game }).griddle
+    this.game = boxedProxy({ griddle: this.game }).griddle as typeof this.game
   }
 
   content = null
