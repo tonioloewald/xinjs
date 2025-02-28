@@ -15,25 +15,27 @@ export type XinProxyTarget = XinObject | XinArray
 
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined
 
-export interface XinProps {
-  [XIN_VALUE]: XinObject | XinObject | XinScalar
+export interface XinProps<T = any> {
+  [XIN_VALUE]: T
   [XIN_PATH]: string
+  xinPath: string
+  valueOf: () => T
 }
 
-export type XinProxy<T> = T extends number
-  ? XinProxy<Number>
+export type XinProxy<T = any> = T extends number
+  ? XinProxy<XinProps<number> & Number>
   : T extends string
-  ? XinProxy<String>
+  ? XinProxy<XinProps<string> & String>
   : T extends boolean
-  ? XinProxy<Boolean>
+  ? XinProxy<XinProps<T> & Boolean>
   : T extends Function
   ? T
   : T extends null | undefined
   ? null | undefined
   : T extends Array<infer U>
-  ? Array<XinProxy<U>>
+  ? Array<XinProxy<U> | U>
   : T extends object
-  ? { [K in keyof T]: XinProxy<T[K]> }
+  ? { [K in keyof T]: T[K] | XinProxy<T[K]>}
   : T
 
 export type XinProxyObject = XinProps & {
@@ -49,7 +51,7 @@ export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (
     | XinProxyObject[]
     | XinScalar[]
   )
-export type XinTouchableType = string | XinProps
+export type XinTouchableType = string | XinProps | XinProxy
 export type XinEventHandler<T = Event> =
   | ((evt: T) => void)
   | ((evt: T) => Promise<void>)
