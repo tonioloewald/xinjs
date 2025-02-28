@@ -102,13 +102,18 @@ const regHandler = (
   // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
   // as you'd expect
   get(target: XinObject | XinArray, _prop: string | symbol): XinValue {
-    if (_prop === XIN_PATH) {
-      return path
-    } else if (_prop === XIN_VALUE) {
-      while (xinPath(target) !== undefined) {
-        target = xinValue(target)
+    switch (_prop) {
+      case XIN_PATH:
+      case 'xinPath':
+        return path
+      case XIN_VALUE:
+        return xinValue(target)
+      case 'valueOf': {
+        const value = xinValue(target)
+        return typeof value.valueOf === 'function'
+          ? () => value.valueOf()
+          : () => value
       }
-      return target
     }
     if (typeof _prop === 'symbol') {
       return (target as XinObject)[_prop]

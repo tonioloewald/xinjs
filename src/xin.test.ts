@@ -56,6 +56,7 @@ test('handles arrays', () => {
 })
 
 test('boxed proxies', () => {
+  // @ts-expect-error boxed contains same content as xin
   const _test = boxed.test as XinProxyObject
   expect(_test.message.valueOf()).toBe('hello xin')
   expect(xinPath(_test.message)).toBe('test.message')
@@ -69,6 +70,28 @@ test('boxed proxies', () => {
   expect(xinPath(_test.things['id=1701'].name)).toBe(
     'test.things[id=1701].name'
   )
+})
+
+test('valueOf works', () => {
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.message.valueOf()).toBe('hello xin')
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.message).not.toBe('hello xin')
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.valueOf().message).toBe('hello xin')
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.things['id=666'].name.valueOf()).toBe('The Beast')
+})
+
+test('xinPath works', () => {
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.xinPath).toBe('test')
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.message.xinPath).toBe('test.message')
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.things['id=666'].xinPath).toBe('test.things[id=666]')
+  // @ts-expect-error boxed contains same content as xin
+  expect(boxed.test.things[2].xinPath).toBe('test.things[2]')
 })
 
 test('updates simple values', () => {
