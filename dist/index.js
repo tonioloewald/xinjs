@@ -1014,16 +1014,15 @@ const $b3e4d800ba46b430$var$boxes = {
 function $b3e4d800ba46b430$var$box(x, path) {
     const t = typeof x;
     if (x === undefined || t === 'object' || t === 'function') return x;
-    else return new Proxy($b3e4d800ba46b430$var$boxes[t](x), $b3e4d800ba46b430$var$regHandler(path, true));
+    else return new Proxy($b3e4d800ba46b430$var$boxes[typeof x](x), $b3e4d800ba46b430$var$regHandler(path, true));
 }
 const $b3e4d800ba46b430$var$regHandler = (path, boxScalars)=>({
-        // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
-        // as you'd expect
         get (target, _prop) {
-            if (_prop === (0, $bRLVT.XIN_PATH)) return path;
-            else if (_prop === (0, $bRLVT.XIN_VALUE)) {
-                while((0, $bRLVT.xinPath)(target) !== undefined)target = (0, $bRLVT.xinValue)(target);
-                return target;
+            switch(_prop){
+                case 0, $bRLVT.XIN_PATH:
+                    return path;
+                case 0, $bRLVT.XIN_VALUE:
+                    return (0, $bRLVT.xinValue)(target);
             }
             if (typeof _prop === 'symbol') return target[_prop];
             let prop = _prop;
@@ -1062,7 +1061,7 @@ const $b3e4d800ba46b430$var$regHandler = (path, boxScalars)=>({
         },
         set (_, prop, value) {
             value = (0, $bRLVT.xinValue)(value);
-            const fullPath = $b3e4d800ba46b430$var$extendPath(path, prop);
+            const fullPath = prop !== (0, $bRLVT.XIN_VALUE) ? $b3e4d800ba46b430$var$extendPath(path, prop) : path;
             if ($b3e4d800ba46b430$var$debugPaths && !$b3e4d800ba46b430$export$a678af82bf766611(fullPath)) throw new Error(`setting invalid path ${fullPath}`);
             const existing = (0, $bRLVT.xinValue)($b3e4d800ba46b430$export$966034e6c6823eb0[fullPath]);
             if (existing !== value && (0, $jq2Jl.setByPath)($b3e4d800ba46b430$var$registry, fullPath, value)) (0, $acXJu.touch)(fullPath);
@@ -1206,8 +1205,8 @@ const $2f9efd8dbae277cd$export$c6592bbc1eebb717 = '-xin-data';
 const $2f9efd8dbae277cd$export$4c0223f67078aeac = `.${$2f9efd8dbae277cd$export$c6592bbc1eebb717}`;
 const $2f9efd8dbae277cd$export$6a7099543a9795c7 = '-xin-event';
 const $2f9efd8dbae277cd$export$21d9322c3477441b = `.${$2f9efd8dbae277cd$export$6a7099543a9795c7}`;
-const $2f9efd8dbae277cd$export$a3622eb3b5dd592a = Symbol('xin-path');
-const $2f9efd8dbae277cd$export$bdd0d039ad781534 = Symbol('xin-value');
+const $2f9efd8dbae277cd$export$a3622eb3b5dd592a = 'xinPath';
+const $2f9efd8dbae277cd$export$bdd0d039ad781534 = 'xinValue';
 const $2f9efd8dbae277cd$export$40700dafb97c3799 = (x)=>{
     return x[$2f9efd8dbae277cd$export$a3622eb3b5dd592a];
 };
@@ -1868,6 +1867,7 @@ function $b43c5f28217f2268$export$95a552d2395ab4c4(obj, boxed = false) {
             console.warn(`xinProxy(..., true) is deprecated; use boxedProxy(...) instead`);
             $b43c5f28217f2268$var$deprecationMessage = true;
         }
+        // @ts-expect-error deprecated
         return $b43c5f28217f2268$export$5ac756d3522a2a00(obj);
     }
     Object.keys(obj).forEach((key)=>{

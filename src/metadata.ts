@@ -1,4 +1,10 @@
-import { XinObject, XinProps, XinBinding, XinEventHandler } from './xin-types'
+import {
+  XinObject,
+  XinProps,
+  XinBinding,
+  XinEventHandler,
+  Unboxed,
+} from './xin-types'
 import { deepClone } from './deep-clone'
 
 export const BOUND_CLASS = '-xin-data'
@@ -6,19 +12,19 @@ export const BOUND_SELECTOR = `.${BOUND_CLASS}`
 export const EVENT_CLASS = '-xin-event'
 export const EVENT_SELECTOR = `.${EVENT_CLASS}`
 
-export const XIN_PATH = Symbol('xin-path')
-export const XIN_VALUE = Symbol('xin-value')
+export const XIN_PATH = 'xinPath'
+export const XIN_VALUE = 'xinValue'
 
 export const xinPath = (x: any): string | undefined => {
   return x[XIN_PATH]
 }
 
-export function xinValue<T>(x: T): T {
+export function xinValue<T>(x: T): Unboxed<T> {
   return (
     typeof x === 'object' && x !== null
       ? (x as unknown as XinProps)[XIN_VALUE] || x
       : x
-  ) as T
+  ) as Unboxed<T>
 }
 
 export interface DataBinding<T = Element> {

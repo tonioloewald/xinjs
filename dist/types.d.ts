@@ -1,7 +1,7 @@
-declare const XIN_PATH: unique symbol;
-declare const XIN_VALUE: unique symbol;
+declare const XIN_PATH = "xinPath";
+declare const XIN_VALUE = "xinValue";
 export const xinPath: (x: any) => string | undefined;
-export function xinValue<T>(x: T): T;
+export function xinValue<T>(x: T): Unboxed<T>;
 export const getListItem: (element: Element) => any;
 declare function clamp(min: number, v: number, max: number): number;
 declare function lerp(a: number, b: number, t: number): number;
@@ -302,20 +302,24 @@ export interface XinObject {
 }
 export type XinProxyTarget = XinObject | XinArray;
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined;
-export interface XinProps {
-    [XIN_VALUE]: XinObject | XinObject | XinScalar;
+export interface XinProps<T = any> {
     [XIN_PATH]: string;
+    [XIN_VALUE]: T;
 }
-export type XinProxy<T> = T extends number ? XinProxy<Number> : T extends string ? XinProxy<String> : T extends boolean ? XinProxy<Boolean> : T extends Function ? T : T extends null | undefined ? null | undefined : T extends Array<infer U> ? Array<XinProxy<U>> : T extends object ? {
-    [K in keyof T]: XinProxy<T[K]>;
+export type BoxedProxy<T = any> = T extends Array<infer U> ? Array<BoxedProxy<U>> : T extends Function ? T : T extends object ? {
+    [K in keyof T]: BoxedProxy<T[K]>;
+} : T extends string ? String : T extends number ? Number : T extends boolean ? Boolean : T;
+export type Unboxed<T = any> = T extends String ? string : T extends Number ? number : T extends Boolean ? boolean : T;
+export type XinProxy<T = any> = T extends Array<infer U> ? Array<XinProxy<U>> : T extends Function ? T : T extends object ? {
+    [K in keyof T]: T[K] extends object ? XinProxy<T[K]> : T[K];
 } : T;
-export type XinProxyObject = XinProps & {
+export type XinProxyObject = XinProps<object> & {
     [key: string]: XinProxyObject | XinProxyArray | XinObject | XinArray | XinScalar;
 };
-export type XinProxyArray = XinProps & {
+export type XinProxyArray = XinProps<[]> & {
     [key: string]: XinProxyObject;
 } & (XinProxyObject[] | XinScalar[]);
-export type XinTouchableType = string | XinProps;
+export type XinTouchableType = string | XinProxy | BoxedProxy | String | Number | Boolean;
 export type XinEventHandler<T = Event> = ((evt: T) => void) | ((evt: T) => Promise<void>) | string;
 export type XinBindingShortcut = XinTouchableType | XinBindingSpec;
 type _BooleanFunction = () => boolean;
@@ -385,7 +389,7 @@ export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 export const xin: XinProxyObject;
-export const boxed: XinProxy<object>;
+export const boxed: BoxedProxy<object>;
 export function bind<T extends Element>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T;
 export const on: (element: HTMLElement, eventType: string, eventHandler: XinEventHandler) => void;
 type VoidFunc = (...args: any[]) => void;
@@ -573,8 +577,8 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
     render(): void;
 }
 export const hotReload: (test?: PathTestFunction) => void;
-export function boxedProxy<T extends object>(obj: T): XinProxy<T>;
-export function xinProxy<T extends object>(obj: T, boxed?: boolean): T;
+export function boxedProxy<T extends object>(obj: T): BoxedProxy<T>;
+export function xinProxy<T extends object>(obj: T, boxed?: boolean): XinProxy<T>;
 export interface XinFactory {
     Color: typeof Color;
     Component: typeof Component;

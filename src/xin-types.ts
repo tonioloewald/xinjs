@@ -16,29 +16,45 @@ export type XinProxyTarget = XinObject | XinArray
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined
 
 export interface XinProps<T = any> {
-  [XIN_VALUE]: T
   [XIN_PATH]: string
-  xinPath: string
-  valueOf: () => T
+  [XIN_VALUE]: T
 }
 
-export type XinProxy<T = any> = T extends number
-  ? XinProxy<XinProps<number> & Number>
-  : T extends string
-  ? XinProxy<XinProps<string> & String>
-  : T extends boolean
-  ? XinProxy<XinProps<T> & Boolean>
+export type BoxedProxy<T = any> = T extends Array<infer U>
+  ? Array<BoxedProxy<U>>
   : T extends Function
   ? T
-  : T extends null | undefined
-  ? null | undefined
-  : T extends Array<infer U>
-  ? Array<XinProxy<U> | U>
   : T extends object
-  ? { [K in keyof T]: T[K] | XinProxy<T[K]>}
+  ? {
+    [K in keyof T]: BoxedProxy<T[K]>
+  }
+  : T extends string
+  ? String
+  : T extends number
+  ? Number
+  : T extends boolean
+  ? Boolean
   : T
 
-export type XinProxyObject = XinProps & {
+export type Unboxed<T = any> = T extends String
+  ? string
+  : T extends Number
+  ? number
+  : T extends Boolean
+  ? boolean
+  : T
+
+export type XinProxy<T = any> = T extends Array<infer U>
+  ? Array<XinProxy<U>>
+  : T extends Function
+  ? T
+  : T extends object
+  ? {
+    [K in keyof T]: T[K] extends object ? XinProxy<T[K]> : T[K]
+  }
+  : T
+
+export type XinProxyObject = XinProps<object> & {
   [key: string]:
     | XinProxyObject
     | XinProxyArray
@@ -47,11 +63,11 @@ export type XinProxyObject = XinProps & {
     | XinScalar
 }
 
-export type XinProxyArray = XinProps & { [key: string]: XinProxyObject } & (
+export type XinProxyArray = XinProps<[]> & { [key: string]: XinProxyObject } & (
     | XinProxyObject[]
     | XinScalar[]
   )
-export type XinTouchableType = string | XinProps | XinProxy
+export type XinTouchableType = string | XinProxy | BoxedProxy | String | Number | Boolean
 export type XinEventHandler<T = Event> =
   | ((evt: T) => void)
   | ((evt: T) => Promise<void>)

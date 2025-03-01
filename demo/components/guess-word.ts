@@ -301,7 +301,7 @@ export class GuessWord extends WebComponent {
               binding(button: HTMLElement, guess: string) {
                 guess = guess.toLocaleLowerCase()
                 ;(button as HTMLButtonElement).disabled =
-                  guess?.length - wordGame.length.valueOf() !== 0 ||
+                  guess.length - Number(wordGame.length) !== 0 ||
                   !wordGame.allowed.includes(guess)
               },
               value: wordGame.currentGuess,

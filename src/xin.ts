@@ -2,7 +2,7 @@ import {
   XinProxyObject,
   XinProxyTarget,
   XinObject,
-  XinProxy,
+  BoxedProxy,
   XinArray,
   XinValue,
   PathTestFunction,
@@ -18,7 +18,7 @@ import {
   observerShouldBeRemoved,
 } from './path-listener'
 import { getByPath, setByPath } from './by-path'
-import { xinValue, xinPath, XIN_VALUE, XIN_PATH } from './metadata'
+import { xinValue, XIN_VALUE, XIN_PATH } from './metadata'
 
 interface ProxyConstructor {
   revocable: <T extends object, P extends object>(
@@ -89,7 +89,7 @@ function box<T>(x: T, path: string): T {
     return x
   } else {
     return new Proxy<XinProxyTarget, XinObject>(
-      boxes[t](x),
+      boxes[typeof x](x),
       regHandler(path, true)
     ) as T
   }
@@ -99,21 +99,12 @@ const regHandler = (
   path: string,
   boxScalars: boolean
 ): ProxyHandler<XinObject> => ({
-  // TODO figure out how to correctly return array[Symbol.iterator] so that for(const foo of xin.foos) works
-  // as you'd expect
   get(target: XinObject | XinArray, _prop: string | symbol): XinValue {
     switch (_prop) {
       case XIN_PATH:
-      case 'xinPath':
         return path
       case XIN_VALUE:
         return xinValue(target)
-      case 'valueOf': {
-        const value = xinValue(target)
-        return typeof value.valueOf === 'function'
-          ? () => value.valueOf()
-          : () => value
-      }
     }
     if (typeof _prop === 'symbol') {
       return (target as XinObject)[_prop]
@@ -190,7 +181,7 @@ const regHandler = (
   },
   set(_, prop: string, value: any) {
     value = xinValue(value)
-    const fullPath = extendPath(path, prop)
+    const fullPath = prop !== XIN_VALUE ? extendPath(path, prop) : path
     if (debugPaths && !isValidPath(fullPath)) {
       throw new Error(`setting invalid path ${fullPath}`)
     }
@@ -227,7 +218,7 @@ const xin = new Proxy<XinObject, XinProxyObject>(
 const boxed = new Proxy<XinObject, XinProxyObject>(
   registry,
   regHandler('', true)
-) as XinProxy<object>
+) as BoxedProxy<object>
 
 export {
   xin,

@@ -32,7 +32,7 @@ const blueprintExample: XinBlueprint = (tag, factory) => {
   const { Component, elements, vars, varDefault, Color } = factory
   const { h3, p, slot, label, input } = elements
 
-  class BpExample extends Component {
+  class BpExample extends Component<BlueprintParts> {
     value = {
       caption: 'Blueprint Example',
     }
@@ -82,7 +82,7 @@ const blueprintExample: XinBlueprint = (tag, factory) => {
     connectedCallback() {
       super.connectedCallback()
 
-      const { captionField } = this.parts as BlueprintParts
+      const { captionField } = this.parts
       captionField.addEventListener('input', () => {
         this.value.caption = captionField.value
         this.queueRender(true)
@@ -94,7 +94,7 @@ const blueprintExample: XinBlueprint = (tag, factory) => {
     render() {
       super.render()
 
-      const { heading, captionField } = this.parts as BlueprintParts
+      const { heading, captionField } = this.parts
       heading.textContent = this.value.caption
       if (captionField.value !== this.value.caption)
         captionField.value = this.value.caption
@@ -103,7 +103,7 @@ const blueprintExample: XinBlueprint = (tag, factory) => {
 
   return {
     // you must return the subclass!
-    type: BpExample,
+    type: BpExample as typeof Component,
     // if a stylespec is returned, it will create a global helper stylesheet
     // for the custom element. Any occurrence of ':host' in the selectors will
     // be replaced with the element's tag
