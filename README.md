@@ -27,7 +27,7 @@ If you want to build a web-application that's performant, robust, and maintainab
 - implement your business logic however you like (or reuse existing code),
 - build your UI with pure `React` components (using `useXin`)
 - and/or `web-component`s,
-- and neatly _bind_ the state of your business objects to the user-interface _directly_.
+- and _bind_ state to the user-interface _directly_.
 
 In general, `xinjs` is able to accomplish the same or better compactness, expressiveness,
 and simplicity as you get with highly-refined React-centric toolchains, but without transpilation,
