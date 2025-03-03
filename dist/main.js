@@ -881,8 +881,7 @@ const $fc64c421299f5d54$var$handleChange = (event)=>{
                     const existing = (0, $cTa2m.xin)[path];
                     if (existing == null) (0, $cTa2m.xin)[path] = value;
                     else {
-                        const existingActual = // @ts-expect-error-error
-                        existing[0, $1zLRT.XIN_PATH] != null ? existing[0, $1zLRT.XIN_VALUE] : existing;
+                        const existingActual = existing[0, $1zLRT.XIN_PATH] != null ? existing[0, $1zLRT.XIN_VALUE] : existing;
                         const valueActual = value[0, $1zLRT.XIN_PATH] != null ? value[0, $1zLRT.XIN_VALUE] : value;
                         if (existingActual !== valueActual) (0, $cTa2m.xin)[path] = valueActual;
                     }
@@ -1967,7 +1966,7 @@ const $04b008a736a73fbf$export$93b87f7746612069 = (test = ()=>true)=>{
     }
     const saveState = (0, $eK8lg.debounce)(()=>{
         const obj = {};
-        const state = (0, $cTa2m.xin)[0, $1zLRT.XIN_VALUE];
+        const state = (0, $1zLRT.xinValue)((0, $cTa2m.xin));
         for (const key of Object.keys(state).filter(test))obj[key] = state[key];
         localStorage.setItem('xin-state', JSON.stringify(obj));
         console.log('xin state saved to localStorage');

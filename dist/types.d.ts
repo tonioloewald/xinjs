@@ -345,7 +345,7 @@ export interface XinInlineBinding<T = Element> {
 }
 export interface ElementProps<T = Element> {
     onClick?: XinEventHandler<MouseEvent>;
-    onInput?: XinEventHandler;
+    onInput?: XinEventHandler<InputEvent>;
     onChange?: XinEventHandler;
     onSubmit?: XinEventHandler;
     bind?: XinInlineBinding<T>;
@@ -388,8 +388,16 @@ export const updates: () => Promise<void>;
 export const touch: (touchable: any) => void;
 export const unobserve: (listener: Listener) => void;
 export const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
-export const xin: XinProxyObject;
-export const boxed: BoxedProxy<object>;
+export const xin: {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+};
+export const boxed: {
+    [x: string]: any;
+    [x: number]: any;
+    [x: symbol]: any;
+};
 export function bind<T extends Element>(element: T, what: XinTouchableType | XinBindingSpec, binding: XinBinding<T>, options?: XinObject): T;
 export const on: (element: HTMLElement, eventType: string, eventHandler: XinEventHandler) => void;
 type VoidFunc = (...args: any[]) => void;

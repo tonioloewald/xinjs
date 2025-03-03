@@ -2,6 +2,7 @@ import {
   XinProxyObject,
   XinProxyTarget,
   XinObject,
+  XinProxy,
   BoxedProxy,
   XinArray,
   XinValue,
@@ -210,15 +211,15 @@ const observe = (
   return _observe(test, func as ObserverCallbackFunction)
 }
 
-const xin = new Proxy<XinObject, XinProxyObject>(
+const xin = new Proxy<XinObject, XinProxy<XinObject>>(
   registry,
   regHandler('', false)
 )
 
-const boxed = new Proxy<XinObject, XinProxyObject>(
+const boxed = new Proxy<XinObject, BoxedProxy<XinObject>>(
   registry,
   regHandler('', true)
-) as BoxedProxy<object>
+)
 
 export {
   xin,

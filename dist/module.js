@@ -864,8 +864,7 @@ const $b5796eaeba5c782e$var$handleChange = (event)=>{
                     const existing = (0, $eppu5.xin)[path];
                     if (existing == null) (0, $eppu5.xin)[path] = value;
                     else {
-                        const existingActual = // @ts-expect-error-error
-                        existing[0, $5hOlm.XIN_PATH] != null ? existing[0, $5hOlm.XIN_VALUE] : existing;
+                        const existingActual = existing[0, $5hOlm.XIN_PATH] != null ? existing[0, $5hOlm.XIN_VALUE] : existing;
                         const valueActual = value[0, $5hOlm.XIN_PATH] != null ? value[0, $5hOlm.XIN_VALUE] : value;
                         if (existingActual !== valueActual) (0, $eppu5.xin)[path] = valueActual;
                     }
@@ -1916,7 +1915,7 @@ const $4c651860c5272284$export$93b87f7746612069 = (test = ()=>true)=>{
     }
     const saveState = (0, $9nL7f.debounce)(()=>{
         const obj = {};
-        const state = (0, $eppu5.xin)[0, $5hOlm.XIN_VALUE];
+        const state = (0, $5hOlm.xinValue)((0, $eppu5.xin));
         for (const key of Object.keys(state).filter(test))obj[key] = state[key];
         localStorage.setItem('xin-state', JSON.stringify(obj));
         console.log('xin state saved to localStorage');

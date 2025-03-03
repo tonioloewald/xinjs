@@ -112,7 +112,7 @@ export interface XinInlineBinding<T = Element> {
 
 export interface ElementProps<T = Element> {
   onClick?: XinEventHandler<MouseEvent>
-  onInput?: XinEventHandler
+  onInput?: XinEventHandler<InputEvent>
   onChange?: XinEventHandler
   onSubmit?: XinEventHandler
   bind?: XinInlineBinding<T>

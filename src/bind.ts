@@ -104,7 +104,6 @@ const handleChange = (event: Event): void => {
             xin[path] = value
           } else {
             const existingActual =
-              // @ts-expect-error-error
               existing[XIN_PATH] != null
                 ? (existing as XinProps)[XIN_VALUE]
                 : existing
