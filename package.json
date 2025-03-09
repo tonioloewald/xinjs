@@ -17,15 +17,10 @@
     "css-variables"
   ],
   "scripts": {
-    "start": "bun clear-targets && bun static-assets && bun parcel demo/index.html --dist-dir www -p 8018",
-    "clear-targets": "rm -rf .parcel-cache && rm -rf www dist && mkdir -p www/assets",
-    "static-assets": "cp README.md docs/*.md *.svg *.ico *.png www/assets && cp -r demo/assets/* www/assets",
+    "start": "bun dev.ts",
     "format": "bun eslint src demo --fix && bun prettier --write .",
-    "make": "bun clear-targets && bun static-assets && bun test && bun parcel build",
-    "pack": "bun format && bun run make && npm pack --pack-destination ~",
     "test": "bun test",
-    "make-icons": "rm -rf static/icons && mkdir static/icons && npx fantasticon",
-    "latest": "rm -rf .parcel-cache && npm update && bun install",
+    "latest": "rm -rf node_modules && npm update && bun install",
     "free-port": "lsof -ti:8018 | xargs kill -9"
   },
   "author": "Tonio Loewald",
@@ -63,24 +58,6 @@
       "**/*.mjs",
       "**/*.d.ts"
     ]
-  },
-  "targets": {
-    "dist": {
-      "isLibrary": true,
-      "distDir": "dist",
-      "outputFormat": "esmodule"
-    },
-    "www": {
-      "source": "demo/index.html",
-      "distDir": "www",
-      "outputFormat": "esmodule"
-    },
-    "cdn": {
-      "distDir": "cdn",
-      "optimize": true,
-      "isLibrary": true,
-      "outputFormat": "esmodule"
-    }
   },
   "dependencies": {
     "caniuse-lite": "^1.0.30001701"

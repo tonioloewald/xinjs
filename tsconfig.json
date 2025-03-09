@@ -1,18 +1,25 @@
 {
   "compilerOptions": {
+    "lib": ["ES2020", "DOM"],
     "module": "es2020",
     "target": "es2020",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
     "strict": true,
-    "esModuleInterop": true,
+    "downlevelIteration": true,
     "skipLibCheck": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
-    "moduleResolution": "node",
-    "declaration": true,
-    "declarationMap": true
+    "allowJs": true,
+    "noEmit": true,
+    "types": [
+      "bun-types", // add Bun global
+      "@types/jsdom"
+    ]
   },
   "allowJs": true,
-  "types": ["bun-types", "babylonjs"],
   "include": ["src/**/*"],
   "exclude": ["node_nodules", "**.*.spec.ts,*.test.ts"]
 }

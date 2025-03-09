@@ -175,7 +175,7 @@ class GriddleGame extends WebComponent {
         },
         bodymovinPlayer({
           part: 'timer',
-          src: '/assets/hourglass.json',
+          src: '/hourglass.json',
           config: {
             autoplay: false,
             loop: true,
