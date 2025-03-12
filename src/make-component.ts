@@ -5,7 +5,7 @@ import { XinStyleSheet } from './css-types'
 import { elements, svgElements, mathML } from './elements'
 import { ElementCreator } from './xin-types'
 import { version } from './version'
-import { xinProxy } from './xin-proxy'
+import { xinProxy, boxedProxy } from './xin-proxy'
 
 export interface XinFactory {
   Color: typeof Color
@@ -16,6 +16,7 @@ export interface XinFactory {
   vars: typeof vars
   varDefault: typeof varDefault
   xinProxy: typeof xinProxy
+  boxedProxy: typeof boxedProxy
   version: string
 }
 
@@ -46,6 +47,7 @@ export function makeComponent(
     varDefault,
     vars,
     xinProxy,
+    boxedProxy,
     version,
   })
   const packagedComponent = {
