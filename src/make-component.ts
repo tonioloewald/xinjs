@@ -4,6 +4,7 @@ import { vars, varDefault } from './css'
 import { XinStyleSheet } from './css-types'
 import { elements, svgElements, mathML } from './elements'
 import { ElementCreator } from './xin-types'
+import { version } from './version'
 import { xinProxy } from './xin-proxy'
 
 export interface XinFactory {
@@ -15,6 +16,7 @@ export interface XinFactory {
   vars: typeof vars
   varDefault: typeof varDefault
   xinProxy: typeof xinProxy
+  version: string
 }
 
 export interface XinComponentSpec {
@@ -44,6 +46,7 @@ export function makeComponent(
     varDefault,
     vars,
     xinProxy,
+    version,
   })
   const packagedComponent = {
     type,

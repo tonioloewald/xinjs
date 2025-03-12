@@ -36,6 +36,7 @@ export type {
 export { MoreMath } from './more-math'
 export { settings } from './settings'
 export { throttle, debounce } from './throttle'
+export { version } from './version'
 export {
   xin,
   boxed,

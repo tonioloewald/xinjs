@@ -14,6 +14,7 @@ export interface XinFactory {
     vars: typeof vars;
     varDefault: typeof varDefault;
     xinProxy: typeof xinProxy;
+    version: string;
 }
 export interface XinComponentSpec {
     type: typeof Component;

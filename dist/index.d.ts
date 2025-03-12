@@ -13,6 +13,7 @@ export type { XinBlueprint, XinFactory, XinPackagedComponent, } from './make-com
 export { MoreMath } from './more-math';
 export { settings } from './settings';
 export { throttle, debounce } from './throttle';
+export { version } from './version';
 export { xin, boxed, observe, unobserve, touch, observerShouldBeRemoved, updates, } from './xin';
 export * from './blueprint-loader';
 export * from './xin-types';

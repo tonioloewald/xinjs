@@ -11,6 +11,20 @@ const PUBLIC = path.resolve(PROJECT_ROOT, 'www')
 const DIST = path.resolve(PROJECT_ROOT, 'dist')
 const isSPA = true
 
+function loadJsonSync<T>(filePath: string): T {
+  try {
+    const data = Bun.file(filePath).textSync()
+    return JSON.parse(data) as T
+  } catch (error) {
+    throw new Error(`Failed to load JSON file: ${filePath}\n${error}`)
+  }
+}
+
+const config = JSON.parse(
+  await Bun.file(path.resolve(PROJECT_ROOT, 'package.json')).text()
+)
+await Bun.write('src/version.ts', `export const version = '${config.version}'`)
+
 async function prebuild() {
   await $`rm -rf ${DIST}`
   await $`rm -rf ${PUBLIC}`

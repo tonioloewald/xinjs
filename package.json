@@ -25,7 +25,7 @@
     "css-variables"
   ],
   "scripts": {
-    "start": "bun dev.ts",
+    "start": "bun --watch dev.ts",
     "format": "bun eslint src demo --fix && bun prettier --write .",
     "test": "bun test",
     "latest": "rm -rf node_modules && npm update && bun install",
