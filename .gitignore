@@ -127,3 +127,4 @@ bun.lockb
 # certificates
 *.csr
 *.pem
+www
