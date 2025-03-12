@@ -3,19 +3,18 @@ import { statSync } from 'fs'
 import { watch } from 'chokidar'
 import { $ } from 'bun'
 
+declare const Bun: any
+
 const PORT = 8018
 const PROJECT_ROOT = import.meta.dir
 const PUBLIC = path.resolve(PROJECT_ROOT, 'www')
 const DIST = path.resolve(PROJECT_ROOT, 'dist')
-const CDN = path.resolve(PROJECT_ROOT, 'cdn')
 const isSPA = true
 
 async function prebuild() {
   await $`rm -rf ${DIST}`
-  await $`rm -rf ${CDN}`
   await $`rm -rf ${PUBLIC}`
   await $`mkdir ${DIST}`
-  await $`mkdir ${CDN}`
   await $`mkdir ${PUBLIC}`
 
   // await $`bun docs.js`
@@ -34,9 +33,35 @@ async function build() {
     console.log('types created')
   }
 
+  const targets = [
+    { naming: 'index.iife.js', format: 'iife' },
+    { naming: 'index.js', format: 'esm' },
+    { naming: 'index.cjs', format: 'cjs' },
+  ]
+  for (const target of targets) {
+    const { naming, format } = target
+    let result = await Bun.build({
+      entrypoints: ['./src/index.ts'],
+      format,
+      outdir: DIST,
+      target: 'browser',
+      sourcemap: 'linked',
+      minify: true,
+      naming,
+    })
+    if (!result.success) {
+      console.error('demo build failed')
+      for (const message of result.logs) {
+        console.error(message)
+      }
+      return
+    }
+  }
+
   result = await Bun.build({
-    entrypoints: ['./src/index.ts'],
-    outdir: DIST,
+    entrypoints: ['./demo/index.ts'],
+    outdir: PUBLIC,
+    target: 'browser',
     sourcemap: 'linked',
     format: 'esm',
     minify: true,
@@ -49,40 +74,10 @@ async function build() {
     return
   }
 
-  result = await Bun.build({
-    entrypoints: ['./src/index.ts'],
-    outdir: CDN,
-    sourcemap: 'linked',
-    format: 'esm',
-    minify: true,
-  })
-  if (!result.success) {
-    console.error('cdn build failed')
-    for (const message of result.logs) {
-      console.error(message)
-    }
-    return
-  }
-
-  await Bun.build({
-    entrypoints: ['./demo/index.ts'],
-    outdir: PUBLIC,
-    target: 'browser',
-    sourcemap: 'linked',
-    minify: true,
-  })
-  if (!result.success) {
-    console.error('demo build failed')
-    for (const message of result.logs) {
-      console.error(message)
-    }
-    return
-  }
-
   console.timeEnd('build')
 }
 
-watch(['README.md', './src']).on('change', prebuild)
+watch(['README.md', './src']).on('change', () => prebuild().then(build))
 watch('./demo').on('change', build)
 
 prebuild().then(build)

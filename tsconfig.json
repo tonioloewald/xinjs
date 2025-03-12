@@ -3,7 +3,7 @@
     "lib": ["ES2020", "DOM"],
     "module": "es2020",
     "target": "es2020",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
     "strict": true,
