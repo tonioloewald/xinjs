@@ -1,4 +1,4 @@
-import { Component } from '../../src/'
+import { Component } from 'xinjs'
 import { marked } from 'marked'
 
 class MarkdownViewer extends Component {

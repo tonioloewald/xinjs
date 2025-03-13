@@ -5,7 +5,7 @@ import {
   boxedProxy,
   vars,
   XinTouchableType,
-} from '../../src/'
+} from 'xinjs'
 import { makeSorter } from 'xinjs-ui'
 import words from '../words'
 

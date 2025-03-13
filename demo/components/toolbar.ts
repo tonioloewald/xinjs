@@ -1,4 +1,4 @@
-import { Component, vars, XinStyleSheet } from '../../src/'
+import { Component, vars, XinStyleSheet } from 'xinjs'
 
 class ToolBar extends Component {
   static styleSpec = {

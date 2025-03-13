@@ -4,7 +4,7 @@ import {
   boxedProxy,
   vars,
   touch,
-} from '../../src/'
+} from 'xinjs'
 
 import { icons, postNotification, xinSelect, XinSelect } from 'xinjs-ui'
 import words from '../words'

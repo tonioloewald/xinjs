@@ -9,11 +9,11 @@ import {
   makeComponent,
   blueprintLoader,
   blueprint,
-} from '../../src/'
+} from 'xinjs'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
 
-const bp = makeComponent('blueprint-example', blueprintExample).creator
+makeComponent('bp-example', blueprintExample)
 
 async function delayMS(duration: number) {
   return new Promise((resolve) => {
@@ -44,6 +44,7 @@ const {
   xinSlot,
   swissClock,
   xinTest,
+  bpExample,
 } = elements
 
 const wordsToCamelCase = (s: string) =>
@@ -514,7 +515,7 @@ This is an in-browser test of key functionality including:
         })
       ),
       swissClock(span('blueprint', { style: { color: vars.brandColor } })),
-      bp(
+      bpExample(
         {
           bindValue: formTest.blueprintTest as unknown as XinProxyObject,
         },
@@ -530,7 +531,9 @@ This is an in-browser test of key functionality including:
         value of the blueprint (and does not change). The binding of elements inside the
         blueprint component to \`value.caption\` is "out of \`xinjs\`'s sight".`
       ),
-      bp(p('This is inside a second instance of the blueprint component!')),
+      bpExample(
+        p('This is inside a second instance of the blueprint component!')
+      ),
       shadowRed(),
       lightBlue(),
       div(

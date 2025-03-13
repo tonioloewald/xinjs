@@ -10,7 +10,7 @@ import {
   ContentType,
   svgElements,
   mathML,
-} from '../src/'
+} from 'xinjs'
 import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'

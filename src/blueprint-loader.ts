@@ -16,7 +16,7 @@ export class Blueprint extends Component {
       const { tag, src } = this
       const imported = await eval(`import('${src}')`)
       const blueprint = imported[this.property] as XinBlueprint
-      this.loaded = makeComponent(tag, blueprint)
+      this.loaded = await makeComponent(tag, blueprint)
     }
     return this.loaded!
   }

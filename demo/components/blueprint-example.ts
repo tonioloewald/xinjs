@@ -1,14 +1,14 @@
 /*!
 # blueprint example
 
-A `XinBlueprint` is a function that tells `xinjs`'s `makeComponent(tag, blueprint)`
+A `XinBlueprint` is an async function that tells `xinjs`'s `makeComponent(tag, blueprint)`
 `XinFactory` how to build out a packaged component. The difference between this and
 exporting a `Component` subclass and/or its `elementCreator` is that this is done
 by the importing app not by you, which means your component is lighter weight and
 can be loaded on-the-fly by any app using a compatible version of `xinjs`.
 */
 
-import { XinBlueprint, PartsMap } from '../../src/'
+import { XinBlueprint, PartsMap } from 'xinjs'
 
 interface BlueprintParts extends PartsMap {
   heading: HTMLElement
@@ -26,6 +26,8 @@ interface BlueprintParts extends PartsMap {
     varDefault,   // varDefault.fooBar('10px') produces `var(--foo-bar, 10px)`
     vars,         // vars.fooBar produces `var(--foo-bar)`, vars.fooBar50 produces `calc(var(--foo-bar) * 0.5)`
     xinProxy,     // produces xin proxies, see https://github.com/tonioloewald/xinjs/blob/main/docs/xin.md
+    boxedProxy,   // produces boxed xin proxies
+    version,      // the version of xinjs
   }
 */
 const blueprintExample: XinBlueprint = (tag, factory) => {

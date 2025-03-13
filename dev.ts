@@ -24,6 +24,7 @@ const config = JSON.parse(
   await Bun.file(path.resolve(PROJECT_ROOT, 'package.json')).text()
 )
 await Bun.write('src/version.ts', `export const version = '${config.version}'`)
+console.log('xinjs package version ', config.version)
 
 async function prebuild() {
   await $`rm -rf ${DIST}`
@@ -48,9 +49,9 @@ async function build() {
   }
 
   const targets = [
-    { naming: 'index.iife.js', format: 'iife' },
-    { naming: 'index.js', format: 'esm' },
-    { naming: 'index.cjs', format: 'cjs' },
+    { naming: 'index.js', format: 'iife' },
+    { naming: 'module.js', format: 'esm' },
+    { naming: 'main.js', format: 'cjs' },
   ]
   for (const target of targets) {
     const { naming, format } = target

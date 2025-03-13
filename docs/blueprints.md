@@ -37,7 +37,7 @@ of component **blueprints**. It will load its `<xin-blueprint>`s in parallel.
 - `src` is the url of the `blueprint` javascript module (required)
 - `tag` is the tagName you wish to use.
 
-## `makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedCompoent`
+## `makeComponent(tag: string, blueprint: XinBlueprint): Promise<XinPackagedCompoent>`
 
 `makeComponent` takes a `tag` of your choice and a `blueprint` and generates
 the custom-element's `class` and `elementCreator` as its `type` and `creator`
@@ -54,9 +54,10 @@ You could write:
     import { makeComponent } from 'xinjs'
     import myThingBlueprint from './path/to/my-thing-blueprint'
 
-    const differentTag = makeComponent('different-tag', myThingBlueprint).creator
+    makeComponent('different-tag', myThingBlueprint).then((packaged) => {
+      document.body.append(packaged.creator())
+    })
 
-    document.body.append(differentTag())
 
 ## `XinBlueprint`
 
@@ -69,6 +70,8 @@ You could write:
       vars: typeof vars
       varDefault: typeof varDefault
       xinProxy: typeof xinProxy
+      boxedProxy: typeof boxedProxy
+      version: string
     }
 
     export interface XinPackagedComponent {
@@ -143,6 +146,8 @@ You can define a "blueprint" like this:
         }
       }
     }
+
+The blueprint function can be `async`, so you can use async import inside it to pull in dependencies.
 
 > **Note** that in this example the blueprint is a *pure* function (i.e. it has no side-effects).
 > If this blueprint is consumed twice, each will be completely independent. A non-pure blueprint

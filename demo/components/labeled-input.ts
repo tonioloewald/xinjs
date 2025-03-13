@@ -1,4 +1,4 @@
-import { elements, Component, vars, PartsMap } from '../../src/'
+import { elements, Component, vars, PartsMap } from 'xinjs'
 const { label, slot, input } = elements
 
 interface LabeledInputParts extends PartsMap {

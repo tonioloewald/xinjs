@@ -7,7 +7,7 @@ import {
   bindings,
   ElementPart,
   vars,
-} from '../src/'
+} from 'xinjs'
 import { debounce } from '../src/throttle'
 import { WordList } from './WordList'
 import wordList from './words'

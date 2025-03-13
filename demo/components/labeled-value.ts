@@ -1,4 +1,4 @@
-import { Component } from '../../src/'
+import { Component } from 'xinjs'
 const { label, slot, span } = Component.elements
 
 class LabeledValue extends Component {

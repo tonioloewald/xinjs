@@ -1,4 +1,4 @@
-import { elements, Component } from '../../src/'
+import { elements, Component } from 'xinjs'
 const { fragment, slot, div } = elements
 
 class AppLayout extends Component {

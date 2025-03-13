@@ -4,6 +4,7 @@ import { vars, varDefault } from './css';
 import { XinStyleSheet } from './css-types';
 import { elements, svgElements, mathML } from './elements';
 import { ElementCreator } from './xin-types';
+import { xin, boxed } from './xin';
 import { xinProxy, boxedProxy } from './xin-proxy';
 export interface XinFactory {
     Color: typeof Color;
@@ -13,8 +14,11 @@ export interface XinFactory {
     mathML: typeof mathML;
     vars: typeof vars;
     varDefault: typeof varDefault;
+    xin: typeof xin;
+    boxed: typeof boxed;
     xinProxy: typeof xinProxy;
     boxedProxy: typeof boxedProxy;
+    makeComponent: typeof makeComponent;
     version: string;
 }
 export interface XinComponentSpec {
@@ -28,5 +32,5 @@ export interface XinPackagedComponent {
 export declare const madeComponents: {
     [key: string]: XinPackagedComponent;
 };
-export type XinBlueprint = (tag: string, module: XinFactory) => XinComponentSpec;
-export declare function makeComponent(tag: string, blueprint: XinBlueprint): XinPackagedComponent;
+export type XinBlueprint = (tag: string, module: XinFactory) => XinComponentSpec | Promise<XinComponentSpec>;
+export declare function makeComponent(tag: string, blueprint: XinBlueprint): Promise<XinPackagedComponent>;
