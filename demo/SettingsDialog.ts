@@ -1,4 +1,4 @@
-import { elements, vars } from '../src'
+import { elements, vars } from '../src/'
 import { icons } from 'xinjs-ui'
 
 const { form, dialog, h2, span, button, label, input, select, option } =

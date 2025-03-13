@@ -9,7 +9,7 @@ import {
   makeComponent,
   blueprintLoader,
   blueprint,
-} from '../../src'
+} from '../../src/'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
 

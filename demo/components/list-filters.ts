@@ -6,7 +6,7 @@ import {
   getListItem,
   bindings,
   Component,
-} from '../../src'
+} from '../../src/'
 import { markdownViewer } from './markdown-viewer'
 
 const { div, span, h1, h2, input, template, button, label, textarea } = elements

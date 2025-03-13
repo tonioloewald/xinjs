@@ -8,7 +8,7 @@ by the importing app not by you, which means your component is lighter weight an
 can be loaded on-the-fly by any app using a compatible version of `xinjs`.
 */
 
-import { XinBlueprint, PartsMap } from '../../src'
+import { XinBlueprint, PartsMap } from '../../src/'
 
 interface BlueprintParts extends PartsMap {
   heading: HTMLElement

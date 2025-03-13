@@ -1,4 +1,4 @@
-import { bind } from '../src'
+import { bind } from '../src/'
 import { StyleSheet, vars, invertLuminance } from '../src/css'
 import { Color } from '../src/color'
 

@@ -1,4 +1,4 @@
-import { Component } from '../../src'
+import { Component } from '../../src/'
 const { label, slot, span } = Component.elements
 
 class LabeledValue extends Component {
@@ -22,4 +22,6 @@ class LabeledValue extends Component {
   }
 }
 
-export const labeledValue = LabeledValue.elementCreator()
+export const labeledValue = LabeledValue.elementCreator({
+  tag: 'labeled-value',
+})

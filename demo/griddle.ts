@@ -5,7 +5,7 @@ import {
   vars,
   boxedProxy,
   XinTouchableType,
-} from '../src'
+} from '../src/'
 import { bodymovinPlayer, BodymovinPlayer, makeSorter, icons } from 'xinjs-ui'
 import wordList from './words'
 

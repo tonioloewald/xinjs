@@ -6,7 +6,7 @@ of `<slot>` elements when creating a web-component with no shadowDOM by
 subclassing `xinjs`'s `Component` base class.
 */
 
-import { Component, elements } from '../src'
+import { Component, elements } from '../src/'
 
 const { fragment, h1, div, slot, xinSlot, button, span } = elements
 

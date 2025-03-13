@@ -1,4 +1,4 @@
-import { Component, vars, XinStyleSheet } from '../../src/index'
+import { Component, vars, XinStyleSheet } from '../../src/'
 
 class ToolBar extends Component {
   static styleSpec = {
@@ -24,4 +24,4 @@ class ToolBar extends Component {
   } as XinStyleSheet
 }
 
-export const toolBar = ToolBar.elementCreator()
+export const toolBar = ToolBar.elementCreator({ tag: 'tool-bar' })

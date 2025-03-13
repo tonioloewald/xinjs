@@ -1,4 +1,4 @@
-import { elements, Component, vars, PartsMap } from '../../src/index'
+import { elements, Component, vars, PartsMap } from '../../src/'
 const { label, slot, input } = elements
 
 interface LabeledInputParts extends PartsMap {
@@ -94,4 +94,6 @@ class LabeledInput extends Component<LabeledInputParts> {
   }
 }
 
-export const labeledInput = LabeledInput.elementCreator()
+export const labeledInput = LabeledInput.elementCreator({
+  tag: 'labeled-input',
+})

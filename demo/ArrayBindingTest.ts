@@ -1,5 +1,5 @@
 import { xinProxy, touch, Component, elements, vars } from '../src/index'
-import { xinValue } from '../src/metadata'
+import { xinValue } from '../src/'
 import { toolBar, labeledValue, labeledInput } from './components/index'
 import { randomColor } from './random-color'
 

@@ -1,4 +1,4 @@
-import { Component } from '../../src'
+import { Component } from '../../src/'
 import { marked } from 'marked'
 
 class MarkdownViewer extends Component {
@@ -25,4 +25,6 @@ class MarkdownViewer extends Component {
   }
 }
 
-export const markdownViewer = MarkdownViewer.elementCreator()
+export const markdownViewer = MarkdownViewer.elementCreator({
+  tag: 'markdown-viewer',
+})

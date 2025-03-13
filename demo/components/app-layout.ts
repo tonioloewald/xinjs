@@ -1,4 +1,4 @@
-import { elements, Component } from '../../src/index'
+import { elements, Component } from '../../src/'
 const { fragment, slot, div } = elements
 
 class AppLayout extends Component {
@@ -29,4 +29,4 @@ class AppLayout extends Component {
   )
 }
 
-export const appLayout = AppLayout.elementCreator()
+export const appLayout = AppLayout.elementCreator({ tag: 'app-layout' })
