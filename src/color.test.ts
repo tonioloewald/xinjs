@@ -1,5 +1,3 @@
-/* eslint-disable */
-// @ts-expect-error
 import { test, expect } from 'bun:test'
 import { Color } from './color'
 

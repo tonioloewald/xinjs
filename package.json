@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -10,7 +10,8 @@
     "import": "./dist/module.js",
     "require": "./dist/main.js",
     "browser": "./dist/index.js",
-    "default": "./dist/module.js"
+    "default": "./dist/module.js",
+    "types": "dist/types.d.ts"
   },
   "homepage": "https://xinjs.net",
   "keywords": [
