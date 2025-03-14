@@ -1,5 +1,3 @@
-/* eslint-disable */
-// @ts-expect-error
 import { test, expect } from 'bun:test'
 import { xinProxy } from './xin-proxy'
 import { elements } from './elements'

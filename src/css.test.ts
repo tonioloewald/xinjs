@@ -1,5 +1,3 @@
-/* eslint-disable */
-// @ts-expect-error
 import { test, expect } from 'bun:test'
 import { camelToKabob, kabobToCamel } from './string-case'
 import { initVars, vars, css, varDefault } from './css'
