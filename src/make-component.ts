@@ -25,12 +25,12 @@ export interface XinFactory {
 }
 
 export interface XinComponentSpec {
-  type: typeof Component
+  type: Component
   styleSpec?: XinStyleSheet
 }
 
 export interface XinPackagedComponent {
-  type: typeof Component
+  type: Component
   creator: ElementCreator
 }
 
