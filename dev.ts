@@ -20,11 +20,16 @@ function loadJsonSync<T>(filePath: string): T {
   }
 }
 
-const config = JSON.parse(
-  await Bun.file(path.resolve(PROJECT_ROOT, 'package.json')).text()
-)
-await Bun.write('src/version.ts', `export const version = '${config.version}'`)
-console.log('xinjs package version ', config.version)
+async function writeVersion() {
+  const config = JSON.parse(
+    await Bun.file(path.resolve(PROJECT_ROOT, 'package.json')).text()
+  )
+  await Bun.write(
+    'src/version.ts',
+    `export const version = '${config.version}'`
+  )
+  console.log('xinjs package version ', config.version)
+}
 
 async function prebuild() {
   await $`rm -rf ${DIST}`
@@ -92,10 +97,15 @@ async function build() {
   console.timeEnd('build')
 }
 
-watch(['README.md', './src']).on('change', () => prebuild().then(build))
+watch('package.json').on('change', writeVersion)
+watch(['README.md', 'package.json', './src']).on('change', () =>
+  prebuild().then(build)
+)
 watch('./demo').on('change', build)
 
-prebuild().then(build)
+await writeVersion()
+await prebuild()
+await build()
 
 function serveFromDir(config: {
   directory: string
