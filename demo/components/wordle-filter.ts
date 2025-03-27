@@ -63,7 +63,7 @@ const { wordle } = boxedProxy({
       const letters: { [key: string]: number } = {}
 
       for (const word of found) {
-        for (const char of [...word]) {
+        for (const char of Array.from(word)) {
           letters[char] = letters[char] ? letters[char] + 1 : 1
         }
       }

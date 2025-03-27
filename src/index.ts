@@ -32,6 +32,7 @@ export type {
   XinBlueprint,
   XinFactory,
   XinPackagedComponent,
+  XinComponentSpec,
 } from './make-component'
 export { MoreMath } from './more-math'
 export { settings } from './settings'
@@ -46,6 +47,11 @@ export {
   observerShouldBeRemoved,
   updates,
 } from './xin'
-export * from './blueprint-loader'
+export {
+  blueprint,
+  Blueprint,
+  blueprintLoader,
+  BlueprintLoader,
+} from './blueprint-loader'
 export * from './xin-types'
 export { xinProxy, boxedProxy } from './xin-proxy'

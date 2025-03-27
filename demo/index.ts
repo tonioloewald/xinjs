@@ -10,8 +10,8 @@ import {
   ContentType,
   svgElements,
   mathML,
+  Color,
 } from 'xinjs'
-import { getElementBindings } from '../src/metadata'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
 import { markdownViewer } from './components/markdown-viewer'
@@ -20,9 +20,9 @@ import { kitchenSink } from './components/kitchen-sink'
 import { wordSearch } from './WordSearch'
 import { listFilterDemo, wordleFilter } from './components'
 import { fauxSlots } from './faux-slots'
-import { Color } from '../src/color'
 import { griddleGame } from './griddle'
 import { guessWord } from './components/guess-word'
+import { blueprintDemo } from './blueprint-demo'
 import { icons } from 'xinjs-ui'
 const logo = './xinjs-logo.svg'
 const readmeMd = './README.md'
@@ -52,7 +52,6 @@ Object.assign(globalThis, {
   vars,
   touch,
   Color,
-  getElementBindings,
 })
 
 type Route = {
@@ -88,6 +87,10 @@ const routes: Route[] = [
   {
     path: 'guess-word',
     content: guessWord,
+  },
+  {
+    path: 'blueprint',
+    content: blueprintDemo,
   },
   {
     path: 'faux-slots',
@@ -168,7 +171,7 @@ function showRoute() {
   if (route == null) {
     route = routes[0]
   }
-  ;[...window.document.querySelectorAll('a')].forEach((a) => {
+  Array.from(window.document.querySelectorAll('a')).forEach((a) => {
     a.classList.toggle('current-route', a.dataset.route === path)
   })
   main!.textContent = ''

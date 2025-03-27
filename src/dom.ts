@@ -32,9 +32,9 @@ export const setValue = (element: Element, newValue: any): void => {
       ;(element as HTMLInputElement).valueAsDate = new Date(newValue)
       break
     case 'multi-select':
-      for (const option of [
-        ...(element as HTMLSelectElement).querySelectorAll('option'),
-      ] as HTMLOptionElement[]) {
+      for (const option of Array.from(
+        (element as HTMLSelectElement).querySelectorAll('option')
+      ) as HTMLOptionElement[]) {
         option.selected = newValue[option.value]
       }
       break
@@ -59,7 +59,7 @@ export const getValue = (element: ValueElement): any => {
     case 'date':
       return (element as HTMLInputElement).valueAsDate?.toISOString()
     case 'multi-select':
-      return [...element.querySelectorAll('option')].reduce(
+      return Array.from(element.querySelectorAll('option')).reduce(
         (map: PickMap, option: HTMLOptionElement): PickMap => {
           map[option.value] = option.selected
           return map

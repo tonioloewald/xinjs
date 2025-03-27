@@ -302,16 +302,16 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
         shadow.appendChild(styleNode.cloneNode(true))
         appendContentToElement(shadow, _content, cloneElements)
       } else if (_content !== null) {
-        const existingChildren = [...this.childNodes]
+        const existingChildren = Array.from(this.childNodes)
         appendContentToElement(this as HTMLElement, _content, cloneElements)
         this.isSlotted = this.querySelector('slot,xin-slot') !== undefined
-        const slots = [...this.querySelectorAll('slot')]
+        const slots = Array.from(this.querySelectorAll('slot'))
         if (slots.length > 0) {
           slots.forEach(XinSlot.replaceSlot)
         }
         if (existingChildren.length > 0) {
           const slotMap: { [key: string]: Element } = { '': this }
-          ;[...this.querySelectorAll('xin-slot')].forEach((slot) => {
+          Array.from(this.querySelectorAll('xin-slot')).forEach((slot) => {
             slotMap[(slot as XinSlot).name] = slot
           })
           existingChildren.forEach((child) => {

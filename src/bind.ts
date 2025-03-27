@@ -59,9 +59,9 @@ export const touchElement = (element: Element, changedPath?: string): void => {
 if (MutationObserver != null) {
   const observer = new MutationObserver((mutationsList) => {
     mutationsList.forEach((mutation) => {
-      ;[...mutation.addedNodes].forEach((node) => {
+      Array.from(mutation.addedNodes).forEach((node) => {
         if (node instanceof Element) {
-          ;[...node.querySelectorAll(BOUND_SELECTOR)].forEach((element) =>
+          Array.from(node.querySelectorAll(BOUND_SELECTOR)).forEach((element) =>
             touchElement(element as Element)
           )
         }
@@ -74,7 +74,7 @@ if (MutationObserver != null) {
 observe(
   () => true,
   (changedPath: string) => {
-    const boundElements = document.querySelectorAll(BOUND_SELECTOR)
+    const boundElements = Array.from(document.querySelectorAll(BOUND_SELECTOR))
 
     for (const element of boundElements) {
       touchElement(element as HTMLElement, changedPath)

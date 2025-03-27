@@ -5,11 +5,13 @@ export declare class Blueprint extends Component {
     src: string;
     property: string;
     loaded?: XinPackagedComponent;
+    onload: () => void;
     packaged(): Promise<XinPackagedComponent>;
     constructor();
 }
 export declare const blueprint: import("./xin-types").ElementCreator<Component<import("./xin-types").PartsMap<Element>>>;
 export declare class BlueprintLoader extends Component {
+    onload: () => void;
     constructor();
     private load;
     connectedCallback(): void;

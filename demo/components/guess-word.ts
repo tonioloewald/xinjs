@@ -103,9 +103,9 @@ const { wordGame } = boxedProxy({
     guess() {
       const currentGuess = wordGame.currentGuess.toLocaleLowerCase()
       wordGame.currentGuess = ''
-      const word = [...wordGame.word]
+      const word = Array.from(wordGame.word)
       wordGame.gameOver = true
-      const clue = [...currentGuess].map((char, idx) => {
+      const clue = Array.from(currentGuess).map((char, idx) => {
         const info =
           word[idx] === char
             ? 'correct'
