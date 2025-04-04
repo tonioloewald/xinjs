@@ -142,10 +142,29 @@ export const invertLuminance = (map: XinStyleRule): XinStyleRule => {
   return inverted
 }
 
+export const varDefault = new Proxy<{ [key: string]: CssVarBuilder }>(
+  {},
+  {
+    get(target, prop: string) {
+      if (target[prop] === undefined) {
+        const varName = `--${prop.replace(
+          /[A-Z]/g,
+          (x) => `-${x.toLocaleLowerCase()}`
+        )}`
+        target[prop] = (val: string | number) => `var(${varName}, ${val})`
+      }
+      return target[prop]
+    },
+  }
+)
+
 export const vars = new Proxy<{ [key: string]: string }>(
   {},
   {
     get(target, prop: string) {
+      if (prop === 'default') {
+        return varDefault
+      }
       if (target[prop] == null) {
         prop = prop.replace(/[A-Z]/g, (x) => `-${x.toLocaleLowerCase()}`)
         const [, _varName, , isNegative, scaleText, method] = prop.match(
@@ -219,19 +238,3 @@ export const vars = new Proxy<{ [key: string]: string }>(
 )
 
 type CssVarBuilder = (val: string | number) => string
-
-export const varDefault = new Proxy<{ [key: string]: CssVarBuilder }>(
-  {},
-  {
-    get(target, prop: string) {
-      if (target[prop] === undefined) {
-        const varName = `--${prop.replace(
-          /[A-Z]/g,
-          (x) => `-${x.toLocaleLowerCase()}`
-        )}`
-        target[prop] = (val: string | number) => `var(${varName}, ${val})`
-      }
-      return target[prop]
-    },
-  }
-)

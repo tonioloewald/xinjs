@@ -66,3 +66,7 @@ test('css works', () => {
 test('varDefault Works', () => {
   expect(varDefault.fooBar('50px')).toBe('var(--foo-bar, 50px)')
 })
+
+test('vars.default Works', () => {
+  expect(vars.default.barBaz('#f00')).toBe('var(--bar-baz, #f00)')
+})
