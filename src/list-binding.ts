@@ -32,7 +32,7 @@ interface VirtualListSlice {
 }
 
 function updateRelativeBindings(element: Element, path: string): void {
-  const boundElements = [...element.querySelectorAll(BOUND_SELECTOR)]
+  const boundElements = Array.from(element.querySelectorAll(BOUND_SELECTOR))
   if (element.matches(BOUND_SELECTOR)) {
     boundElements.unshift(element)
   }
@@ -178,7 +178,7 @@ class ListBinding {
     let moved = 0
     let created = 0
 
-    for (const element of [...this.boundElement.children]) {
+    for (const element of Array.from(this.boundElement.children)) {
       if (element === this.listTop || element === this.listBottom) {
         continue
       }

@@ -32,10 +32,21 @@ of component **blueprints**. It will load its `<xin-blueprint>`s in parallel.
 </swiss-clock>
 ```
 
-### Attributes
+### `<xin-blueprint>` Attributes
 
 - `src` is the url of the `blueprint` javascript module (required)
-- `tag` is the tagName you wish to use.
+- `tag` is the tagName you wish to use. This defaults to the name of the source file if suitable.
+- `property` allows you to load a named exported property from a blueprint module
+  (allowing one blueprint to export multiple blueprints). By default, it's `default`.
+
+#### `<xin-loader>` and `<xin-blueprint>` Properties
+
+- `onload` is called by `<xin-loader>` when all its blueprints are loaded, and by
+  `<xin-blueprint>` when its blueprint is loaded.
+
+#### Properties
+
+- `onload` is called when all the blueprints have loaded.
 
 ## `makeComponent(tag: string, blueprint: XinBlueprint): Promise<XinPackagedCompoent>`
 

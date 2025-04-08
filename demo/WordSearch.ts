@@ -8,7 +8,7 @@ import {
   ElementPart,
   vars,
 } from 'xinjs'
-import { debounce } from '../src/throttle'
+import { debounce } from 'xinjs'
 import { WordList } from './WordList'
 import wordList from './words'
 

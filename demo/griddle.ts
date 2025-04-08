@@ -116,7 +116,7 @@ class GriddleGame extends WebComponent {
   addLetter = (event: Event) => {
     const chars = (event.target as HTMLElement).textContent as string
     this.game.wordInProgress.push(chars)
-    const dice = [...this.parts.board.querySelectorAll('.die')]
+    const dice = Array.from(this.parts.board.querySelectorAll('.die'))
     const index = dice.indexOf(event.target as HTMLElement) as number
     const { row, col } = gridPos(index)
     for (const die in dice) {
@@ -132,7 +132,7 @@ class GriddleGame extends WebComponent {
 
   cancelWord = () => {
     this.game.wordInProgress = []
-    for (const die of [...this.parts.board.querySelectorAll('.die')]) {
+    for (const die of Array.from(this.parts.board.querySelectorAll('.die'))) {
       die.removeAttribute('disabled')
     }
   }

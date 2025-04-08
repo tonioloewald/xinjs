@@ -7,8 +7,8 @@ import {
   vars,
   css,
   makeComponent,
-  blueprintLoader,
   blueprint,
+  blueprintLoader,
 } from 'xinjs'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
@@ -42,7 +42,6 @@ const {
   style,
   slot,
   xinSlot,
-  swissClock,
   xinTest,
   bpExample,
 } = elements
@@ -212,341 +211,355 @@ const options = [
   'and this one last thing',
 ]
 
-export const kitchenSink = () =>
-  fragment(
-    markdownViewer(`# Kitchen Sink
+const container = div(
+  blueprintLoader(
+    blueprint({
+      tag: 'xin-test',
+      src: 'https://tonioloewald.github.io/xin-test/dist/blueprint.js',
+      onload() {
+        container.append(
+          markdownViewer(`# Kitchen Sink
 
 This is an in-browser test of key functionality including:
 - binding (both ways)
 - elements
+- components
 - syntax sugar
-- css`),
-    form(
-      {
-        onSubmit(event: Event) {
-          event.preventDefault()
-        },
-      },
-      label(
-        span('name'),
-        input({ class: 'direct-binding', bindValue: formTest.string })
-      ),
-      xinTest('boxed binding should work', {
-        expect: formTest.string.valueOf(),
-        test() {
-          return (
-            document.querySelector('input.direct-binding') as HTMLInputElement
-          ).value
-        },
-      }),
-      div(
-        h4('inline bindings'),
-        p(
-          {
-            class: 'inline-bound',
-            bind: {
-              value: 'formTest.color',
-              binding: {
-                toDOM(elt, value) {
-                  elt.style.color = value
+- css
+- blueprints`),
+          form(
+            {
+              onSubmit(event: Event) {
+                event.preventDefault()
+              },
+            },
+            label(
+              span('name'),
+              input({ class: 'direct-binding', bindValue: formTest.string })
+            ),
+            xinTest('boxed binding should work', {
+              expect: JSON.stringify(formTest.string.valueOf()),
+              test() {
+                return (
+                  document.querySelector(
+                    'input.direct-binding'
+                  ) as HTMLInputElement
+                ).value
+              },
+            }),
+            div(
+              h4('inline bindings'),
+              p(
+                {
+                  class: 'inline-bound',
+                  bind: {
+                    value: 'formTest.color',
+                    binding: {
+                      toDOM(elt, value) {
+                        elt.style.color = value
+                      },
+                    },
+                  },
+                },
+                'this should be red'
+              )
+            ),
+            xinTest('inline-bound paragraph should be red', {
+              test() {
+                return (
+                  (document.querySelector('p.inline-bound') as HTMLElement)
+                    .style.color === 'red'
+                )
+              },
+            }),
+            div(
+              h4({ bindText: 'formTest.fleet.name' }),
+              div(
+                {
+                  bindList: { value: 'formTest.fleet.vessels', idPath: 'id' },
+                },
+                template(div({ bindText: '^.name' }))
+              )
+            ),
+            div(
+              style(
+                css({
+                  '.test-container': {
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    gap: vars.spacing25,
+                  },
+                  '.test': {
+                    color: 'black',
+                    borderRadius: vars.lineHeight,
+                    lineHeight: vars.lineHeight,
+                    padding: `0 ${vars.spacing50}`,
+                  },
+                })
+              ),
+              xinTest('custom element camelCase prop is set', {
+                test() {
+                  const simple = document.querySelector(
+                    'simple-component'
+                  ) as SimpleComponent
+                  return (
+                    simple.exampleProp !== null &&
+                    simple.exampleProp().word === 'success'
+                  )
+                },
+              })
+            ),
+            div(
+              h4('set vs value bindings'),
+              p('Both of these fields are bound to formTest.setTest'),
+              label(
+                'value bound',
+                input({ id: 'bindSetValue', bindValue: 'formTest.setTest' })
+              ),
+              label(
+                'set bound',
+                input({ id: 'bindSetSet', bindSet: 'formTest.setTest' })
+              ),
+              xinTest('editing value bound input updates set bound input', {
+                delay: 500,
+                expect: '"editing this field updates both fields"',
+                async test() {
+                  const input = document.querySelector(
+                    '#bindSetValue'
+                  ) as HTMLInputElement
+                  input.value = 'editing this field updates both fields'
+                  input.dispatchEvent(new Event('change'))
+                  await delayMS(100)
+                  return (
+                    document.querySelector('#bindSetSet') as HTMLInputElement
+                  ).value
+                },
+              }),
+              xinTest(
+                'editing set bound input does not update value bound input',
+                {
+                  delay: 1000,
+                  expect: '"editing this field updates both fields"',
+                  async test() {
+                    const input = document.querySelector(
+                      '#bindSetSet'
+                    ) as HTMLInputElement
+                    input.value = "editing this field won't trigger an update"
+                    input.dispatchEvent(new Event('change'))
+                    await delayMS(100)
+                    return (
+                      document.querySelector(
+                        '#bindSetValue'
+                      ) as HTMLInputElement
+                    ).value
+                  },
+                }
+              )
+            ),
+            simpleComponent(
+              {
+                exampleProp: () => ({ word: 'success' }),
+              },
+              h4('<simple-component> has a shadowDOM'),
+              p(
+                'Its contents are in the "light" DOM and can be bound normally.'
+              ),
+              label(span('name'), input({ bindValue: 'formTest.string' })),
+              label(
+                span('name (read only)'),
+                div({ class: 'field readonly', bindText: 'formTest.string' })
+              ),
+              div(
+                h4({ bindText: 'formTest.fleet.name' }),
+                div(
+                  {
+                    bindList: { value: 'formTest.fleet.vessels', idPath: 'id' },
+                  },
+                  template(div({ bindText: '^.name' }))
+                ),
+                lightComponent(
+                  {
+                    style: { display: 'block', marginTop: vars.spacing },
+                  },
+                  'this instance of <light-component> is nested and still works'
+                )
+              )
+            ),
+            style(
+              css({
+                '::part(first)': {
+                  color: 'red',
+                },
+                '::part(border)': {
+                  background: 'green',
+                  opacity: 1,
+                },
+                '::part(last)': {
+                  fontWeight: 'bold',
+                },
+              })
+            ),
+            shadowComponent(
+              p('This should be under the heading'),
+              markdownViewer(
+                'Thanks to `::part()` selectors, the line below the heading should be green, the heading should be red and the footer should be bold'
+              ),
+              div({ slot: 'last' }, 'This should be centered and shown last'),
+              h4('<shadow-component> has a shadowDOM and three slots', {
+                slot: 'first',
+              })
+            ),
+            lightComponent(
+              {
+                style: {
+                  display: 'flex',
+                  flexDirection: 'column',
                 },
               },
-            },
-          },
-          'this should be red'
-        )
-      ),
-      xinTest('inline-bound paragraph should be red', {
-        expect: 'red',
-        test() {
-          return (document.querySelector('p.inline-bound') as HTMLElement).style
-            .color
-        },
-      }),
-      div(
-        h4({ bindText: 'formTest.fleet.name' }),
-        div(
-          {
-            bindList: { value: 'formTest.fleet.vessels', idPath: 'id' },
-          },
-          template(div({ bindText: '^.name' }))
-        )
-      ),
-      div(
-        style(
-          css({
-            '.test-container': {
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: vars.spacing25,
-            },
-            '.test': {
-              color: 'black',
-              borderRadius: vars.lineHeight,
-              lineHeight: vars.lineHeight,
-              padding: `0 ${vars.spacing50}`,
-            },
-          })
-        ),
-        xinTest('custom element camelCase prop is set', {
-          test() {
-            const simple = document.querySelector(
-              'simple-component'
-            ) as SimpleComponent
-            return (
-              simple.exampleProp !== null &&
-              simple.exampleProp().word === 'success'
-            )
-          },
-        })
-      ),
-      div(
-        h4('set vs value bindings'),
-        p('Both of these fields are bound to formTest.setTest'),
-        label(
-          'value bound',
-          input({ id: 'bindSetValue', bindValue: 'formTest.setTest' })
-        ),
-        label(
-          'set bound',
-          input({ id: 'bindSetSet', bindSet: 'formTest.setTest' })
-        ),
-        xinTest('editing value bound input updates set bound input', {
-          delay: 500,
-          expect: 'editing this field updates both fields',
-          async test() {
-            const input = document.querySelector(
-              '#bindSetValue'
-            ) as HTMLInputElement
-            input.value = 'editing this field updates both fields'
-            input.dispatchEvent(new Event('change'))
-            await delayMS(100)
-            return (document.querySelector('#bindSetSet') as HTMLInputElement)
-              .value
-          },
-        }),
-        xinTest('editing set bound input does not update value bound input', {
-          delay: 1000,
-          expect: 'editing this field updates both fields',
-          async test() {
-            const input = document.querySelector(
-              '#bindSetSet'
-            ) as HTMLInputElement
-            input.value = "editing this field won't trigger an update"
-            input.dispatchEvent(new Event('change'))
-            await delayMS(100)
-            return (document.querySelector('#bindSetValue') as HTMLInputElement)
-              .value
-          },
-        })
-      ),
-      simpleComponent(
-        {
-          exampleProp: () => ({ word: 'success' }),
-        },
-        h4('<simple-component> has a shadowDOM'),
-        p('Its contents are in the "light" DOM and can be bound normally.'),
-        label(span('name'), input({ bindValue: 'formTest.string' })),
-        label(
-          span('name (read only)'),
-          div({ class: 'field readonly', bindText: 'formTest.string' })
-        ),
-        div(
-          h4({ bindText: 'formTest.fleet.name' }),
-          div(
-            {
-              bindList: { value: 'formTest.fleet.vessels', idPath: 'id' },
-            },
-            template(div({ bindText: '^.name' }))
-          ),
-          lightComponent(
-            {
-              style: { display: 'block', marginTop: vars.spacing },
-            },
-            'this instance of <light-component> is nested and still works'
-          )
-        )
-      ),
-      style(
-        css({
-          '::part(first)': {
-            color: 'red',
-          },
-          '::part(border)': {
-            background: 'green',
-            opacity: 1,
-          },
-          '::part(last)': {
-            fontWeight: 'bold',
-          },
-        })
-      ),
-      shadowComponent(
-        p('This should be under the heading'),
-        markdownViewer(
-          'Thanks to `::part()` selectors, the line below the heading should be green, the heading should be red and the footer should be bold'
-        ),
-        div({ slot: 'last' }, 'This should be centered and shown last'),
-        h4('<shadow-component> has a shadowDOM and three slots', {
-          slot: 'first',
-        })
-      ),
-      lightComponent(
-        {
-          style: {
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        },
-        div('this child is slotted'),
-        div({ slot: 'last' }, 'this child is slotted "last"'),
-        div({ slot: 'first' }, 'this child is slotted "first')
-      ),
-      label(
-        span('number'),
-        input({ type: 'number', bindValue: 'formTest.number' })
-      ),
-      label(
-        span('range input'),
-        input({
-          type: 'range',
-          value: 0,
-          min: -5,
-          max: 5,
-          bindValue: 'formTest.number',
-        })
-      ),
-      label(
-        span('date input'),
-        input({ type: 'date', bindValue: 'formTest.date' })
-      ),
-      label(
-        span('phone number'),
-        input({ type: 'tel', bindValue: 'formTest.phone' })
-      ),
-      label(
-        span('email'),
-        input({ type: 'email', bindValue: 'formTest.email' })
-      ),
-      label(
-        span('select an option'),
-        ...options.map((item) =>
-          label(
-            { class: 'row' },
-            input({
-              type: 'radio',
-              name: 'radio-options',
-              value: item,
-              bindValue: 'formTest.pickOne',
-            }),
-            span(item)
-          )
-        )
-      ),
-      label(
-        span('select an option'),
-        select(
-          { bindValue: 'formTest.pickOne' },
-          ...options.map((item) => option(item))
-        )
-      ),
-      label(
-        span(
-          'select all that apply (avoid using select multiple, users do not understand them!)'
-        ),
-        select(
-          { multiple: true, bindValue: 'formTest.pickAny' },
-          ...options.map((item) =>
-            option(item, { value: wordsToCamelCase(item) })
-          )
-        )
-      ),
-      label(
-        { class: 'row' },
-        input({ type: 'checkbox', bindValue: 'formTest.check1' }),
-        span('checkbox 1')
-      ),
-      label(
-        { class: 'row' },
-        input({ type: 'checkbox', bindValue: 'formTest.check2' }),
-        span('checkbox 2')
-      ),
-      label(
-        span('check all that apply'),
-        ...options.map((item) =>
-          label(
-            {
-              class: 'row',
-              onChange() {
-                // this is to sync the multi-select
-                touch('formTest.pickAny')
+              div('this child is slotted'),
+              div({ slot: 'last' }, 'this child is slotted "last"'),
+              div({ slot: 'first' }, 'this child is slotted "first')
+            ),
+            label(
+              span('number'),
+              input({ type: 'number', bindValue: 'formTest.number' })
+            ),
+            label(
+              span('range input'),
+              input({
+                type: 'range',
+                value: 0,
+                min: -5,
+                max: 5,
+                bindValue: 'formTest.number',
+              })
+            ),
+            label(
+              span('date input'),
+              input({ type: 'date', bindValue: 'formTest.date' })
+            ),
+            label(
+              span('phone number'),
+              input({ type: 'tel', bindValue: 'formTest.phone' })
+            ),
+            label(
+              span('email'),
+              input({ type: 'email', bindValue: 'formTest.email' })
+            ),
+            label(
+              span('select an option'),
+              ...options.map((item) =>
+                label(
+                  { class: 'row' },
+                  input({
+                    type: 'radio',
+                    name: 'radio-options',
+                    value: item,
+                    bindValue: 'formTest.pickOne',
+                  }),
+                  span(item)
+                )
+              )
+            ),
+            label(
+              span('select an option'),
+              select(
+                { bindValue: 'formTest.pickOne' },
+                ...options.map((item) => option(item))
+              )
+            ),
+            label(
+              span(
+                'select all that apply (avoid using select multiple, users do not understand them!)'
+              ),
+              select(
+                { multiple: true, bindValue: 'formTest.pickAny' },
+                ...options.map((item) =>
+                  option(item, { value: wordsToCamelCase(item) })
+                )
+              )
+            ),
+            label(
+              { class: 'row' },
+              input({ type: 'checkbox', bindValue: 'formTest.check1' }),
+              span('checkbox 1')
+            ),
+            label(
+              { class: 'row' },
+              input({ type: 'checkbox', bindValue: 'formTest.check2' }),
+              span('checkbox 2')
+            ),
+            label(
+              span('check all that apply'),
+              ...options.map((item) =>
+                label(
+                  {
+                    class: 'row',
+                    onChange() {
+                      // this is to sync the multi-select
+                      touch('formTest.pickAny')
+                    },
+                  },
+                  input({
+                    type: 'checkbox',
+                    bindValue: `formTest.pickAny.${wordsToCamelCase(item)}`,
+                  }),
+                  span(item)
+                )
+              )
+            ),
+            label(
+              span('autocomplete'),
+              input({
+                apply(element) {
+                  element.setAttribute('list', 'test-options')
+                },
+                bindValue: 'formTest.autocomplete',
+              })
+            ),
+            datalist(
+              { id: 'test-options' },
+              ...options.map((item) => option({ value: item }))
+            ),
+            bpExample(
+              {
+                bindValue: formTest.blueprintTest as unknown as XinProxyObject,
               },
-            },
-            input({
-              type: 'checkbox',
-              bindValue: `formTest.pickAny.${wordsToCamelCase(item)}`,
-            }),
-            span(item)
+              p('This is inside a blueprint component!')
+            ),
+            label(
+              span('Below is the (bound) caption of the previous blueprint'),
+              input({ bindValue: formTest.blueprintTest.caption })
+            ),
+            markdownViewer(
+              `You may notice that editing the caption in the \`<input>\` above does not update the
+                  component. This is because \`formTest.blueprint\` is bound to the
+                  value of the blueprint (and does not change). The binding of elements inside the
+                  blueprint component to \`value.caption\` is "out of \`xinjs\`'s sight".`
+            ),
+            bpExample(
+              p('This is inside a second instance of the blueprint component!')
+            ),
+            shadowRed(),
+            lightBlue(),
+            div(
+              {
+                style: {
+                  display: 'flex',
+                  marginTop: vars.spacing,
+                  gap: vars.spacing50,
+                },
+              },
+              span({ style: { flex: '1 1 auto' } }),
+              button('Reset'),
+              button('Submit', { class: 'primary' })
+            )
           )
         )
-      ),
-      label(
-        span('autocomplete'),
-        input({
-          apply(element) {
-            element.setAttribute('list', 'test-options')
-          },
-          bindValue: 'formTest.autocomplete',
-        })
-      ),
-      datalist(
-        { id: 'test-options' },
-        ...options.map((item) => option({ value: item }))
-      ),
-      blueprintLoader(
-        blueprint({
-          tag: 'swiss-clock',
-          src: 'https://loewald.com/lib/swiss-clock',
-        }),
-        blueprint({
-          tag: 'xin-test',
-          src: 'https://tonioloewald.github.io/xin-test/dist/blueprint.js',
-        })
-      ),
-      swissClock(span('blueprint', { style: { color: vars.brandColor } })),
-      bpExample(
-        {
-          bindValue: formTest.blueprintTest as unknown as XinProxyObject,
-        },
-        p('This is inside a blueprint component!')
-      ),
-      label(
-        span('Below is the (bound) caption of the previous blueprint'),
-        input({ bindValue: formTest.blueprintTest.caption })
-      ),
-      markdownViewer(
-        `You may notice that editing the caption in the \`<input>\` above does not update the
-        component. This is because \`formTest.blueprint\` is bound to the
-        value of the blueprint (and does not change). The binding of elements inside the
-        blueprint component to \`value.caption\` is "out of \`xinjs\`'s sight".`
-      ),
-      bpExample(
-        p('This is inside a second instance of the blueprint component!')
-      ),
-      shadowRed(),
-      lightBlue(),
-      div(
-        {
-          style: {
-            display: 'flex',
-            marginTop: vars.spacing,
-            gap: vars.spacing50,
-          },
-        },
-        span({ style: { flex: '1 1 auto' } }),
-        button('Reset'),
-        button('Submit', { class: 'primary' })
-      )
-    )
+      },
+    })
   )
+)
+
+export const kitchenSink = () => container

@@ -1,6 +1,4 @@
-import { bind } from 'xinjs'
-import { StyleSheet, vars, invertLuminance } from '../src/css'
-import { Color } from '../src/color'
+import { bind, vars, invertLuminance, Color, StyleSheet } from 'xinjs'
 
 const brandColor = Color.fromCss('rgb(8, 131, 88)')
 
@@ -37,6 +35,7 @@ const cssVars = {
   _panelBg: '#ddd',
   _inputBg: '#fff',
   _buttonBg: '#fff8',
+  _testBg: '#ccc',
   _currentBg: brandColor.opacity(0.125),
   _hoverBg: brandColor.opacity(0.25),
   _activeBg: brandColor.opacity(0.5),

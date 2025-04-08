@@ -65,7 +65,7 @@ const update = (): void => {
   if (settings.perf) {
     console.time('xin async update')
   }
-  const paths = [...touchedPaths]
+  const paths = Array.from(touchedPaths)
 
   for (const path of paths) {
     listeners
