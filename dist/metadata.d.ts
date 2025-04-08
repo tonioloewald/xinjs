@@ -5,6 +5,8 @@ export declare const EVENT_CLASS = "-xin-event";
 export declare const EVENT_SELECTOR = ".-xin-event";
 export declare const XIN_PATH = "xinPath";
 export declare const XIN_VALUE = "xinValue";
+export declare const XIN_OBSERVE = "xinObserve";
+export declare const XIN_BIND = "xinBind";
 export declare const xinPath: (x: any) => string | undefined;
 export declare function xinValue<T>(x: T): Unboxed<T>;
 export interface DataBinding<T = Element> {

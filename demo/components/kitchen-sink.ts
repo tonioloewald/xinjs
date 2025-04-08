@@ -9,6 +9,7 @@ import {
   makeComponent,
   blueprint,
   blueprintLoader,
+  updates,
 } from 'xinjs'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
@@ -26,6 +27,7 @@ async function delayMS(duration: number) {
 }
 
 const {
+  strong,
   div,
   span,
   form,
@@ -211,6 +213,14 @@ const options = [
   'and this one last thing',
 ]
 
+const xinBound = span()
+formTest.string.xinBind(xinBound, {
+  toDOM(element, value) {
+    console.log({ element, value })
+    element.textContent = value
+  },
+})
+
 const container = div(
   blueprintLoader(
     blueprint({
@@ -234,17 +244,64 @@ This is an in-browser test of key functionality including:
               },
             },
             label(
-              span('name'),
+              span('name (bindValue)'),
               input({ class: 'direct-binding', bindValue: formTest.string })
             ),
+            label(
+              span('name (custom binding)'),
+              input({
+                class: 'custom-binding',
+                bindValue: formTest.string,
+                bind: {
+                  value: formTest.color,
+                  binding: {
+                    toDOM(element, value) {
+                      element.style.color = value
+                    },
+                    fromDOM(element) {
+                      return element.style.color
+                    },
+                  },
+                },
+              })
+            ),
+            xinTest('custom toDOM binding should work', {
+              expect: '"violet"',
+              async test() {
+                const customBound = document.querySelector('.custom-binding')
+                formTest.color = 'violet'
+                await updates()
+
+                return customBound.style.color
+              },
+            }),
+            xinTest('custom fromDOM binding should work', {
+              delay: 100,
+              expect: '"red"',
+              async test() {
+                const customBound = document.querySelector('.custom-binding')
+                customBound.style.color = 'red'
+                customBound.dispatchEvent(new Event('change'))
+                await updates()
+
+                return formTest.color.valueOf()
+              },
+            }),
             xinTest('boxed binding should work', {
-              expect: JSON.stringify(formTest.string.valueOf()),
               test() {
                 return (
-                  document.querySelector(
-                    'input.direct-binding'
-                  ) as HTMLInputElement
-                ).value
+                  (
+                    document.querySelector(
+                      'input.direct-binding'
+                    ) as HTMLInputElement
+                  ).value === formTest.string.valueOf()
+                )
+              },
+            }),
+            div(strong('Bound using xinBind: '), xinBound),
+            xinTest('formTest.string.xinBind should work', {
+              test() {
+                return xinBound.textContent === formTest.string.valueOf()
               },
             }),
             div(

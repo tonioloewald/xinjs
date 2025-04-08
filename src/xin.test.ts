@@ -384,16 +384,16 @@ test('unobserve works', async () => {
   expect(changes.length).toBe(1)
 })
 
-test('XIN_PATH works', () => {
+test('xinPath works', () => {
   const _test = xin.test as XinProxyObject
   const things = _test.things as XinProxyArray
   const people = _test.people as XinProxyArray
-  expect(_test[XIN_PATH]).toBe('test')
-  expect(people[XIN_PATH]).toBe('test.people')
-  expect(things['id=666'][XIN_PATH]).toBe('test.things[id=666]')
+  expect(_test.xinPath).toBe('test')
+  expect(people.xinPath).toBe('test.people')
+  expect(things['id=666'].xinPath).toBe('test.things[id=666]')
 })
 
-test('XIN_VALUE works, xin does not corrupt content', () => {
+test('xinValue works, xin does not corrupt content', () => {
   const _test = xin.test as XinProxyObject
   const things = _test.things as XinProxyArray
   const people = _test.people as XinProxyArray
@@ -402,6 +402,24 @@ test('XIN_VALUE works, xin does not corrupt content', () => {
   expect((things['id=666'] as XinProxyObject)[XIN_VALUE]).toBe(
     (things[1] as XinProxyObject)[XIN_VALUE]
   )
+})
+
+test('xinObserve works', async () => {
+  const { test } = boxed
+  let a: any = null
+  const observer = test.value.xinObserve((path) => {
+    a = xin[path]
+  })
+  test.value = 'hello'
+  await updates()
+  expect(a).toBe('hello')
+  test.value = 17
+  await updates()
+  expect(a).toBe(17)
+  unobserve(observer)
+  test.value = 'goodbye'
+  await updates()
+  expect(a).toBe(17)
 })
 
 test('instance properties, computed properties', () => {

@@ -19,7 +19,14 @@ import {
   observerShouldBeRemoved,
 } from './path-listener'
 import { getByPath, setByPath } from './by-path'
-import { xinValue, XIN_VALUE, XIN_PATH } from './metadata'
+import { bind } from './bind'
+import {
+  xinValue,
+  XIN_VALUE,
+  XIN_PATH,
+  XIN_OBSERVE,
+  XIN_BIND,
+} from './metadata'
 
 interface ProxyConstructor {
   revocable: <T extends object, P extends object>(
@@ -106,6 +113,12 @@ const regHandler = (
         return path
       case XIN_VALUE:
         return xinValue(target)
+      case XIN_OBSERVE:
+        return (callback) => _observe(path, callback)
+      case XIN_BIND:
+        return (element: Element, binding: XinBinding, options?: XinObject) => {
+          bind(element, path, binding, options)
+        }
     }
     if (typeof _prop === 'symbol') {
       return (target as XinObject)[_prop]

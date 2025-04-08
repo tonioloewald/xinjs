@@ -10,11 +10,11 @@ export declare const initVars: (obj: {
 }) => XinStyleRule;
 export declare const darkMode: (obj: XinStyleRule) => XinStyleRule;
 export declare const invertLuminance: (map: XinStyleRule) => XinStyleRule;
+export declare const varDefault: {
+    [key: string]: CssVarBuilder;
+};
 export declare const vars: {
     [key: string]: string;
 };
 type CssVarBuilder = (val: string | number) => string;
-export declare const varDefault: {
-    [key: string]: CssVarBuilder;
-};
 export {};

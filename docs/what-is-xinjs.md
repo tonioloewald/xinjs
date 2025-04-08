@@ -339,6 +339,15 @@ And you get autocomplete and linting and type-checking, and the `input(): Elemen
 
 > **Caution!** `foo.bar.baz !== 'luhrmann'` because `foo.bar.baz` is now a proxy wrapped around a `String`. So, `foo.bar.baz == 'luhrmann'`. You can use `xinValue(foo.bar.baz)` or `foo.bar.baz.valueOf()` on such objects ('==' is frowned upon by linters).
 
+## `.xinValue`, `.xinPath`, and `.xinObserve`
+
+The xin proxy provides three special properties:
+
+- `.xinValue` is syntax sugar for `xinValue()`, e.g. `boxed.foo.bar.xinValue === xinValue(boxed.foo.bar)`
+- `.xinPath` is syntax sugar for `xinPath()`, e.g. `boxed.foo.bar.xinPath === 'foo.bar' === xinPath(boxed.foo.bar)`
+- `.xinObserve` is syntax sugar for `observe()`, e.g. `observe('foo.bar', path => console.log(xin[path]))` can be
+  rewritten as `boxed.foo.bar.xinObserve(path => console.log(xin[path]))`.
+
 ## `bind`
 
 The `bind` function is used to bind data stored in the `xin` proxy to DOM elements. It only updates elements that are in the `document.body`.

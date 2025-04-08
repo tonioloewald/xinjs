@@ -14,6 +14,8 @@ export const EVENT_SELECTOR = `.${EVENT_CLASS}`
 
 export const XIN_PATH = 'xinPath'
 export const XIN_VALUE = 'xinValue'
+export const XIN_OBSERVE = 'xinObserve'
+export const XIN_BIND = 'xinBind'
 
 export const xinPath = (x: any): string | undefined => {
   return x[XIN_PATH]
