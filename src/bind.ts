@@ -187,7 +187,6 @@ const handleBoundEvent = (event: Event): void => {
           propagationStopped = true
         }
       } else {
-        // @ts-expect-error-error
         const value = target[prop]
         return typeof value === 'function' ? value.bind(target) : value
       }

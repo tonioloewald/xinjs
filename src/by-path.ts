@@ -166,7 +166,6 @@ function getByPath(obj: XinObject | XinArray, path: string): any {
       }
     } else {
       if ((found as XinArray).length === 0) {
-        // @ts-expect-error-error
         found = (found as XinArray)[part.slice(1)]
         if (part[0] !== '=') {
           return undefined
