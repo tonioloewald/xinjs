@@ -8,7 +8,7 @@
     "allowImportingTsExtensions": true,
     "strict": true,
     "downlevelIteration": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "jsx": "preserve",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
@@ -21,5 +21,5 @@
   },
   "allowJs": true,
   "include": ["src/**/*"],
-  "exclude": ["node_nodules", "**.*.spec.ts,*.test.ts"]
+  "exclude": ["node_modules", "**.*.spec.ts", "*.test.ts"]
 }

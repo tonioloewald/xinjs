@@ -341,12 +341,16 @@ And you get autocomplete and linting and type-checking, and the `input(): Elemen
 
 ## `.xinValue`, `.xinPath`, and `.xinObserve`
 
-The xin proxy provides three special properties:
+A xin proxy provides three convenient properties:
 
-- `.xinValue` is syntax sugar for `xinValue()`, e.g. `boxed.foo.bar.xinValue === xinValue(boxed.foo.bar)`
-- `.xinPath` is syntax sugar for `xinPath()`, e.g. `boxed.foo.bar.xinPath === 'foo.bar' === xinPath(boxed.foo.bar)`
+- `.xinValue` is syntax sugar for `xinValue()`, e.g. `foo.bar.xinValue === xinValue(boxed.foo.bar)`
+- `.xinPath` is syntax sugar for `xinPath()`, e.g. `foo.bar.xinPath === 'foo.bar' === xinPath(boxed.foo.bar)`
+- `.xinBind` is syntax sugar for `bind()`, e.g. `foo.bar.xinBind(element, { toDOM(element, value){ ... } })`
+  is equivalent to `bind(element, foo.bar, { toDOM(element, value){ ... } })`
 - `.xinObserve` is syntax sugar for `observe()`, e.g. `observe('foo.bar', path => console.log(xin[path]))` can be
   rewritten as `boxed.foo.bar.xinObserve(path => console.log(xin[path]))`.
+  
+In the preceding examples `foo.bar` is a assumed to be a boxed proxy.
 
 ## `bind`
 

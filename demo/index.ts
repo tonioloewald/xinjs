@@ -11,6 +11,7 @@ import {
   svgElements,
   mathML,
   Color,
+  observe,
 } from 'xinjs'
 import { settingsDialog } from './SettingsDialog'
 import { arrayBindingTest } from './ArrayBindingTest'
@@ -52,6 +53,7 @@ Object.assign(globalThis, {
   vars,
   touch,
   Color,
+  observe,
 })
 
 type Route = {
