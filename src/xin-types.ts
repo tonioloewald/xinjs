@@ -1,4 +1,4 @@
-import { XIN_PATH, XIN_VALUE } from './metadata'
+import { XIN_PATH, XIN_VALUE, XIN_OBSERVE, XIN_BIND } from './metadata'
 import { XinStyleRule } from './css-types'
 
 export type AnyFunction = (...args: any[]) => any | Promise<any>
@@ -15,9 +15,14 @@ export type XinProxyTarget = XinObject | XinArray
 
 export type XinValue = XinObject | XinArray | XinScalar | null | undefined
 
+type ProxyObserveFunc = ((path: string) => void)
+type ProxyBindFunc<T = Element> = (element: T, binding: XinBinding<T>, options?: XinObject) => VoidFunction
+
 export interface XinProps<T = any> {
   [XIN_PATH]: string
   [XIN_VALUE]: T
+  [XIN_OBSERVE]: ProxyObserveFunc
+  [XIN_BIND]: ProxyBindFunc
 }
 
 export type BoxedProxy<T = any> = T extends Array<infer U>

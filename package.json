@@ -1,6 +1,6 @@
 {
   "name": "xinjs",
-  "version": "0.8.10",
+  "version": "0.8.11",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -33,16 +33,16 @@
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",
   "devDependencies": {
-    "@happy-dom/global-registrator": "^13.10.1",
+    "@happy-dom/global-registrator": "^17.4.4",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "bun-types": "^1.2.8",
+    "caniuse-lite": "^1.0.30001712",
     "eslint": "^8.57.1",
     "marked": "^5.1.2",
     "prettier": "^2.8.8",
     "typescript": "^5.8.3",
     "xinjs": "file:.",
-    "xinjs-ui": "^0.9.10",
-    "caniuse-lite": "^1.0.30001712"
+    "xinjs-ui": "^0.9.10"
   },
   "files": [
     "/dist",

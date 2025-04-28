@@ -346,7 +346,51 @@ The xin proxy provides three special properties:
 - `.xinValue` is syntax sugar for `xinValue()`, e.g. `boxed.foo.bar.xinValue === xinValue(boxed.foo.bar)`
 - `.xinPath` is syntax sugar for `xinPath()`, e.g. `boxed.foo.bar.xinPath === 'foo.bar' === xinPath(boxed.foo.bar)`
 - `.xinObserve` is syntax sugar for `observe()`, e.g. `observe('foo.bar', path => console.log(xin[path]))` can be
-  rewritten as `boxed.foo.bar.xinObserve(path => console.log(xin[path]))`.
+  rewritten as `boxed.foo.bar.xinObserve(path => console.log(xin[path]))`. `xinObserve()` returns a function that
+  removes the observer, e.g.
+
+```
+export MyComponent extends Component {
+  set proxy(proxy: BoxedProxy) {
+    this._proxy = proxy
+
+    if(document.body.contains(this)) {
+      this.observe()
+    }
+  }
+
+  get proxy(): null | BoxedProxy {
+    return this._proxy
+  }
+
+  private _proxy = null as null | BoxedProxy
+  private _unobserve = null as null | VoidFunction
+
+  unobserve = () => {
+    if (this._unobserve) {
+      this._unobserve()
+      this._unobserve = null
+    }
+  }
+
+  private observe = () => {
+    this.unobserve()
+    this.unobserve = proxy.some.value.xinObserve(() => {
+      this.parts.something.value = proxy.some.value.xinValue
+    })
+  }
+
+  connectedCallback() {
+    super.connectedCallback()
+
+    this.observe()
+  }
+
+  disconnectedCallback() {
+    this.unobserve()
+  }
+}
+```
 
 ## `bind`
 

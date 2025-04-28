@@ -6,14 +6,14 @@
       "devDependencies": {
         "@happy-dom/global-registrator": "^13.10.1",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
-        "bun-types": "^1.2.5",
-        "caniuse-lite": "^1.0.30001701",
+        "bun-types": "^1.2.8",
+        "caniuse-lite": "^1.0.30001712",
         "eslint": "^8.57.1",
         "marked": "^5.1.2",
         "prettier": "^2.8.8",
-        "typescript": "^5.6.2",
+        "typescript": "^5.8.3",
         "xinjs": "file:.",
-        "xinjs-ui": "^0.9.9",
+        "xinjs-ui": "^0.9.10",
       },
     },
   },
@@ -302,6 +302,10 @@
 
     "xinjs/xinjs": ["xinjs@file:.", {}],
 
+    "xinjs-ui/xinjs": ["xinjs@file:", { "devDependencies": { "@happy-dom/global-registrator": "^13.10.1", "@typescript-eslint/eslint-plugin": "^6.21.0", "bun-types": "^1.2.5", "caniuse-lite": "^1.0.30001701", "eslint": "^8.57.1", "marked": "^5.1.2", "prettier": "^2.8.8", "typescript": "^5.6.2", "xinjs": "file:.", "xinjs-ui": "^0.9.9" } }],
+
     "@typescript-eslint/typescript-estree/minimatch/brace-expansion": ["brace-expansion@2.0.1", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA=="],
+
+    "xinjs-ui/xinjs/xinjs": ["xinjs@file:.", {}],
   }
 }

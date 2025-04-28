@@ -8,6 +8,7 @@ import {
   XinValue,
   PathTestFunction,
   ObserverCallbackFunction,
+  XinBinding,
 } from './xin-types'
 import { settings } from './settings'
 import {
@@ -114,7 +115,10 @@ const regHandler = (
       case XIN_VALUE:
         return xinValue(target)
       case XIN_OBSERVE:
-        return (callback) => _observe(path, callback)
+        return (callback) => {
+          const listener = _observe(path, callback)
+          return () => unobserve(listener)
+        }
       case XIN_BIND:
         return (element: Element, binding: XinBinding, options?: XinObject) => {
           bind(element, path, binding, options)
