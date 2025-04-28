@@ -17,7 +17,7 @@ test('element binding works', async () => {
     bindValue: test.value,
     bindEnabled: test.enabled,
   })
-  document.append(boundDiv, boundInput)
+  document.body.append(boundDiv, boundInput)
   await updates()
   expect(boundDiv.textContent).toBe('foobar')
   expect(JSON.stringify(boundInput.value)).toBe('17')
@@ -65,7 +65,7 @@ test('custom bindings work', async () => {
     },
   })
 
-  document.append(boundDiv, boundInput)
+  document.body.append(boundDiv, boundInput)
   await updates()
   expect(boundDiv.getAttribute('data-what')).toBe('foobar')
   expect(boundInput.style.color).toBe('red')
@@ -74,11 +74,8 @@ test('custom bindings work', async () => {
   await updates()
   expect(boundDiv.getAttribute('data-what')).toBe('baz')
   expect(boundInput.style.color).toBe('yellow')
-  // these tests fail (happydom?) but similar tests in kitchen sink pass
-  /*
   boundInput.style.color = 'blue'
   boundInput.dispatchEvent(new Event('change'))
   await updates()
-  expect(test.color).toBe('blue')
-  */
+  expect(test.color.valueOf()).toBe('blue')
 })
