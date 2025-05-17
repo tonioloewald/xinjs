@@ -10,6 +10,7 @@ import {
   blueprint,
   blueprintLoader,
   updates,
+  XinStyleRule,
 } from 'xinjs'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
@@ -175,6 +176,8 @@ console.warn('^^^ this is intentional')
 
 const { formTest } = boxedProxy({
   formTest: {
+    hidden: false,
+    disabled: true,
     string: 'hello xin',
     number: 3,
     color: 'red',
@@ -201,6 +204,10 @@ const { formTest } = boxedProxy({
     reset() {
       formTest.string = 'hello xin'
     },
+    style: {
+      fontFamily: 'serif',
+      color: '#ff0000',
+    },
   },
 })
 
@@ -214,7 +221,7 @@ const options = [
 ]
 
 const xinBound = span()
-formTest.string.xinBind(xinBound, {
+formTest.string.xinBind!(xinBound, {
   toDOM(element, value) {
     console.log({ element, value })
     element.textContent = value
@@ -268,7 +275,9 @@ This is an in-browser test of key functionality including:
             xinTest('custom toDOM binding should work', {
               expect: '"violet"',
               async test() {
-                const customBound = document.querySelector('.custom-binding')
+                const customBound = document.querySelector(
+                  '.custom-binding'
+                ) as HTMLElement
                 formTest.color = 'violet'
                 await updates()
 
@@ -279,7 +288,9 @@ This is an in-browser test of key functionality including:
               delay: 100,
               expect: '"red"',
               async test() {
-                const customBound = document.querySelector('.custom-binding')
+                const customBound = document.querySelector(
+                  '.custom-binding'
+                ) as HTMLElement
                 customBound.style.color = 'red'
                 customBound.dispatchEvent(new Event('change'))
                 await updates()
@@ -611,6 +622,48 @@ This is an in-browser test of key functionality including:
               span({ style: { flex: '1 1 auto' } }),
               button('Reset'),
               button('Submit', { class: 'primary' })
+            ),
+            h4('Automatic Binding'),
+            div(
+              button(
+                { hidden: formTest.hidden, disabled: formTest.disabled },
+                'Target Button'
+              ),
+              label(
+                input({ type: 'checkbox', bindValue: formTest.disabled }),
+                span('disabled')
+              ),
+              label(
+                input({ type: 'checkbox', bindValue: formTest.hidden }),
+                span('hidden')
+              ),
+              div(
+                {
+                  style: formTest.style as XinStyleRule,
+                },
+                "This div's style is set to formTest.style"
+              ),
+              div(
+                {
+                  style: {
+                    background: formTest.style.color as string,
+                  },
+                },
+                'This div has its background color set to formTest.style.color'
+              ),
+              label(
+                span('font-family'),
+                input({
+                  bindValue: formTest.style.fontFamily,
+                })
+              ),
+              label(
+                span('color'),
+                input({
+                  type: 'color',
+                  bindValue: formTest.style.color,
+                })
+              )
             )
           )
         )

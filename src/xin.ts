@@ -9,7 +9,6 @@ import {
   XinBinding,
   PathTestFunction,
   ObserverCallbackFunction,
-  XinBinding,
 } from './xin-types'
 import { settings } from './settings'
 import {

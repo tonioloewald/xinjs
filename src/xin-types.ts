@@ -25,6 +25,13 @@ export interface XinProps<T = any> {
   [XIN_BIND]: ProxyBindFunc
 }
 
+export interface OptionalXinProps<T = any> {
+  [XIN_PATH]?: string
+  [XIN_VALUE]?: T
+  [XIN_OBSERVE]?: ProxyObserveFunc
+  [XIN_BIND]?: ProxyBindFunc
+}
+
 export type BoxedProxy<T = any> = T extends Array<infer U>
   ? Array<BoxedProxy<U>>
   : T extends Function
@@ -34,11 +41,11 @@ export type BoxedProxy<T = any> = T extends Array<infer U>
     [K in keyof T]: BoxedProxy<T[K]>
   }
   : T extends string
-  ? String
+  ? String & OptionalXinProps<string>
   : T extends number
-  ? Number
+  ? Number & OptionalXinProps<number>
   : T extends boolean
-  ? Boolean
+  ? Boolean & OptionalXinProps<boolean>
   : T
 
 export type Unboxed<T = any> = T extends String

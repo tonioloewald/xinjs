@@ -5,9 +5,11 @@ import {
   ElementProps,
   ElementCreator,
   StringMap,
+  XinBinding,
 } from './xin-types'
 import { camelToKabob } from './string-case'
 import { processProp } from './css'
+import { xinPath } from './metadata'
 
 const MATH = 'http://www.w3.org/1998/Math/MathML'
 const SVG = 'http://www.w3.org/2000/svg'
@@ -140,6 +142,112 @@ export interface ElementsProxy {
 
 const templates: { [key: string]: Element } = {}
 
+const elementStyle = (elt: HTMLElement, prop: string, value: any) => {
+  const processed = processProp(camelToKabob(prop), value)
+  if (processed.prop.startsWith('--')) {
+    elt.style.setProperty(processed.prop, processed.value)
+  } else {
+    ;(elt.style as unknown as { [key: string]: string })[prop] = processed.value
+  }
+}
+
+const elementStyleBinding = (prop: string): XinBinding => {
+  return {
+    toDOM(element, value) {
+      elementStyle(element as HTMLElement, prop, value)
+    },
+  }
+}
+
+const elementProp = (elt: HTMLElement, key: string, value: any) => {
+  if (key === 'style') {
+    if (typeof value === 'object') {
+      for (const prop of Object.keys(value)) {
+        if (xinPath(value[prop])) {
+          console.log(prop, value[prop])
+          bind(elt, value[prop], elementStyleBinding(prop))
+        } else {
+          elementStyle(elt, prop, value[prop])
+        }
+      }
+    } else {
+      elt.setAttribute('style', value)
+    }
+  } else if ((elt as { [key: string]: any })[key] !== undefined) {
+    // MathML is only supported on 91% of browsers, and not on the Raspberry Pi Chromium
+    const { MathMLElement } = globalThis
+    if (
+      elt instanceof SVGElement ||
+      (MathMLElement !== undefined && elt instanceof MathMLElement)
+    ) {
+      elt.setAttribute(key, value)
+    } else {
+      ;(elt as { [key: string]: any })[key] = value
+    }
+  } else {
+    const attr = camelToKabob(key)
+
+    if (attr === 'class') {
+      value.split(' ').forEach((className: string) => {
+        elt.classList.add(className)
+      })
+    } else if ((elt as { [key: string]: any })[attr] !== undefined) {
+      ;(elt as StringMap)[attr] = value
+    } else if (typeof value === 'boolean') {
+      value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr)
+    } else {
+      elt.setAttribute(attr, value)
+    }
+  }
+}
+
+const elementPropBinding = (key: string): XinBinding => {
+  return {
+    toDOM(element, value) {
+      elementProp(element as HTMLElement, key, value)
+    },
+  }
+}
+
+const elementSet = (elt: HTMLElement, key: string, value: any) => {
+  if (key === 'apply') {
+    value(elt)
+  } else if (key.match(/^on[A-Z]/) != null) {
+    const eventType = key.substring(2).toLowerCase()
+    on(elt, eventType, value)
+  } else if (key === 'bind') {
+    const binding =
+      typeof value.binding === 'string'
+        ? bindings[value.binding]
+        : value.binding
+    if (binding !== undefined && value.value !== undefined) {
+      bind(
+        elt,
+        value.value,
+        value.binding instanceof Function
+          ? { toDOM: value.binding }
+          : value.binding
+      )
+    } else {
+      throw new Error(`bad binding`)
+    }
+  } else if (key.match(/^bind[A-Z]/) != null) {
+    const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5)
+    const binding = bindings[bindingType]
+    if (binding !== undefined) {
+      bind(elt, value, binding)
+    } else {
+      throw new Error(
+        `${key} is not allowed, bindings.${bindingType} is not defined`
+      )
+    }
+  } else if (xinPath(value)) {
+    bind(elt, value, elementPropBinding(key))
+  } else {
+    elementProp(elt, key, value)
+  }
+}
+
 const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   if (templates[tagType] === undefined) {
     const [tag, namespace] = tagType.split('|')
@@ -169,77 +277,7 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   }
   for (const key of Object.keys(elementProps)) {
     const value: any = elementProps[key]
-    if (key === 'apply') {
-      value(elt)
-    } else if (key === 'style') {
-      if (typeof value === 'object') {
-        for (const prop of Object.keys(value)) {
-          const processed = processProp(camelToKabob(prop), value[prop])
-          if (processed.prop.startsWith('--')) {
-            elt.style.setProperty(processed.prop, processed.value)
-          } else {
-            ;(elt.style as unknown as { [key: string]: string })[prop] =
-              processed.value
-          }
-        }
-      } else {
-        elt.setAttribute('style', value)
-      }
-    } else if (key.match(/^on[A-Z]/) != null) {
-      const eventType = key.substring(2).toLowerCase()
-      on(elt, eventType, value)
-    } else if (key === 'bind') {
-      const binding =
-        typeof value.binding === 'string'
-          ? bindings[value.binding]
-          : value.binding
-      if (binding !== undefined && value.value !== undefined) {
-        bind(
-          elt,
-          value.value,
-          value.binding instanceof Function
-            ? { toDOM: value.binding }
-            : value.binding
-        )
-      } else {
-        throw new Error(`bad binding`)
-      }
-    } else if (key.match(/^bind[A-Z]/) != null) {
-      const bindingType = key.substring(4, 5).toLowerCase() + key.substring(5)
-      const binding = bindings[bindingType]
-      if (binding !== undefined) {
-        bind(elt, value, binding)
-      } else {
-        throw new Error(
-          `${key} is not allowed, bindings.${bindingType} is not defined`
-        )
-      }
-    } else if ((elt as { [key: string]: any })[key] !== undefined) {
-      // MathML is only supported on 91% of browsers, and not on the Raspberry Pi Chromium
-      const { MathMLElement } = globalThis
-      if (
-        elt instanceof SVGElement ||
-        (MathMLElement !== undefined && elt instanceof MathMLElement)
-      ) {
-        elt.setAttribute(key, value)
-      } else {
-        ;(elt as { [key: string]: any })[key] = value
-      }
-    } else {
-      const attr = camelToKabob(key)
-
-      if (attr === 'class') {
-        value.split(' ').forEach((className: string) => {
-          elt.classList.add(className)
-        })
-      } else if ((elt as { [key: string]: any })[attr] !== undefined) {
-        ;(elt as StringMap)[attr] = value
-      } else if (typeof value === 'boolean') {
-        value ? elt.setAttribute(attr, '') : elt.removeAttribute(attr)
-      } else {
-        elt.setAttribute(attr, value)
-      }
-    }
+    elementSet(elt, key, value)
   }
   return elt
 }
