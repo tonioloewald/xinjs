@@ -436,7 +436,7 @@ This is an in-browser test of key functionality including:
               label(span('name'), input({ bindValue: 'formTest.string' })),
               label(
                 span('name (read only)'),
-                div({ class: 'field readonly', bindText: 'formTest.string' })
+                div({ class: 'field readonly' }, formTest.string)
               ),
               div(
                 h4({ bindText: 'formTest.fleet.name' }),

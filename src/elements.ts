@@ -271,6 +271,8 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
       } else {
         elt.append(item as Node)
       }
+    } else if (item.xinPath) {
+      elt.append(elements.span({ bindText: item }))
     } else {
       Object.assign(elementProps, item)
     }
