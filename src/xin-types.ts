@@ -133,6 +133,7 @@ export interface ElementProps<T = Element> {
   bindList?: XinBindingShortcut
   bindEnabled?: XinBindingShortcut
   bindDisabled?: XinBindingShortcut
+  bindSet?: XinBindingShortcut
   bindStyle?: XinBindingShortcut
   style?: XinStyleRule
   class?: string
