@@ -187,7 +187,7 @@ const handleBoundEvent = (event: Event): void => {
           propagationStopped = true
         }
       } else {
-        const value = target[prop]
+        const value = (target as any)[prop]
         return typeof value === 'function' ? value.bind(target) : value
       }
     },
