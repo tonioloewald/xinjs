@@ -125,7 +125,7 @@ if (globalThis.document != null) {
   document.body.addEventListener('input', handleChange, true)
 }
 
-export function bind<T extends Element>(
+export function bind<T extends Element = Element>(
   element: T,
   what: XinTouchableType | XinBindingSpec,
   binding: XinBinding<T>,
@@ -197,7 +197,7 @@ const handleBoundEvent = (event: Event): void => {
     const handlers = eventBindings[event.type] || ([] as XinEventHandler[])
     for (const handler of handlers) {
       if (typeof handler === 'function') {
-        handler(wrappedEvent)
+        handler(wrappedEvent as Event & { target: Element })
       } else {
         const func = xin[handler]
         if (typeof func === 'function') {

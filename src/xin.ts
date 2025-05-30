@@ -176,7 +176,7 @@ const regHandler = (
       const value = target[prop as unknown as number]
       return typeof value === 'function'
         ? (...items: any[]) => {
-            const result = Array.prototype[prop].apply(target, items)
+            const result = value.apply(target, items)
             if (ARRAY_MUTATIONS.includes(prop)) {
               touch(path)
             }

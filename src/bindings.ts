@@ -34,16 +34,15 @@ export const bindings: { [key: string | symbol]: XinBinding<Element> } = {
   },
 
   style: {
-    toDOM(element: Element, value: any) {
-      if (typeof value === 'object') {
-        for (const prop of Object.keys(value)) {
-          // @ts-expect-error typescript has a strange/incorrect idea of what element.style is
-          element.style[prop] = value[prop]
-        }
-      } else if (typeof value === 'string') {
-        element.setAttribute('style', value)
-      } else {
-        throw new Error('style binding expects either a string or object')
+    toDOM(element: Element, value: any) {},
+  },
+
+  callback: {
+    toDOM(element: Element, value: any, options?: XinObject) {
+      if (options?.callback) {
+        options.callback(element, value)
+      } else if (value instanceof Function) {
+        value(element)
       }
     },
   },
