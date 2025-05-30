@@ -197,6 +197,13 @@ const { formTest } = boxedProxy({
         { id: 'ncc-74656', name: 'Voyager' },
       ],
     },
+    template: {
+      country: 'Spain',
+      location: 'plain',
+    },
+    callback(element: Element) {
+      element.textContent = 'A callback was here!'
+    },
     setTest: 'try editing this',
     blueprintTest: {
       caption: 'This one is bound',
@@ -210,6 +217,9 @@ const { formTest } = boxedProxy({
     },
   },
 })
+
+// @ts-expect-error for debugging
+window.formTest = formTest
 
 const options = [
   'this',
@@ -380,7 +390,7 @@ This is an in-browser test of key functionality including:
             ),
             div(
               h4('set vs value bindings'),
-              p('Both of these fields are bound to formTest.setTest'),
+              p('The next three fields are bound to formTest.setTest'),
               label(
                 'value bound',
                 input({ id: 'bindSetValue', bindValue: 'formTest.setTest' })
@@ -389,26 +399,33 @@ This is an in-browser test of key functionality including:
                 'set bound',
                 input({ id: 'bindSetSet', bindSet: 'formTest.setTest' })
               ),
-              xinTest('editing value bound input updates set bound input', {
-                delay: 500,
-                expect: '"editing this field updates both fields"',
-                async test() {
-                  const input = document.querySelector(
-                    '#bindSetValue'
-                  ) as HTMLInputElement
-                  input.value = 'editing this field updates both fields'
-                  input.dispatchEvent(new Event('change'))
-                  await delayMS(100)
-                  return (
-                    document.querySelector('#bindSetSet') as HTMLInputElement
-                  ).value
-                },
-              }),
+              label(
+                'automatically bound',
+                input({ id: 'bindSetAuto', value: formTest.setTest })
+              ),
+              xinTest(
+                'editing value bound input updates set and auto bound inputs',
+                {
+                  delay: 500,
+                  expect: '"editing this field updates all three fields"',
+                  async test() {
+                    const input = document.querySelector(
+                      '#bindSetValue'
+                    ) as HTMLInputElement
+                    input.value = 'editing this field updates all three fields'
+                    input.dispatchEvent(new Event('change'))
+                    await delayMS(100)
+                    return (
+                      document.querySelector('#bindSetSet') as HTMLInputElement
+                    ).value
+                  },
+                }
+              ),
               xinTest(
                 'editing set bound input does not update value bound input',
                 {
                   delay: 1000,
-                  expect: '"editing this field updates both fields"',
+                  expect: '"editing this field updates all three fields"',
                   async test() {
                     const input = document.querySelector(
                       '#bindSetSet'
@@ -423,7 +440,78 @@ This is an in-browser test of key functionality including:
                     ).value
                   },
                 }
+              ),
+              xinTest(
+                'editing auto bound input does not update value bound input',
+                {
+                  delay: 1000,
+                  expect: '"editing this field updates all three fields"',
+                  async test() {
+                    const input = document.querySelector(
+                      '#bindSetAuto'
+                    ) as HTMLInputElement
+                    input.value =
+                      "editing this field also won't trigger an update"
+                    input.dispatchEvent(new Event('change'))
+                    await delayMS(100)
+                    return (
+                      document.querySelector(
+                        '#bindSetValue'
+                      ) as HTMLInputElement
+                    ).value
+                  },
+                }
               )
+            ),
+            div(
+              h4('Callback Binding'),
+              p({
+                id: 'callback-template',
+                bindCallback: {
+                  value: formTest.template,
+                  callback(element, value) {
+                    element.textContent = `The rain in ${value.country} stays mainly in the ${value.location}.`
+                  },
+                },
+              }),
+              p({
+                id: 'simple-callback',
+                bindCallback: 'formTest.callback',
+              }),
+              xinTest('callback populates template', {
+                expect: '"The rain in Spain stays mainly in the plain."',
+                delay: 200,
+                async test() {
+                  formTest.template = {
+                    country: 'Spain',
+                    location: 'plain',
+                  }
+                  await delayMS(100)
+                  return document.getElementById('callback-template')!
+                    .textContent
+                },
+              }),
+              xinTest('updating formTest.template changes content', {
+                expect: '"The rain in Australia stays mainly in the coast."',
+                delay: 1000,
+                async test() {
+                  await delayMS(500)
+                  formTest.template = {
+                    country: 'Australia',
+                    location: 'coast',
+                  }
+                  await delayMS(100)
+                  return document.getElementById('callback-template')!
+                    .textContent
+                },
+              }),
+              xinTest('simple callback works', {
+                expect: '"A callback was here!"',
+                delay: 100,
+                async test() {
+                  return document.getElementById('simple-callback')!.textContent
+                },
+              })
             ),
             simpleComponent(
               {
