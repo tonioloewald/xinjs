@@ -210,6 +210,9 @@ StyleSheet('base-style', {
   'input[type="range"], input[type="checkbox"], input[type="radio"]': {
     boxShadow: 'none',
   },
+  ':disabled': {
+    opacity: 0.5,
+  },
   'input:disabled, .field.readonly': {
     opacity: 0.75,
   },

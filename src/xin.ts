@@ -115,7 +115,10 @@ const regHandler = (
       case XIN_VALUE:
         return xinValue(target)
       case XIN_OBSERVE:
-        return (callback) => _observe(path, callback)
+        return (callback) => {
+          const listener = _observe(path, callback)
+          return () => unobserve(listener)
+        }
       case XIN_BIND:
         return (element: Element, binding: XinBinding, options?: XinObject) => {
           bind(element, path, binding, options)
@@ -173,7 +176,7 @@ const regHandler = (
       const value = target[prop as unknown as number]
       return typeof value === 'function'
         ? (...items: any[]) => {
-            const result = Array.prototype[prop].apply(target, items)
+            const result = value.apply(target, items)
             if (ARRAY_MUTATIONS.includes(prop)) {
               touch(path)
             }

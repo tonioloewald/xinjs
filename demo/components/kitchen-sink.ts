@@ -10,6 +10,7 @@ import {
   blueprint,
   blueprintLoader,
   updates,
+  XinStyleRule,
 } from 'xinjs'
 import { markdownViewer } from './markdown-viewer'
 import blueprintExample from './blueprint-example'
@@ -175,6 +176,8 @@ console.warn('^^^ this is intentional')
 
 const { formTest } = boxedProxy({
   formTest: {
+    hidden: false,
+    disabled: true,
     string: 'hello xin',
     number: 3,
     color: 'red',
@@ -194,6 +197,13 @@ const { formTest } = boxedProxy({
         { id: 'ncc-74656', name: 'Voyager' },
       ],
     },
+    template: {
+      country: 'Spain',
+      location: 'plain',
+    },
+    callback(element: Element) {
+      element.textContent = 'A callback was here!'
+    },
     setTest: 'try editing this',
     blueprintTest: {
       caption: 'This one is bound',
@@ -201,8 +211,15 @@ const { formTest } = boxedProxy({
     reset() {
       formTest.string = 'hello xin'
     },
+    style: {
+      fontFamily: 'serif',
+      color: '#ff0000',
+    },
   },
 })
+
+// @ts-expect-error for debugging
+window.formTest = formTest
 
 const options = [
   'this',
@@ -214,7 +231,7 @@ const options = [
 ]
 
 const xinBound = span()
-formTest.string.xinBind(xinBound, {
+formTest.string.xinBind!(xinBound, {
   toDOM(element, value) {
     console.log({ element, value })
     element.textContent = value
@@ -268,7 +285,9 @@ This is an in-browser test of key functionality including:
             xinTest('custom toDOM binding should work', {
               expect: '"violet"',
               async test() {
-                const customBound = document.querySelector('.custom-binding')
+                const customBound = document.querySelector(
+                  '.custom-binding'
+                ) as HTMLElement
                 formTest.color = 'violet'
                 await updates()
 
@@ -279,7 +298,9 @@ This is an in-browser test of key functionality including:
               delay: 100,
               expect: '"red"',
               async test() {
-                const customBound = document.querySelector('.custom-binding')
+                const customBound = document.querySelector(
+                  '.custom-binding'
+                ) as HTMLElement
                 customBound.style.color = 'red'
                 customBound.dispatchEvent(new Event('change'))
                 await updates()
@@ -369,7 +390,7 @@ This is an in-browser test of key functionality including:
             ),
             div(
               h4('set vs value bindings'),
-              p('Both of these fields are bound to formTest.setTest'),
+              p('The next three fields are bound to formTest.setTest'),
               label(
                 'value bound',
                 input({ id: 'bindSetValue', bindValue: 'formTest.setTest' })
@@ -378,26 +399,33 @@ This is an in-browser test of key functionality including:
                 'set bound',
                 input({ id: 'bindSetSet', bindSet: 'formTest.setTest' })
               ),
-              xinTest('editing value bound input updates set bound input', {
-                delay: 500,
-                expect: '"editing this field updates both fields"',
-                async test() {
-                  const input = document.querySelector(
-                    '#bindSetValue'
-                  ) as HTMLInputElement
-                  input.value = 'editing this field updates both fields'
-                  input.dispatchEvent(new Event('change'))
-                  await delayMS(100)
-                  return (
-                    document.querySelector('#bindSetSet') as HTMLInputElement
-                  ).value
-                },
-              }),
+              label(
+                'automatically bound',
+                input({ id: 'bindSetAuto', value: formTest.setTest })
+              ),
+              xinTest(
+                'editing value bound input updates set and auto bound inputs',
+                {
+                  delay: 500,
+                  expect: '"editing this field updates all three fields"',
+                  async test() {
+                    const input = document.querySelector(
+                      '#bindSetValue'
+                    ) as HTMLInputElement
+                    input.value = 'editing this field updates all three fields'
+                    input.dispatchEvent(new Event('change'))
+                    await delayMS(100)
+                    return (
+                      document.querySelector('#bindSetSet') as HTMLInputElement
+                    ).value
+                  },
+                }
+              ),
               xinTest(
                 'editing set bound input does not update value bound input',
                 {
                   delay: 1000,
-                  expect: '"editing this field updates both fields"',
+                  expect: '"editing this field updates all three fields"',
                   async test() {
                     const input = document.querySelector(
                       '#bindSetSet'
@@ -412,7 +440,78 @@ This is an in-browser test of key functionality including:
                     ).value
                   },
                 }
+              ),
+              xinTest(
+                'editing auto bound input does not update value bound input',
+                {
+                  delay: 1000,
+                  expect: '"editing this field updates all three fields"',
+                  async test() {
+                    const input = document.querySelector(
+                      '#bindSetAuto'
+                    ) as HTMLInputElement
+                    input.value =
+                      "editing this field also won't trigger an update"
+                    input.dispatchEvent(new Event('change'))
+                    await delayMS(100)
+                    return (
+                      document.querySelector(
+                        '#bindSetValue'
+                      ) as HTMLInputElement
+                    ).value
+                  },
+                }
               )
+            ),
+            div(
+              h4('Callback Binding'),
+              p({
+                id: 'callback-template',
+                bindCallback: {
+                  value: formTest.template,
+                  callback(element, value) {
+                    element.textContent = `The rain in ${value.country} stays mainly in the ${value.location}.`
+                  },
+                },
+              }),
+              p({
+                id: 'simple-callback',
+                bindCallback: 'formTest.callback',
+              }),
+              xinTest('callback populates template', {
+                expect: '"The rain in Spain stays mainly in the plain."',
+                delay: 200,
+                async test() {
+                  formTest.template = {
+                    country: 'Spain',
+                    location: 'plain',
+                  }
+                  await delayMS(100)
+                  return document.getElementById('callback-template')!
+                    .textContent
+                },
+              }),
+              xinTest('updating formTest.template changes content', {
+                expect: '"The rain in Australia stays mainly in the coast."',
+                delay: 1000,
+                async test() {
+                  await delayMS(500)
+                  formTest.template = {
+                    country: 'Australia',
+                    location: 'coast',
+                  }
+                  await delayMS(100)
+                  return document.getElementById('callback-template')!
+                    .textContent
+                },
+              }),
+              xinTest('simple callback works', {
+                expect: '"A callback was here!"',
+                delay: 100,
+                async test() {
+                  return document.getElementById('simple-callback')!.textContent
+                },
+              })
             ),
             simpleComponent(
               {
@@ -425,7 +524,7 @@ This is an in-browser test of key functionality including:
               label(span('name'), input({ bindValue: 'formTest.string' })),
               label(
                 span('name (read only)'),
-                div({ class: 'field readonly', bindText: 'formTest.string' })
+                div({ class: 'field readonly' }, formTest.string)
               ),
               div(
                 h4({ bindText: 'formTest.fleet.name' }),
@@ -611,6 +710,48 @@ This is an in-browser test of key functionality including:
               span({ style: { flex: '1 1 auto' } }),
               button('Reset'),
               button('Submit', { class: 'primary' })
+            ),
+            h4('Automatic Binding'),
+            div(
+              button(
+                { hidden: formTest.hidden, disabled: formTest.disabled },
+                'Target Button'
+              ),
+              label(
+                input({ type: 'checkbox', bindValue: formTest.disabled }),
+                span('disabled')
+              ),
+              label(
+                input({ type: 'checkbox', bindValue: formTest.hidden }),
+                span('hidden')
+              ),
+              div(
+                {
+                  style: formTest.style as XinStyleRule,
+                },
+                "This div's style is set to formTest.style"
+              ),
+              div(
+                {
+                  style: {
+                    background: formTest.style.color as string,
+                  },
+                },
+                'This div has its background color set to formTest.style.color'
+              ),
+              label(
+                span('font-family'),
+                input({
+                  bindValue: formTest.style.fontFamily,
+                })
+              ),
+              label(
+                span('color'),
+                input({
+                  type: 'color',
+                  bindValue: formTest.style.color,
+                })
+              )
             )
           )
         )

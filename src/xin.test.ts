@@ -1,4 +1,3 @@
-// @ts-expect-error bun:test
 import { test, expect } from 'bun:test'
 import { XinObject, XinProxyArray, XinProxyObject, XinArray } from './xin-types'
 import {
@@ -407,7 +406,7 @@ test('xinValue works, xin does not corrupt content', () => {
 test('xinObserve works', async () => {
   const { test } = boxed
   let a: any = null
-  const observer = test.value.xinObserve((path) => {
+  const unobserveValue = test.value.xinObserve((path) => {
     a = xin[path]
   })
   test.value = 'hello'
@@ -416,7 +415,7 @@ test('xinObserve works', async () => {
   test.value = 17
   await updates()
   expect(a).toBe(17)
-  unobserve(observer)
+  unobserveValue()
   test.value = 'goodbye'
   await updates()
   expect(a).toBe(17)

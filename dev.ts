@@ -43,12 +43,12 @@ async function prebuild() {
 
 async function build() {
   console.time('build')
-  let result
+  let result: any
 
   await $`cp demo/static/* ${PUBLIC}`
 
   try {
-    await $`tsc ./src/index.ts --declaration --emitDeclarationOnly --target es2022 --outDir dist`
+    await $`bun tsc ./src/index.ts --declaration --emitDeclarationOnly --target es2022 --outDir dist`
   } catch (e) {
     console.log('types created')
   }
@@ -127,13 +127,13 @@ function serveFromDir(config: {
   return null
 }
 
-const server = Bun.serve({
+Bun.serve({
   port: PORT,
   tls: {
     key: Bun.file('./tls/key.pem'),
     cert: Bun.file('./tls/certificate.pem'),
   },
-  fetch(request) {
+  fetch(request: any) {
     let reqPath = new URL(request.url).pathname
     console.log(request.method, reqPath)
     if (reqPath === '/') reqPath = '/index.html'

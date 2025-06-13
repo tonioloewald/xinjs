@@ -29,7 +29,7 @@ export function xinValue<T>(x: T): Unboxed<T> {
   ) as Unboxed<T>
 }
 
-export interface DataBinding<T = Element> {
+export interface DataBinding<T extends Element = Element> {
   path: string
   binding: XinBinding<T>
   options?: XinObject

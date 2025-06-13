@@ -1,5 +1,5 @@
 import {
-  xinProxy,
+  boxedProxy,
   elements,
   touch,
   getListItem,
@@ -42,7 +42,9 @@ class Todo {
   }
 }
 
-const { todoApp } = xinProxy({ todoApp: new Todo() })
+const { todoApp } = boxedProxy({
+  todoApp: new Todo([{ id: 0, reminder: 'a gentle reminder' }]),
+})
 
 const flex = { display: 'flex', gap: vars.spacing50, flexDirection: 'row' }
 const row = { ...flex, alignItems: 'center' }
@@ -60,10 +62,6 @@ export const todo = (...args: ElementPart[]) =>
     ...args,
     {
       style: { ...padded, ...stack },
-      // TODO figure out how to make this automatic
-      apply() {
-        touch('todoApp')
-      },
     },
     h1('To Do'),
     div(
@@ -96,8 +94,8 @@ export const todo = (...args: ElementPart[]) =>
       input({
         style: elastic,
         placeholder: 'enter a reminder',
-        bindValue: 'todoApp.newItem.reminder',
+        bindValue: todoApp.newItem.reminder,
       }),
-      button('Add Item', { bindEnabled: 'todoApp.newItem.reminder' })
+      button('Add Item', { bindEnabled: todoApp.newItem.reminder })
     )
   )

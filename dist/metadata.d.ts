@@ -9,7 +9,7 @@ export declare const XIN_OBSERVE = "xinObserve";
 export declare const XIN_BIND = "xinBind";
 export declare const xinPath: (x: any) => string | undefined;
 export declare function xinValue<T>(x: T): Unboxed<T>;
-export interface DataBinding<T = Element> {
+export interface DataBinding<T extends Element = Element> {
     path: string;
     binding: XinBinding<T>;
     options?: XinObject;
