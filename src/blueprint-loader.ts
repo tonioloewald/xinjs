@@ -7,6 +7,8 @@ import {
 
 const loadedBlueprints: { [key: string]: Promise<XinPackagedComponent> } = {}
 
+const loadModule = (src: string): Promise<any> => import(src)
+
 export class Blueprint extends Component {
   tag = 'anon-elt'
   src = ''
@@ -19,7 +21,7 @@ export class Blueprint extends Component {
     const signature = `${tag}.${property}:${src}`
     if (!this.loaded) {
       if (loadedBlueprints[signature] === undefined) {
-        const imported = await eval(`import('${src}')`)
+        const imported = await loadModule(src)
         const blueprint = imported[property] as XinBlueprint
         loadedBlueprints[signature] = makeComponent(tag, blueprint)
       } else {
