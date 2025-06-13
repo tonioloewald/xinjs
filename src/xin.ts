@@ -17,7 +17,6 @@ import {
   observe as _observe,
   unobserve,
   updates,
-  observerShouldBeRemoved,
 } from './path-listener'
 import { getByPath, setByPath } from './by-path'
 import { bind } from './bind'
@@ -237,14 +236,5 @@ const boxed = new Proxy<XinObject, BoxedProxy<XinObject>>(
   regHandler('', true)
 )
 
-export {
-  xin,
-  boxed,
-  updates,
-  touch,
-  observe,
-  unobserve,
-  observerShouldBeRemoved,
-  isValidPath,
-  settings,
-}
+// settings and isValidPath are only used for internal testing
+export { xin, boxed, updates, touch, observe, unobserve, settings, isValidPath }

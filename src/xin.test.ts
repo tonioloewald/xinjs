@@ -73,7 +73,7 @@ test('valueOf works', () => {
   expect(boxed.test.things['id=666'].name.valueOf()).toBe('The Beast')
 })
 
-test('xinPath works', () => {
+test('xinPath property works', () => {
   expect(boxed.test.xinPath).toBe('test')
   expect(boxed.test.message.xinPath).toBe('test.message')
   expect(boxed.test.things['id=666'].xinPath).toBe('test.things[id=666]')
@@ -383,13 +383,12 @@ test('unobserve works', async () => {
   expect(changes.length).toBe(1)
 })
 
-test('xinPath works', () => {
+test('xinPath() works', () => {
   const _test = xin.test as XinProxyObject
   const things = _test.things as XinProxyArray
   const people = _test.people as XinProxyArray
   expect(_test.xinPath).toBe('test')
   expect(people.xinPath).toBe('test.people')
-  expect(things['id=666'].xinPath).toBe('test.things[id=666]')
 })
 
 test('xinValue works, xin does not corrupt content', () => {
@@ -397,7 +396,8 @@ test('xinValue works, xin does not corrupt content', () => {
   const things = _test.things as XinProxyArray
   const people = _test.people as XinProxyArray
   expect(_test[XIN_VALUE]).toBe(obj)
-  expect(people[XIN_VALUE]).toBe(obj.people)
+  expect(people[XIN_VALUE] as string[]).toBe(obj.people)
+  expect(people.xinValue as string[]).toBe(obj.people)
   expect((things['id=666'] as XinProxyObject)[XIN_VALUE]).toBe(
     (things[1] as XinProxyObject)[XIN_VALUE]
   )
@@ -406,7 +406,7 @@ test('xinValue works, xin does not corrupt content', () => {
 test('xinObserve works', async () => {
   const { test } = boxed
   let a: any = null
-  const unobserveValue = test.value.xinObserve((path) => {
+  const unobserveValue = test.value.xinObserve((path: string) => {
     a = xin[path]
   })
   test.value = 'hello'

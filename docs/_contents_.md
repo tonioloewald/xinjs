@@ -19,7 +19,6 @@ A lot of low-level code in `xinjs` is borrowed from [b8rjs](https://b8rjs.com).
 
 1. [what is xinjs?](what-is-xinjs.md) — an overview of xinjs
 2. [xin](xin.md) — path-based observer
-3. [paths](by-path.md) - querying objects by path
 4. [bind](bind.md) — binding state to the DOM
 5. [bindings](bindings.md) — the standard bindings provided out-of-the-box, and how to add your own
 6. [elements](elements.md) — conveniently creating DOM elements

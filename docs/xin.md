@@ -212,3 +212,25 @@ or even buried deeper…
 Instead of referring to the first item in `messages` as `messages[0]` it can be referred to
 as `messages[id=1234abcd]`, and this will retrieve the item regardless of its position in messages.
 
+### `touch`, `observe` and `unobserve`
+
+`touch`, `observe` and `unobserve` provide low level access to the `xin` observer model. `touch(path: touchable)` allows you to directly inform `xin` that the value at a specified path has changed. You might want to update a large data structure directly without firing observers. You can let `xin` know you've made changes behind its back using `touch`, e.g.
+
+    doTerribleThings(xin.luhrman)
+    touch(xin.luhrman)
+
+What's `touchable`? A string (id-path) or a xin observer proxy.
+
+`observe(path: string | RegExp | PathTestFunction, callback: function): Listener` allows you to directly observe changes to a path (or any path that matches a RegExp or PathTestFunction evalutes as true) and trigger a callback which will be passed the path that actually changed. `unobserve(listener: Listener)` removes the listener.
+
+### `async updates()`
+
+`updates` is an async function that resolves after the next UI update. This is for a case where you expect a change you've made to trigger UI changes and you want to act after those have occurred. Typically, this is simply not needed, but it's very useful for testing when you want to change an observed value and verify that your UI widget has updated correctly.
+
+> ## `isValidPath(path: string): boolean`
+>
+> This is an internally used function that validates a path string. It's used in testing and may be useful at runtime.
+>
+> ## `settings: { perf: boolean, debug: boolean }`
+>
+> This is a (so far) internally used configuration object. It's used in testing and may be useful at runtime. Eventually it will allow you to make path resolution and so forth easier to debug and performance tune.
