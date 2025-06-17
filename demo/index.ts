@@ -1,310 +1,374 @@
-import './style'
+/*
+FIXME component-ize the doc system from xinjs-ui
+copied from xinjs-ui demo/src/index.ts
+*/
+
 import {
-  xin,
-  boxed,
-  touch,
   elements,
+  xinProxy,
+  vars,
+  xin,
+  bindings,
+  touch,
+  getListItem,
+  StyleSheet,
+  version,
+  bind,
   hotReload,
-  settings,
-  vars,
-  ContentType,
-  svgElements,
-  mathML,
-  Color,
-  observe,
+  debounce,
 } from 'xinjs'
-import { settingsDialog } from './SettingsDialog'
-import { arrayBindingTest } from './ArrayBindingTest'
-import { markdownViewer } from './components/markdown-viewer'
-import { todo } from './components/todo'
-import { kitchenSink } from './components/kitchen-sink'
-import { wordSearch } from './WordSearch'
-import { listFilterDemo, wordleFilter } from './components'
-import { fauxSlots } from './faux-slots'
-import { griddleGame } from './griddle'
-import { guessWord } from './components/guess-word'
-import { blueprintDemo } from './blueprint-demo'
-import { icons } from 'xinjs-ui'
-const logo = './xinjs-logo.svg'
-const readmeMd = './README.md'
 
-xin.app = {
-  title: 'docs & tests',
-  darkmode: 'auto',
-}
+import {
+  icons,
+  markdownViewer,
+  MarkdownViewer,
+  LiveExample,
+  sideNav,
+  SideNav,
+  sizeBreak,
+  popMenu,
+  version as uiVersion,
+} from 'xinjs-ui'
 
-console.time('total')
+import { styleSpec } from './style'
+StyleSheet('demo-style', styleSpec)
 
-settings.perf = true
+import * as xinjs from 'xinjs'
+import * as xinjsui from 'xinjs-ui'
 
-const { img, h1, div, nav, span, button, a, main } = elements
+import docs from './docs.json'
 
-hotReload((path) => {
-  if (path.startsWith('words') || path.startsWith('emoji')) {
-    return false
-  }
-  return true
-})
-
-Object.assign(globalThis, {
-  xin,
-  boxed,
-  elements,
-  vars,
-  touch,
-  Color,
-  observe,
-})
-
-type Route = {
-  path: string
-  content: () => ContentType
-}
-const routes: Route[] = [
-  {
-    path: 'read-me',
-    content: () =>
-      div({ class: 'page-padded' }, markdownViewer({ src: readmeMd })),
-  },
-  {
-    path: 'todo',
-    content: todo,
-  },
-  {
-    path: 'array-binding',
-    content: arrayBindingTest,
-  },
-  {
-    path: 'griddle',
-    content: griddleGame,
-  },
-  {
-    path: 'word-search',
-    content: wordSearch,
-  },
-  {
-    path: 'wordle-filter',
-    content: wordleFilter,
-  },
-  {
-    path: 'guess-word',
-    content: guessWord,
-  },
-  {
-    path: 'blueprint',
-    content: blueprintDemo,
-  },
-  {
-    path: 'faux-slots',
-    content: () =>
-      fauxSlots(
-        { style: { padding: '20px', display: 'block' } },
-        span({ slot: 'heading' }, 'this will go in the heading'),
-        div('these will go in the body'),
-        fauxSlots(
-          {
-            style: {
-              padding: '20px',
-              margin: '10px 0',
-              background: vars.panelBg,
-            },
-          },
-          span(
-            { slot: 'heading' },
-            'this will go in the inner instance heading'
-          ),
-          span('and this goes in the inner instance body')
-        )
-      ),
-  },
-  {
-    path: 'list-filters',
-    content: () => div({ class: 'page-padded' }, listFilterDemo()),
-  },
-  {
-    path: 'kitchen-sink',
-    content: () => div({ class: 'page-padded' }, kitchenSink()),
-  },
-  {
-    path: 'SVG',
-    content() {
-      const { svg, polygon } = svgElements
-      return svg(
-        {
-          style: {
-            backgroundColor: vars.brandColor50o,
-            width: 400,
-            height: 400,
-          },
-          viewBox: '0 0 200 200',
-        },
-        polygon({
-          points: '40,40,160,100,40,160,40,120,80,100,40,80',
-          fill: vars.brandTextColor,
-        })
-      )
-    },
-  },
-  {
-    path: 'MathML',
-    content() {
-      const { math, mrow, msup, mi, mn, mo } = mathML
-      return math(
-        {
-          style: {
-            padding: vars.spacing200,
-            fontSize: '200%',
-          },
-        },
-        mrow(msup(mi('x'), mn(2)), mo('+'), mrow(mn(4), mi('x'))),
-        mo('+'),
-        mn(4),
-        mo('='),
-        mn(0)
-      )
-    },
-  },
-]
-
-function showRoute() {
-  const main = document.querySelector('main')
-  const path = location.search.substring(1).split('&').shift()
-  let route = routes.find((route) => route.path === path)
-  if (route == null) {
-    route = routes[0]
-  }
-  Array.from(window.document.querySelectorAll('a')).forEach((a) => {
-    a.classList.toggle('current-route', a.dataset.route === path)
-  })
-  main!.textContent = ''
-  main!.append(route.content() as Node)
-}
-
-window.addEventListener('popstate', showRoute)
-
-const appBar = () =>
-  span(
-    {
-      style: {
-        display: 'flex',
-        height: '44px',
-        padding: '0 8px',
-        alignItems: 'center',
-        flex: '0 0 60px',
-        background: vars.brandColor,
-        '--text-color': vars.brandTextColor,
-        '--text-heading-color': vars.brandTextColor,
-      },
-    },
-    button(icons.chevronRight(), {
-      title: 'toggle menu',
-      class: 'icon-button',
-      style: {
-        fontSize: vars.fontSize150,
-        marginRight: vars.spacing50,
-        transition: '0.25s ease-out',
-        transformOrigin: '50% 50%',
-        transform: 'rotateZ(180deg)',
-      },
-      onClick(event) {
-        const leftSideNav = document.querySelector(
-          '.left-side-nav'
-        ) as HTMLElement
-        if (leftSideNav.style.marginLeft) {
-          leftSideNav.style.marginLeft = ''
-          // @ts-expect-error Typescript is wrong
-          event.target.style.transform = 'rotateZ(180deg)'
-        } else {
-          leftSideNav.style.marginLeft = '-180px'
-          // @ts-expect-error Typescript is wrong
-          event.target.style.transform = ''
-        }
-      },
-    }),
-    span({ style: { flex: '1 1 auto' } }),
-    h1(
-      {
-        style: {
-          lineHeight: '44px',
-          fontSize: '24px',
-          fontWeight: '200',
-          padding: 0,
-          margin: 0,
-          display: 'flex',
-        },
-      },
-      img({
-        alt: 'xinjs',
-        style: {
-          width: '44px',
-          height: '44px',
-          marginRight: '10px',
-        },
-        src: logo,
-      }),
-      span({ bindText: 'app.title' })
-    ),
-    span({ style: { flex: '1 1 auto' } }),
-    button(icons.settings(), {
-      title: 'settings',
-      class: 'icon-button',
-      onClick() {
-        ;(document.querySelector('.settings') as HTMLDialogElement).showModal()
-      },
-    })
+setTimeout(() => {
+  const brandColor = getComputedStyle(document.body).getPropertyValue(
+    '--brand-color'
   )
 
-document.body.append(
-  div(
-    {
-      style: {
-        display: 'flex',
-        flexDirection: 'column',
-        height: vars.vh,
-        overflow: 'hidden',
-      },
-    },
-    appBar(),
-    div(
-      { style: { display: 'flex', flex: '1 1 auto', overflow: 'hidden' } },
-      nav(
+  console.log('welcome to %cxinjs.net', `color: ${brandColor}; padding: 0 5px;`)
+}, 100)
+
+const PROJECT = 'xinjs'
+
+const docName =
+  document.location.search !== ''
+    ? document.location.search.substring(1).split('&')[0]
+    : 'README.md'
+const currentDoc = docs.find((doc) => doc.filename === docName) || docs[0]
+
+const { app, prefs } = xinProxy({
+  app: {
+    title: PROJECT,
+    blogUrl: `https://loewald.com`,
+    discordUrl: `https://discord.com/invite/ramJ9rgky5`,
+    githubUrl: `https://github.com/tonioloewald/${PROJECT}#readme`,
+    npmUrl: `https://www.npmjs.com/package/${PROJECT}`,
+    xinjsuiUrl: 'https://ui.xinjs.net',
+    bundleBadgeUrl: `https://deno.bundlejs.com/?q=${PROJECT}&badge=`,
+    bundleUrl: `https://bundlejs.com/?q=${PROJECT}`,
+    cdnBadgeUrl: `https://data.jsdelivr.com/v1/package/npm/${PROJECT}/badge`,
+    cdnUrl: `https://www.jsdelivr.com/package/npm/${PROJECT}`,
+    optimizeLottie: false,
+    lottieFilename: '',
+    lottieData: '',
+    docs,
+    currentDoc,
+  },
+  prefs: {
+    theme: 'system',
+    highContrast: false,
+    locale: '',
+  },
+})
+
+hotReload((path) => {
+  if (path.startsWith('prefs')) {
+    return true
+  }
+  return false
+})
+
+bindings.docLink = {
+  toDOM(elt, filename) {
+    elt.setAttribute('href', `?${filename}`)
+  },
+}
+
+bindings.current = {
+  toDOM(elt, currentFile) {
+    const boundFile = elt.getAttribute('href') || ''
+    elt.classList.toggle('current', currentFile === boundFile.substring(1))
+  },
+}
+
+setTimeout(() => {
+  // provide globals for experimentation, but prevent them from masking compile bugs
+  Object.assign(globalThis, { app, xin, bindings, elements, vars, touch })
+}, 1000)
+
+const main = document.querySelector('main') as HTMLElement | null
+
+const { h2, div, span, a, img, header, button, template, input } = elements
+
+bind(document.body, 'prefs.theme', {
+  toDOM(element, theme) {
+    if (theme === 'system') {
+      theme =
+        getComputedStyle(document.body).getPropertyValue('--darkmode') ===
+        'true'
+          ? 'dark'
+          : 'light'
+    }
+    element.classList.toggle('darkmode', theme === 'dark')
+  },
+})
+
+bind(document.body, 'prefs.highContrast', {
+  toDOM(element, highContrast) {
+    element.classList.toggle('high-contrast', highContrast)
+  },
+})
+
+window.addEventListener('popstate', () => {
+  const filename = window.location.search.substring(1)
+  app.currentDoc =
+    app.docs.find((doc) => doc.filename === filename) || app.docs[0]
+})
+
+const filterDocs = debounce(() => {
+  console.time('filter')
+  const needle = searchField.value.toLocaleLowerCase()
+  app.docs.forEach((doc: any) => {
+    doc.hidden =
+      !doc.title.toLocaleLowerCase().includes(needle) &&
+      !doc.text.toLocaleLowerCase().includes(needle)
+  })
+  touch(app.docs)
+  console.timeEnd('filter')
+})
+
+const searchField = input({
+  slot: 'nav',
+  placeholder: 'search',
+  type: 'search',
+  style: {
+    width: 'calc(100% - 10px)',
+    margin: '5px',
+  },
+  onInput: filterDocs,
+})
+
+if (main)
+  main.append(
+    header(
+      a(
         {
-          class: 'left-side-nav',
+          href: '/',
+          style: {
+            display: 'flex',
+            alignItems: 'center',
+            borderBottom: 'none',
+          },
+          title: `xinjs ${version}, xinjs-ui ${uiVersion}`,
+        },
+        icons.xinColor({
+          style: { _fontSize: 40, marginRight: 10 },
+        }),
+        h2({ bindText: 'app.title' })
+      ),
+      span({ class: 'elastic' }),
+      sizeBreak(
+        {
+          minWidth: 750,
+        },
+        span(
+          {
+            style: {
+              marginRight: vars.spacing,
+              display: 'flex',
+              alignItems: 'center',
+              gap: vars.spacing50,
+            },
+          },
+          a(
+            { href: app.bundleUrl },
+            img({ alt: 'bundlejs size badge', src: app.bundleBadgeUrl })
+          ),
+          a(
+            { href: app.cdnUrl },
+            img({ alt: 'jsdelivr', src: app.cdnBadgeUrl })
+          )
+        ),
+        span({ slot: 'small' })
+      ),
+      span({ style: { flex: '0 0 10px' } }),
+      button(
+        {
+          title: 'theme',
+          class: 'iconic',
+          style: { color: vars.linkColor },
+          onClick(event) {
+            popMenu({
+              target: event.target as HTMLButtonElement,
+              menuItems: [
+                {
+                  icon: 'github',
+                  caption: 'github',
+                  action: app.githubUrl,
+                },
+                {
+                  icon: 'npm',
+                  caption: 'npm',
+                  action: app.npmUrl,
+                },
+                {
+                  icon: 'discord',
+                  caption: 'discord',
+                  action: app.discordUrl,
+                },
+                {
+                  icon: 'xinjsUiColor',
+                  caption: 'xinjs-ui',
+                  action: app.xinjsuiUrl,
+                },
+                {
+                  icon: 'blog',
+                  caption: 'Blog',
+                  action: 'https://loewald.com',
+                },
+                null,
+                {
+                  icon: 'rgb',
+                  caption: 'Color Theme',
+                  menuItems: [
+                    {
+                      caption: 'System',
+                      checked() {
+                        return prefs.theme === 'system'
+                      },
+                      action() {
+                        prefs.theme = 'system'
+                      },
+                    },
+                    {
+                      caption: 'Dark',
+                      checked() {
+                        return prefs.theme === 'dark'
+                      },
+                      action() {
+                        prefs.theme = 'dark'
+                      },
+                    },
+                    {
+                      caption: 'Light',
+                      checked() {
+                        return prefs.theme === 'light'
+                      },
+                      action() {
+                        prefs.theme = 'light'
+                      },
+                    },
+                    null,
+                    {
+                      caption: 'High Contrast',
+                      checked() {
+                        return prefs.highContrast
+                      },
+                      action() {
+                        prefs.highContrast = !prefs.highContrast
+                      },
+                    },
+                  ],
+                },
+              ],
+            })
+          },
+        },
+        icons.moreVertical()
+      )
+    ),
+    sideNav(
+      {
+        name: 'Documentation',
+        navSize: 200,
+        minSize: 600,
+        style: {
+          flex: '1 1 auto',
+          overflow: 'hidden',
+        },
+      },
+      searchField,
+      div(
+        {
+          slot: 'nav',
           style: {
             display: 'flex',
             flexDirection: 'column',
-            flex: '0 0 180px',
-            transition: 'margin-left 0.25s ease-out',
-            padding: '10px 0',
+            width: '100%',
+            height: '100%',
+            overflowY: 'scroll',
+          },
+          bindList: {
+            hiddenProp: 'hidden',
+            value: app.docs,
           },
         },
-        ...routes.map((route) =>
-          a(route.path.replace(/-/g, ' '), {
-            dataRoute: route.path,
-            href: `?${route.path}`,
+        template(
+          a({
+            class: 'doc-link',
+            bindCurrent: 'app.currentDoc.filename',
+            bindDocLink: '^.filename',
+            bindText: '^.title',
             onClick(event: Event) {
+              const a = event.target as HTMLAnchorElement
+              const doc = getListItem(event.target as HTMLElement)
+              const nav = (event.target as HTMLElement).closest(
+                'xin-sidenav'
+              ) as SideNav
+              nav.contentVisible = true
+              const { href } = a
+              window.history.pushState({ href }, '', href)
+              app.currentDoc = doc
               event.preventDefault()
-              const newUrl =
-                window.location.href.split('?')[0] + '?' + route.path
-              window.history.pushState({}, route.path, newUrl)
-              showRoute()
             },
           })
         )
       ),
-      main({
-        style: {
-          overflowY: 'auto',
-          flex: '1 1 auto',
-          background: 'var(--input-bg)',
-          position: 'relative',
+      div(
+        {
+          style: {
+            position: 'relative',
+            overflowY: 'scroll',
+            height: '100%',
+          },
         },
-      })
-    ),
-    settingsDialog()
+        button(
+          {
+            title: 'show navigation',
+            class: 'transparent close-nav show-within-compact',
+            style: {
+              marginTop: '2px',
+              position: 'fixed',
+            },
+            onClick(event: Event) {
+              ;(
+                (event.target as HTMLElement).closest('xin-sidenav') as SideNav
+              ).contentVisible = false
+            },
+          },
+          icons.chevronLeft()
+        ),
+        markdownViewer({
+          style: {
+            display: 'block',
+            maxWidth: '44em',
+            margin: 'auto',
+            padding: `0 1em`,
+            overflow: 'hidden',
+          },
+          bindValue: 'app.currentDoc.text',
+          didRender(this: MarkdownViewer) {
+            LiveExample.insertExamples(this, { xinjs, xinjsui })
+          },
+        })
+      )
+    )
   )
-)
-
-showRoute()
-
-console.timeEnd('total')

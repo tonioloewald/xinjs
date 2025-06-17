@@ -7,9 +7,10 @@ declare const Bun: any
 
 const PORT = 8018
 const PROJECT_ROOT = import.meta.dir
-const PUBLIC = path.resolve(PROJECT_ROOT, 'www')
+const PUBLIC = path.resolve(PROJECT_ROOT, 'docs')
 const DIST = path.resolve(PROJECT_ROOT, 'dist')
 const isSPA = true
+const MINIFY = true
 
 function loadJsonSync<T>(filePath: string): T {
   try {
@@ -37,8 +38,7 @@ async function prebuild() {
   await $`mkdir ${DIST}`
   await $`mkdir ${PUBLIC}`
 
-  // await $`bun docs.js`
-  await $`cp README.md ${PUBLIC}`
+  await $`bun docs.js`
 }
 
 async function build() {
@@ -66,7 +66,7 @@ async function build() {
       outdir: DIST,
       target: 'browser',
       sourcemap: 'linked',
-      minify: true,
+      minify: MINIFY,
       naming,
     })
     if (!result.success) {
@@ -84,7 +84,7 @@ async function build() {
     target: 'browser',
     sourcemap: 'linked',
     format: 'esm',
-    minify: true,
+    minify: MINIFY,
   })
   if (!result.success) {
     console.error('dist build failed')

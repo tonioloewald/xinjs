@@ -1,5 +1,7 @@
 # xinjs
 
+<!--{ "pin": "top" }-->
+
 <div style="text-align: center; margin: 20px">
   <a href="https://xinjs.net">
     <img style="width: 200px; max-width: 80%" alt="xinjs logo" src="https://xinjs.net/xinjs-logo.svg">
@@ -12,9 +14,10 @@
 [![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
 [![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
 
-For a pretty thorough overview of xinjs, you might like to start with [what is xinjs?](https://github.com/tonioloewald/xinjs/blob/main/docs/what-is-xinjs.md)
+For a pretty thorough overview of xinjs, you might like to start with [What is xinjs?](https://loewald.com/blog/2025/6/4/what-is-xinjs-).
+To understand the thinking behind xinjs, there's [What should a front-end framework do?](https://loewald.com/blog/2025/6/4/what-should-a-front-end-framework-do).
 
-### Path-based State for Web Apps
+### Build UIs with less code
 
 - simple, efficient observer pattern
 - written in TypeScript
@@ -325,6 +328,16 @@ To create a local package (for experimenting with a build) run `bun pack`.
 - rm -rf node_modules
 - run the update script
 - npx parcel build (which restores needed parcel transformers)
+
+## Related Libraries
+
+- react-xinjs [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme)
+  allows you to use xin's path-observer model in React [ReactJS](https://reactjs.org) apps
+- type-by-example [github](https://github.com/tonioloewald/type-by-example) | [npm](https://www.npmjs.com/package/type-by-example)
+  is a library for declaring types in pure javascript, allowing run-time type-checking.
+- filter-shapes [github](https://github.com/tonioloewald/filter-shapes) | [npm](https://www.npmjs.com/package/filter-shapes)
+  is a library for filtering objects (and arrays of objects) to specific shapes (e.g. to reduce storage / bandwidth costs).
+  It is built on top of type-by-example.
 
 ## Credits
 

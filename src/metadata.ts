@@ -18,7 +18,7 @@ export const XIN_OBSERVE = 'xinObserve'
 export const XIN_BIND = 'xinBind'
 
 export const xinPath = (x: any): string | undefined => {
-  return x[XIN_PATH]
+  return x && x[XIN_PATH]
 }
 
 export function xinValue<T>(x: T): Unboxed<T> {

@@ -15,7 +15,7 @@
         "prettier": "^2.8.8",
         "typescript": "^5.8.3",
         "xinjs": "file:.",
-        "xinjs-ui": "^0.9.10",
+        "xinjs-ui": "^0.9.14",
       },
     },
   },
@@ -294,7 +294,7 @@
 
     "xinjs": ["xinjs@root:", {}],
 
-    "xinjs-ui": ["xinjs-ui@0.9.11", "", { "peerDependencies": { "marked": "^5.1.2", "xinjs": "^0.8.6" } }, "sha512-mx9+6ios3oyk0lghXQXkazqQHhhy9CVPNLbwzVGBOesCDe+EllHPXsLg0mOXLiJQ7Z1a1hna1ede9TY8UAlnXQ=="],
+    "xinjs-ui": ["xinjs-ui@0.9.15", "", { "peerDependencies": { "marked": "^5.1.2", "xinjs": "^0.8.10" } }, "sha512-GvlDuWT6Sltj9EadMqEWphBrX9gOykHZhto+6Wt5nOV9w02fWRlz98s5Jw+/wA0yW++pCcgUIfaDn4/CccUD/g=="],
 
     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
 

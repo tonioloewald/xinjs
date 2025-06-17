@@ -1,322 +1,391 @@
-import { bind, vars, invertLuminance, Color, StyleSheet } from 'xinjs'
+/*
+FIXME component-tize the doc system in xinjs-ui
+copied from xinjs-ui demo/src/style.ts
+*/
 
-const brandColor = Color.fromCss('rgb(8, 131, 88)')
+import { XinStyleSheet, vars, invertLuminance } from 'xinjs'
 
-bind(document.body, 'app.darkmode', {
-  toDOM(elt, value) {
-    switch (value) {
-      case 'dark':
-        elt.classList.add('darkmode')
-        break
-      case 'light':
-        elt.classList.remove('darkmode')
-        break
-      default: {
-        const autoSetting = getComputedStyle(document.body).getPropertyValue(
-          '--darkmode'
-        )
-        elt.classList.toggle('darkmode', autoSetting === 'true')
-      }
-    }
-  },
-})
-
-const cssVars = {
-  _font: "'Aleo', Sans-serif",
-  _codeFont: "'Spline Sans Mono', monospace",
-  _fontSize: 16,
-  _codeFontSize: 16,
-  _lineHeight: 24,
-  _touchSize: 48,
-  _spacing: 16,
+const colors = {
   _textColor: '#222',
-  _itemSpacing: vars.spacing50,
-  _background: '#e8e8e8',
-  _panelBg: '#ddd',
-  _inputBg: '#fff',
-  _buttonBg: '#fff8',
-  _testBg: '#ccc',
-  _currentBg: brandColor.opacity(0.125),
-  _hoverBg: brandColor.opacity(0.25),
-  _activeBg: brandColor.opacity(0.5),
-  _primaryColor: '#ccf8',
-  _selectedBg: '#ddf',
-  _borderColor: '#0002',
-  _darkBorderColor: '#0004',
-  _lightBorderColor: '#fff4',
-  _inputBorder: '1px solid var(--border-color)',
-  _lightBorder: '1px solid var(--light-border-color)',
-  _darkBorder: '1px solid var(--dark-border-color)',
-  _roundedRadius: vars.lineHeight25,
-  _borderShadow: 'inset 0 0 0 1px var(--dark-border-color)',
-  _inputBorderShadow: 'inset 0 0 0 1px var(--border-color)',
-  _toolbarHeight: `calc(${vars.lineHeight} + ${vars.spacing})`,
-  _placeHolderOpacity: 0.5,
-  _vh: '100vh',
+  _brandColor: '#295546',
+  _background: '#fafafa',
+  _inputBg: '#fdfdfd',
+  _backgroundShaded: '#f5f5f5',
+  _navBg: '#ddede8',
+  _barColor: '#dae3df',
+  _focusColor: '#148960ad',
+  _brandTextColor: '#ecf3dd',
+  _insetBg: '#eee',
+  _codeBg: '#f8ffe9',
+  _shadowColor: '#0004',
+  _menuBg: '#fafafa',
+  _menuItemActiveColor: '#000',
+  _menuItemIconActiveColor: '#000',
+  _menuItemActiveBg: '#aaa',
+  _menuItemHoverBg: '#eee',
+  _menuItemColor: '#222',
+  _menuSeparatorColor: '#2224',
+  _scrollThumbColor: '#0006',
+  _scrollBarColor: '#0001',
 }
 
-const brandColors = {
-  _brandColor: brandColor,
-  _brandTextColor: '#ECF3DD',
-  _textHeadingColor: vars.brandColor,
-}
-
-const darkBrandColors = {
-  _textHeadingColor: vars.brandTextColor,
-}
-
-const codeVars = {
-  _codeColor: vars.textColor,
-  _codeBg: brandColor.brighten(0.25).saturate(1).opacity(0.1),
-}
-
-StyleSheet('base-style', {
+export const styleSpec: XinStyleSheet = {
   '@import':
     'https://fonts.googleapis.com/css2?family=Aleo:ital,wght@0,100..900;1,100..900&famiSpline+Sans+Mono:ital,wght@0,300..700;1,300..700&display=swap',
-  body: {
-    ...cssVars,
-    ...brandColors,
-    ...codeVars,
-    fontFamily: vars.font,
-    background: vars.background,
-    color: vars.textColor,
-    margin: 0,
-    fontSize: vars.fontSize,
-    lineHeight: vars.lineHeight,
-    accentColor: vars.brandColor,
+  ':root': {
+    _fontFamily: "'Aleo', sans-serif",
+    _codeFontFamily: "'Spline Sans Mono', monospace",
+    _fontSize: '16px',
+    _codeFontSize: '14px',
+    ...colors,
+    _spacing: '10px',
+    _lineHeight: 'calc(var(--font-size) * 1.6)',
+    _h1Scale: '2',
+    _h2Scale: '1.5',
+    _h3Scale: '1.25',
+    _touchSize: '32px',
+    _headerHeight:
+      'calc( var(--line-height) * var(--h2-scale) + var(--spacing) * 2 )',
   },
   '@media (prefers-color-scheme: dark)': {
     body: {
       _darkmode: 'true',
     },
   },
-  '.darkmode': { ...invertLuminance(cssVars), ...darkBrandColors },
-  'h1, h2, h3': {
-    margin: `${vars.spacing200} 0 ${vars.spacing}`,
-    color: vars.textHeadingColor,
+  '.darkmode': {
+    ...invertLuminance(colors),
+    _menuShadow: '0 0 0 2px #a0f3d680',
+    _menuSeparatorColor: '#a0f3d640',
   },
-  'p, h4, h5, h6, pre, blockquote': {
-    margin: `0 0 ${vars.spacing}`,
+  '.high-contrast': {
+    filter: 'contrast(2)',
   },
-  blockquote: {
-    paddingLeft: `${vars.spacing}`,
-    paddingRight: `${vars.spacing}`,
-    fontSize: '90%',
+  '*': {
+    boxSizing: 'border-box',
+    scrollbarColor: `${vars.scrollThumbColor} ${vars.scrollBarColor}`,
+    scrollbarWidth: 'thin',
   },
-  h1: {
-    lineHeight: vars.lineHeight200,
+  body: {
+    fontFamily: vars.fontFamily,
+    fontSize: vars.fontSize,
+    margin: '0',
+    lineHeight: vars.lineHeight,
+    background: vars.background,
+    _linkColor: vars.brandColor,
+    _xinTabsSelectedColor: vars.brandColor,
+    _xinTabsBarColor: vars.brandTextColor,
+    _menuItemIconColor: vars.brandColor,
+    color: vars.textColor,
   },
-  h2: {
-    lineHeight: vars.lineHeight150,
-  },
-  h3: {
-    lineHeight: vars.lineHeight125,
-  },
-  pre: {
-    fontSize: vars.codeFontSize,
-    background: vars.codeBg,
-    color: vars.codeColor,
-    borderRadius: vars.roundedRadius50,
-    padding: vars.spacing,
-  },
-  'ul, ol': {
-    margin: `0 ${vars.spacing200} ${vars.spacing} 0`,
-  },
-  li: {
-    margin: `0 0 ${vars.spacing25}`,
-  },
-  'labeled-input, labeled-value': {
-    display: 'block',
-  },
-  'label, .row': {
-    display: 'flex',
-    gap: vars.spacing50,
-  },
-  label: {
-    flexDirection: 'column',
-    marginTop: vars.spacing,
-  },
-  '.row': {
-    flexDirection: 'row',
-    alignItems: 'center',
+  'input, button, select, textarea': {
+    fontFamily: vars.fontFamily,
+    fontSize: vars.fontSize,
+    color: 'currentColor',
+    background: vars.inputBg,
   },
   select: {
+    WebkitAppearance: 'none',
     appearance: 'none',
   },
-  'label label': {
-    marginTop: 0,
+  header: {
+    background: vars.brandColor,
+    color: vars.brandTextColor,
+    _textColor: vars.brandTextColor,
+    _linkColor: vars.transTextColor,
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 var(--spacing)',
+    lineHeight: 'calc(var(--line-height) * var(--h1-scale))',
+    height: vars.headerHeight,
+    whiteSpace: 'nowrap',
   },
-  'label, input, button, textarea, select, .field': {
-    fontFamily: vars.font,
-    fontSize: vars.fontSize,
+  h1: {
+    _textColor: vars.brandColor,
+    fontSize: 'calc(var(--font-size) * var(--h1-scale))',
+    lineHeight: 'calc(var(--line-height) * var(--h1-scale))',
+    fontWeight: '400',
+    margin: '0',
+    padding: vars.spacing,
+    textAlign: 'center',
+  },
+  'header h2': {
+    color: vars.brandTextColor,
+    whiteSpace: 'nowrap',
+  },
+  h2: {
+    color: vars.brandColor,
+    fontSize: 'calc(var(--font-size) * var(--h2-scale))',
+    lineHeight: 'calc(var(--line-height) * var(--h2-scale))',
+    margin: 'calc(var(--spacing) * var(--h2-scale)) 0',
+  },
+  h3: {
+    fontSize: 'calc(var(--font-size) * var(--h3-scale))',
+    lineHeight: 'calc(var(--line-height) * var(--h3-scale))',
+    margin: 'calc(var(--spacing) * var(--h3-scale)) 0',
+  },
+  main: {
+    alignItems: 'stretch',
+    display: 'flex',
+    flexDirection: 'column',
+    maxWidth: '100vw',
+    height: '100vh',
+    overflow: 'hidden',
+  },
+  'main > xin-sidenav': {
+    height: 'calc(100vh - var(--header-height))',
+  },
+  'main > xin-sidenav::part(nav)': {
+    background: vars.navBg,
+  },
+  'input[type=search]': {
+    borderRadius: 99,
+  },
+  blockquote: {
+    background: vars.insetBg,
+    margin: '0',
+    padding: 'var(--spacing) calc(var(--spacing) * 2)',
+  },
+  'blockquote > :first-child': {
+    marginTop: '0',
+  },
+  'blockquote > :last-child': {
+    marginBottom: '0',
+  },
+  '.bar': {
+    display: 'flex',
+    gap: vars.spacing,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: vars.spacing,
+    flexWrap: 'wrap',
+    _textColor: vars.brandColor,
+    background: vars.barColor,
+  },
+  a: {
+    textDecoration: 'none',
+    color: vars.linkColor,
+    opacity: '0.9',
+    borderBottom: '1px solid var(--brand-color)',
+  },
+  'button, select, .clickable': {
+    transition: 'ease-out 0.2s',
+    background: vars.brandTextColor,
+    _textColor: vars.brandColor,
+    display: 'inline-block',
+    textDecoration: 'none',
+    padding: '0 calc(var(--spacing) * 1.25)',
+    border: 'none',
+    borderRadius: 'calc(var(--spacing) * 0.5)',
+  },
+  'button, select, clickable, input': {
+    lineHeight: 'calc(var(--line-height) + var(--spacing))',
+  },
+  'select:has(+ .icon-chevron-down)': {
+    paddingRight: 'calc(var(--spacing) * 2.7)',
+  },
+  'select + .icon-chevron-down': {
+    marginLeft: 'calc(var(--spacing) * -2.7)',
+    width: 'calc(var(--spacing) * 2.7)',
+    alignSelf: 'center',
+    pointerEvents: 'none',
+    objectPosition: 'left center',
+    _textColor: vars.brandColor,
+  },
+  'label > select + .icon-chevron-down': {
+    marginLeft: 'calc(var(--spacing) * -3.5)',
+  },
+  'input, textarea': {
+    border: 'none',
+    outline: 'none',
+    borderRadius: 'calc(var(--spacing) * 0.5)',
+  },
+  input: {
+    padding: '0 calc(var(--spacing) * 1.5)',
+  },
+  textarea: {
+    padding: 'var(--spacing) calc(var(--spacing) * 1.25)',
     lineHeight: vars.lineHeight,
+    minHeight: 'calc(var(--spacing) + var(--line-height) * 4)',
+  },
+  "input[type='number']": {
+    paddingRight: 0,
+    width: '6em',
+    textAlign: 'right',
+  },
+  'input[type=number]::-webkit-inner-spin-button': {
+    margin: '1px 3px 1px 0.5em',
+    opacity: 1,
+    inset: 1,
+  },
+  "input[type='checkbox'], input[type='radio']": {
+    maxWidth: vars.lineHeight,
+  },
+  '::placeholder': {
+    color: vars.focusColor,
+  },
+  img: {
+    verticalAlign: 'middle',
+  },
+  'button:hover, button:hover, .clickable:hover': {
+    boxShadow: 'inset 0 0 0 2px var(--brand-color)',
+  },
+  'button:active, button:active, .clickable:active': {
+    background: vars.brandColor,
+    color: vars.brandTextColor,
+  },
+  label: {
+    display: 'inline-flex',
+    gap: 'calc(var(--spacing) * 0.5)',
+    alignItems: 'center',
+  },
+  '.elastic': {
+    flex: '1 1 auto',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  'svg text': {
+    pointerEvents: 'none',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    fill: '#000',
+    stroke: '#fff8',
+    strokeWidth: '0.5',
+    opacity: '0',
+  },
+  'svg text.hover': {
+    opacity: '1',
+  },
+  '.thead': {
+    background: vars.brandColor,
+    color: vars.brandTextColor,
+  },
+  '.th + .th': {
+    border: '1px solid #fff4',
+    borderWidth: '0 1px',
+  },
+  '.th, .td': {
+    padding: '0 var(--spacing)',
+  },
+  '.tr:not([aria-selected]):hover': {
+    background: '#08835810',
+  },
+  '[aria-selected]': {
+    background: '#08835820',
+  },
+  ':disabled': {
+    opacity: '0.5',
+    filter: 'saturate(0)',
+    pointerEvents: 'none',
+  },
+  pre: {
+    background: vars.codeBg,
+    padding: vars.spacing,
+    borderRadius: 'calc(var(--spacing) * 0.25)',
+    overflow: 'auto',
+    fontSize: vars.codeFontSize,
+    lineHeight: 'calc(var(--font-size) * 1.2)',
+  },
+  'pre, code': {
+    fontFamily: vars.codeFontFamily,
+    _textColor: vars.brandColor,
+  },
+  '.-xin-sidenav-visible .close-content': {
+    display: 'none',
+  },
+  '.transparent, .iconic': {
+    background: 'none',
+  },
+  '.iconic': {
+    padding: '0',
+    fontSize: '150%',
+    lineHeight: 'calc(var(--line-height) + var(--spacing))',
+    width: 'calc(var(--line-height) + var(--spacing))',
+    textAlign: 'center',
+  },
+  '.transparent:hover, .iconic:hover': {
+    background: '#0002',
+    boxShadow: 'none',
     color: vars.textColor,
-    border: 0,
   },
-  'input, button, textarea, select, .field': {
-    padding: `${vars.spacing75} ${vars.spacing}`,
+  '.transparent:active, .iconic:active': {
+    background: '#0004',
+    boxShadow: 'none',
+    color: vars.textColor,
   },
-  button: {
-    borderRadius: vars.roundedRadius,
-    background: vars.buttonBg,
+  'xin-sidenav:not([compact]) .show-within-compact': {
+    display: 'none',
+  },
+  '.on.on': {
+    background: vars.brandColor,
+    _textColor: vars.brandTextColor,
+  },
+  '.current': {
+    background: vars.background,
+  },
+  '.doc-link': {
+    cursor: 'pointer',
+    borderBottom: 'none',
+    transition: '0.15s ease-out',
+    marginLeft: '20px',
+    padding: 'calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5)',
+  },
+  '.doc-link:not(.current):hover': {
+    background: vars.background,
+  },
+  '.doc-link:not(.current)': {
+    opacity: '0.8',
+    marginLeft: 0,
+  },
+  'xin-example': {
+    margin: 'var(--spacing) 0',
+  },
+  'xin-example [part=editors]': {
+    background: vars.insetBg,
+  },
+  "[class*='icon-'], xin-icon": {
+    color: 'currentcolor',
+    height: vars.fontSize,
+    pointerEvents: 'none',
+  },
+  "[class*='icon-']": {
+    verticalAlign: 'middle',
+  },
+  '.icon-plus': {
+    content: "'+'",
   },
   table: {
     borderCollapse: 'collapse',
-    borderBottom: `1px solid ${brandColor.opacity(0.2)}`,
   },
-  a: {
-    color: vars.textHeadingColor,
-    textDecoration: 'none',
-    borderRadius: vars.roundedRadius50,
-    padding: `${vars.spacing25} ${vars.spacing50}`,
-    margin: `${vars.spacing_25} ${vars.spacing_50}`,
-  },
-  'nav a': {
-    padding: `${vars.spacing25} ${vars.spacing}`,
-    margin: 0,
-  },
-  '.current-route': {
-    background: vars.currentBg,
-    zIndex: 1,
-    pointerEvents: 'none',
-  },
-  th: {
-    background: brandColor.opacity(0.2),
-  },
-  'td, th': {
-    padding: `${vars.spacing25} ${vars.spacing75}`,
-  },
-  'tr:nth-child(2n+2)': {
-    background: brandColor.opacity(0.05),
-  },
-  'input, textarea, select, .field': {
-    background: vars.inputBg,
-  },
-  'input, textarea, select, button, .field': {
-    boxShadow: vars.inputBorderShadow,
-  },
-  'input, textarea, .field': {
-    borderRadius: vars.roundedRadius50,
-  },
-  'select, button': {
-    borderRadius: vars.roundedRadius,
-  },
-  'select[multiple]': {
-    padding: `${vars.spacing50} 0`,
-  },
-  'select[multiple] option': {
-    padding: `${vars.spacing50} ${vars.spacing}`,
-  },
-  'input[type="range"], input[type="checkbox"], input[type="radio"]': {
-    boxShadow: 'none',
-  },
-  ':disabled': {
-    opacity: 0.5,
-  },
-  'input:disabled, .field.readonly': {
-    opacity: 0.75,
-  },
-  'button:not(:disabled):hover, a:not(:disabled):hover': {
-    background: vars.hoverBg,
-  },
-  'button:not(:disabled):active, a:not(:disabled):active': {
-    background: vars.activeBg,
-  },
-  'a:not(:disabled):visited': {
-    opacity: 0.8,
-  },
-  '[hidden]': {
-    display: 'none !important',
-  },
-  'code, pre': {
-    fontFamily: vars.codeFont,
-  },
-  '.icon-button': {
-    display: 'inline-flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: vars.fontSize200,
-    background: 'transparent',
-    lineHeight: vars.touchSize,
-    borderRadius: 1000,
-    padding: 0,
-    minWidth: vars.touchSize,
-    minHeight: vars.touchSize,
-    boxShadow: 'none',
-  },
-  'dialog::backdrop': {
-    backgroundColor: '#0004',
-    backdropFilter: 'blur(2px)',
-  },
-  form: {
-    minWidth: '300px',
-    padding: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: vars.spacing,
-  },
-  'form *': {
-    margin: 0,
-  },
-  '.primary': {
-    backgroundColor: vars.primaryColor,
-  },
-  '.page-padded': {
-    padding: `${vars.spacing} ${vars.spacing200}`,
-  },
-  'option:checked': {
+  thead: {
     background: vars.brandColor,
     color: vars.brandTextColor,
   },
-  'tool-bar button': {
+  tbody: {
+    background: vars.background,
+  },
+  'tr:nth-child(2n)': {
+    background: vars.backgroundShaded,
+  },
+  'th, td': {
+    padding: 'calc(var(--spacing) * 0.5) var(--spacing)',
+  },
+  'header xin-locale-picker xin-select button': {
+    color: 'currentcolor',
     background: 'transparent',
-    padding: `${vars.spacing25} ${vars.spacing50}`,
-    boxShadow: 'none',
-    color: vars.brandColor,
+    gap: '2px',
   },
-  '::placeholder': {
-    opacity: vars.placeholderOpacity,
+  svg: {
+    fill: 'currentcolor',
   },
-  ':focus-visible': {
-    outline: 'none',
-    boxShadow: `inset 0 0 0 2px ${brandColor.opacity(0.5)}`,
+  'img.logo, xin-icon.logo': {
+    animation: '2s ease-in-out 0s infinite alternate logo-swing',
   },
-  '.show-after-empty:not(.-xin-empty-list+*)': {
-    display: 'none',
+  '@keyframes logo-swing': {
+    '0%': {
+      transform: 'perspective(1000px) rotateY(15deg)',
+    },
+    '100%': {
+      transform: 'perspective(1000px) rotateY(-15deg)',
+    },
   },
-  '::selection': {
-    background: vars.brandColor,
-    color: vars.brandTextColor,
-  },
-  '*::-webkit-scrollbar': {
-    background: '#fff6',
-    width: vars.spacing50,
-    height: vars.spacing50,
-  },
-  '*::-webkit-scrollbar-thumb': {
-    background: brandColor.opacity(0.5),
-    borderRadius: vars.spacing25,
-  },
-  '*::-webkit-scrollbar-thumb:hover': {
-    background: vars.brandColor,
-    borderRadius: vars.spacing25,
-  },
-  'color-swatch::part(idSpan)': {
-    fontSize: vars.fontSize80,
-    opacity: 0.5,
-  },
-  // icons
-  'svg[class*="icon-"]': {
-    width: 24,
-    height: 24,
-    fill: vars.textColor,
-    pointerEvents: 'none',
-  },
-})
-
-// adapted from https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
-const setTrueHeight = () => {
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`)
 }
-setTrueHeight()
-window.addEventListener('resize', setTrueHeight)
