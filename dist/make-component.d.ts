@@ -2,6 +2,7 @@ import { Color } from './color';
 import { Component } from './component';
 import { vars, varDefault } from './css';
 import { XinStyleSheet } from './css-types';
+import { bind, on } from './bind';
 import { elements, svgElements, mathML } from './elements';
 import { ElementCreator, PartsMap } from './xin-types';
 import { xin, boxed } from './xin';
@@ -19,6 +20,8 @@ export interface XinFactory {
     xinProxy: typeof xinProxy;
     boxedProxy: typeof boxedProxy;
     makeComponent: typeof makeComponent;
+    bind: typeof bind;
+    on: typeof on;
     version: string;
 }
 export interface XinComponentSpec<T = PartsMap> {

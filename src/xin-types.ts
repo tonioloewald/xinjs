@@ -35,7 +35,7 @@ export interface OptionalXinProps<T = any> {
 export type BoxedProxy<T = any> = T extends Array<infer U>
   ? Array<BoxedProxy<U>>
   : T extends Function
-  ? T
+  ? T & OptionalXinProps<Function>
   : T extends object
   ? {
     [K in keyof T]: BoxedProxy<T[K]>
@@ -80,6 +80,7 @@ export type XinProxyArray = XinProps<[]> & { [key: string]: XinProxyObject } & (
     | XinScalar[]
   )
 export type XinTouchableType = string | XinProxy | BoxedProxy | String | Number | Boolean
+
 export type XinEventHandler<T extends Event = Event, E extends Element = Element> =
   | ((evt: T & {target: E}) => void)
   | ((evt: T & {target: E}) => Promise<void>)

@@ -1,5 +1,5 @@
 /*#
-# xin
+# 1. xin
 
 > In Mandarin, "xin" has several meanings including "truth" and "message".
 
@@ -250,6 +250,7 @@ import {
   XinBinding,
   PathTestFunction,
   ObserverCallbackFunction,
+  XinEventHandler,
 } from './xin-types'
 import { settings } from './settings'
 import {
@@ -260,13 +261,14 @@ import {
   updates,
 } from './path-listener'
 import { getByPath, setByPath } from './by-path'
-import { bind } from './bind'
+import { bind, on } from './bind'
 import {
   xinValue,
   XIN_VALUE,
   XIN_PATH,
   XIN_OBSERVE,
   XIN_BIND,
+  XIN_ON,
 } from './metadata'
 
 interface ProxyConstructor {
@@ -355,10 +357,16 @@ const regHandler = (
       case XIN_VALUE:
         return xinValue(target)
       case XIN_OBSERVE:
-        return (callback) => {
+        return (callback: ObserverCallbackFunction) => {
           const listener = _observe(path, callback)
           return () => unobserve(listener)
         }
+      case XIN_ON:
+        return (
+          element: HTMLElement,
+          eventType: keyof HTMLElementEventMap
+        ): VoidFunction =>
+          on(element, eventType, xinValue(target) as XinEventHandler)
       case XIN_BIND:
         return (element: Element, binding: XinBinding, options?: XinObject) => {
           bind(element, path, binding, options)
@@ -401,14 +409,12 @@ const regHandler = (
       } else {
         value = (target as XinArray)[prop as unknown as number]
       }
-      if (value !== null && typeof value === 'object') {
+      if (value instanceof Object) {
         const currentPath = extendPath(path, prop)
         return new Proxy<XinObject, XinProxyObject>(
-          value,
+          value instanceof Function ? value.bind(target) : value,
           regHandler(currentPath, boxScalars)
         ) as XinValue
-      } else if (typeof value === 'function') {
-        return value.bind(target)
       } else {
         return boxScalars ? box(value, extendPath(path, prop)) : value
       }

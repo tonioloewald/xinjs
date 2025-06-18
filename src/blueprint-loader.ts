@@ -1,11 +1,27 @@
 /*#
-# blueprints
+# 4.1 blueprints
 
 One issue with standard web-components built with xinjs is that building them
 "sucks in" the version of `xinjs` you're working with. This isn't a huge problem
 with monolithic code-bases, but it does prevent components from being loaded
 "on-the-fly" from CDNs and composed on the spot and it does make it hard to
 "tree shake" component libraries.
+
+```js
+const { elements, blueprintLoader, blueprint } = xinjs
+
+preview.append(
+  blueprintLoader(
+    blueprint({
+      tag: 'swiss-clock',
+      src: 'https://tonioloewald.github.io/xin-clock/dist/blueprint.js?1234',
+      blueprintLoaded({creator}) {
+        preview.append(creator())
+      }
+    }),
+  )
+)
+```
 
 Another issue is name-collision. What if two people create a `<tab-selector>` component
 and you want to use both of them? Or you want to switch to a new and better one but
@@ -39,15 +55,15 @@ of component **blueprints**. It will load its `<xin-blueprint>`s in parallel.
 - `tag` is the tagName you wish to use. This defaults to the name of the source file if suitable.
 - `property` allows you to load a named exported property from a blueprint module
   (allowing one blueprint to export multiple blueprints). By default, it's `default`.
+- `loaded` is the `XinPackagedComponent` after loading
 
-#### `<xin-loader>` and `<xin-blueprint>` Properties
+#### `<xin-blueprint>` Properties
 
-- `onload` is called by `<xin-loader>` when all its blueprints are loaded, and by
-  `<xin-blueprint>` when its blueprint is loaded.
+- `blueprintLoaded(package: XinPackagedComponent)` `<xin-blueprint>` when its blueprint is loaded.
 
-#### Properties
+#### `<xin-loader>` Properties
 
-- `onload` is called when all the blueprints have loaded.
+- `allLoaded()` is called when all the blueprints have loaded.
 
 ## `makeComponent(tag: string, blueprint: XinBlueprint): Promise<XinPackagedCompoent>`
 
@@ -70,6 +86,47 @@ You could write:
       document.body.append(packaged.creator())
     })
 
+This is a more complex example that loads two components and only generates
+the test component once everything is ready:
+
+```js
+const { blueprintLoader, blueprint } = xinjs
+
+let clockType = null
+
+preview.append(
+  blueprintLoader(
+    {
+      allLoaded() {
+        const xinTest = this.querySelector('[tag="xin-test"]').loaded.creator
+        preview.append(
+          xinTest({
+            description: `${clockType.tagName} registered`,
+            test() {
+              return (
+                preview.querySelector(clockType.tagName) && preview.querySelector(clockType.tagName).constructor !==
+                HTMLElement
+              )
+            },
+          })
+        )
+      },
+    },
+    blueprint({
+      tag: 'swiss-clock',
+      src: 'https://tonioloewald.github.io/xin-clock/dist/blueprint.js?1234',
+      blueprintLoaded({type, creator}) {
+        clockType = type
+        preview.append(creator())
+      },
+    }),
+    blueprint({
+      tag: 'xin-test',
+      src: 'https://tonioloewald.github.io/xin-test/dist/blueprint.js',
+    })
+  )
+)
+```
 
 ## `XinBlueprint`
 
@@ -81,8 +138,13 @@ You could write:
       mathML: typeof mathML
       vars: typeof vars
       varDefault: typeof varDefault
+      xin: typeof xin
+      boxed: typeof boxed
       xinProxy: typeof xinProxy
       boxedProxy: typeof boxedProxy
+      makeComponent: typeof makeComponent
+      bind: typeof bind
+      on: typeof on
       version: string
     }
 
@@ -184,21 +246,22 @@ export class Blueprint extends Component {
   src = ''
   property = 'default'
   loaded?: XinPackagedComponent
-  onload = () => {}
+  blueprintLoaded = (_package: XinPackagedComponent) => {}
 
   async packaged(): Promise<XinPackagedComponent> {
     const { tag, src, property } = this
     const signature = `${tag}.${property}:${src}`
     if (!this.loaded) {
       if (loadedBlueprints[signature] === undefined) {
-        const imported = await loadModule(src)
-        const blueprint = imported[property] as XinBlueprint
-        loadedBlueprints[signature] = makeComponent(tag, blueprint)
+        loadedBlueprints[signature] = loadModule(src).then((imported) => {
+          const blueprint = imported[property] as XinBlueprint
+          return makeComponent(tag, blueprint)
+        })
       } else {
         console.log(`using cached ${tag}`)
       }
       this.loaded = await loadedBlueprints[signature]
-      this.onload()
+      this.blueprintLoaded(this.loaded)
     }
     return this.loaded!
   }
@@ -216,7 +279,7 @@ export const blueprint = Blueprint.elementCreator({
 })
 
 export class BlueprintLoader extends Component {
-  onload = () => {}
+  allLoaded = () => {}
 
   constructor() {
     super()
@@ -230,7 +293,7 @@ export class BlueprintLoader extends Component {
     ).filter((elt) => elt.src)
     const promises = blueprintElements.map((elt) => elt.packaged())
     await Promise.all(promises)
-    this.onload()
+    this.allLoaded()
   }
 
   connectedCallback() {

@@ -1,5 +1,5 @@
 /*#
-# color
+# 5.1 color
 
 `xinjs` includes a compact (~1.3kB) and powerful `Color` class for manipulating colors.
 The hope is that when the CSS provides native color calculations this will no

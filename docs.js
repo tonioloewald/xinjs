@@ -24,10 +24,10 @@ function metadata(content, filePath) {
 
 function pinnedSort(a, b) {
   a =
-    (a.pin === 'top' ? 'A' : a.pin === 'bottom' ? 'Z' : 'M') +
+    (a.pin === 'top' ? '!' : a.pin === 'bottom' ? '~' : a.pin || '}') +
     a.title.toLocaleLowerCase()
   b =
-    (b.pin === 'top' ? 'A' : b.pin === 'bottom' ? 'Z' : 'M') +
+    (b.pin === 'top' ? '!' : b.pin === 'bottom' ? '~' : b.pin || '}') +
     b.title.toLocaleLowerCase()
   return a > b ? 1 : b > a ? -1 : 0
 }

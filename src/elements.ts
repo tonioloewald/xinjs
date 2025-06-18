@@ -1,22 +1,45 @@
 /*#
-# elements
+# 3. elements
 
 `xinjs` provides `elements` for easily and efficiently generating DOM elements
 without using `innerHTML` or other unsafe methods.
 
-    import {elements} from 'xinjs'
+```js
+const { elements } =  xinjs
 
-    const {label, span, input} = elements
+const { div, input, label, span } = elements
 
-    document.body.append(
-      label(
-      {style: {
-        display: 'inline-flex'
-      }},
-      span('This is a field'),
+preview.append(
+  div(
+    {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 10,
+        gap: 10
+      }
+    },
+    label(
+      {
+        style: {
+          display: 'inline-flex'
+        }
+      },
+      span('text'),
       input({value: 'hello world', placeholder: 'type something'})
-      )
+    ),
+    label(
+      {
+        style: {
+          display: 'inline-flex'
+        }
+      },
+      span('checkbox'),
+      input({type: 'checkbox', checked: true})
     )
+  )
+)
+```
 
 `elements` is a proxy whose properties are element factory functions,
 so `elements.foo` is a function that returns a `<foo>` element.
@@ -44,7 +67,7 @@ E.g.
 Attributes in camelCase, e.g. `dataInfo`, will be converted to kebab-case,
 so:
 
-    span({dataInfo: 'foo'})        // produces <span data-ref="foo"></span>
+    span({dataInfo: 'foo'})        // produces <span data-info="foo"></span>
 
 ## style properties
 
@@ -52,12 +75,12 @@ so:
 element's `style` object (while a string property will just change the
 element's `style` attribute, eliminating previous changes).
 
-  span({style: 'border: 1px solid red'}, {style: 'font-size: 15px'})
+    span({style: 'border: 1px solid red'}, {style: 'font-size: 15px'})
 
 …produces `<span style="font-size: 15px"></span>`, which is probably
 not what was wanted.
 
-  span({style: {border: '1px solid red'}, {style: {fontSize: '15px'}}})
+    span({style: {border: '1px solid red'}, {style: {fontSize: '15px'}}})
 
 …produces `<span style="border: 1px solid red; fon-size: 15px></span>`
 which is probably what was wanted.
@@ -70,7 +93,7 @@ turned into a `mouseup` listener.
 
 ## binding
 
-You can [bind](bind.md) an element to state using [bindings](bindings.md)
+You can [bind](/?bind.ts) an element to state using [bindings](/?bindings.ts)
 using convenient properties, e.g.
 
     import { elements } from 'xinjs'
@@ -94,6 +117,35 @@ If you want to use your own bindings, you can use `apply`:
     div({ apply(elt){
       bind(elt, 'app.prefs.isVisible', visibleBinding})
     } })
+
+## event-handlers
+
+You can attach event handlers to elements using `on<EventType>`
+as syntax sugar, e.g.
+
+    import { elements } from 'xinjs'
+    const { button } = elements
+    document.body.append(
+      button('click me', {onClick() {
+        alert('clicked!')
+      }})
+    )
+
+…is syntax sugar for:
+
+    import { elements, on } from 'xinjs'
+    const { button } = elements
+    const aButton = button('click me')
+    on(aButton, 'click', () => {
+      alert('clicked!')
+    })
+    document.body.append(
+      aButton
+    )
+
+There are some subtle but important differences between `on()` and
+`addEventListener` which are discussed in detail in the section on
+[bind](/?bind.ts).
 
 ## apply
 

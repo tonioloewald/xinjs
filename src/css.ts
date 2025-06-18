@@ -1,5 +1,5 @@
 /*#
-# css
+# 5. css
 
 `xinjs` provides a collection of utilities for working with CSS rules that
 help leverage CSS variables to produce highly maintainable and lightweight

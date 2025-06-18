@@ -1,3 +1,7 @@
+/*#
+# 1.3 metadata
+
+*/
 import {
   XinObject,
   XinProps,
@@ -16,6 +20,7 @@ export const XIN_PATH = 'xinPath'
 export const XIN_VALUE = 'xinValue'
 export const XIN_OBSERVE = 'xinObserve'
 export const XIN_BIND = 'xinBind'
+export const XIN_ON = 'xinOn'
 
 export const xinPath = (x: any): string | undefined => {
   return x && x[XIN_PATH]
@@ -38,7 +43,7 @@ export interface DataBinding<T extends Element = Element> {
 export type DataBindings = DataBinding[]
 
 export interface XinEventBindings {
-  [eventType: string]: XinEventHandler[]
+  [eventType: string]: Set<XinEventHandler>
 }
 
 export const elementToHandlers: WeakMap<Element, XinEventBindings> =

@@ -8,6 +8,7 @@ import {
   xinProxy,
   vars,
   xin,
+  boxed,
   bindings,
   touch,
   getListItem,
@@ -101,7 +102,15 @@ bindings.current = {
 
 setTimeout(() => {
   // provide globals for experimentation, but prevent them from masking compile bugs
-  Object.assign(globalThis, { app, xin, bindings, elements, vars, touch })
+  Object.assign(globalThis, {
+    app,
+    xin,
+    bindings,
+    elements,
+    vars,
+    touch,
+    boxed,
+  })
 }, 1000)
 
 const main = document.querySelector('main') as HTMLElement | null

@@ -14,7 +14,7 @@ export { MoreMath } from './more-math';
 export { settings } from './settings';
 export { throttle, debounce } from './throttle';
 export { version } from './version';
-export { xin, boxed, observe, unobserve, touch, observerShouldBeRemoved, updates, } from './xin';
+export { xin, boxed, observe, unobserve, touch, updates } from './xin';
 export { blueprint, Blueprint, blueprintLoader, BlueprintLoader, } from './blueprint-loader';
 export * from './xin-types';
 export { xinProxy, boxedProxy } from './xin-proxy';

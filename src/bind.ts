@@ -1,5 +1,5 @@
 /*#
-# bind
+# 2. bind
 
 `bind()` lets you synchronize data / application state to the user-interface reliably,
 efficiently, and with a minimum of code.
@@ -11,7 +11,7 @@ state synchronized with the user-interface. One approach to this problem
 is [Reactive Programming](https://en.wikipedia.org/wiki/Reactive_programming)
 as exemplified by [React](https://reactjs.org) and its many imitators.
 
-`xinjs` works very well with React via the [useXin](./useXin.md) React "hook".
+`xinjs` works very well with React via the [useXin](https://github.com/tonioloewald/react-xinjs) React "hook".
 But `xinjs` is not designed for "reactive programming" and in fact "hooks" aren't
 "reactive" at all, so much as an example of the "observer" or "pub/sub" pattern.
 
@@ -22,10 +22,10 @@ This allows data to be "observed" before it exists, which in particular *decoupl
 of the user interface from the initialization of data and allows user interfaces
 built with `xinjs` to be *deeply asynchronous*.
 
-## `bind`
+## `bind()`
 
 The `bind` function is a simple way of tying an `HTMLElement`'s properties to
-state via `path` using [bindings](bindings.md)
+state via `path` using [bindings](/?bindings.ts)
 
     import {bind, bindings, xin, elements, updates} from 'xinjs'
     const {div, input} = elements
@@ -87,6 +87,67 @@ based on whether the bound value is neither "falsy" nor an empty `Array`.
     }
     bind(listElement, 'app.bigList', visibility)
 
+## `on()`
+
+    on(element: Element, eventType: string, handler: XinEventHandler): VoidFunction
+
+    export type XinEventHandler<T extends Event = Event, E extends Element = Element> =
+      | ((evt: T & {target: E}) => void)
+      | ((evt: T & {target: E}) => Promise<void>)
+      | string
+
+```js
+const { elements, on, boxedProxy } = xinjs
+const { postNotification } = xinjsui
+
+const makeHandler = (message) => () => {
+  postNotification({ message, duration: 2 })
+}
+
+const { onExample } = boxedProxy({
+  onExample: {
+    clickHandler: makeHandler('Hello from onExample proxy')
+  }
+})
+
+const { button, div, h2 } = elements
+
+const hasListener = button('has listener')
+hasListener.addEventListener('click', makeHandler('Hello from addEventListener'))
+
+preview.append(
+  div(
+    {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 10,
+        gap: 10
+      }
+    },
+    h2('Event Handler Examples'),
+    hasListener,
+    button('just a callback', {onClick: makeHandler('just a callback')}),
+    button('via proxy', {onClick: onExample.clickHandler}),
+  )
+)
+```
+
+`on()` binds event-handlers to DOM elements.
+
+More than syntax sugar for `addEventListener`, `on()` allows you to bind event
+handlers inside `xin` by path (e.g. allowing event-handling code to be loaded
+asynchronously or lazily, or simply allowing event-handlers to be switched dynamically
+without rebinding) and it uses event-bubbling to minimize the actual number of
+event handlers that need to be registered.
+
+`on()` returns a function for removing the event handler.
+
+In essence, only one event handler of a given type is ever added to the
+DOM by `on()` (at `document.body` level), and then when that event is detected,
+that handler goes from the original target through to the DOM and fires off
+event-handlers, passing them an event proxy (so that `stopPropagation()` still
+works).
 */
 
 import { xin, touch, observe } from './xin'
@@ -283,9 +344,10 @@ const handleBoundEvent = (event: Event): void => {
       }
     },
   })
+  const nohandlers = new Set<XinEventHandler>()
   while (!propagationStopped && target != null) {
     const eventBindings = elementToHandlers.get(target) as XinEventBindings
-    const handlers = eventBindings[event.type] || ([] as XinEventHandler[])
+    const handlers = eventBindings[event.type] || nohandlers
     for (const handler of handlers) {
       if (typeof handler === 'function') {
         handler(wrappedEvent as Event & { target: Element })
@@ -308,11 +370,13 @@ const handleBoundEvent = (event: Event): void => {
   }
 }
 
-export const on = (
-  element: HTMLElement,
-  eventType: string,
-  eventHandler: XinEventHandler
-): void => {
+type RemoveListener = VoidFunction
+
+export function on<E extends HTMLElement, K extends keyof HTMLElementEventMap>(
+  element: E,
+  eventType: K,
+  eventHandler: XinEventHandler<HTMLElementEventMap[K], E>
+): RemoveListener {
   let eventBindings = elementToHandlers.get(element)
   element.classList.add(EVENT_CLASS)
   if (eventBindings == null) {
@@ -320,13 +384,14 @@ export const on = (
     elementToHandlers.set(element, eventBindings)
   }
   if (!eventBindings[eventType]) {
-    eventBindings[eventType] = []
+    eventBindings[eventType] = new Set<XinEventHandler>()
   }
-  if (!eventBindings[eventType].includes(eventHandler)) {
-    eventBindings[eventType].push(eventHandler)
-  }
+  eventBindings[eventType].add(eventHandler as XinEventHandler)
   if (!handledEventTypes.has(eventType)) {
     handledEventTypes.add(eventType)
     document.body.addEventListener(eventType, handleBoundEvent, true)
+  }
+  return () => {
+    eventBindings[eventType].delete(eventHandler as XinEventHandler)
   }
 }

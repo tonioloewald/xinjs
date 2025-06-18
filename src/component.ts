@@ -1,5 +1,5 @@
 /*#
-# web-components
+# 4. web-components
 
 **xinjs** provides the abstract `Component` class to make defining custom-elements
 easier.
@@ -32,7 +32,7 @@ The last line defines the `ToolBar` class as the implementation of `<tool-bar>`
 HTML elements (`tool-bar` is derived automatically from the class name) and
 returns an `ElementCreator` function that creates `<tool-bar>` elements.
 
-See [elements](./elements.md) for more information on `ElementCreator` functions.
+See [elements](/?elements.ts) for more information on `ElementCreator` functions.
 
 ### Component properties
 
@@ -253,7 +253,7 @@ Be sure to call `super.render()` if you implement `render` in the subclass.
 
     const {label, span, input} = Component.elements
 
-This is simply provided as a convenient way to get to [elements](./elements.md)
+This is simply provided as a convenient way to get to [elements](/?elements.ts)
 
 ### Component static methods
 
@@ -299,20 +299,24 @@ ignored on all subsequent calls).
 
 ## Examples
 
-In proving out `Component` I've built a number of examples.
+[xinjs-ui](https://ui.xinjs.net) is a component library built using this `Component` class
+that provides the essential additions to standard HTML elements needed to build many
+user-interfaces.
 
-- [app-layout](../demo/components/app-layout.ts) uses multiple named slots to implement
-  a typical app-layout with header, footer, sidebars, etc.
-- [babylon3d](../demo/components/babylon3d.ts) implements a whole family of components
-  (inspired by [a-frame](https://aframe.io)) that lets you assemble interactive 3d scenes.
-  Aside from the core `<b-3d>` element, none of the other elements are actually displayed.
-- [game-controller.ts](../demo/components/game-controller.ts) is an invisible element that
-  implements basic game-controller functions (loosely based on [unity3d](https://unity3d.com)'s
-  game controls).
-- [labeled-input](../demo/components/labeled-input.ts) is what you'd expect.
-- [labeled-value](../demo/components/labeled-input.ts) is like labeled-input but read-only.
-- [markdown-viewer](../demo/components/markdown-viewer.ts) renders markdown.
-- [toolbar.ts](../demo/components/toolbar.ts) is a simple toolbar container.
+- [xin-example](https://ui.xinjs.net/https://ui.xinjs.net/?live-example.ts) uses multiple named slots to implement
+  powers the interactive examples used for this site.
+- [xin-sidebar](https://ui.xinjs.net/?side-nav.ts) implements the sidebar navigation
+  used on this site.
+- [xin-table](https://ui.xinjs.net/?data-table.ts) implements virtualized tables
+  with resizable, reorderable, sortable columns that can handle more data
+  than you're probably willing to load.
+- [xin-form and xin-field](https://ui.xinjs.net/?form.ts) allow you to
+  quickly create forms that leverage all the built-in functionality of `<input>`
+  elements (including powerful validation) even for custom-fields.
+- [xin-md](https://ui.xinjs.net/?markdown-viewer.ts) uses `marked` to render
+  markdown.
+- [xin-3d](https://ui.xinjs.net/?babylon-3d.ts) lets you easily embed 3d scenes
+  in your application using [babylonjs](https://babylonjs.com/)
 */
 import { css } from './css'
 import { XinStyleSheet } from './css-types'

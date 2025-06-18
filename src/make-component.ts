@@ -1,7 +1,16 @@
+/*#
+# 4.2 makeComponent
+
+`makeComponent(tag: string, bluePrint: XinBlueprint): Promise<XinComponentSpec>`
+hydrates [blueprints](/?blueprint-loader.ts) into usable [web-component](./?component.ts)s.
+
+*/
+
 import { Color } from './color'
 import { Component } from './component'
 import { vars, varDefault } from './css'
 import { XinStyleSheet } from './css-types'
+import { bind, on } from './bind'
 import { elements, svgElements, mathML } from './elements'
 import { ElementCreator, PartsMap } from './xin-types'
 import { version } from './version'
@@ -21,6 +30,8 @@ export interface XinFactory {
   xinProxy: typeof xinProxy
   boxedProxy: typeof boxedProxy
   makeComponent: typeof makeComponent
+  bind: typeof bind
+  on: typeof on
   version: string
 }
 
@@ -58,6 +69,8 @@ export async function makeComponent(
     xinProxy,
     boxedProxy,
     makeComponent,
+    bind,
+    on,
     version,
   })
   const packagedComponent = {

@@ -1,5 +1,5 @@
 /*#
-# throttle & debounce
+# 7. throttle & debounce
 
 Usage:
 
@@ -9,6 +9,45 @@ Usage:
 `throttle(voidFunc, interval)` and `debounce(voidFunc, interval)` are utility functions for
 producing functions that filter out unnecessary repeated calls to a function, typically
 in response to rapid user input, e.g. from keystrokes or pointer movement.
+
+```js
+const { throttle, debounce, on } = xinjs
+
+function follow( element ) {
+  return ( event ) => {
+    console.log(event.offsetX, event.offsetY)
+    element.style.top = event.offsetY + 'px'
+    element.style.left = event.offsetX + 'px'
+  }
+}
+on(preview, 'mousemove', follow(preview.querySelector('#unfiltered')))
+on(preview, 'mousemove', throttle(follow(preview.querySelector('#throttle'))))
+on(preview, 'mousemove', debounce(follow(preview.querySelector('#debounce'))))
+```
+```html
+<h3>Throttle & Debounce in Action</h3>
+<p>Move your mouse around in here…</p>
+<p style="color: blue">follow function — triggers immediately</p>
+<p style="color: red">throttled follow function — triggers every 250ms</p>
+<p style="color: green">debounced follow function — stop moving for 250ms to trigger it</p>
+<div id="unfiltered" class="follower" style="height: 20px; width: 20px; border-color: blue"></div>
+<div id="throttle" class="follower" style="height: 40px; width: 40px; border-color: red"></div>
+<div id="debounce" class="follower" style="height: 60px; width: 60px; border-color: green"></div>
+```
+```css
+.preview * {
+  pointer-events: none;
+}
+.preview .follower {
+  top: 100px;
+  left: 400px;
+  position: absolute;
+  border-width: 4px;
+  border-style: solid;
+  background: transparent;
+  transform: translateX(-50%) translateY(-50%);
+}
+```
 
 The usual purpose of these functions is to prevent over-calling of a function based on
 rapidly changing data, such as keyboard event or scroll event handling.

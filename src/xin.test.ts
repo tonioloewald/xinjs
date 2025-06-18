@@ -9,6 +9,7 @@ import {
   updates,
   isValidPath,
 } from './xin'
+import { elements } from './elements'
 import { XIN_VALUE, XIN_PATH, xinPath } from './metadata'
 
 type Change = { path: string; value: any; observed?: any }
@@ -419,6 +420,30 @@ test('xinObserve works', async () => {
   test.value = 'goodbye'
   await updates()
   expect(a).toBe(17)
+})
+
+test('xinOn works', async () => {
+  const { test } = boxed
+  let count = 0
+  test.onTest = {
+    handler: () => {
+      count += 1
+    },
+  }
+  const button = elements.button()
+  const cancel = test.onTest.handler.xinOn(button, 'click')
+  document.body.append(button)
+  button.dispatchEvent(new Event('click'))
+  await updates()
+  expect(count).toBe(1)
+  button.dispatchEvent(new Event('click'))
+  await updates()
+  expect(count).toBe(2)
+  cancel()
+  button.dispatchEvent(new Event('click'))
+  await updates()
+  expect(count).toBe(2)
+  button.remove()
 })
 
 test('instance properties, computed properties', () => {

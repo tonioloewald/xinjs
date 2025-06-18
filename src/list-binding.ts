@@ -1,3 +1,15 @@
+/*#
+# 2.1 binding arrays
+
+## `bindList` and `bindings.list`
+
+## Virtualized Lists
+
+## `hiddenProp`
+
+## Filtered Lists
+
+*/
 import { settings } from './settings'
 import { resizeObserver } from './dom'
 import { throttle } from './throttle'

@@ -1,5 +1,5 @@
 /*#
-# bindings
+# 2.2 bindings
 
 `bindings` is simply a collection of common bindings.
 
@@ -14,7 +14,7 @@ A `binding` looks like this:
 
 The `fromDOM` function is only needed for bindings to elements that trigger `change` or `input`
 events, typically `<input>`, `<textarea>`, and `<select>` elements, and of course your
-own [Custom Elements](web-components.md).
+own [Custom Elements](/?components.ts).
 
 You can see examples of these bindings in the [kitchen sink demo](../demo/components/kitchen-sink.ts).
 

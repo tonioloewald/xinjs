@@ -7,6 +7,7 @@ export declare const XIN_PATH = "xinPath";
 export declare const XIN_VALUE = "xinValue";
 export declare const XIN_OBSERVE = "xinObserve";
 export declare const XIN_BIND = "xinBind";
+export declare const XIN_ON = "xinOn";
 export declare const xinPath: (x: any) => string | undefined;
 export declare function xinValue<T>(x: T): Unboxed<T>;
 export interface DataBinding<T extends Element = Element> {
@@ -16,7 +17,7 @@ export interface DataBinding<T extends Element = Element> {
 }
 export type DataBindings = DataBinding[];
 export interface XinEventBindings {
-    [eventType: string]: XinEventHandler[];
+    [eventType: string]: Set<XinEventHandler>;
 }
 export declare const elementToHandlers: WeakMap<Element, XinEventBindings>;
 export declare const elementToBindings: WeakMap<Element, DataBindings>;
