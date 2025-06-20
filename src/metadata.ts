@@ -1,6 +1,32 @@
 /*#
 # 1.3 metadata
 
+## `getListItem(element: Element): any`
+
+## `xinValue(x: any): any`
+
+`xinValue` is helpful when you want to strip the `xin` or `boxed` proxy off of a
+value. `xinValue` passes through normal values, so it's safe to use on anything.
+
+    import { boxed } from 'xinjs'
+
+    const foo = { bar: 'hello', baz: 17 }
+    boxed.foo = foo
+
+    boxed.foo.bar === foo.bar               // false, boxed.foo.bar is a String
+    boxed.foo === foo                       // false, boxed.foo is a Proxy
+    boxed.foo.baz === 17                    // false, boxed.foo.baz is a Number
+    xinValue(boxed.foo.bar) === 'hello'     // true
+    boxed.foo.xinValue === foo              // true
+    boxed.foo.baz.xinValue = 17             // true
+    xinValue(boxed.foo) === xinValue(foo)   // true
+    foo.xinValue                            // undefined! foo isn't a proxy
+
+## `xinPath(x: any): string | undefined`
+
+`xinPath` will get you the path of a `xin` or `boxed` proxy. `xinPath` will be
+undefined for anything that's isn't a `xin` or `boxed` proxy, so it can also
+be used to tell if a value is a (`xin` or `boxed`) proxy.
 */
 import {
   XinObject,
@@ -23,7 +49,7 @@ export const XIN_BIND = 'xinBind'
 export const XIN_ON = 'xinOn'
 
 export const xinPath = (x: any): string | undefined => {
-  return x && x[XIN_PATH]
+  return (x && x[XIN_PATH]) || undefined
 }
 
 export function xinValue<T>(x: T): Unboxed<T> {
