@@ -1,7 +1,13 @@
 /*#
 # 1. xin
 
-> In Mandarin, "xin" has several meanings including "truth" and "message".
+> In Mandarin, 信 ("xin") has several meanings including "letter", "true" and "message".
+> As conceived, `xin` acts is intended to be the "single source of truth" for application
+> state, or data.
+>
+> In [b8rjs](https://b8rjs.com)—`xinjs`'s predecessor—it was called
+> `registry`. But registry has some bad connotations (Windows "registry") and it's
+> harder to type and search for.
 
 `xin` is a path-based implementation of the **observer** or **pub/sub**
 pattern designed to be very simple and straightforward to use, leverage
@@ -355,7 +361,7 @@ const regHandler = (
       case XIN_PATH:
         return path
       case XIN_VALUE:
-        return xinValue(target)
+        return target.valueOf ? target.valueOf() : target
       case XIN_OBSERVE:
         return (callback: ObserverCallbackFunction) => {
           const listener = _observe(path, callback)
