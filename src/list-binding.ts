@@ -1,9 +1,139 @@
 /*#
 # 2.1 binding arrays
 
+The most likely source of complexity and performance issues in applications is
+displaying large lists or grids of objects. `xinjs` provides robust support
+for handling this efficiently.
+
 ## `bindList` and `bindings.list`
 
+The basic structure of a **list-binding** is:
+
+    div( // container element
+      {
+        bindList: {
+          value: boxed.path.to.array // OR 'path.to.array'
+          idPath: 'id' // (optional) path to unique id of array items
+        }
+      },
+      template( // template for the repeated item
+        div( // repeated item should have a single root element
+          ... // whatever you want
+          span({
+            bindText: '^.foo.bar' // binding to a given array member's `foo.bar`
+              // '^' refers to the array item itself
+          })
+        )
+      )
+    )
+
+```js
+const { elements, boxedProxy } = xinjs
+const { listBindingExample } = boxedProxy({
+  listBindingExample: {
+    array: ['this', 'is', 'an', 'example']
+  }
+})
+
+const { h3, ul, li, template } = elements
+
+preview.append(
+  h3('binding an array of strings'),
+  ul(
+    {
+      bindList: {
+        value: listBindingExample.array
+      },
+    },
+    template(
+      li({ bindText: '^' })
+    )
+  )
+)
+```
+
 ## Virtualized Lists
+
+The real power of `bindList` comes from its support for virtualizing lists.
+
+    bindList: {
+      value: emojiListExample.array,
+      idPath: 'name',
+      virtual: {
+        height: 30,
+      },
+    }
+
+Simply add a `virtual` property to the list-binding specifying a *minimum* `height` (and, optionally,
+`height`) and the list will be `virtualized` (meaning that only visible elements will be rendered,
+missing elements being replaced by a single padding element above and below the list).
+
+Now you can trivially bind an array of a million objects to the DOM and have it scroll at
+120fps.
+
+```js
+const { elements, boxedProxy } = xinjs
+const request = await fetch(
+  'https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json'
+)
+const { emojiListExample } = boxedProxy({
+  emojiListExample: {
+    array: await request.json()
+  }
+})
+
+const { div, span, template } = elements
+
+preview.append(
+  div(
+    {
+      class: 'emoji-table',
+      bindList: {
+        value: emojiListExample.array,
+        idPath: 'name',
+        virtual: {
+          height: 30,
+        },
+      }
+    },
+    template(
+      div(
+        {
+          class: 'emoji-row',
+          tabindex: 0,
+        },
+        span({ bindText: '^.chars', class: 'graphic' }),
+        span({ bindText: '^.name', class: 'no-overflow' }),
+        span({ bindText: '^.category', class: 'no-overflow' }),
+        span({ bindText: '^.subcategory', class: 'no-overflow' })
+      )
+    )
+  )
+)
+```
+```css
+.emoji-table {
+  height: 100%;
+  overflow: auto;
+}
+.emoji-row {
+  display: grid;
+  grid-template-columns: 50px 300px 200px 200px;
+  align-items: center;
+  height: 30px;
+}
+
+.emoji-row > .graphic {
+  font-size: 20px;
+  justify-self: center;
+}
+
+.emoji-row > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+```
 
 ## `hiddenProp`
 
