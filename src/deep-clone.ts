@@ -7,7 +7,9 @@ export function deepClone(obj: Cloneable): Cloneable | Cloneable[] {
   if (obj == null || typeof obj !== 'object') {
     return obj
   }
-  if (Array.isArray(obj)) {
+  if (obj instanceof Set) {
+    return new Set(obj)
+  } else if (Array.isArray(obj)) {
     return obj.map(deepClone)
   }
   const clone: XinObject = {}
