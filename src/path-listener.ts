@@ -1,5 +1,58 @@
 /*#
 # 1.2 path-listener
+
+`path-listener` implements the `xin` observer model. Although these events
+are exported from `xinjs` they shouldn't need to be used very often. Mostly
+they're used by `bind` and `xin` to manage state.
+
+## `touch(path: string)`
+
+This is used to inform `xin` that a value at a path has changed. Remember that
+xin simply wraps an object, and if you change the object directly, `xin` won't
+necessarily know about it.
+
+The two most common uses for `touch()` are:
+
+1. You want to make lots of changes to a large data structure, possibly
+   over a period of time (e.g. update hundreds of thousands of values
+   in a table that involve service calls or heavy computation) and don't
+   want to thrash the UI so you just change the object directly.
+2. You want to change the content of an object but need a something that
+   is bound to the "outer" object to be refreshed.
+
+## `observe()` and `unobserve()`
+
+    const listener = observe(
+      path: string | RegExp | (path: string) => boolean,
+      (changedPath: string) => {
+        ...
+      }
+    )
+
+    // and later, when you're done
+    unobserve(listener);
+
+`observe(…)` lets you call a function whenever a specified path changes. You'll
+be passed the path that changed and you can do whatever you like. It returns
+a reference to the listener to allow you to dispose of it later.
+
+`unobserve(listener)` removes the listener.
+
+> This is how binding works. When you bind a path to an interface element, an
+> observer is created that knows when to update the interface element. (If the
+> binding is "two-way" (i.e. provides a `fromDOM` callback) then an `input` or
+> `change` event that hits that element will update the value at the bound
+> path.
+
+## `async updates()`
+
+You can `await updates()` or use `updates().then(…)` to execute code
+after any changes have been rendered to the DOM. Typically, you shouldn't
+have to mess with this, but sometimes—for example—you might need to know
+how large a rendered UI element is to adjust something else.
+
+It's also used a lot in unit tests. After you perform some logic, does
+it appear correctly in the UI?
 */
 
 import {
