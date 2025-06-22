@@ -64,7 +64,6 @@ export const styleSpec: XinStyleSheet = {
     boxSizing: 'border-box',
     scrollbarColor: `${vars.scrollThumbColor} ${vars.scrollBarColor}`,
     scrollbarWidth: 'thin',
-    color: vars.textColor,
   },
   body: {
     fontFamily: vars.fontFamily,
@@ -340,6 +339,9 @@ export const styleSpec: XinStyleSheet = {
   },
   'xin-example': {
     margin: 'var(--spacing) 0',
+  },
+  'xin-example .preview.preview': {
+    padding: 10,
   },
   'xin-example [part=editors]': {
     background: vars.insetBg,

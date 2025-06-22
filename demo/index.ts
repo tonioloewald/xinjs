@@ -213,7 +213,6 @@ if (main)
         {
           title: 'theme',
           class: 'iconic',
-          style: { color: vars.linkColor },
           onClick(event) {
             popMenu({
               target: event.target as HTMLButtonElement,
