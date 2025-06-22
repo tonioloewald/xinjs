@@ -52,6 +52,28 @@ preview.append(
 )
 ```
 
+### id-paths
+
+**id-paths** are a wrinkle in `xin`'s paths specifically there to make list-bindign more efficient.
+This is because in many cases you will encounter large arrays of objects, each with a unique id somewhere, e.g. it might be `id` or `uid`
+or even buried deeper…
+
+    xin.message = [
+      {
+        id: '1234abcd',
+        title: 'hello',
+        body: 'hello there!'
+      },
+      …
+    ]
+
+Instead of referring to the first item in `messages` as `messages[0]` it can be referred to
+as `messages[id=1234abcd]`, and this will retrieve the item regardless of its position in messages.
+
+Specifying an `idPath` in a list-binding will allow the list to be more efficiently updated.
+It's the equivalent of a `key` in React, the difference being that its optional and
+specifically intended to leverage pre-existing keys where available.
+
 ## Virtualized Lists
 
 The real power of `bindList` comes from its support for virtualizing lists.
@@ -135,10 +157,135 @@ preview.append(
 }
 ```
 
-## `hiddenProp`
-
 ## Filtered Lists
 
+It's also extremely common to want to filter a rendered list, and `xinjs`
+provides both simple and powerful methods for doing this.
+
+## `hiddenProp` and `visibleProp`
+
+`hiddenProp` and `visibleProp` allow you to use a property to hide or show array
+elements (and they can be `symbol` values if you want to avoid "polluting"
+your data, e.g. for round-tripping to a database.)
+
+## `filter` and `needle`
+
+    bindList: {
+      value: filterListExample.array,
+      idPath: 'name',
+      virtual: {
+        height: 30,
+      },
+      filter: (emojis, needle) => {
+        needle = needle.trim().toLocaleLowerCase()
+        if (!needle) {
+          return emojis
+        }
+        return emojis.filter(emoji => `${emoji.name} ${emoji.category} ${emoji.subcategory}`.toLocaleLowerCase().includes(needle))
+      },
+      needle: filterListExample.needle
+    }
+
+If `bindList`'s options provide a `filter` function and a `needle` (proxy or path) then
+the list will be filtered using the function via throttled updates.
+
+`filter` is passed the whole array, and `needle` can be anything so, `filter` can
+sort the array or even synthesize it entirely.
+
+In this example the `needle` is an object containing both a `needle` string and `sort`
+value, and the `filter` function filters the list if the string is non-empty, and
+sorts the list if `sort` is not "default". Also note that an `input` event handler
+is used to `touch` the object and trigger updates.
+
+```js
+// note that this example is styled by the earlier example
+
+const { elements, boxedProxy } = xinjs
+const request = await fetch(
+  'https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json'
+)
+const { filterListExample } = boxedProxy({
+  filterListExample: {
+    config: {
+      needle: '',
+      sort: 'default',
+    },
+    array: await request.json()
+  }
+})
+
+const { b, div, span, template, label, input, select, option } = elements
+
+preview.append(
+  div(
+    {
+      style: {
+        display: 'flex',
+        padding: 10,
+        gap: 10,
+        height: 60,
+        alignItems: 'center'
+      },
+      onInput() {
+        // need to trigger change if any prop of config changes
+        touch(filterListExample.config)
+      },
+    },
+    b('filtered list'),
+    span({style: 'flex: 1'}),
+    label(
+      span('sort by'),
+      select(
+        {
+          bindValue: filterListExample.config.sort
+        },
+        option('default'),
+        option('name'),
+        option('category')
+      ),
+    ),
+    input({
+      type: 'search',
+      placeholder: 'filter emoji',
+      bindValue: filterListExample.config.needle
+    })
+  ),
+  div(
+    {
+      class: 'emoji-table',
+      style: 'height: calc(100% - 60px)',
+      bindList: {
+        value: filterListExample.array,
+        idPath: 'name',
+        virtual: {
+          height: 30,
+        },
+        filter: (emojis, config) => {
+          let { needle, sort } = config
+          needle = needle.trim().toLocaleLowerCase()
+          if (needle) {
+            emojis = emojis.filter(emoji => `${emoji.name} ${emoji.category} ${emoji.subcategory}`.toLocaleLowerCase().includes(needle))
+          }
+          return config.sort === 'default' ? emojis : emojis.sort((a, b) => a[config.sort] > b[config.sort] ? 1 : -1)
+        },
+        needle: filterListExample.config
+      }
+    },
+    template(
+      div(
+        {
+          class: 'emoji-row',
+          tabindex: 0,
+        },
+        span({ bindText: '^.chars', class: 'graphic' }),
+        span({ bindText: '^.name', class: 'no-overflow' }),
+        span({ bindText: '^.category', class: 'no-overflow' }),
+        span({ bindText: '^.subcategory', class: 'no-overflow' })
+      )
+    )
+  )
+)
+```
 */
 import { settings } from './settings'
 import { resizeObserver } from './dom'
@@ -153,16 +300,22 @@ import {
   xinValue,
   xinPath,
 } from './metadata'
-import { XinObject } from './xin-types'
+import { XinObject, XinTouchableType } from './xin-types'
+import { Listener } from './path-listener'
 
-const listBindingRef = Symbol('list-binding')
+export const listBindingRef = Symbol('list-binding')
 const SLICE_INTERVAL_MS = 16 // 60fps
+const FILTER_INTERVAL_MS = 100 // 10fps
+
+type ListFilter = (array: any[], needle: any) => any[]
 
 interface ListBindingOptions {
   idPath?: string
   virtual?: { height: number; width?: number }
   hiddenProp?: symbol | string
   visibleProp?: symbol | string
+  filter?: ListFilter
+  needle?: XinTouchableType
 }
 
 interface VirtualListSlice {
@@ -191,7 +344,7 @@ function updateRelativeBindings(element: Element, path: string): void {
   }
 }
 
-class ListBinding {
+export class ListBinding {
   boundElement: Element
   listTop: HTMLElement
   listBottom: HTMLElement
@@ -201,8 +354,13 @@ class ListBinding {
   private _array: any[] = []
   private readonly _update?: VoidFunction
   private _previousSlice?: VirtualListSlice
+  static filterBoundObservers = new WeakMap<Element, Listener>()
 
-  constructor(boundElement: Element, options: ListBindingOptions = {}) {
+  constructor(
+    boundElement: Element,
+    value: any[],
+    options: ListBindingOptions = {}
+  ) {
     this.boundElement = boundElement
     this.itemToElement = new WeakMap()
     if (boundElement.children.length !== 1) {
@@ -248,6 +406,9 @@ class ListBinding {
     if (visibleProp !== undefined) {
       visibleArray = visibleArray.filter((item) => item[visibleProp] === true)
     }
+    if (this.options.filter && this.needle !== undefined) {
+      visibleArray = this.options.filter(visibleArray, this.needle)
+    }
     let firstItem = 0
     let lastItem = visibleArray.length - 1
     let topBuffer = 0
@@ -287,14 +448,21 @@ class ListBinding {
     }
   }
 
-  update(array?: any[], isSlice?: boolean): void {
+  private needle?: any
+  filter = throttle((needle: any) => {
+    if (this.needle !== needle) {
+      this.needle = needle
+      this.update(this._array)
+    }
+  }, FILTER_INTERVAL_MS)
+
+  update(array?: any[], isSlice?: boolean) {
     if (array == null) {
       array = []
     }
     this._array = array
 
     const { hiddenProp, visibleProp } = this.options
-
     const arrayPath: string = xinPath(array) as string
 
     const slice = this.visibleSlice()
@@ -399,11 +567,12 @@ interface ListBoundElement extends Element {
 
 export const getListBinding = (
   boundElement: ListBoundElement,
+  value: any[],
   options?: ListBindingOptions
 ): ListBinding => {
   let listBinding = boundElement[listBindingRef]
   if (listBinding === undefined) {
-    listBinding = new ListBinding(boundElement, options)
+    listBinding = new ListBinding(boundElement, value, options)
     boundElement[listBindingRef] = listBinding
   }
   return listBinding

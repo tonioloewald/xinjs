@@ -148,6 +148,15 @@ DOM by `on()` (at `document.body` level), and then when that event is detected,
 that handler goes from the original target through to the DOM and fires off
 event-handlers, passing them an event proxy (so that `stopPropagation()` still
 works).
+
+## `touchElement()`
+
+    touchElement(element: Element, changedPath?: string)
+
+This is a low-level function for *immediately* updating a bound element. If you specifically
+want to force a render of an element (versus anything bound to a path), simply call
+`touchElement(element)`. Specifying a `changedPath` will only trigger bindings bound
+to paths staring with the provided path.
 */
 
 import { xin, touch, observe } from './xin'
@@ -172,6 +181,7 @@ import {
   XinBinding,
   XinBindingSpec,
 } from './xin-types'
+import { ListBinding, listBindingRef } from './list-binding'
 
 const { document, MutationObserver } = globalThis
 
@@ -277,11 +287,15 @@ if (globalThis.document != null) {
   document.body.addEventListener('input', handleChange, true)
 }
 
+interface BindingOptions {
+  [key: string]: any
+}
+
 export function bind<T extends Element = Element>(
   element: T,
   what: XinTouchableType | XinBindingSpec,
   binding: XinBinding<T>,
-  options?: XinObject
+  options?: BindingOptions
 ): T {
   if (element instanceof DocumentFragment) {
     throw new Error('bind cannot bind to a DocumentFragment')
@@ -319,6 +333,17 @@ export function bind<T extends Element = Element>(
   if (toDOM != null && !path.startsWith('^')) {
     // not calling toDOM directly here allows virtual list bindings to work
     touch(path)
+  }
+
+  if (options?.filter && options?.needle) {
+    bind(element, options.needle, {
+      toDOM(element, value) {
+        console.log({ needle: value })
+        ;(element as { [listBindingRef]?: ListBinding })[
+          listBindingRef
+        ]?.filter(value)
+      },
+    })
   }
 
   return element
