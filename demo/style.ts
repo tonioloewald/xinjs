@@ -64,6 +64,7 @@ export const styleSpec: XinStyleSheet = {
     boxSizing: 'border-box',
     scrollbarColor: `${vars.scrollThumbColor} ${vars.scrollBarColor}`,
     scrollbarWidth: 'thin',
+    color: vars.textColor,
   },
   body: {
     fontFamily: vars.fontFamily,
@@ -104,9 +105,9 @@ export const styleSpec: XinStyleSheet = {
     fontSize: 'calc(var(--font-size) * var(--h1-scale))',
     lineHeight: 'calc(var(--line-height) * var(--h1-scale))',
     fontWeight: '400',
-    margin: '0',
-    padding: vars.spacing,
-    textAlign: 'center',
+    borderBottom: `4px solid ${vars.barColor}`,
+    margin: `${vars.spacing} 0 ${vars.spacing200}`,
+    padding: 0,
   },
   'header h2': {
     color: vars.brandTextColor,
@@ -288,6 +289,7 @@ export const styleSpec: XinStyleSheet = {
   'pre, code': {
     fontFamily: vars.codeFontFamily,
     _textColor: vars.brandColor,
+    fontSize: '90%',
   },
   '.-xin-sidenav-visible .close-content': {
     display: 'none',

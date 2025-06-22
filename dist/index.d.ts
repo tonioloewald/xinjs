@@ -1,4 +1,4 @@
-export { bind, on } from './bind';
+export { bind, on, touchElement } from './bind';
 export { bindings } from './bindings';
 export { css, invertLuminance, darkMode, initVars, vars, varDefault, StyleSheet, } from './css';
 export type { XinStyleSheet, XinStyleMap, XinStyleRule } from './css-types';

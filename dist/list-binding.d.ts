@@ -1,5 +1,7 @@
-import { XinObject } from './xin-types';
-declare const listBindingRef: unique symbol;
+import { XinObject, XinTouchableType } from './xin-types';
+import { Listener } from './path-listener';
+export declare const listBindingRef: unique symbol;
+type ListFilter = (array: any[], needle: any) => any[];
 interface ListBindingOptions {
     idPath?: string;
     virtual?: {
@@ -8,8 +10,10 @@ interface ListBindingOptions {
     };
     hiddenProp?: symbol | string;
     visibleProp?: symbol | string;
+    filter?: ListFilter;
+    needle?: XinTouchableType;
 }
-declare class ListBinding {
+export declare class ListBinding {
     boundElement: Element;
     listTop: HTMLElement;
     listBottom: HTMLElement;
@@ -19,12 +23,15 @@ declare class ListBinding {
     private _array;
     private readonly _update?;
     private _previousSlice?;
-    constructor(boundElement: Element, options?: ListBindingOptions);
+    static filterBoundObservers: WeakMap<Element, Listener>;
+    constructor(boundElement: Element, value: any[], options?: ListBindingOptions);
     private visibleSlice;
+    private needle?;
+    filter: (...args: any[]) => void;
     update(array?: any[], isSlice?: boolean): void;
 }
 interface ListBoundElement extends Element {
     [listBindingRef]?: ListBinding;
 }
-export declare const getListBinding: (boundElement: ListBoundElement, options?: ListBindingOptions) => ListBinding;
+export declare const getListBinding: (boundElement: ListBoundElement, value: any[], options?: ListBindingOptions) => ListBinding;
 export {};

@@ -327,7 +327,12 @@ if (main)
             bindDocLink: '^.filename',
             bindText: '^.title',
             onClick(event: Event) {
-              const a = event.target as HTMLAnchorElement
+              const a = (event.target as HTMLElement).closest(
+                'a'
+              ) as HTMLAnchorElement
+              if (!a) {
+                return
+              }
               const doc = getListItem(event.target as HTMLElement)
               const nav = (event.target as HTMLElement).closest(
                 'xin-sidenav'
