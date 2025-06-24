@@ -1,9 +1,31 @@
 /*#
 # 4.2 makeComponent
 
-`makeComponent(tag: string, bluePrint: XinBlueprint): Promise<XinComponentSpec>`
+`makeComponent(tag: string, bluePrint: XinBlueprint<T>): Promise<XinComponentSpec<T>>`
 hydrates [blueprints](/?blueprint-loader.ts) into usable [web-component](./?component.ts)s.
 
+Here are the relevant interfaces:
+
+```
+export interface PartsMap<T = Element> {
+  [key: string]: T
+}
+
+export type XinBlueprint<T = PartsMap> = (
+  tag: string,
+  module: XinFactory
+) => XinComponentSpec<T> | Promise<XinComponentSpec<T>>
+
+export interface XinComponentSpec<T = PartsMap> {
+  type: Component<T>
+  styleSpec?: XinStyleSheet
+}
+```
+
+Note that a crucial benefit of blueprints is that the **consumer** of the blueprint gets
+to choose the `tagName` of the custom-element. (Of course with react you can choose
+the virtualDOM representation, but this often doesn't give you much of a clue where
+the corresponding code is by looking at the DOM or even the React component panel.
 */
 
 import { Color } from './color'
@@ -54,8 +76,8 @@ export type XinBlueprint<T = PartsMap> = (
 
 export async function makeComponent(
   tag: string,
-  blueprint: XinBlueprint
-): Promise<XinPackagedComponent> {
+  blueprint: XinBlueprint<T>
+): Promise<XinPackagedComponent<T>> {
   const { type, styleSpec } = await blueprint(tag, {
     Color,
     Component,
