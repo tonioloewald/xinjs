@@ -79,8 +79,8 @@ ${a}`}).join(`
 [![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
 [![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
 
-For a pretty thorough overview of xinjs, you might like to start with [What is xinjs?](https://loewald.com/blog/2025/6/4/what-is-xinjs-).
-To understand the thinking behind xinjs, there's [What should a front-end framework do?](https://loewald.com/blog/2025/6/4/what-should-a-front-end-framework-do).
+> For a pretty thorough overview of xinjs, you might like to start with [What is xinjs?](https://loewald.com/blog/2025/6/4/what-is-xinjs-).
+> To understand the thinking behind xinjs, there's [What should a front-end framework do?](https://loewald.com/blog/2025/6/4/what-should-a-front-end-framework-do).
 
 ### Build UIs with less code
 
@@ -2360,8 +2360,31 @@ The blueprint function can be \`async\`, so you can use async import inside it t
 > could be implemented such that the different versions of the blueprint share information.
 > E.g. you could maintain a list of all the instances of any version of the blueprint.`,title:"4.1 blueprints",filename:"blueprint-loader.ts",path:"src/blueprint-loader.ts"},{text:`# 4.2 makeComponent
 
-\`makeComponent(tag: string, bluePrint: XinBlueprint): Promise<XinComponentSpec>\`
-hydrates [blueprints](/?blueprint-loader.ts) into usable [web-component](./?component.ts)s.`,title:"4.2 makeComponent",filename:"make-component.ts",path:"src/make-component.ts"},{text:`# 5. css
+\`makeComponent(tag: string, bluePrint: XinBlueprint<T>): Promise<XinComponentSpec<T>>\`
+hydrates [blueprints](/?blueprint-loader.ts) into usable [web-component](./?component.ts)s.
+
+Here are the relevant interfaces:
+
+\`\`\`
+export interface PartsMap<T = Element> {
+  [key: string]: T
+}
+
+export type XinBlueprint<T = PartsMap> = (
+  tag: string,
+  module: XinFactory
+) => XinComponentSpec<T> | Promise<XinComponentSpec<T>>
+
+export interface XinComponentSpec<T = PartsMap> {
+  type: Component<T>
+  styleSpec?: XinStyleSheet
+}
+\`\`\`
+
+Note that a crucial benefit of blueprints is that the **consumer** of the blueprint gets
+to choose the \`tagName\` of the custom-element. (Of course with react you can choose
+the virtualDOM representation, but this often doesn't give you much of a clue where
+the corresponding code is by looking at the DOM or even the React component panel.`,title:"4.2 makeComponent",filename:"make-component.ts",path:"src/make-component.ts"},{text:`# 5. css
 
 \`xinjs\` provides a collection of utilities for working with CSS rules that
 help leverage CSS variables to produce highly maintainable and lightweight
@@ -2632,12 +2655,14 @@ If you want to desaturate colors more nicely, you can try blending them with the
 ## Utilities
 
 - \`swatch()\` emits the color into the console with a swatch and returns the color for chaining.
-- \`toString()\` emits the \`html\` property`,title:"5.1 color",filename:"color.ts",path:"src/color.ts"},{text:"# 6. more-math\n\nSome simple functions egregiously missing from the Javascript `Math`\nobject. They are exported from `xinjs` as the `MoreMath` object.\n\n## Functions\n\n`clamp(min, v, max)` will return `v` if it's between `min` and `max`\nand the `min` or `max` otherwise.\n\n`lerp(a, b, t, clamped = true)` will interpolate linearly between `a` and `b` using\nparameter `t`. `t` will be clamped to the interval `[0, 1]`, so\n`lerp` will be clamped *between* a and b unless you pass `false` as the\noptional fourth parameter (allowing `lerp()` to extrapolate).\n\n    lerp(0, 10, 0.5)        // produces 5\n    lerp(0, 10, 2)          // produces 10\n    lerp(0, 10, 2, false)   // produces 20\n    lerp(5, -5, 0.75)       // produces -2.5\n\n## Constants\n\n`RADIANS_TO_DEGREES` and `DEGREES_TO_RADIANS` are values to multiply\nan angle by to convert between degrees and radians.",title:"6. more-math",filename:"more-math.ts",path:"src/more-math.ts"},{text:`# 7. throttle & debounce
+- \`toString()\` emits the \`html\` property`,title:"5.1 color",filename:"color.ts",path:"src/color.ts"},{text:"# A.1 more-math\n\nSome simple functions egregiously missing from the Javascript `Math`\nobject. They are exported from `xinjs` as the `MoreMath` object.\n\n## Functions\n\n`clamp(min, v, max)` will return `v` if it's between `min` and `max`\nand the `min` or `max` otherwise.\n\n`lerp(a, b, t, clamped = true)` will interpolate linearly between `a` and `b` using\nparameter `t`. `t` will be clamped to the interval `[0, 1]`, so\n`lerp` will be clamped *between* a and b unless you pass `false` as the\noptional fourth parameter (allowing `lerp()` to extrapolate).\n\n```\nlerp(0, 10, 0.5)        // produces 5\nlerp(0, 10, 2)          // produces 10\nlerp(0, 10, 2, false)   // produces 20\nlerp(5, -5, 0.75)       // produces -2.5\n```\n\n## Constants\n\n`RADIANS_TO_DEGREES` and `DEGREES_TO_RADIANS` are values to multiply\nan angle by to convert between degrees and radians.",title:"A.1 more-math",filename:"more-math.ts",path:"src/more-math.ts"},{text:`# A.2 throttle & debounce
 
 Usage:
 
-    const debouncedFunc = debounce(func, 250)
-    const throttledFunc = debounce(func, 250)
+\`\`\`
+const debouncedFunc = debounce(func, 250)
+const throttledFunc = debounce(func, 250)
+\`\`\`
 
 \`throttle(voidFunc, interval)\` and \`debounce(voidFunc, interval)\` are utility functions for
 producing functions that filter out unnecessary repeated calls to a function, typically
@@ -2700,7 +2725,7 @@ every \`interval\` ms, including one last time after the last time the wrapper i
 > wrapped function after the last call to the wrapper.
 
 Note that parameters will be passed to the wrapped function, and that *the last call always goes through*.
-However, parameters passed to skipped calls will *never* reach the wrapped function.`,title:"7. throttle & debounce",filename:"throttle.ts",path:"src/throttle.ts"},{text:`# todo
+However, parameters passed to skipped calls will *never* reach the wrapped function.`,title:"A.2 throttle & debounce",filename:"throttle.ts",path:"src/throttle.ts"},{text:`# todo
 
 ## work in progress
 
@@ -2717,5 +2742,5 @@ However, parameters passed to skipped calls will *never* reach the wrapped funct
 - bindList cloning doesn't duplicate svgs for some reason
 `,title:"todo",filename:"TODO.md",path:"TODO.md",pin:"bottom"}];Gn("demo-style",To);setTimeout(()=>{let n=getComputedStyle(document.body).getPropertyValue("--brand-color");console.log("welcome to %cxinjs.net",`color: ${n}; padding: 0 5px;`)},100);var xn="xinjs",bl=document.location.search!==""?document.location.search.substring(1).split("&")[0]:"README.md",yl=It.find((n)=>n.filename===bl)||It[0],{app:B,prefs:Q}=Sn({app:{title:xn,blogUrl:"https://loewald.com",discordUrl:"https://discord.com/invite/ramJ9rgky5",githubUrl:`https://github.com/tonioloewald/${xn}#readme`,npmUrl:`https://www.npmjs.com/package/${xn}`,xinjsuiUrl:"https://ui.xinjs.net",bundleBadgeUrl:`https://deno.bundlejs.com/?q=${xn}&badge=`,bundleUrl:`https://bundlejs.com/?q=${xn}`,cdnBadgeUrl:`https://data.jsdelivr.com/v1/package/npm/${xn}/badge`,cdnUrl:`https://www.jsdelivr.com/package/npm/${xn}`,optimizeLottie:!1,lottieFilename:"",lottieData:"",docs:It,currentDoc:yl},prefs:{theme:"system",highContrast:!1,locale:""}});Jt((n)=>{if(n.startsWith("prefs"))return!0;return!1});K.docLink={toDOM(n,t){n.setAttribute("href",`?${t}`)}};K.current={toDOM(n,t){let e=n.getAttribute("href")||"";n.classList.toggle("current",t===e.substring(1))}};setTimeout(()=>{Object.assign(globalThis,{app:B,xin:P,bindings:K,elements:g,vars:r,touch:rn,boxed:En})},1000);var Mo=document.querySelector("main"),{h2:gl,div:Po,span:_t,a:At,img:Io,header:fl,button:_o,template:wl,input:vl}=g;X(document.body,"prefs.theme",{toDOM(n,t){if(t==="system")t=getComputedStyle(document.body).getPropertyValue("--darkmode")==="true"?"dark":"light";n.classList.toggle("darkmode",t==="dark")}});X(document.body,"prefs.highContrast",{toDOM(n,t){n.classList.toggle("high-contrast",t)}});window.addEventListener("popstate",()=>{let n=window.location.search.substring(1);B.currentDoc=B.docs.find((t)=>t.filename===n)||B.docs[0]});var xl=lt(()=>{console.time("filter");let n=Ao.value.toLocaleLowerCase();B.docs.forEach((t)=>{t.hidden=!t.title.toLocaleLowerCase().includes(n)&&!t.text.toLocaleLowerCase().includes(n)}),rn(B.docs),console.timeEnd("filter")}),Ao=vl({slot:"nav",placeholder:"search",type:"search",style:{width:"calc(100% - 10px)",margin:"5px"},onInput:xl});if(Mo)Mo.append(fl(At({href:"/",style:{display:"flex",alignItems:"center",borderBottom:"none"},title:`xinjs ${dt}, xinjs-ui ${ze}`},f.xinColor({style:{_fontSize:40,marginRight:10}}),gl({bindText:"app.title"})),_t({class:"elastic"}),Be({minWidth:750},_t({style:{marginRight:r.spacing,display:"flex",alignItems:"center",gap:r.spacing50}},At({href:B.bundleUrl},Io({alt:"bundlejs size badge",src:B.bundleBadgeUrl})),At({href:B.cdnUrl},Io({alt:"jsdelivr",src:B.cdnBadgeUrl}))),_t({slot:"small"})),_t({style:{flex:"0 0 10px"}}),_o({title:"theme",class:"iconic",onClick(n){Z({target:n.target,menuItems:[{icon:"github",caption:"github",action:B.githubUrl},{icon:"npm",caption:"npm",action:B.npmUrl},{icon:"discord",caption:"discord",action:B.discordUrl},{icon:"xinjsUiColor",caption:"xinjs-ui",action:B.xinjsuiUrl},{icon:"blog",caption:"Blog",action:"https://loewald.com"},null,{icon:"rgb",caption:"Color Theme",menuItems:[{caption:"System",checked(){return Q.theme==="system"},action(){Q.theme="system"}},{caption:"Dark",checked(){return Q.theme==="dark"},action(){Q.theme="dark"}},{caption:"Light",checked(){return Q.theme==="light"},action(){Q.theme="light"}},null,{caption:"High Contrast",checked(){return Q.highContrast},action(){Q.highContrast=!Q.highContrast}}]}]})}},f.moreVertical())),Ae({name:"Documentation",navSize:200,minSize:600,style:{flex:"1 1 auto",overflow:"hidden"}},Ao,Po({slot:"nav",style:{display:"flex",flexDirection:"column",width:"100%",height:"100%",overflowY:"scroll"},bindList:{hiddenProp:"hidden",value:B.docs}},wl(At({class:"doc-link",bindCurrent:"app.currentDoc.filename",bindDocLink:"^.filename",bindText:"^.title",onClick(n){let t=n.target.closest("a");if(!t)return;let e=hn(n.target),a=n.target.closest("xin-sidenav");a.contentVisible=!0;let{href:o}=t;window.history.pushState({href:o},"",o),B.currentDoc=e,n.preventDefault()}}))),Po({style:{position:"relative",overflowY:"scroll",height:"100%"}},_o({title:"show navigation",class:"transparent close-nav show-within-compact",style:{marginTop:"2px",position:"fixed"},onClick(n){n.target.closest("xin-sidenav").contentVisible=!1}},f.chevronLeft()),Ee({style:{display:"block",maxWidth:"44em",margin:"auto",padding:"0 1em",overflow:"hidden"},bindValue:"app.currentDoc.text",didRender(){On.insertExamples(this,{xinjs:Jn,xinjsui:He})}}))));
 
-//# debugId=76C7039BB6C1CA1664756E2164756E21
+//# debugId=16CAA33DE915DB1164756E2164756E21
 //# sourceMappingURL=index.js.map
