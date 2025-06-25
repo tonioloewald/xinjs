@@ -1,10 +1,12 @@
 /*#
-# 7. throttle & debounce
+# A.2 throttle & debounce
 
 Usage:
 
-    const debouncedFunc = debounce(func, 250)
-    const throttledFunc = debounce(func, 250)
+```
+const debouncedFunc = debounce(func, 250)
+const throttledFunc = debounce(func, 250)
+```
 
 `throttle(voidFunc, interval)` and `debounce(voidFunc, interval)` are utility functions for
 producing functions that filter out unnecessary repeated calls to a function, typically

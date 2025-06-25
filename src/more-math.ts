@@ -1,5 +1,5 @@
 /*#
-# 6. more-math
+# A.1 more-math
 
 Some simple functions egregiously missing from the Javascript `Math`
 object. They are exported from `xinjs` as the `MoreMath` object.
@@ -14,10 +14,12 @@ parameter `t`. `t` will be clamped to the interval `[0, 1]`, so
 `lerp` will be clamped *between* a and b unless you pass `false` as the
 optional fourth parameter (allowing `lerp()` to extrapolate).
 
-    lerp(0, 10, 0.5)        // produces 5
-    lerp(0, 10, 2)          // produces 10
-    lerp(0, 10, 2, false)   // produces 20
-    lerp(5, -5, 0.75)       // produces -2.5
+```
+lerp(0, 10, 0.5)        // produces 5
+lerp(0, 10, 2)          // produces 10
+lerp(0, 10, 2, false)   // produces 20
+lerp(5, -5, 0.75)       // produces -2.5
+```
 
 ## Constants
 
