@@ -2,17 +2,15 @@
 
 <!--{ "pin": "top" }-->
 
-<div style="text-align: center; margin: 20px">
-  <a href="https://xinjs.net">
-    <img style="width: 250px; max-width: 80%" class="logo" alt="xinjs logo" src="https://xinjs.net/favicon.svg">
-  </a>
-</div>
-
 [xinjs.net](https://xinjs.net) | [xinjs-ui](https://ui.xinjs.net) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme) | [discord](https://discord.gg/ramJ9rgky5)
 
 [![xinjs is on NPM](https://badge.fury.io/js/xinjs.svg)](https://www.npmjs.com/package/xinjs)
 [![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
 [![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
+
+<div style="text-align: center; margin: 20px">
+  <img style="width: 250px; max-width: 80%" class="logo" alt="xinjs logo" src="https://xinjs.net/favicon.svg">
+</div>
 
 > For a pretty thorough overview of xinjs, you might like to start with [What is xinjs?](https://loewald.com/blog/2025/6/4/what-is-xinjs-).
 > To understand the thinking behind xinjs, there's [What should a front-end framework do?](https://loewald.com/blog/2025/6/4/what-should-a-front-end-framework-do).
