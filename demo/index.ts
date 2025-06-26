@@ -17,6 +17,7 @@ import {
   bind,
   hotReload,
   debounce,
+  Color,
 } from 'xinjs'
 
 import {
@@ -40,11 +41,13 @@ import * as xinjsui from 'xinjs-ui'
 import docs from './docs.json'
 
 setTimeout(() => {
-  const brandColor = getComputedStyle(document.body).getPropertyValue(
-    '--brand-color'
-  )
+  const brandColor = Color.fromVar(vars.brandColor)
+  const background = Color.fromVar(vars.background)
 
-  console.log('welcome to %cxinjs.net', `color: ${brandColor}; padding: 0 5px;`)
+  console.log(
+    `welcome to %c${window.location.hostname}`,
+    `background: ${brandColor.html}; color: ${background.html}; padding: 0 5px;`
+  )
 }, 100)
 
 const PROJECT = 'xinjs'
@@ -110,6 +113,7 @@ setTimeout(() => {
     vars,
     touch,
     boxed,
+    Color,
   })
 }, 1000)
 

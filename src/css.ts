@@ -374,7 +374,6 @@ export const vars = new Proxy<{ [key: string]: string }>(
       }
       if (target[prop] == null) {
         prop = camelToKabob(prop)
-        console.log({ prop })
         const [, _varName, , isNegative, scaleText, method] = prop.match(
           /^([-\w]*?)((_)?(\d+)(\w?))?$/
         ) || ['', prop]
@@ -387,44 +386,32 @@ export const vars = new Proxy<{ [key: string]: string }>(
           switch (method) {
             case 'b': // brighten
               {
-                const baseColor = getComputedStyle(
-                  document.body
-                ).getPropertyValue(varName)
+                const baseColor = Color.fromVar(varName)
                 target[prop] =
                   scale > 0
-                    ? Color.fromCss(baseColor).brighten(scale).rgba
-                    : Color.fromCss(baseColor).darken(-scale).rgba
+                    ? baseColor.brighten(scale).rgba
+                    : baseColor.darken(-scale).rgba
               }
               break
             case 's': // saturate
               {
-                const baseColor = getComputedStyle(
-                  document.body
-                ).getPropertyValue(varName)
+                const baseColor = Color.fromVar(varName)
                 target[prop] =
                   scale > 0
-                    ? Color.fromCss(baseColor).saturate(scale).rgba
-                    : Color.fromCss(baseColor).desaturate(-scale).rgba
+                    ? baseColor.saturate(scale).rgba
+                    : baseColor.desaturate(-scale).rgba
               }
               break
             case 'h': // hue
               {
-                const baseColor = getComputedStyle(
-                  document.body
-                ).getPropertyValue(varName)
-                target[prop] = Color.fromCss(baseColor).rotate(scale * 100).rgba
-                console.log(
-                  Color.fromCss(baseColor).hsla,
-                  Color.fromCss(baseColor).rotate(scale).hsla
-                )
+                const baseColor = Color.fromVar(varName)
+                target[prop] = baseColor.rotate(scale * 100).rgba
               }
               break
             case 'o': // alpha
               {
-                const baseColor = getComputedStyle(
-                  document.body
-                ).getPropertyValue(varName)
-                target[prop] = Color.fromCss(baseColor).opacity(scale).rgba
+                const baseColor = Color.fromVar(varName)
+                target[prop] = baseColor.opacity(scale).rgba
               }
               break
             case '':

@@ -12,6 +12,12 @@ the constructor to create an `rgb` or `rgba` representation.
 
 ## Static Methods
 
+These are alternatives to the standard `Color(r, g, b, a = 1)` constructor.
+
+`Color.fromVar(cssVariableName: string, element = document.body): Color` evaluates
+the color at the specified element and then returns a `Color` instance with that
+value. It will accept both bare variable names (`--foo-bar`) and wrapped (`var(--foo-bar)`).
+
 `Color.fromCss(cssColor: string): Color` produces a `Color` instance from any
 css color definition the browser can handle.
 
@@ -113,9 +119,17 @@ export class Color {
   b: number
   a: number
 
+  static fromVar(varName: string, element = document.body): Color {
+    if (varName.endsWith(')') && varName.startsWith('var(')) {
+      varName = varName.substring(4, varName.length - 1).trim()
+    }
+    return Color.fromCss(getComputedStyle(element).getPropertyValue(varName))
+  }
+
   static fromCss(spec: CSSSystemColor | string): Color {
     let converted = spec
     if (span instanceof HTMLSpanElement) {
+      span.style.color = 'black'
       span.style.color = spec
       document.body.appendChild(span)
       converted = getComputedStyle(span).color
