@@ -239,6 +239,7 @@ import {
 
 const loadedBlueprints: { [key: string]: Promise<XinPackagedComponent> } = {}
 
+// @ts-ignore TS1323
 const loadModule = (src: string): Promise<any> => import(src)
 
 export class Blueprint extends Component {

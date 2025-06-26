@@ -180,6 +180,7 @@ import {
   XinTouchableType,
   XinBinding,
   XinBindingSpec,
+  EventType,
 } from './xin-types'
 import { ListBinding, listBindingRef } from './list-binding'
 
@@ -397,7 +398,7 @@ const handleBoundEvent = (event: Event): void => {
 
 type RemoveListener = VoidFunction
 
-export function on<E extends HTMLElement, K extends keyof HTMLElementEventMap>(
+export function on<E extends HTMLElement, K extends EventType>(
   element: E,
   eventType: K,
   eventHandler: XinEventHandler<HTMLElementEventMap[K], E>
