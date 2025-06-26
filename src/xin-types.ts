@@ -81,6 +81,7 @@ export type XinProxyArray = XinProps<[]> & { [key: string]: XinProxyObject } & (
   )
 export type XinTouchableType = string | XinProxy | BoxedProxy | String | Number | Boolean
 
+export type EventType = keyof HTMLElementEventMap
 export type XinEventHandler<T extends Event = Event, E extends Element = Element> =
   | ((evt: T & {target: E}) => void)
   | ((evt: T & {target: E}) => Promise<void>)
@@ -161,8 +162,8 @@ export interface StringMap {
   [key: string]: any
 }
 
-export interface PartsMap<T = Element> {
-  [key: string]: T
+export interface PartsMap {
+  [key: string]: Element
 }
 
 export type ValueElement =

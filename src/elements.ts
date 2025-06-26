@@ -196,6 +196,7 @@ import {
   ElementCreator,
   StringMap,
   XinBinding,
+  EventType,
 } from './xin-types'
 import { camelToKabob } from './string-case'
 import { processProp } from './css'
@@ -404,7 +405,7 @@ const elementSet = (elt: HTMLElement, key: string, value: any) => {
     value(elt)
   } else if (key.match(/^on[A-Z]/) != null) {
     const eventType = key.substring(2).toLowerCase()
-    on(elt, eventType, value)
+    on(elt, eventType as EventType, value)
   } else if (key === 'bind') {
     const binding =
       typeof value.binding === 'string'

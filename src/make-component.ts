@@ -67,18 +67,18 @@ export interface XinPackagedComponent<T = PartsMap> {
   creator: ElementCreator
 }
 
-export const madeComponents: { [key: string]: XinPackagedComponent } = {}
+export const madeComponents: { [key: string]: XinPackagedComponent<any> } = {}
 
 export type XinBlueprint<T = PartsMap> = (
   tag: string,
   module: XinFactory
 ) => XinComponentSpec<T> | Promise<XinComponentSpec<T>>
 
-export async function makeComponent(
+export async function makeComponent<T = PartsMap>(
   tag: string,
   blueprint: XinBlueprint<T>
 ): Promise<XinPackagedComponent<T>> {
-  const { type, styleSpec } = await blueprint(tag, {
+  const { type, styleSpec } = (await blueprint(tag, {
     Color,
     Component,
     elements,
@@ -94,7 +94,7 @@ export async function makeComponent(
     bind,
     on,
     version,
-  })
+  })) as XinComponentSpec<T>
   const packagedComponent = {
     type,
     creator: type.elementCreator({ tag, styleSpec }),
