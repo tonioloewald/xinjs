@@ -39,13 +39,12 @@ export const styleSpec: XinStyleSheet = {
     _codeFontSize: '14px',
     ...colors,
     _spacing: '10px',
-    _lineHeight: 'calc(var(--font-size) * 1.6)',
+    _lineHeight: vars.fontSize160,
     _h1Scale: '2',
     _h2Scale: '1.5',
     _h3Scale: '1.25',
     _touchSize: '32px',
-    _headerHeight:
-      'calc( var(--line-height) * var(--h2-scale) + var(--spacing) * 2 )',
+    _headerHeight: `calc(${vars.lineHeight} * ${vars.h2Scale} + ${vars.spacing200})`,
   },
   '@media (prefers-color-scheme: dark)': {
     body: {

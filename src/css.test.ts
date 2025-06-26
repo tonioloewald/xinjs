@@ -22,12 +22,14 @@ test('kabobToCamel works', () => {
   expect(kabobToCamel('inner-h-t-m-l')).toBe('innerHTML')
 })
 
-// these tests belong in css.test.ts but mysteriously putting them there causes other tests to fail
 test('vars works', () => {
   expect(vars.foo).toBe('var(--foo)')
   expect(vars.fooBar).toBe('var(--foo-bar)')
   expect(vars.fooBar50).toBe('calc(var(--foo-bar) * 0.5)')
   expect(vars.fooBar_50).toBe('calc(var(--foo-bar) * -0.5)')
+  expect(vars.h2Scale).toBe('var(--h2-scale)')
+  expect(vars.h2FontSize80).toBe('calc(var(--h2-font-size) * 0.8)')
+  expect(vars.h2FontSize_50).toBe('calc(var(--h2-font-size) * -0.5)')
 })
 
 test('initVars works', () => {

@@ -357,10 +357,7 @@ export const varDefault = new Proxy<{ [key: string]: CssVarBuilder }>(
   {
     get(target, prop: string) {
       if (target[prop] === undefined) {
-        const varName = `--${prop.replace(
-          /[A-Z]/g,
-          (x) => `-${x.toLocaleLowerCase()}`
-        )}`
+        const varName = '--' + camelToKabob(prop)
         target[prop] = (val: string | number) => `var(${varName}, ${val})`
       }
       return target[prop]
@@ -376,10 +373,11 @@ export const vars = new Proxy<{ [key: string]: string }>(
         return varDefault
       }
       if (target[prop] == null) {
-        prop = prop.replace(/[A-Z]/g, (x) => `-${x.toLocaleLowerCase()}`)
+        prop = camelToKabob(prop)
+        console.log({ prop })
         const [, _varName, , isNegative, scaleText, method] = prop.match(
-          /^([^\d_]*)((_)?(\d+)(\w*))?$/
-        ) as string[]
+          /^([-\w]*?)((_)?(\d+)(\w?))?$/
+        ) || ['', prop]
         const varName = `--${_varName}`
         if (scaleText != null) {
           const scale =
