@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test'
-import { xinProxy } from './xin-proxy'
+import { boxedProxy } from './xin-proxy'
 import { elements } from './elements'
 import { updates } from './path-listener'
 
@@ -16,14 +16,11 @@ test('element attributes work', () => {
 })
 
 test('data binding works', async () => {
-  const { test } = xinProxy(
-    {
-      test: {
-        value: 'hello world',
-      },
+  const { test } = boxedProxy({
+    test: {
+      value: 'hello world',
     },
-    true
-  )
+  })
 
   expect(test.value.valueOf()).toBe('hello world')
 
@@ -35,17 +32,14 @@ test('data binding works', async () => {
 })
 
 test('event binding works', async () => {
-  const { test } = xinProxy(
-    {
-      test: {
-        count: 0,
-        handler() {
-          test.count += 1
-        },
+  const { test } = boxedProxy({
+    test: {
+      count: 0,
+      handler() {
+        test.count += 1
       },
     },
-    true
-  )
+  })
 
   test.handler()
   expect(test.count.valueOf()).toBe(1)
