@@ -11,18 +11,20 @@ and methods you want, with some help from `Component` itself, and then simply
 export your new class's `elementCreator()` which is a function that defines your
 new component's element and produces instances of it as needed.
 
-    import {Component} from 'xinjs'
+```
+import {Component} from 'xinjs'
 
-    class ToolBar extends Component {
-      static styleSpec = {
-        ':host': {
-          display: 'flex',
-          gap: '10px',
-        },
-      }
-    }
+class ToolBar extends Component {
+  static styleSpec = {
+    ':host': {
+      display: 'flex',
+      gap: '10px',
+    },
+  }
+}
 
-    export const toolBar = ToolBar.elementCreator({ tag: 'tool-bar' })
+export const toolBar = ToolBar.elementCreator({ tag: 'tool-bar' })
+```
 
 This component is just a structural element. By default a `Component` subclass will
 comprise itself and a `<slot>`. You can change this by giving your subclass its
@@ -43,38 +45,46 @@ Here's a simple example of a custom-element that simply produces a
 to that of its `<input>` so the user doesn't need to care about how
 it works internally.
 
-    const {label, span, input} = Component.elements
+```js
+const { Component, elements } = xinjs
 
-    class LabeledInput extends Component {
-      caption: string = 'untitled'
-      value: string = ''
+const {label, span, input} = elements
 
-      constructor() {
-        super()
-        this.initAttributes('caption')
-      }
+class LabeledInput extends Component {
+  caption = 'untitled'
+  value = ''
 
-      content = label(span(), input())
+  constructor() {
+    super()
+    this.initAttributes('caption')
+  }
 
-      connectedCallback() {
-        super.connectedCallback()
-        const {input} = this.parts
-        input.addEventListener('input', () => {
-          this.value = input.value
-        })
-      }
+  content = label(span(), input())
 
-      render() {
-        super.render()
-        const {span, input} = this.parts
-        span.textContent = this.caption
-        if (input.value !== this.value) {
-          input.value = this.value
-        }
-      }
+  connectedCallback() {
+    super.connectedCallback()
+    const {input} = this.parts
+    input.addEventListener('input', () => {
+      this.value = input.value
+    })
+  }
+
+  render() {
+    super.render()
+    const {span, input} = this.parts
+    span.textContent = this.caption
+    if (input.value !== this.value) {
+      input.value = this.value
     }
+  }
+}
 
-    export const labeledInput = LabeledInput.elementCreator()
+const labeledInput = LabeledInput.elementCreator()
+
+preview.append(
+  labeledInput({caption: 'A text field', value: 'some text'})
+)
+```
 
 `content` is, in essence, a template for the internals of the element. By default
 it's a single `<slot>` element. If you explicitly want an element with no content
@@ -89,32 +99,34 @@ because `xin` cannot "see" elements there. As a general rule, you need to take c
 of anything in the `shadowDOM` yourself.)
 
 If you'd like to see a more complex example along the same lines, look at
-[labeled-input.ts](../demo/components/labeled-input.ts).
+[xin-form and xin-field](https://ui.xinjs.net/?form.ts).
 
 ##### <slot> names and the `slot` attribute
 
-    const {slot} = Component.elements
-    class MenuBar extends Component {
-      static styleSpec = {
-        ':host, :host > slot': {
-          display: 'flex',
-        },
-        ':host > slot:nth-child(1)': {
-          flex: '1 1 auto'
-        },
-      }
+```
+const {slot} = Component.elements
+class MenuBar extends Component {
+  static styleSpec = {
+    ':host, :host > slot': {
+      display: 'flex',
+    },
+    ':host > slot:nth-child(1)': {
+      flex: '1 1 auto'
+    },
+  }
 
-      content = [slot(), slot({name: 'gadgets'})]
-    }
+  content = [slot(), slot({name: 'gadgets'})]
+}
 
-    export menuBar = MenuBar.elementCreator()
+export menuBar = MenuBar.elementCreator()
+```
 
 One of the neat things about custom-elements is that you can give them *multiple*
 `<slot>`s with different `name` attributes and then have children target a specific
 slot using the `slot` attribute.
 
-[app-layout.ts](../demo/components/app-layout.ts) is a more complex example of a
-structural element utilizing multiple named `<slot>`s.
+This app's layout (the nav sidebar that disappears if the app is in a narrow space, etc.)
+is built using just such a custom-element.
 
 #### `<xin-slot>`
 
