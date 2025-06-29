@@ -131,7 +131,40 @@ you want to give a `<xin-slot>` attributes (such as `class` or `style`), create 
 explicitly (e.g. using `elements.xinSlot()`) rather than using `<slot>` elements
 and letting them be switched out (because they'll lose any attributes you give them).
 
-Also see the [faux-slot example](/demo/faux-slots.ts).
+Here's a very simple example:
+
+```js
+const { Component, elements } = xinjs
+
+const { xinSlot, div } = elements
+
+class FauxSlotExample extends Component {
+  content = [
+    div('This is a web-component with no shadow DOM and working slots!'),
+    xinSlot({name: 'top'}),
+    xinSlot(),
+    xinSlot({name: 'bottom'}),
+  ]
+}
+
+const fauxSlotExample = FauxSlotExample.elementCreator({
+  tag: 'faux-slot-example',
+  styleSpec: {
+    ':host': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+  }
+})
+
+preview.append(
+  fauxSlotExample(
+    div({slot: 'bottom'}, 'I should be on the bottom'),
+    div({slot: 'top'}, 'I should be on the top'),
+    div('I should be in the middle')
+  )
+)
+```
 
 > ##### Background
 >
