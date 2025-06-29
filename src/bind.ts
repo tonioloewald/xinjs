@@ -52,7 +52,7 @@ What's happening is essentially the same as:
 Except:
 
 1. this code is harder to write
-2. it will fail if xin.app hasn't been initialized (which it hasn't!)
+2. it will fail if xin.app hasn't been initialized (which it hasn't been!)
 3. inputElt will also trigger *debounced* updates on `input` events
 
 After this. `div.textContent` and `inputElt.value` are 'hello world'.

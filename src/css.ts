@@ -27,19 +27,49 @@ the most straightforward way possible. It allows for things like `@import`,
 like autocompletion of CSS rules (rendered as camelcase) so that, unlike me, it
 can remind you that it's `whiteSpace` and not `whitespace`.
 
-    import {elements, css} from 'xinjs'
-    const {style} = elements
+```
+import {elements, css} from 'xinjs'
+const {style} = elements
 
-    const myStyleMap = {
-      body: {
-        color: 'red'
-      },
-      button: {
-        borderRadius: 5
-      }
-    }
+const myStyleMap = {
+  body: {
+    color: 'red'
+  },
+  button: {
+    borderRadius: 5
+  }
+}
 
-    document.head.append(style(css(myStyleMap)))
+document.head.append(style(css(myStyleMap)))
+```
+
+There's a convenient `Stylesheet()` function that does all this and adds an id to the
+resulting `<style>` element to make it easier to figure out where a given stylesheet
+came from.
+
+```
+Stylesheet('my-styles', {
+  body: {
+    color: 'red'
+  },
+  button: {
+    borderRadius: 5
+  }
+})
+```
+
+…inserts the following in the `document.head`:
+
+```
+<style id="my-styles">
+body {
+  color: red;
+}
+button {
+  border-radius: 5px;
+}
+</style>
+```
 
 If a bare, non-zero **number** is assigned to a CSS property it will have 'px' suffixed
 to it automatically. There are *no bare numeric*ele properties in CSS except `0`.
@@ -49,29 +79,96 @@ least surprising option.
 
 `css` should render nested rules, such as `@keyframes` and `@media` correctly.
 
-## initVars({[key: string]: any}) => {[key: string]: any}
+## Initializing CSS Variables
 
-Given a map of CSS properties (in camelCase) form emit a map of css-variables to
-the values, with `px` suffixed to bare numbers where appropriate.
+You can initialize CSS variables using `_` or `__` prefixes on property names.
+One bar, turns the camelCase property-name into a --snake-case CSS variable
+name, while two creates a default that can be overridden.
 
-    const cssVars = {
-      textColor: '#222',   // --text-color: #222
-      background: '#eee',  // --background: #eee
-      fontSize: 15         // --font-size: 15px
-    }
+```
+StyleSheet('my-theme', {
+  ':root', {
+    _fooBar: 'red',
+    __bazBar: '10px'
+  }
+})
+```
 
-    const myStyleMap = {
-      ':root': initVars(cssVars)
-    }
-## darkMode({[key: string]: any}) => {[key: string]: string}
+Will produce:
+
+```
+<style id="my-theme">
+  :root {
+    --foo-bar: red;
+    --baz-bar: var(--baz-bar-default, 10px);
+  }
+</style>
+```
+```js
+const { elements, vars } = xinjs
+const { div } = elements
+
+window.CSS.registerProperty({
+  name: '--at-bar',
+  syntax: '<color>',
+  inherits: true,
+  initialValue: 'green',
+})
+
+preview.append(
+  div(
+    {
+      style: {
+        _fooBar: 'red',
+        __bazBar: 'blue',
+      }
+    },
+    div(
+      {
+        style: { color: vars.fooBar },
+      },
+      'fooBar'
+    ),
+    div(
+      {
+        style: { color: vars.bazBar },
+      },
+      'bazBar'
+    ),
+    div(
+      {
+        style: { color: vars.atBar },
+      },
+      'atBar'
+    ),
+  )
+)
+```
+
+> ### @property and CSS.registerProperty() considered harmful
+>
+> This [new CSS feature}(https://developer.mozilla.org/en-US/docs/Web/CSS/@property) 
+> is well-intentioned but ill-considered. I advise
+> against using it yourself until its serious flaws are addressed. The problem
+> is that if someone registers a variable you're using or you register
+> a variable someone else is using then your CSS may be broken. And
+> you can't re-register a variable either. 
+
+> This is a bit like the problem
+> that xinjs Component works around with tagNames, but in practice far more
+> difficult to solve. It is impossible to tell if a given instance of 
+> a given variable name is an intentional reuse or a new separate variable.
+> No-one intentionally defines two different components with the same tag.
+
+## invertLuminance({[key: string]: any}) => {[key: string]: string}
 
 Given a map of CSS properties (in camelCase) emit a map of those properties that
 has color values with their luminance inverted.
 
     const myStyleMap = {
-      ':root': cssVars,               // includes --font-size
+      ':root': cssVars,                      // includes --font-size
       '@media (prefers-color-scheme: dark)': {
-        ':root': darkMode(cssVars)    // omits --font-size
+        ':root': invertLuminance(cssVars)    // omits --font-size
       },
     }
 
@@ -91,6 +188,12 @@ a camelCase property, e.g.
 with a default, e.g
 
     varDefault.borderColor('red') // `var(--border-color, red)`
+    
+## `getCssVar(variable: string, atElement = document.body): string`
+
+`getCssVar()` obtains the css variable evaluated at the specified element 
+(an element defined at `:root` can be evaluated at `document.body`). You
+can provide the name, e.g. `--foo-bar`, or "wrapped", e.g. `var(--foo-bar)`.
 
 ### Syntax Sugar for `calc(...)`
 
@@ -102,40 +205,56 @@ on css (dimensional) variables by a percentage:
 
 ### Computed Colors
 
+> #### Notes
+>
+> `color()` and `color-mix()` are [now enjoy 91% support](https://caniuse.com/?search=color-mix) as of writing.
+> See [color-mix()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix) documentation.
+> Where they meet your needs, I'd suggest using them.
+>
+> [contrast-color()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/contrast-color) is coming in Safari 26, 
+> but [currently enjoys 0% upport](https://caniuse.com/?search=contrast-color).
+>
 > **Caution** although these look superficially like the `vars` syntax
 > sugar for `calc()` performed on dimensional variables, they are in fact
-> color calculations are performed on colors *evaluated* on `document.body`.
+> color calculations are performed on colors *evaluated* on `document.body` at 
+> execution time. (So they won'b automatically be recomputed on theme change.)
 
 You can write:
 
-    initVars({
-      lineHeight: 24,
-      spacing: 5,
-      buttonHeight: calc(`vars.lineHeight + vars.spacing200`)
-    })
+```
+const styleSpec = {
+  _lineHeight: 24,
+  _spacing: 5,
+  _buttonHeight: calc(`vars.lineHeight + vars.spacing200`)
+)
+```
 
 And then render this as CSS and stick it into a StyleNode and it will work.
 
 You *cannot* write:
 
-    initVars({
-      background: '#fafafa',
-      blockColor: vars.background_5b
-    })
+```
+const styleSpec = {
+  _background: '#fafafa',
+  _blockColor: vars.background_5b
+}
+```
 
 Because `--background` isn't defined on `document.body` yet, so vars.background_5b
 won't be able to tell what `--background` is going to be yet. So either you need to
 do this in two stags (create a StyleNode that defines the base color `--background`
 then define the computed colors and add this) OR use a `Color` instance:
 
-    const background = Color.fromCss('#fafafa')
+```
+const background = Color.fromCss('#fafafa')
 
-    initVars({
-      background: background.toHTML,
-      blockColor: background.brighten(-0.05).toHTML
-    })
+initVars({
+  background: background.toHTML,
+  blockColor: background.brighten(-0.05).toHTML
+})
+```
 
-Until browsers support color calculations the way they support dimenion arithmetic with `calc()`
+Until browsers support color calculations the way they support dimension arithmetic with `calc()`
 this is the miserable existence we all lead. That, or defining huge arrays of color
 values that we mostly don't use and are often not exactly what we want. You choose!
 
@@ -314,22 +433,6 @@ export const initVars = (obj: {
     const kabobKey = camelToKabob(key)
     rule[`--${kabobKey}`] =
       typeof value === 'number' && value !== 0 ? String(value) + 'px' : value
-  }
-  return rule
-}
-
-export const darkMode = (obj: XinStyleRule): XinStyleRule => {
-  console.warn('darkMode is deprecated. Use inverseLuminance instead.')
-  const rule: XinStyleRule = {}
-  for (const key of Object.keys(obj)) {
-    let value = obj[key]
-    if (
-      typeof value === 'string' &&
-      value.match(/^(#|rgb[a]?\(|hsl[a]?\()/) != null
-    ) {
-      value = Color.fromCss(value).inverseLuminance.html
-      rule[`--${camelToKabob(key)}`] = value
-    }
   }
   return rule
 }

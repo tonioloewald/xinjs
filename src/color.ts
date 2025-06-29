@@ -73,6 +73,7 @@ If you want to desaturate colors more nicely, you can try blending them with the
 */
 
 import { lerp, clamp } from './more-math'
+import { getCssVar } from './get-css-var'
 import { CSSSystemColor } from './css-system-color'
 
 // http://www.itu.int/rec/R-REC-BT.601
@@ -120,10 +121,7 @@ export class Color {
   a: number
 
   static fromVar(varName: string, element = document.body): Color {
-    if (varName.endsWith(')') && varName.startsWith('var(')) {
-      varName = varName.substring(4, varName.length - 1).trim()
-    }
-    return Color.fromCss(getComputedStyle(element).getPropertyValue(varName))
+    return Color.fromCss(getCssVar(varName, element))
   }
 
   static fromCss(spec: CSSSystemColor | string): Color {
