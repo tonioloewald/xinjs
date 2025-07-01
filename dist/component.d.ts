@@ -33,5 +33,5 @@ export declare abstract class Component<T = PartsMap> extends HTMLElement {
     private hydrate;
     render(): void;
 }
-export declare const xinSlot: ElementCreator<Component<PartsMap<Element>>>;
+export declare const xinSlot: ElementCreator<Component<PartsMap>>;
 export {};

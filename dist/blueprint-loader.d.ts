@@ -9,11 +9,11 @@ export declare class Blueprint extends Component {
     packaged(): Promise<XinPackagedComponent>;
     constructor();
 }
-export declare const blueprint: import("./xin-types").ElementCreator<Component<import("./xin-types").PartsMap<Element>>>;
+export declare const blueprint: import("./xin-types").ElementCreator<Component<import("./xin-types").PartsMap>>;
 export declare class BlueprintLoader extends Component {
     allLoaded: () => void;
     constructor();
     private load;
     connectedCallback(): void;
 }
-export declare const blueprintLoader: import("./xin-types").ElementCreator<Component<import("./xin-types").PartsMap<Element>>>;
+export declare const blueprintLoader: import("./xin-types").ElementCreator<Component<import("./xin-types").PartsMap>>;
