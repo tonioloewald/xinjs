@@ -1,3 +1,13 @@
+/*#
+# A.3 hotReload
+
+`hotReload()` persists any root-level paths in `xin` that its test function evaluates as true
+to `localStorage`.
+
+```
+hotReload(test: PathTestFunction = () => true): void
+```
+*/
 import { xin, observe } from './xin'
 import { xinValue } from './metadata'
 import {
