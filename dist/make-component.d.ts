@@ -33,7 +33,7 @@ export interface XinPackagedComponent<T = PartsMap> {
     creator: ElementCreator;
 }
 export declare const madeComponents: {
-    [key: string]: XinPackagedComponent;
+    [key: string]: XinPackagedComponent<any>;
 };
 export type XinBlueprint<T = PartsMap> = (tag: string, module: XinFactory) => XinComponentSpec<T> | Promise<XinComponentSpec<T>>;
-export declare function makeComponent(tag: string, blueprint: XinBlueprint<T>): Promise<XinPackagedComponent<T>>;
+export declare function makeComponent<T = PartsMap>(tag: string, blueprint: XinBlueprint<T>): Promise<XinPackagedComponent<T>>;

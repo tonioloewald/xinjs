@@ -10,6 +10,7 @@ export declare class Color {
     g: number;
     b: number;
     a: number;
+    static fromVar(varName: string, element?: HTMLElement): Color;
     static fromCss(spec: CSSSystemColor | string): Color;
     static fromHsl(h: number, s: number, l: number, a?: number): Color;
     constructor(r: number, g: number, b: number, a?: number);

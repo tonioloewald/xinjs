@@ -36,6 +36,7 @@ export type XinProxyArray = XinProps<[]> & {
     [key: string]: XinProxyObject;
 } & (XinProxyObject[] | XinScalar[]);
 export type XinTouchableType = string | XinProxy | BoxedProxy | String | Number | Boolean;
+export type EventType = keyof HTMLElementEventMap;
 export type XinEventHandler<T extends Event = Event, E extends Element = Element> = ((evt: T & {
     target: E;
 }) => void) | ((evt: T & {
@@ -99,8 +100,8 @@ export interface ElementProps<T extends Element = Element> {
 export interface StringMap {
     [key: string]: any;
 }
-export interface PartsMap<T = Element> {
-    [key: string]: T;
+export interface PartsMap {
+    [key: string]: Element;
 }
 export type ValueElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 export type ElementPart<T extends Element = Element> = Element | DocumentFragment | ElementProps<T> | string | number;
