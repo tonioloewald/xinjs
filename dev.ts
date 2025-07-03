@@ -2,6 +2,7 @@ import * as path from 'path'
 import { statSync } from 'fs'
 import { watch } from 'chokidar'
 import { $ } from 'bun'
+import { gzippedSize } from './gzipped-size'
 
 declare const Bun: any
 
@@ -97,6 +98,9 @@ async function build() {
   }
 
   console.timeEnd('build')
+
+  const size = await gzippedSize('./dist/module.js')
+  console.log('module.js size ', size)
 }
 
 watch('package.json').on('change', writeVersion)
