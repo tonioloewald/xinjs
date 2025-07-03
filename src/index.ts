@@ -3,7 +3,6 @@ export { bindings } from './bindings'
 export {
   css,
   invertLuminance,
-  darkMode,
   initVars,
   vars,
   varDefault,
