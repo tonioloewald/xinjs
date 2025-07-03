@@ -355,7 +355,6 @@ const elementProp = (elt: HTMLElement, key: string, value: any) => {
     if (typeof value === 'object') {
       for (const prop of Object.keys(value)) {
         if (xinPath(value[prop])) {
-          console.log(prop, value[prop])
           bind(elt, value[prop], elementStyleBinding(prop))
         } else {
           elementStyle(elt, prop, value[prop])
