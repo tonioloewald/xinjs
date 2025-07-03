@@ -7,23 +7,16 @@ You can create your own bindings easily enough (and add them to `bindings` if so
 
 A `binding` looks like this:
 
-    interface XinBinding {
-      toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
-      fromDOM?: (element: HTMLElement) => any
-    }
+```
+interface XinBinding {
+  toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
+  fromDOM?: (element: HTMLElement) => any
+}
+```
 
 The `fromDOM` function is only needed for bindings to elements that trigger `change` or `input`
 events, typically `<input>`, `<textarea>`, and `<select>` elements, and of course your
 own [Custom Elements](/?components.ts).
-
-You can see examples of these bindings in the [kitchen sink demo](../demo/components/kitchen-sink.ts).
-
-## set
-
-The `set` binding sends state from `xin` to the bound element's `value` property. It's a
-"one way" version of the `value` binding. It's recommended for handling compound
-UI elements like dialog boxes or composite custom-elements like a code-editor which might
-have all kinds of internal elements generating `change` events.
 
 ## value
 
@@ -110,9 +103,6 @@ binding `virtual` by passing the `height` (and optionally `width`) of an item.
 Only visible elements will be rendered. Just make sure the values passed represent
 the *minimum* dimensions of the individual rendered items if they can vary in size.
 
-You can find examples of large, virtual bound arrays in [ArrayBindingsTest.ts](../demo/ArrayBindingTest.ts)
-and [list-filters.ts](../demo/components/list-filters.ts)
-
 ### Filtered Lists and Detail Views
 
 You can **filter** the elements you wish to display in a bound list by using the
@@ -125,9 +115,6 @@ Typically, you can use `hiddenProp` to power filters and `visibleProp` to power
 detail views. The beauty of using symbols is that it won't impact the serialized
 values of the array and different views of the array can use different selection
 and filtering criteria.
-
-An example of a large array bound to a filtered list view using `hiddenProp`
-and a detail view using `visibleProp` can be found in [list-filters.ts](../demo/components/list-filters.ts).
 
 > **Note** for a given list-binding, if you specify `hiddenProp` (but not `visibleProp`),
 > then all items in the array will be shown *unless* `item[hiddenProp] === true`.
@@ -143,8 +130,6 @@ and a detail view using `visibleProp` can be found in [list-filters.ts](../demo/
 If you list-bind a custom-element with `bindValue` implemented and providing an
 `idPath` then the list-binding will bind the array items to the value of the
 custom-element.
-
-See [arrayBindingTest.ts](../demo/ArrayBindingTest.ts) for an example of this.
 
 ### xin-empty-list class
 
@@ -165,10 +150,6 @@ export const bindings: { [key: string | symbol]: XinBinding<Element> } = {
     },
   },
 
-  set: {
-    toDOM: setValue,
-  },
-
   text: {
     toDOM(element: Element, value: any) {
       element.textContent = value
@@ -184,20 +165,6 @@ export const bindings: { [key: string | symbol]: XinBinding<Element> } = {
   disabled: {
     toDOM(element: Element, value: any) {
       ;(element as HTMLButtonElement).disabled = Boolean(value)
-    },
-  },
-
-  style: {
-    toDOM(element: Element, value: any) {},
-  },
-
-  callback: {
-    toDOM(element: Element, value: any, options?: XinObject) {
-      if (options?.callback) {
-        options.callback(element, value)
-      } else if (value instanceof Function) {
-        value(element)
-      }
     },
   },
 

@@ -102,9 +102,11 @@ export const cloneWithBindings = (element: Node): Node => {
       elementToHandlers.set(cloned, deepClone(eventHandlers))
     }
   }
-  for (const node of element instanceof HTMLTemplateElement
-    ? element.content.childNodes
-    : element.childNodes) {
+  for (const node of Array.from(
+    element instanceof HTMLTemplateElement
+      ? element.content.childNodes
+      : element.childNodes
+  )) {
     if (node instanceof Element || node instanceof DocumentFragment) {
       cloned.appendChild(cloneWithBindings(node))
     } else {

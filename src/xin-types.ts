@@ -150,8 +150,6 @@ export interface ElementProps<T extends Element = Element> {
   bindList?: XinBindingShortcut
   bindEnabled?: XinBindingShortcut
   bindDisabled?: XinBindingShortcut
-  bindSet?: XinBindingShortcut,
-  bindCallback?: XinBindingShortcut,
   style?: XinStyleRule
   class?: string
   apply?: (element: Element) => void | Promise<void>

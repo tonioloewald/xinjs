@@ -24,6 +24,59 @@ built with `xinjs` to be *deeply asynchronous*.
 
 ## `bind()`
 
+```
+bind<T = Element>(
+  element: T,
+  what: XinTouchableType,
+  binding: XinBinding,
+  options: XinObject
+): T
+```
+
+`bind()` binds a `path` to an element, syncing the value at the path to and/or from the DOM.
+
+```js
+const { bind, boxedProxy } = xinjs
+
+const { simpleBindExample } = boxedProxy({
+  simpleBindExample: {
+    showThing: true
+  }
+})
+
+bind(
+  preview.querySelector('b'),
+  'simpleBindExample.showThing',
+  {
+    toDOM(element, value) {
+      element.style.visibility = value ? 'visible' : 'hidden'
+    }
+  }
+)
+
+bind(
+  preview.querySelector('input[type=checkbox]'),
+  // the boxedProxy can be used instead of a string path
+  simpleBindExample.showThing,
+  // we could just use bindings.value here
+  {
+    toDOM(element, value) {
+      element.checked = value
+    },
+    fromDOM(element) {
+      return element.checked
+    }
+  }
+)
+```
+```html
+<b>The thing</b><br>
+<label>
+  <input type="checkbox">
+  Show the thing
+</label>
+```
+
 The `bind` function is a simple way of tying an `HTMLElement`'s properties to
 state via `path` using [bindings](/?bindings.ts)
 
@@ -63,10 +116,12 @@ anything observer of the paths `app.text` and `app` will be fired.
 
 A `binding` looks like this:
 
-    interface XinBinding {
-      toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
-      fromDOM?: (element: HTMLElement) => any
-    }
+```
+interface XinBinding {
+  toDOM?: (element: HTMLElement, value: any, options?: XinObject) => void
+  fromDOM?: (element: HTMLElement) => any
+}
+```
 
 Simply put the `toDOM` method updates the DOM based on changes in state
 while `fromDOM` updates state based on data in the DOM. Most bindings
@@ -77,15 +132,17 @@ It's easy to write your own `bindings` if those in `bindings` don't meet your
 need, e.g. here's a custom binding that toggles the visibility of an element
 based on whether the bound value is neither "falsy" nor an empty `Array`.
 
-    const visibility = {
-      toDOM(element, value) {
-        if (element.dataset.origDisplay === undefined && element.style.display !== 'none') {
-          element.dataset.origDisplay = element.style.display
-        }
-        element.style.display = (value != null && element.length > 0) ? element.dataset.origDisplay : 'none'
-      }
+```
+const visibility = {
+  toDOM(element, value) {
+    if (element.dataset.origDisplay === undefined && element.style.display !== 'none') {
+      element.dataset.origDisplay = element.style.display
     }
-    bind(listElement, 'app.bigList', visibility)
+    element.style.display = (value != null && element.length > 0) ? element.dataset.origDisplay : 'none'
+  }
+}
+bind(listElement, 'app.bigList', visibility)
+```
 
 ## `on()`
 
@@ -151,7 +208,9 @@ works).
 
 ## `touchElement()`
 
-    touchElement(element: Element, changedPath?: string)
+```
+touchElement(element: Element, changedPath?: string)
+```
 
 This is a low-level function for *immediately* updating a bound element. If you specifically
 want to force a render of an element (versus anything bound to a path), simply call
