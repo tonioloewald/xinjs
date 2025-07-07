@@ -7,8 +7,147 @@ longer be needed.
 
 ## Color
 
-The most straightforward method for creating a `Color` instance is using
-the constructor to create an `rgb` or `rgba` representation.
+The most straightforward methods for creating a `Color` instance is using
+the constructor to create an `rgb` or `rgba` representation, or using the
+class `fromCss` function to create a `Color` from any standard CSS representation,
+e.g.
+
+```
+new Color(255, 255, 0)               // yellow
+new Color(0, 128, 0, 0.5)            // translucent dark green
+Color.fromCss('#000')                // black
+Color.fromCss('hsl(90deg 100% 50%))  // orange
+```
+
+## Manipulating Colors
+
+```js
+const { elements, Color } = xinjs
+
+const { label, span, div, input, button } = elements
+
+const swatches = div({ class: 'swatches' })
+function makeSwatch(text) {
+  const color = Color.fromCss(colorInput.value)
+  const adjustedColor = eval('color.' + text)
+  swatches.style.background = color
+  swatches.append(
+    div(
+      text, 
+      {
+        class: 'swatch',
+        title: `${adjustedColor.html} ${adjustedColor.hsla}`,
+        style: { 
+          _bg: adjustedColor, 
+          _color: adjustedColor.contrasting()
+        }
+      }
+    )
+  )
+}
+
+const colorInput = input({
+  type: 'color', 
+  value: '#000',
+  onInput: update
+})
+const black = Color.fromCss('#000')
+const white = Color.fromCss('#fff')
+const gray = Color.fromCss('#888')
+
+function update() {
+  swatches.textContent = ''
+  makeSwatch('brighten(-0.5)')
+  makeSwatch('brighten(0.5)')
+  makeSwatch('saturate(0.25)')
+  makeSwatch('saturate(0.5)')
+  makeSwatch('desaturate(0.5)')
+  makeSwatch('desaturate(0.75)')
+  makeSwatch('contrasting()')
+  makeSwatch('contrasting(0.05)')
+  makeSwatch('contrasting(0.25)')
+  makeSwatch('contrasting(0.45)')
+  makeSwatch('inverseLuminance')
+  makeSwatch('mono')
+  makeSwatch('rotate(-330)')
+  makeSwatch('rotate(60)')
+  makeSwatch('rotate(-270)')
+  makeSwatch('rotate(120)')
+  makeSwatch('rotate(-210)')
+  makeSwatch('rotate(180)')
+  makeSwatch('rotate(-150)')
+  makeSwatch('rotate(240)')
+  makeSwatch('rotate(-90)')
+  makeSwatch('rotate(300)')
+  makeSwatch('rotate(-30)')
+  makeSwatch('opacity(0.1)')
+  makeSwatch('opacity(0.5)')
+  makeSwatch('opacity(0.75)')
+  makeSwatch('rotate(-90).opacity(0.75)')
+  makeSwatch('brighten(0.5).desaturate(0.5)')
+  makeSwatch('blend(black, 0.5)')
+  makeSwatch('blend(white, 0.75)')
+  makeSwatch('blend(gray, 0.25)')
+}
+
+function randomColor() {
+  colorInput.value = Color.fromHsl(Math.random() * 360, Math.random(), Math.random())
+  update()
+}
+
+randomColor()
+
+preview.append(
+  label(
+    span('base color'),
+    colorInput
+  ),
+  button(
+    'Random Color',
+    {
+      onClick: randomColor
+    }
+  ),
+  swatches
+)
+```
+```css
+.preview .swatches {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  flex-wrap: wrap;
+  font-size: 80%;
+}
+.preview .swatch {
+  display: inline-block;
+  padding: 4px 14px; 
+  background: var(--bg);
+  color: var(--color);
+  border: 1px solid var(--color);
+}
+```
+
+Each of these methods creates a new color instance based on the existing color(s).
+
+In each case `amount` is from 0 to 1, and `degrees` is an angle (e.g. ± 0 to 360).
+
+- `brighten(amount: number)`
+- `darken(amount: number)`
+- `saturate(amount: number)`
+- `desaturate(amount: number)`
+- `rotate(angle: number)`
+- `opacity(amount: number)` — this just creates a color with that opacity (it doesn't adjust it)
+- `mix(otherColor: Color, amount)` — produces a mix of the two colors in HSL-space
+- `blend(otherColor: Color, amount)` — produces a blend of the two colors in RGB-space (usually icky)
+- `contrasting(amount = 1)` — produces a **contrasting color** by blending the color with black (if its
+  `brightness` is > 0.5) or white by `amount`. The new color will always have opacity 1.
+
+Where-ever possible, unless otherwise indicated, all of these operations are performed in HSL-space.
+HSL space is not great! For example, `desaturate` essentially blends you with medium gray (`#888`)
+rather than a BT.601 `brightness` value where "yellow" is really bright and "blue" is really dark.
+
+If you want to desaturate colors more nicely, you can try blending them with their own `mono`.
 
 ## Static Methods
 
@@ -35,6 +174,7 @@ computations in rgb.
 
 ## Properties (read-only)
 
+- `black`, `white` — handy constants
 - `html` — the color in HTML `#rrggbb[aa]` format
 - `inverse` — the photonegative of the color (light is dark, orange is blue)
 - `inverseLuminance` — inverts luminance but keeps hue, great for "dark mode"
@@ -44,27 +184,6 @@ computations in rgb.
   [WebGL](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API) (for example).
 - `brightness` — this is the brightness of the color based on [BT.601](https://www.itu.int/rec/R-REC-BT.601)
 - `mono` — this produces a `Color` instance that a greyscale version (based on `brightness`)
-
-## Manipulating Colors
-
-Each of these methods creates a new color instance based on the existing color(s).
-
-In each case `amount` is from 0 to 1, and `degrees` is an angle (e.g. ± 0 to 360).
-
-- `brighten(amount: number)`
-- `darken(amount: number)`
-- `saturate(amount: number)`
-- `desaturate(amount: number)`
-- `rotate(angle: number)`
-- `opacity(amount: number)` — this just creates a color with that opacity (it doesn't adjust it)
-- `mix(otherColor: Color, amount)` — produces a mix of the two colors in HSL-space
-- `blend(otherColor: Color, amount)` — produces a blend of the two colors in RGB-space (usually icky)
-
-Where-ever possible, unless otherwise indicated, all of these operations are performed in HSL-space.
-HSL space is not great! For example, `desaturate` essentially blends you with medium gray (`#888`)
-rather than a BT.601 `brightness` value where "yellow" is really bright and "blue" is really dark.
-
-If you want to desaturate colors more nicely, you can try blending them with their own `mono`.
 
 ## Utilities
 
@@ -139,11 +258,14 @@ export class Color {
 
   static fromHsl(h: number, s: number, l: number, a = 1): Color {
     return Color.fromCss(
-      `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(
+      `hsl(${h.toFixed(0)}deg ${(s * 100).toFixed(0)}% ${(l * 100).toFixed(
         0
-      )}%, ${a.toFixed(2)})`
+      )}% / ${(a * 100).toFixed(0)}%)`
     )
   }
+
+  static black = new Color(0, 0, 0)
+  static white = new Color(255, 255, 255)
 
   constructor(r: number, g: number, b: number, a = 1) {
     this.r = clamp(0, r, 255)
@@ -159,6 +281,11 @@ export class Color {
   get inverseLuminance(): Color {
     const { h, s, l } = this._hsl
     return Color.fromHsl(h, s, 1 - l, this.a)
+  }
+
+  contrasting(amount = 1): Color {
+    const { h, s, l } = this._hsl
+    return this.blend(this.brightness > 0.5 ? Color.black : Color.white, amount)
   }
 
   get rgb(): string {
@@ -192,16 +319,16 @@ export class Color {
 
   get hsl(): string {
     const { h, s, l } = this._hsl
-    return `hsl(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(
+    return `hsl(${h.toFixed(0)}deg ${(s * 100).toFixed(0)}% ${(l * 100).toFixed(
       0
     )}%)`
   }
 
   get hsla(): string {
     const { h, s, l } = this._hsl
-    return `hsla(${h.toFixed(0)}, ${(s * 100).toFixed(0)}%, ${(l * 100).toFixed(
+    return `hsl(${h.toFixed(0)}deg ${(s * 100).toFixed(0)}% ${(l * 100).toFixed(
       0
-    )}%, ${this.a.toFixed(2)})`
+    )}% / ${(this.a * 100).toFixed(0)}%)`
   }
 
   get mono(): Color {
@@ -263,10 +390,9 @@ export class Color {
   }
 
   swatch(): Color {
-    const { r, g, b, a } = this
     console.log(
-      `%c      %c ${this.html}, rgba(${r}, ${g}, ${b}, ${a}), ${this.hsla}`,
-      `background-color: rgba(${r}, ${g}, ${b}, ${a})`,
+      `%c      %c ${this.html}, ${this.rgba}`,
+      `background-color: ${this.html}`,
       'background-color: transparent'
     )
     return this
