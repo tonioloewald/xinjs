@@ -33,7 +33,7 @@
   "author": "Tonio Loewald",
   "license": "BSD-3-CLAUSE",
   "devDependencies": {
-    "@happy-dom/global-registrator": "^17.6.3",
+    "@happy-dom/global-registrator": "^18.0.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "bun-types": "^1.2.18",
     "caniuse-lite": "^1.0.30001727",
