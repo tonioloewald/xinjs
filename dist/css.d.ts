@@ -8,7 +8,6 @@ export declare const css: (obj: XinStyleSheet, indentation?: string) => string;
 export declare const initVars: (obj: {
     [key: string]: string | number;
 }) => XinStyleRule;
-export declare const darkMode: (obj: XinStyleRule) => XinStyleRule;
 export declare const invertLuminance: (map: XinStyleRule) => XinStyleRule;
 export declare const varDefault: {
     [key: string]: CssVarBuilder;

@@ -59,6 +59,12 @@ export const styleSpec: XinStyleSheet = {
   '.high-contrast': {
     filter: 'contrast(2)',
   },
+  '.monochrome': {
+    filter: 'grayscale(1)',
+  },
+  '.high-contrast.monochrome': {
+    filter: 'contrast(2) grayscale(1)',
+  },
   '*': {
     boxSizing: 'border-box',
     scrollbarColor: `${vars.scrollThumbColor} ${vars.scrollBarColor}`,

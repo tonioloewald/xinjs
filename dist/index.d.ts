@@ -1,11 +1,12 @@
 export { bind, on, touchElement } from './bind';
 export { bindings } from './bindings';
-export { css, invertLuminance, darkMode, initVars, vars, varDefault, StyleSheet, } from './css';
+export { css, invertLuminance, initVars, vars, varDefault, StyleSheet, } from './css';
 export type { XinStyleSheet, XinStyleMap, XinStyleRule } from './css-types';
 export { Color } from './color';
 export { Component } from './component';
 export { elements, svgElements, mathML } from './elements';
 export type { ElementsProxy } from './elements';
+export { getCssVar } from './get-css-var';
 export { hotReload } from './hot-reload';
 export { getListItem, xinPath, xinValue } from './metadata';
 export { makeComponent } from './make-component';
