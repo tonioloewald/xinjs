@@ -40,17 +40,17 @@ import * as xinjsui from 'xinjs-ui'
 
 import docs from './docs.json'
 
+const PROJECT = 'xinjs'
+
 setTimeout(() => {
   const brandColor = Color.fromVar(vars.brandColor)
   const background = Color.fromVar(vars.background)
 
   console.log(
-    `welcome to %c${window.location.hostname}`,
+    `welcome to %c${PROJECT}`,
     `background: ${brandColor.html}; color: ${background.html}; padding: 0 5px;`
   )
 }, 100)
-
-const PROJECT = 'xinjs'
 
 const docName =
   document.location.search !== ''
