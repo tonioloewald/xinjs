@@ -8,9 +8,9 @@ and are approaching wide implementation.
 
 ## Color
 
-The most straightforward methods for creating a `Color` instance is using
-the constructor to create an `rgb` or `rgba` representation, or using the
-class `fromCss` function to create a `Color` from any standard CSS representation,
+The most straightforward methods for creating a `Color` instance are to use the
+`Color()` constructor to create an `rgb` or `rgba` representation, or using the
+`Color.fromCss()` to create a `Color` from any CSS (s)rgb representation,
 e.g.
 
 ```
@@ -18,12 +18,13 @@ new Color(255, 255, 0)               // yellow
 new Color(0, 128, 0, 0.5)            // translucent dark green
 Color.fromCss('#000')                // black
 Color.fromCss('hsl(90deg 100% 50%))  // orange
+Color.fromCss('color(srgb 1 0 0.5))  // purple
 ```
 
 Note that `Color.fromCss()` is not compatible with non-srgb color spaces. The new CSS
 color functions produce color specifications of the form `color(<space> ....)` and
 `Color.fromCSS()` will handle `color(srgb ...)` correctly (this is so it can parse the
-output of `color-mix(in hsl ...)` but not other color spaces.
+output of `color-mix(in hsl ...)` but not other [color spaces](https://developer.mozilla.org/en-US/blog/css-color-module-level-4/#whats_new_in_css_colors_module_level_4).
 
 ## Manipulating Colors
 

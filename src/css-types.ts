@@ -3,7 +3,6 @@ import { CSSSystemColor } from './css-system-color'
 
 type CSSBasicAlign = 'normal' | 'stretch'
 type CSSColor = 'transparent' | 'currentcolor' | CSSSystemColor
-export type CSSColorSpace = 'hsl' | 'lch' | 'srgb' | 'lab' | string
 type CSSPositionalAlign = 'center' | 'start' | 'end' | 'flex-start' | 'flex-end'
 type CSSDistributedAlign =
   | 'space-between'
