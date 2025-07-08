@@ -20,6 +20,11 @@ Color.fromCss('#000')                // black
 Color.fromCss('hsl(90deg 100% 50%))  // orange
 ```
 
+Note that `Color.fromCss()` is not compatible with non-srgb color spaces. The new CSS
+color functions produce color specifications of the form `color(<space> ....)` and
+`Color.fromCSS()` will handle `color(srgb ...)` correctly (this is so it can parse the
+output of `color-mix(in hsl ...)` but not other color spaces.
+
 ## Manipulating Colors
 
 ```js
@@ -31,7 +36,7 @@ const swatches = div({ class: 'swatches' })
 function makeSwatch(text) {
   const color = Color.fromCss(colorInput.value)
   const adjustedColor = eval('color.' + text)
-  swatches.style.background = color
+  swatches.style.setProperty('--original', color)
   swatches.append(
     div(
       text, 
@@ -39,8 +44,8 @@ function makeSwatch(text) {
         class: 'swatch',
         title: `${adjustedColor.html} ${adjustedColor.hsla}`,
         style: { 
-          _bg: adjustedColor, 
-          _color: adjustedColor.contrasting()
+          _adjusted: adjustedColor, 
+          _text: adjustedColor.contrasting()
         }
       }
     )
@@ -55,7 +60,7 @@ const colorInput = input({
 const red = Color.fromCss('#f00')
 const gray = Color.fromCss('#888')
 const teal = Color.fromCss('teal')
-const crimson = Color.fromCss('crimson')
+const aliceblue = Color.fromCss('aliceblue')
 
 function update() {
   swatches.textContent = ''
@@ -96,13 +101,13 @@ function update() {
   makeSwatch('mix(teal, 0.25)')
   makeSwatch('mix(teal, 0.5)')
   makeSwatch('mix(teal, 0.75)')
-  makeSwatch('colorMix(crimson, 0.25)')
-  makeSwatch('colorMix(crimson, 0.5)')
-  makeSwatch('colorMix(crimson, 0.75)')
+  makeSwatch('colorMix(aliceblue, 0.25)')
+  makeSwatch('colorMix(aliceblue, 0.5)')
+  makeSwatch('colorMix(aliceblue, 0.75)')
 }
 
 function randomColor() {
-  colorInput.value = Color.fromHsl(Math.random() * 360, Math.random(), Math.random())
+  colorInput.value = Color.fromHsl(Math.random() * 360, Math.random(), Math.random() * 0.5 + 0.25)
   update()
 }
 
@@ -114,7 +119,7 @@ preview.append(
     colorInput
   ),
   button(
-    'Random Color',
+    'Random(ish) Color',
     {
       onClick: randomColor
     }
@@ -133,15 +138,15 @@ preview.append(
 .preview .swatch {
   display: inline-block;
   padding: 2px 6px; 
-  background: var(--bg);
-  color: var(--color);
-  border: 1px solid var(--color);
+  color: var(--text);
+  background: var(--adjusted);
+  border: 2px solid var(--original);
 }
 ```
 
 Each of these methods creates a new color instance based on the existing color(s).
 
-In each case `amount` is from 0 to 1, and `degrees` is an angle (e.g. ± 0 to 360).
+In each case `amount` is from 0 to 1, and `degrees` is an angle in degrees.
 
 - `brighten(amount: number)`
 - `darken(amount: number)`
@@ -154,12 +159,13 @@ In each case `amount` is from 0 to 1, and `degrees` is an angle (e.g. ± 0 to 36
 - `blend(otherColor: Color, amount)` — produces a blend of the two colors in RGB-space (usually icky)
 - `contrasting(amount = 1)` — produces a **contrasting color** by blending the color with black (if its
   `brightness` is > 0.5) or white by `amount`. The new color will always have opacity 1.
+  `contrasting()` produce nearly identical results to `contrast-color()`.
   
 > **Note** the captions in the example above are colored using `contrasting()` and thus
 > should always be readable. In general, a base color will produce the worst results when
 > its `brightness` is around 0.5, much as is the case with the new and experimental CSS
 > [contrast-color()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/contrast-color)
-> function.
+> function. 
 
 Where-ever possible, unless otherwise indicated, all of these operations are performed in HSL-space.
 HSL space is not great! For example, `desaturate` essentially blends you with medium gray (`#888`)
@@ -273,9 +279,9 @@ export class Color {
     const [r, g, b, a] = converted.match(/[\d.]+/g) as string[]
     const scale = converted.startsWith('color(srgb') ? 255 : 1
     return new Color(
-      Number(r * scale),
-      Number(g * scale),
-      Number(b * scale),
+      Number(r) * scale,
+      Number(g) * scale,
+      Number(b) * scale,
       a == null ? 1 : Number(a)
     )
   }
