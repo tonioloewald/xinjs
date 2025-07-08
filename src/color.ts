@@ -167,6 +167,9 @@ In each case `amount` is from 0 to 1, and `degrees` is an angle in degrees.
 > its `brightness` is around 0.5, much as is the case with the new and experimental CSS
 > [contrast-color()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/contrast-color)
 > function. 
+>
+> **Also note** that `contrasting()` a highly translucent color will often get poor
+> results since the underlying background color is the important thing.
 
 Where-ever possible, unless otherwise indicated, all of these operations are performed in HSL-space.
 HSL space is not great! For example, `desaturate` essentially blends you with medium gray (`#888`)
