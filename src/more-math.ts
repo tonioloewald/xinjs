@@ -9,6 +9,12 @@ object. They are exported from `xinjs` as the `MoreMath` object.
 `clamp(min, v, max)` will return `v` if it's between `min` and `max`
 and the `min` or `max` otherwise.
 
+```
+clamp(0, 0.5, 1)        // produces 0.5
+clamp(0, -0.5, 1)       // produces 0
+clamp(-50, 75, 50)      // produces 50
+```
+
 `lerp(a, b, t, clamped = true)` will interpolate linearly between `a` and `b` using
 parameter `t`. `t` will be clamped to the interval `[0, 1]`, so
 `lerp` will be clamped *between* a and b unless you pass `false` as the

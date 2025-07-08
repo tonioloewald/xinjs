@@ -79,6 +79,7 @@ const { app, prefs } = xinProxy({
   prefs: {
     theme: 'system',
     highContrast: false,
+    monochrome: false,
     locale: '',
   },
 })
@@ -137,6 +138,12 @@ bind(document.body, 'prefs.theme', {
 bind(document.body, 'prefs.highContrast', {
   toDOM(element, highContrast) {
     element.classList.toggle('high-contrast', highContrast)
+  },
+})
+
+bind(document.body, 'prefs.monochrome', {
+  toDOM(element, monochrome) {
+    element.classList.toggle('monochrome', monochrome)
   },
 })
 
@@ -286,6 +293,15 @@ if (main)
                       },
                       action() {
                         prefs.highContrast = !prefs.highContrast
+                      },
+                    },
+                    {
+                      caption: 'Monochrome',
+                      checked() {
+                        return prefs.monochrome
+                      },
+                      action() {
+                        prefs.monochrome = !prefs.monochrome
                       },
                     },
                   ],
