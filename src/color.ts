@@ -1,9 +1,10 @@
 /*#
 # 5.1 color
 
-`xinjs` includes a compact (~1.3kB) and powerful `Color` class for manipulating colors.
-The hope is that when the CSS provides native color calculations this will no
-longer be needed.
+`xinjs` includes a lightweight, powerful `Color` class for manipulating colors.
+I hope at some point CSS will provide sufficiently capable native color calculations 
+so that this will no longer be needed. Some of these methods have begun to appear, 
+and are approaching wide implementation.
 
 ## Color
 
@@ -51,9 +52,10 @@ const colorInput = input({
   value: '#000',
   onInput: update
 })
-const black = Color.fromCss('#000')
-const white = Color.fromCss('#fff')
+const red = Color.fromCss('#f00')
 const gray = Color.fromCss('#888')
+const teal = Color.fromCss('teal')
+const crimson = Color.fromCss('crimson')
 
 function update() {
   swatches.textContent = ''
@@ -85,9 +87,18 @@ function update() {
   makeSwatch('opacity(0.75)')
   makeSwatch('rotate(-90).opacity(0.75)')
   makeSwatch('brighten(0.5).desaturate(0.5)')
-  makeSwatch('blend(black, 0.5)')
-  makeSwatch('blend(white, 0.75)')
-  makeSwatch('blend(gray, 0.25)')
+  makeSwatch('blend(Color.black, 0.5)')
+  makeSwatch('mix(Color.white, 0.4)')
+  makeSwatch('blend(gray, 0.4)')
+  makeSwatch('mix(red, 0.25)')
+  makeSwatch('mix(red, 0.5)')
+  makeSwatch('mix(red, 0.75)')
+  makeSwatch('mix(teal, 0.25)')
+  makeSwatch('mix(teal, 0.5)')
+  makeSwatch('mix(teal, 0.75)')
+  makeSwatch('colorMix(crimson, 0.25)')
+  makeSwatch('colorMix(crimson, 0.5)')
+  makeSwatch('colorMix(crimson, 0.75)')
 }
 
 function randomColor() {
@@ -121,7 +132,7 @@ preview.append(
 }
 .preview .swatch {
   display: inline-block;
-  padding: 4px 14px; 
+  padding: 2px 6px; 
   background: var(--bg);
   color: var(--color);
   border: 1px solid var(--color);
@@ -139,9 +150,16 @@ In each case `amount` is from 0 to 1, and `degrees` is an angle (e.g. ± 0 to 36
 - `rotate(angle: number)`
 - `opacity(amount: number)` — this just creates a color with that opacity (it doesn't adjust it)
 - `mix(otherColor: Color, amount)` — produces a mix of the two colors in HSL-space
+- `colorMix(otherColor: Color, amount)` — uses `color-mix(in hsl...)` to blend the colors
 - `blend(otherColor: Color, amount)` — produces a blend of the two colors in RGB-space (usually icky)
 - `contrasting(amount = 1)` — produces a **contrasting color** by blending the color with black (if its
   `brightness` is > 0.5) or white by `amount`. The new color will always have opacity 1.
+  
+> **Note** the captions in the example above are colored using `contrasting()` and thus
+> should always be readable. In general, a base color will produce the worst results when
+> its `brightness` is around 0.5, much as is the case with the new and experimental CSS
+> [contrast-color()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/contrast-color)
+> function.
 
 Where-ever possible, unless otherwise indicated, all of these operations are performed in HSL-space.
 HSL space is not great! For example, `desaturate` essentially blends you with medium gray (`#888`)
@@ -253,7 +271,13 @@ export class Color {
       span.remove()
     }
     const [r, g, b, a] = converted.match(/[\d.]+/g) as string[]
-    return new Color(Number(r), Number(g), Number(b), a == null ? 1 : Number(a))
+    const scale = converted.startsWith('color(srgb') ? 255 : 1
+    return new Color(
+      Number(r * scale),
+      Number(g * scale),
+      Number(b * scale),
+      a == null ? 1 : Number(a)
+    )
   }
 
   static fromHsl(h: number, s: number, l: number, a = 1): Color {
@@ -407,14 +431,31 @@ export class Color {
     )
   }
 
+  static blendHue(a: number, b: number, t: number): number {
+    const delta = (b - a + 720) % 360
+    if (delta < 180) {
+      return a + t * delta
+    } else {
+      return a - (360 - delta) * t
+    }
+  }
+
   mix(otherColor: Color, t: number): Color {
     const a = this._hsl
     const b = otherColor._hsl
     return Color.fromHsl(
-      lerp(a.h, b.h, t),
+      a.s === 0 ? b.h : b.s === 0 ? a.h : Color.blendHue(a.h, b.h, t),
       lerp(a.s, b.s, t),
       lerp(a.l, b.l, t),
       lerp(this.a, otherColor.a, t)
+    )
+  }
+
+  colorMix(otherColor: Color, t: number): Color {
+    return Color.fromCss(
+      `color-mix(in hsl, ${this.html}, ${otherColor.html} ${(t * 100).toFixed(
+        0
+      )}%)`
     )
   }
 }
