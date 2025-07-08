@@ -17,7 +17,6 @@ const { throttle, debounce, on } = xinjs
 
 function follow( element ) {
   return ( event ) => {
-    console.log(event.offsetX, event.offsetY)
     element.style.top = event.offsetY + 'px'
     element.style.left = event.offsetX + 'px'
   }
