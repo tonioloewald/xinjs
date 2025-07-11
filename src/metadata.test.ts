@@ -28,6 +28,8 @@ test('xinPath works', () => {
   expect(xin.foo.xinPath).toBe('foo')
   expect(boxed.foo.bar.xinPath).toBe('foo.bar')
   expect(xinPath(boxed.foo.bar)).toBe('foo.bar')
+  // @ts-expect-error definition of toBe is wrong?
   expect(xinPath(foo)).toBe(undefined)
+  // @ts-expect-error definition of toBe is wrong?
   expect(xinPath(xin.foo.bar)).toBe(undefined)
 })

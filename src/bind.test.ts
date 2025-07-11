@@ -13,14 +13,14 @@ test('element binding works', async () => {
     },
   })
   const boundDiv = div({ bindText: test.string })
-  const boundInput = div({
+  const boundInput = input({
     bindValue: test.value,
     bindEnabled: test.enabled,
   })
   document.body.append(boundDiv, boundInput)
   await updates()
   expect(boundDiv.textContent).toBe('foobar')
-  expect(JSON.stringify(boundInput.value)).toBe('17')
+  expect(JSON.stringify(boundInput.value)).toBe('"17"')
   expect(boundInput.disabled).toBe(true)
   boundInput.value = 'baz'
   boundInput.dispatchEvent(new Event('change'))

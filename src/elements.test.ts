@@ -36,6 +36,7 @@ test('event binding works', async () => {
     test: {
       count: 0,
       handler() {
+        // @ts-expect-error tsc is stupid
         test.count += 1
       },
     },
