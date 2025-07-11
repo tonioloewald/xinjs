@@ -12,8 +12,11 @@ export declare const invertLuminance: (map: XinStyleRule) => XinStyleRule;
 export declare const varDefault: {
     [key: string]: CssVarBuilder;
 };
-export declare const vars: {
+type VarsType = {
+    default: typeof varDefault;
+} & {
     [key: string]: string;
 };
+export declare const vars: VarsType;
 type CssVarBuilder = (val: string | number) => string;
 export {};

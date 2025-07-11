@@ -166,7 +166,7 @@ function getByPath(obj: XinObject | XinArray, path: string): any {
       }
     } else {
       if ((found as XinArray).length === 0) {
-        found = (found as XinArray)[part.slice(1)]
+        found = (found as XinArray)[Number(part.slice(1))]
         if (part[0] !== '=') {
           return undefined
         }

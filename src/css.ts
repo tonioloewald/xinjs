@@ -468,71 +468,74 @@ export const varDefault = new Proxy<{ [key: string]: CssVarBuilder }>(
   }
 )
 
-export const vars = new Proxy<{ [key: string]: string }>(
-  {},
-  {
-    get(target, prop: string) {
-      if (prop === 'default') {
-        return varDefault
-      }
-      if (target[prop] == null) {
-        prop = camelToKabob(prop)
-        const [, _varName, , isNegative, scaleText, method] = prop.match(
-          /^([-\w]*?)((_)?(\d+)(\w?))?$/
-        ) || ['', prop]
-        const varName = `--${_varName}`
-        if (scaleText != null) {
-          const scale =
-            isNegative == null
-              ? Number(scaleText) / 100
-              : -Number(scaleText) / 100
-          switch (method) {
-            case 'b': // brighten
-              {
-                const baseColor = Color.fromVar(varName)
-                target[prop] =
-                  scale > 0
-                    ? baseColor.brighten(scale).rgba
-                    : baseColor.darken(-scale).rgba
-              }
-              break
-            case 's': // saturate
-              {
-                const baseColor = Color.fromVar(varName)
-                target[prop] =
-                  scale > 0
-                    ? baseColor.saturate(scale).rgba
-                    : baseColor.desaturate(-scale).rgba
-              }
-              break
-            case 'h': // hue
-              {
-                const baseColor = Color.fromVar(varName)
-                target[prop] = baseColor.rotate(scale * 100).rgba
-              }
-              break
-            case 'o': // alpha
-              {
-                const baseColor = Color.fromVar(varName)
-                target[prop] = baseColor.opacity(scale).rgba
-              }
-              break
-            case '':
-              target[prop] = `calc(var(${varName}) * ${scale})`
-              break
-            default:
-              console.error(method)
-              throw new Error(
-                `Unrecognized method ${method} for css variable ${varName}`
-              )
-          }
-        } else {
-          target[prop] = `var(${varName})`
+type VarsType = {
+  default: typeof varDefault
+} & {
+  [key: string]: string
+}
+
+export const vars = new Proxy<VarsType>({} as VarsType, {
+  get(target, prop: string) {
+    if (prop === 'default') {
+      return varDefault
+    }
+    if (target[prop] == null) {
+      prop = camelToKabob(prop)
+      const [, _varName, , isNegative, scaleText, method] = prop.match(
+        /^([-\w]*?)((_)?(\d+)(\w?))?$/
+      ) || ['', prop]
+      const varName = `--${_varName}`
+      if (scaleText != null) {
+        const scale =
+          isNegative == null
+            ? Number(scaleText) / 100
+            : -Number(scaleText) / 100
+        switch (method) {
+          case 'b': // brighten
+            {
+              const baseColor = Color.fromVar(varName)
+              target[prop] =
+                scale > 0
+                  ? baseColor.brighten(scale).rgba
+                  : baseColor.darken(-scale).rgba
+            }
+            break
+          case 's': // saturate
+            {
+              const baseColor = Color.fromVar(varName)
+              target[prop] =
+                scale > 0
+                  ? baseColor.saturate(scale).rgba
+                  : baseColor.desaturate(-scale).rgba
+            }
+            break
+          case 'h': // hue
+            {
+              const baseColor = Color.fromVar(varName)
+              target[prop] = baseColor.rotate(scale * 100).rgba
+            }
+            break
+          case 'o': // alpha
+            {
+              const baseColor = Color.fromVar(varName)
+              target[prop] = baseColor.opacity(scale).rgba
+            }
+            break
+          case '':
+            target[prop] = `calc(var(${varName}) * ${scale})`
+            break
+          default:
+            console.error(method)
+            throw new Error(
+              `Unrecognized method ${method} for css variable ${varName}`
+            )
         }
+      } else {
+        target[prop] = `var(${varName})`
       }
-      return target[prop]
-    },
-  }
-)
+    }
+    return target[prop]
+  },
+})
 
 type CssVarBuilder = (val: string | number) => string

@@ -3,7 +3,7 @@
     "lib": ["ES2022", "DOM"],
     "module": "es2022",
     "target": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
     "strict": true,
@@ -13,13 +13,13 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "noEmit": true,
     "types": [
       "bun-types", // add Bun global
       "@types/jsdom"
     ]
   },
+  "files": ["./node_modules/@types/react/index.d.ts"],
   "allowJs": true,
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**.*.spec.ts", "*.test.ts"]
+  "exclude": ["node_modules", "src/**/*.spec.ts", "src/**/*.test.ts"]
 }

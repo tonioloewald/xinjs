@@ -51,7 +51,7 @@ async function build() {
 
   try {
     // removing undici spam
-    await $`bun tsc ./src/index.ts --declaration --emitDeclarationOnly --target es2022 --outDir dist | grep -v "TS2792: Cannot find module`
+    await $`bun tsc --declaration --emitDeclarationOnly --target es2022 --outDir dist`
   } catch (e) {
     console.log('types created')
   }

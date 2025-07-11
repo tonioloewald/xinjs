@@ -34,10 +34,12 @@
   "license": "BSD-3-CLAUSE",
   "devDependencies": {
     "@happy-dom/global-registrator": "^18.0.1",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^20.19.7",
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "bun-types": "^1.2.18",
     "caniuse-lite": "^1.0.30001727",
-    "@types/node": "20.16.0",
     "chokidar": "^4.0.3",
     "eslint": "^8.57.1",
     "marked": "^5.1.2",

@@ -1,4 +1,3 @@
-// @ts-expect-error bun:test types
 import { test, expect } from 'bun:test'
 import { getByPath, setByPath, deleteByPath } from './by-path'
 import { XinObject } from './xin-types'

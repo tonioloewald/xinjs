@@ -22,9 +22,7 @@ test('boxedProxy works', () => {
       nullity: null,
     },
   })
-  // @ts-expect-error it's a test ffs
   expect(xin.box.foo).toBe('bar')
-  // @ts-expect-error it's a test ffs
   expect(box.foo.valueOf()).toBe('bar')
   expect(xinPath(box.foo)).toBe('box.foo')
   // @ts-expect-error it's a test ffs
