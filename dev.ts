@@ -50,7 +50,6 @@ async function build() {
   await $`cp demo/static/* ${PUBLIC}`
 
   try {
-    // removing undici spam
     await $`bun tsc --declaration --emitDeclarationOnly --target es2022 --outDir dist`
   } catch (e) {
     console.log('types created')
