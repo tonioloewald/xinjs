@@ -1,6 +1,6 @@
 {
-  "name": "xinjs",
-  "version": "1.0.2",
+  "name": "tosijs",
+  "version": "1.0.3",
   "description": "path-based state management for web apps",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -13,7 +13,7 @@
     "default": "./dist/module.js",
     "types": "./dist/index.d.ts"
   },
-  "homepage": "https://xinjs.net",
+  "homepage": "https://tosijs.net",
   "keywords": [
     "javascript",
     "typescript",
@@ -45,8 +45,8 @@
     "marked": "^5.1.2",
     "prettier": "^2.8.8",
     "typescript": "^5.8.3",
-    "xinjs": "file:.",
-    "xinjs-ui": "^0.9.15"
+    "tosijs": "file:.",
+    "tosijs-ui": "^0.9.15"
   },
   "files": [
     "/dist",
@@ -55,7 +55,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/tonioloewald/xinjs.git"
+    "url": "https://github.com/tonioloewald/tosijs.git"
   },
   "ts-standard": {
     "ignore": [
