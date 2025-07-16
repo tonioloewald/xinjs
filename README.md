@@ -1,46 +1,82 @@
-# xinjs
+# tosijs
 
 <!--{ "pin": "top" }-->
 
-[xinjs.net](https://xinjs.net) | [xinjs-ui](https://ui.xinjs.net) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme) | [discord](https://discord.gg/ramJ9rgky5)
+> `tosijs` is being renamed `tosijs`. This is a work-in-progress.
 
-[![xinjs is on NPM](https://badge.fury.io/js/xinjs.svg)](https://www.npmjs.com/package/xinjs)
-[![xinjs is about 10kB gzipped](https://deno.bundlejs.com/?q=xinjs&badge=)](https://bundlejs.com/?q=xinjs&badge=)
-[![xinjs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/xinjs/badge)](https://www.jsdelivr.com/package/npm/xinjs)
+[tosijs.net](https://tosijs.net) | [tosijs-ui](https://ui.tosijs.net) | [github](https://github.com/tonioloewald/tosijs) | [npm](https://www.npmjs.com/package/tosijs) | [cdn](https://www.jsdelivr.com/package/npm/tosijs) | [react-tosijs](https://github.com/tonioloewald/react-tosijs#readme) | [discord](https://discord.gg/ramJ9rgky5)
+
+[![tosijs is on NPM](https://badge.fury.io/js/tosijs.svg)](https://www.npmjs.com/package/tosijs)
+[![tosijs is about 10kB gzipped](https://deno.bundlejs.com/?q=tosijs&badge=)](https://bundlejs.com/?q=tosijs&badge=)
+[![tosijs on jsdelivr](https://data.jsdelivr.com/v1/package/npm/tosijs/badge)](https://www.jsdelivr.com/package/npm/tosijs)
 
 <div style="text-align: center; margin: 20px">
-  <img style="width: 250px; max-width: 80%" class="logo" alt="xinjs logo" src="https://xinjs.net/favicon.svg">
+  <img style="width: 250px; max-width: 80%" class="logo" alt="tosijs logo" src="https://tosijs.net/favicon.svg">
 </div>
 
-> For a pretty thorough overview of xinjs, you might like to start with [What is xinjs?](https://loewald.com/blog/2025/6/4/what-is-xinjs-).
-> To understand the thinking behind xinjs, there's [What should a front-end framework do?](https://loewald.com/blog/2025/6/4/what-should-a-front-end-framework-do).
+> For a pretty thorough overview of tosijs, you might like to start with [What is tosijs?](https://loewald.com/blog/2025/6/4/what-is-tosijs-).
+> To understand the thinking behind tosijs, there's [What should a front-end framework do?](https://loewald.com/blog/2025/6/4/what-should-a-front-end-framework-do).
 
 ### Build UIs with less code
 
-- simple, efficient observer pattern
-- written in TypeScript
-- lightweight
-- works anywhere (browsers, node, bun, electron etc.)
-
 If you want to build a web-application that's performant, robust, and maintainable,
-`xinjs` lets you:
+`tosijs` lets you:
 
-- implement your business logic however you like (or reuse existing code),
-- build your UI with pure `React` components (using `useXin`)
-- and/or `web-component`s,
-- and _bind_ state to the user-interface _directly_.
+- build user-interfaces with pure javascript/typescript—no JSX, complex tooling, or spooky action-at-a-distance
+- manage application state almost effortlessly—eliminate most binding code
+- written in Typescript, Javascript-friendly
+- use web-components, build your own web-components quickly and easily
+- manage CSS efficiently and flexibly using CSS variables and Color computations
+- leverage existing business logic and libraries without complex wrappers
 
-In general, `xinjs` is able to accomplish the same or better compactness, expressiveness,
+```js
+const { elements, tosi, touch } = tosijs
+
+const todo = {
+  list: [],
+  addItem(reminder) {
+    if (reminder.trim()) {
+      todo.list.push(reminder)
+    }
+  }
+}
+
+const { readmeTodoDemo } = tosi({ readmeTodoDemo: todo })
+
+const { h4, ul, template, li, label, input } = elements
+preview.append(
+  h4('To Do List'),
+  ul(
+    {
+      bindList: {
+        value: readmeTodoDemo.list
+      }
+    },
+    template(li({ bindText: '^' }))
+  ),
+  label(
+    'Reminder',
+    input({ 
+      placeholder: 'enter a reminder',
+      onKeydown(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          readmeTodoDemo.addItem(event.target.value.trim())
+          event.target.value = ''
+          touch(readmeTodoDemo)
+        }
+      }
+    })
+  )
+)
+```
+
+In general, `tosijs` is able to accomplish the same or better compactness, expressiveness,
 and simplicity as you get with highly-refined React-centric toolchains, but without transpilation,
-domain-specific-languages, or other tricks that provide convenience at the cost of becoming locked-in
-to React, a specific state-management system (which permeats your business logic), and UI framework.
+domain-specific-languages, or other tricks that provide "convenience" at the cost of becoming locked-in
+to React, a specific state-management system (which permeates your business logic), and usually a specific UI framework.
 
-Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts).
-
-The standard [React Todo List Example](https://codesandbox.io/s/xinjs-react-reminders-demo-v0-4-2-l46k52?file=/src/App.tsx)
-becomes shorter and simpler with `xinjs` and _cleanly separates_ business logic from presentation. `xinjs` **paths** route data to/from UI elements, and events from the UI to methods, and those paths are _exactly what you expect_.
-
-But xinjs lets you work with pure HTML components as cleanly—more cleanly—and efficiently than
+`tosijs` lets you work with pure HTML and web-component as cleanly—more cleanly—and efficiently than
 React toolchains let you work with JSX.
 
     export default function App() {
@@ -54,10 +90,10 @@ React toolchains let you work with JSX.
 
 Becomes:
 
-    const { div, h1, h2 } = elements // exported from xinjs
+    const { div, h1, h2 } = elements // exported from tosijs
     export const App = () => div(
       { class: 'App' },
-      h1('Hello xinjs'),
+      h1('Hello tosijs'),
       h2('Start editing to see some magic happen!')
     )
 
@@ -66,27 +102,27 @@ or virtual DOM required. And it all works just as well with web-components. This
 you run App() in the console:
 
     ▼ <div class="App">
-        <h1>Hello xinjs</h1>
+        <h1>Hello tosijs</h1>
         <h2>Start editing to see some magic happen!</h2>
       </div>
 
 The ▼ is there to show that's **DOM nodes**, not HTML.
 
-`xinjs` lets you lean into web-standards and native browser functionality while writing less code that's
+`tosijs` lets you lean into web-standards and native browser functionality while writing less code that's
 easier to run, debug, deploy, and maintain. Bind data direct to standard input elements—without having
 to fight their basic behavior—and now you're using _native_ functionality with _deep accessibility_ support
 as opposed to whatever the folks who wrote the library you're using have gotten around to implementing.
 
-> **Aside**: `xinjs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't
+> **Aside**: `tosijs` will also probably work perfectly well with `Angular`, `Vue`, et al, but I haven't
 > bothered digging into it and don't want to deal with `ngZone` stuff unless someone is paying
 > me.
 
 If you want to build your own `web-components` versus use something off-the-rack like
-[Shoelace](https://shoelace.style), `xinjs` offers a `Component` base class that, along with
+[Shoelace](https://shoelace.style), `tosijs` offers a `Component` base class that, along with
 its `elements` and `css` libraries allows you to implement component views in pure Javascript
 more compactly than with `jsx` (and without a virtual DOM).
 
-    import { Component, elements, css } from 'xinjs'
+    import { Component, elements, css } from 'tosijs'
 
     const { style, h1, slot } = elements
     export class MyComponent extends Component {
@@ -102,14 +138,14 @@ The difference is that `web-components` are drop-in replacements for standard HT
 and interoperate happily with one-another and other libraries, load asynchronously,
 and are natively supported by all modern browsers.
 
-## What `xinjs` does
+## What `tosijs` does
 
 ### Observe Object State
 
-`xinjs` tracks the state of objects you assign to it using `paths` allowing economical
+`tosijs` tracks the state of objects you assign to it using `paths` allowing economical
 and direct updates to application state.
 
-    import { xinProxy, observe } from 'xinjs'
+    import { xinProxy, observe } from 'tosijs'
 
     const { app } = xinProxy({
       app: {
@@ -145,7 +181,7 @@ and direct updates to application state.
 > and so on, but not "scalars" like `number`s, `string`s, `boolean`s, `null`, and `undefined`)
 >
 > All you need to know about a `XinProxy` is that it's Proxy wrapped around your original
-> object that allows you to interact with the object normally, but which allows `xinjs` to
+> object that allows you to interact with the object normally, but which allows `tosijs` to
 > **observe** changes made to the wrapped object and tell interested parties about the changes.
 >
 > If you want to original object back you can just hold on to a reference or use `xinValue(someProxy)`
@@ -153,13 +189,13 @@ and direct updates to application state.
 
 ### No Tax, No Packaging
 
-`xinjs` does not modify the stuff you hand over to it… it just wraps objects
+`tosijs` does not modify the stuff you hand over to it… it just wraps objects
 with a `Proxy` and then if you use `xin` to make changes to those objects,
-`xinjs` will notify any interested observers.
+`tosijs` will notify any interested observers.
 
 **Note** `xinProxy({foo: {...}})` is syntax sugar for `xin.foo = {...}`.
 
-    import { xinProxy, observe } from 'xinjs'
+    import { xinProxy, observe } from 'tosijs'
     const { foo } = xinProxy({
       foo: {
         bar: 17
@@ -178,7 +214,7 @@ with a `Proxy` and then if you use `xin` to make changes to those objects,
 `xin` is designed to behave just like a JavaScript `Object`. What you put
 into it is what you get out of it:
 
-    import { xin, xinValue } from 'xinjs'
+    import { xin, xinValue } from 'tosijs'
 
     const foo = {bar: 'baz'}
     xin.foo = foo
@@ -197,9 +233,9 @@ into it is what you get out of it:
 ### …but better!
 
 It's very common to deal with arrays of objects that have unique id values,
-so `xinjs` supports the idea of id-paths
+so `tosijs` supports the idea of id-paths
 
-    import { xinProxy, xin } from 'xinjs
+    import { xinProxy, xin } from 'tosijs
 
     const { app } = xinProxy ({
       app: {
@@ -225,7 +261,7 @@ so `xinjs` supports the idea of id-paths
 Sometimes you will modify an object behind `xin`'s back (e.g. for efficiency).
 When you want to trigger updates, simply touch the path.
 
-    import { xin, observe, touch } from 'xinjs'
+    import { xin, observe, touch } from 'tosijs'
 
     const foo = { bar: 17 }
     xin.foo = foo
@@ -237,9 +273,9 @@ When you want to trigger updates, simply touch the path.
 
 ### CSS
 
-`xinjs` includes utilities for working with css.
+`tosijs` includes utilities for working with css.
 
-    import {css, vars, initVars, darkMode} from 'xinjs'
+    import {css, vars, initVars, darkMode} from 'tosijs'
     const cssVars = {
       textFont: 'sans-serif'
       color: '#111'
@@ -267,9 +303,9 @@ The `vars` simply converts its camelCase properties into css variable references
 
 ## Color
 
-`xinjs` includes a powerful `Color` class for manipulating colors.
+`tosijs` includes a powerful `Color` class for manipulating colors.
 
-    import {Color} from 'xinjs
+    import {Color} from 'tosijs
     const translucentBlue = new Color(0, 0, 255, 0.5) // r, g, b, a parameters
     const postItBackground = Color.fromCss('#e7e79d')
     const darkGrey = Color.fromHsl(0, 0, 0.2)
@@ -280,10 +316,10 @@ making adjustments, blending colors, and so forth.
 ## Hot Reload
 
 One of the nice things about working with the React toolchain is hot reloading.
-`xinjs` supports hot reloading (and not just in development!) via the `hotReload()`
+`tosijs` supports hot reloading (and not just in development!) via the `hotReload()`
 function:
 
-    import {xin, hotReload} from 'xinjs'
+    import {xin, hotReload} from 'tosijs'
 
     xin.app = {
       ...
@@ -302,9 +338,9 @@ To completely reset the app, run `localStorage.clear()` in the console.
 
 ### Types
 
-`xinjs` [type-by-example](https://www.npmjs.com/package/type-by-example) has been
+`tosijs` [type-by-example](https://www.npmjs.com/package/type-by-example) has been
 broken out into a separate standalone library. (Naturally it works very well with
-xinjs but they are completely independent.)
+tosijs but they are completely independent.)
 
 ## Development Notes
 
@@ -329,7 +365,7 @@ To create a local package (for experimenting with a build) run `bun pack`.
 
 ## Related Libraries
 
-- react-xinjs [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme)
+- react-tosijs [react-tosijs](https://github.com/tonioloewald/react-tosijs#readme)
   allows you to use xin's path-observer model in React [ReactJS](https://reactjs.org) apps
 - type-by-example [github](https://github.com/tonioloewald/type-by-example) | [npm](https://www.npmjs.com/package/type-by-example)
   is a library for declaring types in pure javascript, allowing run-time type-checking.
@@ -339,11 +375,11 @@ To create a local package (for experimenting with a build) run `bun pack`.
 
 ## Credits
 
-`xinjs` is in essence a highly incompatible update to `b8rjs` with the goal
+`tosijs` is in essence a highly incompatible update to `b8rjs` with the goal
 of removing cruft, supporting more use-cases, and eliminating functionality
 that has been made redundant by improvements to the JavaScript language and
 DOM APIs.
 
-`xinjs` is being developed using [bun](https://bun.sh/).
+`tosijs` is being developed using [bun](https://bun.sh/).
 `bun` is crazy fast (based on Webkit's JS engine, vs. V8), does a lot of stuff
 natively, and runs TypeScript (with import and require) directly.

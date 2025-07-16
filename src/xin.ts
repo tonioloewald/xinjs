@@ -188,7 +188,7 @@ const { observe, xin, elements } = xinjs
 
 const { h3, div } = elements
 
-const history = div('Try playing with the preceding example')
+const history = div('This shows changes made to the preceding example')
 
 preview.append(
   h3('Changes to the calculatorExample'),
