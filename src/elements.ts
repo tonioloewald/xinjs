@@ -41,26 +41,63 @@ preview.append(
 )
 ```
 
-`elements` is a proxy whose properties are element factory functions,
-so `elements.foo` is a function that returns a `<foo>` element.
+## `ElementCreator` functions
 
-The arguments of the factory functions can be strings, numbers, other
-elements, or property-maps, which are converted into attributes or properties.
+`elements` is a proxy whose properties are element factory functions,
+referred to throughout this documentation as `elementCreator`s, functions
+of type `ElementCreator`. So `elements.div` is a function that returns a `<div>` 
+element, `elements.foo` creates <foo> elements, and elements.fooBar creates
+`<foo-bar>` elements.
+
+The arguments of `elementCreator`s can be strings, numbers, other
+elements, or property-maps, which are converted into attributes or properties
+(or bindings).
 
 E.g.
 
-    const {span} = elements
-    span('foo')                   // produces <span>foo</foo>
-    span('bar', {class: 'foo'})   // produces <span class="foo">bar</span>
-    button('click me', {
-      onclick() {
-        alert('you clicked me')
+```js
+const { elements, tosi } = xinjs
+
+const { elementCreatorDemo } = tosi({
+  elementCreatorDemo: {
+    isChecked: true,
+    someString: 'hello elementCreator',
+    someColor: 'blue',
+    clicks: 0
+  }
+})
+
+const { div, button, label, input } = elements
+
+preview.append(
+  div('I am a div'),
+  div(
+    {
+      style: { color: 'blue' }
+    },
+    elementCreatorDemo.someString
+  ),
+  label(
+    'Edit someString',
+    input({bindValue: elementCreatorDemo.someString})
+  ),
+  div(
+    button(
+      'Click me',
+      {
+        onClick() {
+          elementCreatorDemo.clicks += 1
+        }
       }
-    })                            // creates a button with an event handler
-    input({
-      type: 'checkbox',
-      checked: true
-    })                            // produces a checked checkbox
+    ),
+    div(elementCreatorDemo.clicks, ' clicks so far'),
+  ),
+  label(
+    'isChecked?',
+    input({type: 'checkbox', bindValue: elementCreatorDemo.isChecked})
+  )
+)
+```
 
 ## camelCase conversion
 
