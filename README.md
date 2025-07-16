@@ -1,6 +1,8 @@
-# xinjs
+# tosijs
 
 <!--{ "pin": "top" }-->
+
+> `xinjs` is being renamed `tosijs`. This is a work-in-progress.
 
 [xinjs.net](https://xinjs.net) | [xinjs-ui](https://ui.xinjs.net) | [github](https://github.com/tonioloewald/xinjs) | [npm](https://www.npmjs.com/package/xinjs) | [cdn](https://www.jsdelivr.com/package/npm/xinjs) | [react-xinjs](https://github.com/tonioloewald/react-xinjs#readme) | [discord](https://discord.gg/ramJ9rgky5)
 
@@ -30,17 +32,54 @@ If you want to build a web-application that's performant, robust, and maintainab
 - and/or `web-component`s,
 - and _bind_ state to the user-interface _directly_.
 
+```js
+const { elements, tosi, touch } = xinjs
+
+const todo = {
+  list: [],
+  addItem(reminder) {
+    if (reminder.trim()) {
+      todo.list.push(reminder)
+    }
+  }
+}
+
+const { readmeTodoDemo } = tosi({ readmeTodoDemo: todo })
+
+const { h4, ul, template, li, label, input } = elements
+preview.append(
+  h4('To Do List'),
+  ul(
+    {
+      bindList: {
+        value: readmeTodoDemo.list
+      }
+    },
+    template(li({ bindText: '^' }))
+  ),
+  label(
+    'Reminder',
+    input({ 
+      placeholder: 'enter a reminder',
+      onKeydown(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          readmeTodoDemo.addItem(event.target.value.trim())
+          event.target.value = ''
+          touch(readmeTodoDemo)
+        }
+      }
+    })
+  )
+)
+```
+
 In general, `xinjs` is able to accomplish the same or better compactness, expressiveness,
 and simplicity as you get with highly-refined React-centric toolchains, but without transpilation,
-domain-specific-languages, or other tricks that provide convenience at the cost of becoming locked-in
-to React, a specific state-management system (which permeats your business logic), and UI framework.
+domain-specific-languages, or other tricks that provide "convenience" at the cost of becoming locked-in
+to React, a specific state-management system (which permeates your business logic), and usually a specific UI framework.
 
-Here's the usual codesandbox `React Typescript` boilerplate [converted to `xinjs`](https://codesandbox.io/s/xinapp-eei48c?file=/src/app.ts).
-
-The standard [React Todo List Example](https://codesandbox.io/s/xinjs-react-reminders-demo-v0-4-2-l46k52?file=/src/App.tsx)
-becomes shorter and simpler with `xinjs` and _cleanly separates_ business logic from presentation. `xinjs` **paths** route data to/from UI elements, and events from the UI to methods, and those paths are _exactly what you expect_.
-
-But xinjs lets you work with pure HTML components as cleanly—more cleanly—and efficiently than
+`xinjs` lets you work with pure HTML and web-component as cleanly—more cleanly—and efficiently than
 React toolchains let you work with JSX.
 
     export default function App() {
