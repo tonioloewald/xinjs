@@ -4,6 +4,7 @@ copied from xinjs-ui demo/src/style.ts
 */
 
 import { XinStyleSheet, vars, Color, invertLuminance } from 'tosijs'
+import { icons, svg2DataUrl } from 'tosijs-ui'
 
 const brandColor = Color.fromCss('#EE257B')
 
@@ -157,7 +158,20 @@ export const styleSpec: XinStyleSheet = {
     marginTop: '0',
   },
   'blockquote > :last-child': {
+    position: 'relative',
+    width: '100%',
+    paddingBottom: 48,
     marginBottom: '0',
+  },
+  'blockquote > :last-child::after': {
+    content: '" "',
+    width: 48,
+    height: 48,
+    display: 'block',
+    bottom: 0,
+    right: 0,
+    position: 'absolute',
+    background: svg2DataUrl(icons.tosi()),
   },
   '.bar': {
     display: 'flex',
