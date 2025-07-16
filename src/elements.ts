@@ -56,7 +56,7 @@ elements, or property-maps, which are converted into attributes or properties
 E.g.
 
 ```js
-const { elements, tosi } = xinjs
+const { elements, tosi } = tosijs
 
 const { elementCreatorDemo } = tosi({
   elementCreatorDemo: {

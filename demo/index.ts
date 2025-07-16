@@ -11,7 +11,7 @@ import {
   hotReload,
   debounce,
   Color,
-} from 'xinjs'
+} from 'tosijs'
 
 import {
   icons,
@@ -23,13 +23,13 @@ import {
   sizeBreak,
   popMenu,
   version as uiVersion,
-} from 'xinjs-ui'
+} from 'tosijs-ui'
 
 import { styleSpec } from './style'
 StyleSheet('demo-style', styleSpec)
 
-import * as xinjs from 'xinjs'
-import * as xinjsui from 'xinjs-ui'
+import * as tosijs from 'tosijs'
+import * as tosijsui from 'tosijs-ui'
 
 import docs from './docs.json'
 
@@ -390,7 +390,7 @@ if (main)
           },
           bindValue: 'app.currentDoc.text',
           didRender(this: MarkdownViewer) {
-            LiveExample.insertExamples(this, { xinjs, xinjsui })
+            LiveExample.insertExamples(this, { tosijs, tosijsui })
           },
         })
       )

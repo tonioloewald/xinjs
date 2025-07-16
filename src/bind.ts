@@ -36,7 +36,7 @@ bind<T = Element>(
 `bind()` binds a `path` to an element, syncing the value at the path to and/or from the DOM.
 
 ```js
-const { bind, boxedProxy } = xinjs
+const { bind, boxedProxy } = tosijs
 
 const { simpleBindExample } = boxedProxy({
   simpleBindExample: {
@@ -80,27 +80,31 @@ bind(
 The `bind` function is a simple way of tying an `HTMLElement`'s properties to
 state via `path` using [bindings](/?bindings.ts)
 
-    import {bind, bindings, xin, elements, updates} from 'xinjs'
-    const {div, input} = elements
+```
+import {bind, bindings, xin, elements, updates} from 'xinjs'
+const {div, input} = elements
 
-    const divElt = div()
-    bind(divElt, 'app.title', bindings.text)
-    document.body.append(divElt)
+const divElt = div()
+bind(divElt, 'app.title', bindings.text)
+document.body.append(divElt)
 
-    const inputElt = input()
-    bind(inputElt, 'app.title', bindings.value)
+const inputElt = input()
+bind(inputElt, 'app.title', bindings.value)
 
-    xin.app = {title: 'hello world'}
-    await updates()
+xin.app = {title: 'hello world'}
+await updates()
+```
 
 What's happening is essentially the same as:
 
-    divElt.textContent = xin.app.title
-    observe('app.title', () => divElt.textContent = xin.app.title)
+```
+divElt.textContent = xin.app.title
+observe('app.title', () => divElt.textContent = xin.app.title)
 
-    inputElt.value = xin.app.title
-    observe('app.title', () => inputElt.value = xin.app.title)
-    inputElt.addEventListener('change', () => { xin.app.title = inputElt.value })
+inputElt.value = xin.app.title
+observe('app.title', () => inputElt.value = xin.app.title)
+inputElt.addEventListener('change', () => { xin.app.title = inputElt.value })
+```
 
 Except:
 
@@ -146,16 +150,18 @@ bind(listElement, 'app.bigList', visibility)
 
 ## `on()`
 
-    on(element: Element, eventType: string, handler: XinEventHandler): VoidFunction
+```
+on(element: Element, eventType: string, handler: XinEventHandler): VoidFunction
 
-    export type XinEventHandler<T extends Event = Event, E extends Element = Element> =
-      | ((evt: T & {target: E}) => void)
-      | ((evt: T & {target: E}) => Promise<void>)
-      | string
+export type XinEventHandler<T extends Event = Event, E extends Element = Element> =
+  | ((evt: T & {target: E}) => void)
+  | ((evt: T & {target: E}) => Promise<void>)
+  | string
+```
 
 ```js
-const { elements, on, boxedProxy } = xinjs
-const { postNotification } = xinjsui
+const { elements, on, boxedProxy } = tosijs
+const { postNotification } = tosijsui
 
 const makeHandler = (message) => () => {
   postNotification({ message, duration: 2 })

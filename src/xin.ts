@@ -53,7 +53,7 @@ the input field doesn't lose any state (so your text selection
 and insertion point are stable.
 
 ```js
-const { xin, elements } = xinjs
+const { xin, elements } = tosijs
 
 xin.xinExample = {
   string: 'hello, xin'
@@ -93,7 +93,7 @@ preview.append(
 ### A Calculator
 
 ```js
-const { xin, elements, touch } = xinjs
+const { xin, elements, touch } = tosijs
 
 // here's a vanilla javascript calculator
 const calculator = {
@@ -184,7 +184,7 @@ Now the `onChange` handler isn't necessary at all. `observe`
 is documented in [path-listener](/?path-listener.ts).
 
 ```js
-const { observe, xin, elements } = xinjs
+const { observe, xin, elements } = tosijs
 
 const { h3, div } = elements
 
@@ -341,7 +341,7 @@ This is **useful** because `boxed.foo.bar` always knows where it came from, whil
 This means you can write:
 
 ```js
-const { boxed, elements } = xinjs
+const { boxed, elements } = tosijs
 
 boxed.boxedExample = {
   string: 'hello, boxed'
@@ -412,7 +412,7 @@ the chance of making costly errors.
 This example puts all of this together.
 
 ```js
-const { elements, boxedProxy } = xinjs
+const { elements, boxedProxy } = tosijs
 
 const { todos } = boxedProxy({
   todos: {

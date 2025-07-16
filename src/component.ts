@@ -46,7 +46,7 @@ to that of its `<input>` so the user doesn't need to care about how
 it works internally.
 
 ```js
-const { Component, elements } = xinjs
+const { Component, elements } = tosijs
 
 const {label, span, input} = elements
 
@@ -146,7 +146,7 @@ and letting them be switched out (because they'll lose any attributes you give t
 Here's a very simple example:
 
 ```js
-const { Component, elements } = xinjs
+const { Component, elements } = tosijs
 
 const { xinSlot, div } = elements
 

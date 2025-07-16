@@ -8,7 +8,7 @@ with monolithic code-bases, but it does prevent components from being loaded
 "tree shake" component libraries.
 
 ```js
-const { elements, blueprintLoader, blueprint } = xinjs
+const { elements, blueprintLoader, blueprint } = tosijs
 
 preview.append(
   blueprintLoader(
@@ -90,7 +90,7 @@ This is a more complex example that loads two components and only generates
 the test component once everything is ready:
 
 ```js
-const { blueprintLoader, blueprint } = xinjs
+const { blueprintLoader, blueprint } = tosijs
 
 let clockType = null
 

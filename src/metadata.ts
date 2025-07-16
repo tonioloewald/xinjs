@@ -8,19 +8,21 @@
 `xinValue` is helpful when you want to strip the `xin` or `boxed` proxy off of a
 value. `xinValue` passes through normal values, so it's safe to use on anything.
 
-    import { boxed } from 'xinjs'
+```
+import { boxed } from 'xinjs'
 
-    const foo = { bar: 'hello', baz: 17 }
-    boxed.foo = foo
+const foo = { bar: 'hello', baz: 17 }
+boxed.foo = foo
 
-    boxed.foo.bar === foo.bar               // false, boxed.foo.bar is a String
-    boxed.foo === foo                       // false, boxed.foo is a Proxy
-    boxed.foo.baz === 17                    // false, boxed.foo.baz is a Number
-    xinValue(boxed.foo.bar) === 'hello'     // true
-    boxed.foo.xinValue === foo              // true
-    boxed.foo.baz.xinValue = 17             // true
-    xinValue(boxed.foo) === xinValue(foo)   // true
-    foo.xinValue                            // undefined! foo isn't a proxy
+boxed.foo.bar === foo.bar               // false, boxed.foo.bar is a String
+boxed.foo === foo                       // false, boxed.foo is a Proxy
+boxed.foo.baz === 17                    // false, boxed.foo.baz is a Number
+xinValue(boxed.foo.bar) === 'hello'     // true
+boxed.foo.xinValue === foo              // true
+boxed.foo.baz.xinValue = 17             // true
+xinValue(boxed.foo) === xinValue(foo)   // true
+foo.xinValue                            // undefined! foo isn't a proxy
+```
 
 ## `xinPath(x: any): string | undefined`
 

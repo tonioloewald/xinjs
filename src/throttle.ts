@@ -13,7 +13,7 @@ producing functions that filter out unnecessary repeated calls to a function, ty
 in response to rapid user input, e.g. from keystrokes or pointer movement.
 
 ```js
-const { throttle, debounce, on } = xinjs
+const { throttle, debounce, on } = tosijs
 
 function follow( element ) {
   return ( event ) => {

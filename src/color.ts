@@ -29,7 +29,7 @@ output of `color-mix(in hsl ...)` but not other [color spaces](https://developer
 ## Manipulating Colors
 
 ```js
-const { elements, Color } = xinjs
+const { elements, Color } = tosijs
 
 const { label, span, div, input, button } = elements
 
