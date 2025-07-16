@@ -3,7 +3,7 @@ FIXME component-tize the doc system in xinjs-ui
 copied from xinjs-ui demo/src/style.ts
 */
 
-import { XinStyleSheet, vars, Color, invertLuminance } from 'xinjs'
+import { XinStyleSheet, vars, Color, invertLuminance } from 'tosijs'
 
 const brandColor = Color.fromCss('#EE257B')
 

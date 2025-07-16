@@ -105,7 +105,7 @@ Will produce:
 </style>
 ```
 ```js
-const { elements, vars } = xinjs
+const { elements, vars } = tosijs
 const { div } = elements
 
 window.CSS.registerProperty({

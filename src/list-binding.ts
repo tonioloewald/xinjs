@@ -28,7 +28,7 @@ The basic structure of a **list-binding** is:
     )
 
 ```js
-const { elements, boxedProxy } = xinjs
+const { elements, boxedProxy } = tosijs
 const { listBindingExample } = boxedProxy({
   listBindingExample: {
     array: ['this', 'is', 'an', 'example']
@@ -94,7 +94,7 @@ Now you can trivially bind an array of a million objects to the DOM and have it 
 120fps.
 
 ```js
-const { elements, boxedProxy } = xinjs
+const { elements, boxedProxy } = tosijs
 const request = await fetch(
   'https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json'
 )
@@ -200,7 +200,7 @@ is used to `touch` the object and trigger updates.
 ```js
 // note that this example is styled by the earlier example
 
-const { elements, boxedProxy } = xinjs
+const { elements, boxedProxy } = tosijs
 const request = await fetch(
   'https://raw.githubusercontent.com/tonioloewald/emoji-metadata/master/emoji-metadata.json'
 )
