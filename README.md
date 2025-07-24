@@ -2,7 +2,7 @@
 
 <!--{ "pin": "top" }-->
 
-> `tosijs` is being renamed `tosijs`. This is a work-in-progress.
+> `xinjs` has been renamed `tosijs`. This is a work-in-progress.
 
 [tosijs.net](https://tosijs.net) | [tosijs-ui](https://ui.tosijs.net) | [github](https://github.com/tonioloewald/tosijs) | [npm](https://www.npmjs.com/package/tosijs) | [cdn](https://www.jsdelivr.com/package/npm/tosijs) | [react-tosijs](https://github.com/tonioloewald/react-tosijs#readme) | [discord](https://discord.gg/ramJ9rgky5)
 
