@@ -376,6 +376,23 @@ JS — and it decides things at runtime by asking live objects. The `.d.ts` are 
 *projection* of that design: useful for discoverability and editor autocomplete,
 and **not an authority on whether code is correct.**
 
+**Sharper than "sometimes wrong": an annotation carries no information about
+behaviour.** A signal that is always false is useful — negate it. A signal
+uncorrelated with what it describes carries nothing. In this codebase the
+correlation between an annotation and the runtime exists *only where someone
+independently wrote a check*: `touch(touchable: TosiTouchableType)` holds
+because of an `if (invalid) throw`, not because of its signature, while
+`debounce(origFn: VoidFunc, minInterval = 250)` cheerfully accepts
+`debounce('not a fn', 10)` and returns a callable. Delete every annotation and
+the runtime is identical; delete every check and the annotations are still
+there, still green.
+
+They *are* correlated with **intent** — evidence of what the author meant —
+which is exactly why autocomplete works and the safety claim does not.
+Autocomplete asks "what did the author mean this to have"; that is the
+dimension annotations carry. Correctness asks "what does this do"; that is the
+dimension they do not.
+
 **The operational rule: when `tsc` and the runtime disagree, find out which one
 is wrong. Do not assume it is the code.** Four times in one week the answer was
 "the type":
