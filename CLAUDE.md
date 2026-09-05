@@ -433,6 +433,29 @@ pretend to.
 typechecks `*.test.ts`, ~15 sites use direct assignment and are *correct*; a
 ratchet chasing zero must exclude that class deliberately, not silently.
 
+**This is NOT a licence to validate everything.** "The runtime is the truth"
+does not mean "check every argument" — that is the same ceremony from the other
+direction, and it costs real time on paths that run constantly. The rule is
+**validate at boundaries, dispatch everywhere else**, and the two look
+identical in a grep while being opposites:
+
+- **Dispatch** asks *what does this value mean here* and always proceeds:
+  `elementSet`'s `typeof value === 'function'`, the proxy's `typeof _prop ===
+  'symbol'`. This is the design, and there is no version of the library without
+  it.
+- **Validation** asks *is this the right type* and refuses. It belongs where a
+  wrong value corrupts state or fails far from its cause — `touch()` throws on
+  an invalid target; the agent surface's `toPath()` refuses a non-proxy rather
+  than `String()`-ing it into an unmatchable path.
+
+The measured shape, which the codebase already had before anyone wrote it down:
+`regHandler` is **243 lines with one throw** and runs on *every property
+access*; `touch`, a public entry point, validates. **Take the performance win
+of not checking** unless skipping the check would blow something up — which is
+exactly what tjs's `safety inputs` at the public API and `safety none` for hot
+internals encodes, and why 2.0 puts the touch queue, DOM updates and proxy
+traps in the second bucket.
+
 **What static checking IS good for here, and it is not nothing:** questions of
 *shape at the seams*, which no execution reveals. `tsc --declaration` from a
 scratch consumer caught tosijs#38 — `withAttributes` making downstream `.d.ts`
