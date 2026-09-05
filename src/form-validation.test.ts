@@ -1,4 +1,5 @@
 import { test, expect, describe, beforeAll } from 'bun:test'
+import type { ElementCreator } from './xin-types'
 import { validateAgainstConstraints } from './form-validation'
 import { Component } from './component'
 
@@ -211,7 +212,7 @@ describe('Component validation methods with mocked internals', () => {
     content = null
   }
 
-  let validatedComponent: ReturnType<typeof ValidatedComponent.elementCreator>
+  let validatedComponent: ElementCreator<ValidatedComponent>
 
   beforeAll(() => {
     validatedComponent = ValidatedComponent.elementCreator()

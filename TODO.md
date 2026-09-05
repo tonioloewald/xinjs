@@ -1,5 +1,43 @@
 # todo
 
+## Test-typecheck mining: where it stands, and what is left
+
+No lane typechecks `*.test.ts` (`tsconfig.json` excludes them), so the errors
+sitting there are unread signal. Mining them yielded **five public-surface
+defects** — all shipped, all now fixed in 1.10.1:
+
+| | |
+| --- | --- |
+| `ProxyObserveFunc` | declared `(path: string) => void`; takes a callback, returns an unsubscribe |
+| `ElementPart` | excluded proxies, so `div(app.name)` — a live bound text child — did not typecheck |
+| `tosiBinding` | served on both proxy kinds, declared on `TosiAccessor` only |
+| `take` | same, and it is the plain-prop binding form the docs recommend |
+| four public types | named in public signatures, exported from no entry |
+
+**The remaining 390 are two homogeneous non-defect clusters plus a tail:**
+
+- **85 — correct code flagged.** `app.name = 'Ada'` is intended and works;
+  TypeScript cannot represent it. **Do not "fix" these.** See CLAUDE.md →
+  *TypeScript is autocomplete, not a source of truth*.
+- **~280 — test-file sloppiness.** `unknown` in catch blocks, `as any` gaps,
+  fixtures missing optional fields. Low yield: mechanical to fix, and fixing
+  them proves nothing about the library.
+- **A tail worth sampling, not chasing.** The five findings above came from the
+  first ~30 errors examined; the density dropped sharply after that.
+
+**Done this pass:** `ReturnType<typeof X.elementCreator>` resolves to
+`unknown` (the method is typed `this: new () => C`, and `ReturnType` does not
+bind `this`), which accounted for **156 of the errors** across two test files.
+Replaced with `ElementCreator<X>`, which works and preserves the component's
+own members.
+
+- [ ] **Consumer-facing sharp edge worth documenting**, since
+      `ReturnType<typeof Widget.elementCreator>` is a natural thing to write
+      and silently yields `unknown`: say in the component docs that the
+      spelling is `ElementCreator<Widget>`.
+- [ ] If a typecheck lane is ever gated, it must exclude the 85 deliberately
+      — a ratchet chasing zero would rewrite correct code.
+
 ## `get` and `has` disagree: the proxy denies the API it serves
 
 `app.observe(cb)` is a working function. `'observe' in app` is **false**.

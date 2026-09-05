@@ -1,4 +1,5 @@
 import { expect, test, describe, beforeAll } from 'bun:test'
+import type { ElementCreator } from './xin-types'
 import { Component, tosiSlot, withAttributes } from './component'
 import { elements } from './elements'
 import { dispatch } from './dom'
@@ -116,13 +117,13 @@ class ShadowPartComponent extends Component {
   content = ({ div }: typeof elements) => div({ part: 'box' }, 'boxed')
 }
 
-let testComponent: ReturnType<typeof TestComponent.elementCreator>
-let styledComponent: ReturnType<typeof StyledComponent.elementCreator>
-let valueComponent: ReturnType<typeof ValueComponent.elementCreator>
-let resizableComponent: ReturnType<typeof ResizableComponent.elementCreator>
-let slottedComponent: ReturnType<typeof SlottedComponent.elementCreator>
-let emptyComponent: ReturnType<typeof EmptyComponent.elementCreator>
-let dynamicComponent: ReturnType<typeof DynamicComponent.elementCreator>
+let testComponent: ElementCreator<TestComponent>
+let styledComponent: ElementCreator<StyledComponent>
+let valueComponent: ElementCreator<ValueComponent>
+let resizableComponent: ElementCreator<ResizableComponent>
+let slottedComponent: ElementCreator<SlottedComponent>
+let emptyComponent: ElementCreator<EmptyComponent>
+let dynamicComponent: ElementCreator<DynamicComponent>
 
 beforeAll(() => {
   testComponent = TestComponent.elementCreator()
@@ -681,7 +682,7 @@ describe('formAssociated', () => {
     content = ({ input }: typeof elements) => input({ part: 'input' })
   }
 
-  let formComponent: ReturnType<typeof FormComponent.elementCreator>
+  let formComponent: ElementCreator<FormComponent>
 
   beforeAll(() => {
     formComponent = FormComponent.elementCreator()
