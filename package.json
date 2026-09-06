@@ -90,6 +90,7 @@
   "files": [
     "/dist",
     "!/dist/.*",
+    "!/dist/.build-fingerprint",
     "!/dist/**/*.tsbuildinfo",
     "!/dist/bun-plugin",
     "!/dist/module.safe.js.map",

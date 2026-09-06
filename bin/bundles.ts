@@ -180,3 +180,62 @@ export const BUNDLES: BundleSpec[] = [
     sourcemap: false,
   },
 ]
+
+/**
+ * A FINGERPRINT OF EVERYTHING THAT DETERMINES `dist/`.
+ *
+ * `prepublishOnly` could prove the artifacts EXIST and are TRACKED, and not
+ * that they were built from the source being published. That gap is reachable:
+ * a dev run wipes `dist/`, `restoreCommittedDist()` puts the COMMITTED copies
+ * back, and those satisfy existence and tracking while being older than the
+ * source. `release-doctor` catches it — but release-doctor is not run by
+ * `npm publish`, so the only freshness check was one a human had to remember,
+ * which is exactly the kind this repo has already been bitten by three times.
+ *
+ * Defined HERE, in the side-effect-free module both the build and the publish
+ * hook already import, so the two cannot compute it differently. That is the
+ * failure this file's own header warns about, and the one that produced three
+ * review rounds this week.
+ */
+export async function sourceFingerprint(root = process.cwd()): Promise<string> {
+  const { readdirSync, readFileSync, existsSync } = await import('node:fs')
+  const { join, relative } = await import('node:path')
+  const { createHash } = await import('node:crypto')
+
+  const files: string[] = []
+  const walk = (dir: string): void => {
+    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name < b.name ? -1 : 1
+    )) {
+      const full = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(full)
+      } else if (
+        entry.name.endsWith('.ts') &&
+        !entry.name.endsWith('.test.ts') &&
+        !entry.name.endsWith('.d.ts')
+      ) {
+        files.push(full)
+      }
+    }
+  }
+  walk(join(root, 'src'))
+  // the build inputs that are not in src/: the bundle manifest and the build
+  // entry both change what lands in dist/, and the version is stamped into it
+  for (const extra of ['bin/bundles.ts', 'bin/site.ts']) {
+    const p = join(root, extra)
+    if (existsSync(p)) files.push(p)
+  }
+
+  const hash = createHash('sha256')
+  for (const f of files) {
+    hash.update(relative(root, f))
+    hash.update(readFileSync(f))
+  }
+  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'))
+  hash.update(String(pkg.version))
+  return hash.digest('hex')
+}
+
+/** where the build records it, and the publish hook reads it */
+export const FINGERPRINT_PATH = 'dist/.build-fingerprint'

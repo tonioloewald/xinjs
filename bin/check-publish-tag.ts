@@ -18,7 +18,8 @@
  * the mistake.
  */
 import pkg from '../package.json'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { sourceFingerprint, FINGERPRINT_PATH } from './bundles'
 import { spawnSync } from 'node:child_process'
 
 const version: string = pkg.version
@@ -92,6 +93,34 @@ if (missing.length > 0) {
   )
   process.exit(1)
 }
+/**
+ * ARE THESE ARTIFACTS BUILT FROM THIS SOURCE?
+ *
+ * The check above proves every `exports` target EXISTS and is TRACKED. It
+ * cannot prove they were built from the source being published — and that gap
+ * is reachable, because a dev run wipes `dist/` and `restoreCommittedDist()`
+ * puts the COMMITTED copies back, which satisfy both conditions while being
+ * older than the source. `release-doctor` catches staleness, but it is not run
+ * by `npm publish`, so this was the one guard a human had to remember.
+ */
+const recorded = existsSync(FINGERPRINT_PATH)
+  ? readFileSync(FINGERPRINT_PATH, 'utf8').trim()
+  : ''
+const actual = await sourceFingerprint()
+if (recorded !== actual) {
+  console.error(
+    `\n  REFUSING TO PUBLISH: dist/ was not built from this source.\n\n` +
+      `  recorded: ${
+        recorded || '(no fingerprint — dist/ predates this check)'
+      }\n` +
+      `  current:  ${actual}\n\n` +
+      `  Run \`bun run build\` and publish from that tree. This usually means a\n` +
+      `  dev server or the browser lane wiped dist/ after the last real build\n` +
+      `  and the committed copies were restored in its place.\n`
+  )
+  process.exit(1)
+}
+
 console.log(
   `exports gate: ${Object.keys((pkg as any).exports).length} subpaths resolve`
 )

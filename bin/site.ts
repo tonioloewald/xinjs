@@ -10,7 +10,12 @@ Project config lives in tosijs-site.config.ts; the library bundling (esm/cjs/iif
 import * as path from 'path'
 import { existsSync } from 'node:fs'
 import { $ } from 'bun'
-import { BUNDLES, BundleSpec } from './bundles'
+import {
+  BUNDLES,
+  BundleSpec,
+  sourceFingerprint,
+  FINGERPRINT_PATH,
+} from './bundles'
 import siteConfig from '../tosijs-site.config'
 import { buildSite, devServer } from 'tosijs-ui/site'
 
@@ -505,6 +510,9 @@ async function buildLibrary(full = true) {
     console.log(
       `exports gate: ${Object.keys(pkgJson.exports).length} subpaths resolve`
     )
+    // RECORD WHAT THIS dist/ WAS BUILT FROM, so `prepublishOnly` can prove the
+    // artifacts match the source being published rather than merely existing.
+    await Bun.write(FINGERPRINT_PATH, await sourceFingerprint(PROJECT_ROOT))
   }
 
   // PACKAGE PAYLOAD BUDGET. The gzip budgets above police what a consumer
