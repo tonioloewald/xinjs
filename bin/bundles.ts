@@ -95,7 +95,23 @@ export const BUNDLES: BundleSpec[] = [
     // accepts a Map as a props bag, and WARNS on an unspread array or a value
     // that is neither — +264 gz. Most of it is the two warning strings, which
     // are the point: they convert three silent no-ops into a named mistake.
-    budget: 45_000,
+    //
+    // 45_000 -> 46_000 in 1.11.0, deliberately and in the commit that caused
+    // the growth. Re-vendoring tosijs-floorplan 0.4.0 costs +318 gz here
+    // (index.js +1 and core.js +0 — neither carries the agent surface, which
+    // is where the schematic lives). It bought ONE implementation of
+    // isInteractive/target-size shared with the renderer that draws the same
+    // map, replacing two copies that had drifted into contradicting each
+    // other. The minimum-headroom gate caught this at 754 B — under the 1 kB
+    // this file specifies — which is the state that breaks on the next
+    // unrelated commit. Restored to the ~1.75 kB slack every other bundle
+    // carries, from THIS bundle's own measurement (44_246), rather than
+    // shaved to it.
+    //
+    // That it lands on the same number as main.js is a coincidence, not a
+    // copy: main.js measured 44_516 and keeps 1_484 B under its existing
+    // ceiling, so it needed no change at all. See the warning below.
+    budget: 46_000,
     probe: 'import',
     stage: 'main',
   },

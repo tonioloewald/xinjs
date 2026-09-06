@@ -6,6 +6,63 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 For releases before 1.6.0, see the git history (`git log`) and tags.
 
+## [1.11.0] - 2026-09-06
+
+**One implementation of "can I act here" and "is this big enough."**
+`auditAccessibility()` and the vendored floorplan renderer drew their verdicts
+from two separate copies of the same rules, and the copies had drifted into
+contradicting each other on real elements — a divergence this repo had already
+written down at `src/audit.ts` rather than fixed, because the fix had to happen
+upstream. tosijs-floorplan 0.4.0 exports `isInteractive`, `targetSizeFinding`
+and `TARGET_SIZE_DEFAULT` (tosijs-floorplan#4); the local copies are deleted.
+
+Minor, not patch: **`auditAccessibility()` returns different findings for the
+same input**, in both directions. Nothing else in the public API moves.
+
+### Changed — audit verdicts, deliberately
+
+Stricter (now flagged, previously clean):
+
+- **An accessible name never sized a box.** The old `target-size` rule exempted
+  any `<a>` carrying a name, so an icon-only `<a href aria-label="Buy">` at
+  20×20 audited clean. WCAG 2.5.8's inline exception is geometric, and is now
+  applied as such: a link is exempt when it has **text** *and* its box is
+  **wider than tall** — the shape text layout produces.
+- **A square link is not a text link.** A 16×16 `<a>` carrying one glyph was
+  exempt under the old text-or-name rule; it flags now.
+- **A producer may assert affordance it cannot introspect** (`interactive` /
+  `editable`). tosijs never emits these — it reads handlers directly — so this
+  only affects foreign maps handed to `auditAccessibility()`.
+
+Looser (now clean, previously flagged):
+
+- **A forged arrow confers nothing.** The old predicate scanned *every* string
+  property for the two-way binding glyph, so user-controlled text in a `label`
+  or `placeholder` could dress an inert `<div>` as a control. Identity fields
+  (`tag`/`id`/`part`/`role`/`label`/`placeholder`/`type`/`description`/`href`/
+  `ref`/`image`) are never bindable and are no longer scanned.
+- **A list container is ground.** It is wired — the collection binds there —
+  but its *items* are the affordances, so it is no longer audited as a control
+  too small to hit.
+- **An empty `href` is not a destination.** `href != null` counted; `href` must
+  now be a non-empty string.
+
+`0×0` records stay exempt. A hidden or unlaid-out element is not a target too
+small to hit, and the shared rule (correctly, for a renderer) has no opinion
+about that — so `audit.ts` keeps that one condition itself, and says so.
+
+**These six changes are pinned by tests written to fail against the 1.10.1
+predicate, and watched doing so** — the existing audit suite went 11/11 green
+straight through the adoption, reaching not one changed case.
+
+### Changed — schematic rendering
+
+`src/schematic.ts` is re-vendored from tosijs-floorplan 0.4.0. Maps with none
+of the new constructs render byte-identical to 0.3.0; `href` now draws as an
+affordance, and captions containing arrow tokens are neutralized at one choke
+point (a forged arrow no longer earns the two-way badge). Full detail in
+[tosijs-floorplan's CHANGELOG](https://github.com/tonioloewald/tosijs-floorplan/blob/main/CHANGELOG.md).
+
 ## [1.10.1] - 2026-09-06
 
 Public types that were wrong or unreachable, and **silent failures in element

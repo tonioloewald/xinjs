@@ -1,1 +1,1 @@
-export declare const version = "1.10.1";
+export declare const version = "1.11.0";

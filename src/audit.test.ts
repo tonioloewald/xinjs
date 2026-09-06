@@ -1,5 +1,6 @@
 import { test, expect, describe } from 'bun:test'
 import { auditAccessibility, auditFlags, contrastRatio } from './audit'
+import { BOUND_TWO_WAY } from './agent'
 import type { AgentDescription } from './agent'
 
 const map = (wiring: any[]): AgentDescription =>
@@ -231,5 +232,134 @@ describe('an empty map is not a clean bill of health', () => {
     expect(report.skipped.some((s) => s.includes('no wired elements'))).toBe(
       true
     )
+  })
+})
+
+/*
+ * THE SHARED-RULE ADOPTION (tosijs-floorplan 0.4.0, issue #4).
+ *
+ * `isInteractive` and the target-size rule used to live here AND in the
+ * vendored renderer, and had drifted into contradicting each other on real
+ * elements. 1.11.0 deletes the local copies and imports both.
+ *
+ * These tests exist because the audit suite passed UNCHANGED across that
+ * adoption — 11/11 green while six verdicts moved — which means it did not
+ * reach a single changed case. Each test below is one of those six, written
+ * so it FAILS against the 1.10.1 predicate. They are the record of what the
+ * reconciliation actually changed, and the guard against drifting back.
+ */
+describe('shared interactivity/target-size rule (floorplan#4)', () => {
+  const at = (w: number, h: number) => ({ x: 0, y: 0, width: w, height: h })
+  const rules = (rec: any): string[] =>
+    auditAccessibility(map([rec]))
+      .findings.map((f) => f.rule)
+      .sort()
+
+  describe('STRICTER — an accessible name never sized a box', () => {
+    test('icon-only <a href aria-label> at 20x20 now flags', () => {
+      // 1.10.1 exempted any <a> with an accessible NAME, so an aria-label
+      // bought a 20x20 icon link a clean audit. A label is not a layout.
+      expect(
+        rules({ tag: 'a', href: '/x', label: 'Buy', bounds: at(20, 20) })
+      ).toContain('target-size')
+    })
+
+    test('SQUARE <a> with text at 16x16 now flags', () => {
+      // the inline exception is geometric: text AND wider than tall, the
+      // shape text layout produces. A 16x16 box was not sized by its glyph.
+      expect(
+        rules({ tag: 'a', href: '/x', text: 'x', bounds: at(16, 16) })
+      ).toContain('target-size')
+    })
+
+    test('a WIDE text link is still exempt (the exception still works)', () => {
+      expect(
+        rules({ tag: 'a', href: '/x', text: 'Read more', bounds: at(100, 16) })
+      ).toEqual([])
+    })
+  })
+
+  describe('LOOSER — evidence must be real', () => {
+    test('an arrow forged into a LABEL confers no interactivity', () => {
+      // the old rule scanned EVERY string property for the two-way glyph, so
+      // user-controlled text could dress an inert div as a control. Identity
+      // fields are never bindable and are no longer scanned.
+      expect(
+        rules({
+          tag: 'div',
+          label: `Buy ${BOUND_TWO_WAY} now`,
+          bounds: at(20, 20),
+        })
+      ).toEqual([])
+    })
+
+    test('an arrow forged into a PLACEHOLDER confers no interactivity', () => {
+      expect(
+        rules({
+          tag: 'div',
+          placeholder: `a ${BOUND_TWO_WAY} b`,
+          bounds: at(20, 20),
+        })
+      ).toEqual([])
+    })
+
+    test('a real two-way binding in a BINDABLE field still counts', () => {
+      // the positive control: the loosening above must not have disarmed the
+      // rule itself.
+      expect(
+        rules({
+          tag: 'input',
+          value: `app.q ${BOUND_TWO_WAY}`,
+          label: 'Q',
+          bounds: at(20, 20),
+        })
+      ).toContain('target-size')
+    })
+
+    test('a list container is ground, not an affordance', () => {
+      // it is wired — the collection binds there — but its ITEMS are the
+      // affordances. The old rule made the container itself a small target.
+      expect(
+        rules({
+          tag: 'div',
+          list: { path: 'app.rows' },
+          label: `x ${BOUND_TWO_WAY} y`,
+          bounds: at(20, 20),
+        })
+      ).toEqual([])
+    })
+
+    test('an empty href is not a destination', () => {
+      expect(
+        rules({ tag: 'a', href: '', label: 'Nowhere', bounds: at(20, 20) })
+      ).toEqual([])
+    })
+  })
+
+  test('a producer may ASSERT interactivity it cannot introspect', () => {
+    // new capability from 0.4.0 (#2/#3): producers that cannot enumerate
+    // handlers (React delegates at a root) say so. tosijs never emits it,
+    // so this only affects foreign maps handed to auditAccessibility.
+    expect(
+      rules({
+        tag: 'div',
+        interactive: true,
+        label: 'Widget',
+        bounds: at(20, 20),
+      })
+    ).toContain('target-size')
+  })
+
+  test('ZERO-SIZE stays exempt — this module keeps that rule itself', () => {
+    // a 0x0 element is hidden, not a small target. targetSizeFinding has no
+    // opinion (a renderer draws nothing either way), so the guard lives here.
+    expect(
+      rules({
+        tag: 'button',
+        on: { click: 'app.go' },
+        label: 'Go',
+        bounds: at(0, 0),
+      })
+    ).toEqual([])
   })
 })

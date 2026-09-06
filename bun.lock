@@ -21,7 +21,7 @@
         "prettier": "^2.8.8",
         "tjs-lang": "0.13.6",
         "tosijs": "file:.",
-        "tosijs-floorplan": "0.3.0",
+        "tosijs-floorplan": "0.4.0",
         "tosijs-schema": "^1.6.0",
         "tosijs-ui": "1.12.0",
         "typescript": "^5.9.3",
@@ -313,7 +313,7 @@
 
     "tosijs": ["tosijs@root:", {}],
 
-    "tosijs-floorplan": ["tosijs-floorplan@0.3.0", "", {}, "sha512-pqfVBEugcZ9yhdCf81mzhPE1G0Q8cRXDNoJl41cioeYhHU9Wc9aQZDI36iuxtWs/9jiVLbqRwcFlVk/2TvsoQw=="],
+    "tosijs-floorplan": ["tosijs-floorplan@0.4.0", "", {}, "sha512-bV/U3iR1fKYdXq6MaIW1DLFNDe2jIj+vzfMY5RQzqnZTfakPWTZfRx4jySi6Qu+F8dkCtvnWmJNOkMeL+SpLPg=="],
 
     "tosijs-schema": ["tosijs-schema@1.6.0", "", {}, "sha512-pmOIZxGRIetPeKABRG3fAirqJFUYsofgF7/1RZ1s7/r69R01X2oio9XBzvkQbrQ+xKL/clubINaEXrhkt2bewA=="],
 

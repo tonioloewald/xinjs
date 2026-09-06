@@ -104,17 +104,19 @@ contrast rule has nothing to measure and skips itself (it says so).</p>
 <p>Findings carry the record and its index, so a caller can jump straight to
 the element — or hand the pair to <code>schematicSVG</code>&#39;s <code>flags</code> to <em>draw</em> them.</p>
 <blockquote>
-<p><strong>Known divergence (tosijs-floorplan#4).</strong> <code>target-size</code> and &quot;is this
-interactive&quot; are currently implemented <em>twice</em> — here, and in the vendored
-renderer that draws the same map — and the two have drifted: this module
-counts <code>href</code> as interactive and exempts a link named by <code>aria-label</code>; the
-renderer does neither. So an icon-only <code>&lt;a href onClick aria-label=&quot;Buy&quot;&gt;</code>
-at 20×20 audits clean while the drawing flags it, and a nameless 16×16
-<code>&lt;a href&gt;</code> does the reverse. Reconciliation has to happen upstream
-(<code>src/schematic.ts</code> is machine-vendored) — see
-<a href="https://github.com/tonioloewald/tosijs-floorplan/issues/4">tosijs-floorplan#4</a>.
-Until it lands, trust <em>this</em> module&#39;s verdict for <code>target-size</code>: it has
-the accessible name, which the renderer does not.</p>
+<p><strong>The divergence is closed</strong> (tosijs-floorplan 0.4.0, issue #4). <code>target-size</code>
+and &quot;is this interactive&quot; used to be implemented <em>twice</em> — here, and in the
+vendored renderer that draws the same map — and the two had drifted into
+contradicting each other on real elements. Both now come from
+<code>./schematic</code>, so the audit and the drawing cannot disagree by
+construction. <strong>Geometry is judged where the geometry lives</strong>; this module
+keeps only what it uniquely knows (the accessible name, the contrast
+math) and the rule wording.</p>
+<p>Adopting the shared rule changed some verdicts, deliberately, in both
+directions — see the 1.11.0 CHANGELOG entry. The one exemption this module
+still applies on top is <strong>zero-size</strong>: a <code>0×0</code> element is hidden, not a
+small target, and <code>targetSizeFinding</code> (correctly, for a renderer) has no
+opinion about that.</p>
 </blockquote>
 <blockquote>
 <p><strong>EXPERIMENTAL.</strong> Ships with the agent surface; rules and shapes may change.</p>

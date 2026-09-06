@@ -33,22 +33,33 @@ contrast rule has nothing to measure and skips itself (it says so).
 Findings carry the record and its index, so a caller can jump straight to
 the element — or hand the pair to `schematicSVG`'s `flags` to *draw* them.
 
-> **Known divergence (tosijs-floorplan#4).** `target-size` and "is this
-> interactive" are currently implemented *twice* — here, and in the vendored
-> renderer that draws the same map — and the two have drifted: this module
-> counts `href` as interactive and exempts a link named by `aria-label`; the
-> renderer does neither. So an icon-only `<a href onClick aria-label="Buy">`
-> at 20×20 audits clean while the drawing flags it, and a nameless 16×16
-> `<a href>` does the reverse. Reconciliation has to happen upstream
-> (`src/schematic.ts` is machine-vendored) — see
-> [tosijs-floorplan#4](https://github.com/tonioloewald/tosijs-floorplan/issues/4).
-> Until it lands, trust *this* module's verdict for `target-size`: it has
-> the accessible name, which the renderer does not.
+> **The divergence is closed** (tosijs-floorplan 0.4.0, issue #4). `target-size`
+> and "is this interactive" used to be implemented *twice* — here, and in the
+> vendored renderer that draws the same map — and the two had drifted into
+> contradicting each other on real elements. Both now come from
+> `./schematic`, so the audit and the drawing cannot disagree by
+> construction. **Geometry is judged where the geometry lives**; this module
+> keeps only what it uniquely knows (the accessible name, the contrast
+> math) and the rule wording.
+>
+> Adopting the shared rule changed some verdicts, deliberately, in both
+> directions — see the 1.11.0 CHANGELOG entry. The one exemption this module
+> still applies on top is **zero-size**: a `0×0` element is hidden, not a
+> small target, and `targetSizeFinding` (correctly, for a renderer) has no
+> opinion about that.
 
 > **EXPERIMENTAL.** Ships with the agent surface; rules and shapes may change.
 */
-import { AgentDescription, AgentWiringRecord, BOUND_TWO_WAY } from './agent'
+import { AgentDescription, AgentWiringRecord } from './agent'
 import { Color } from './color'
+// ONE implementation of "can I act here" and "is this big enough", shared with
+// the renderer that draws the same map (tosijs-floorplan#4). Importing them is
+// the whole point — a local copy is what drifted last time.
+import {
+  isInteractive,
+  targetSizeFinding,
+  TARGET_SIZE_DEFAULT,
+} from './schematic'
 
 export type AuditSeverity = 'error' | 'warn' | 'info'
 
@@ -80,15 +91,6 @@ export interface AuditOptions {
   /** rule ids to skip */
   exclude?: string[]
 }
-
-const isInteractive = (w: AgentWiringRecord): boolean =>
-  w.structural !== true &&
-  (w.on != null ||
-    w.contentEditable === true ||
-    w.href != null ||
-    Object.values(w).some(
-      (v) => typeof v === 'string' && v.includes(BOUND_TWO_WAY)
-    ))
 
 const accessibleName = (w: AgentWiringRecord): string =>
   String(w.label ?? w.text ?? '').trim()
@@ -137,7 +139,11 @@ export const auditAccessibility = (
   description: AgentDescription,
   options: AuditOptions = {}
 ): AuditReport => {
-  const { targetSize = 24, contrastRatio: floor = 4.5, exclude = [] } = options
+  const {
+    targetSize = TARGET_SIZE_DEFAULT,
+    contrastRatio: floor = 4.5,
+    exclude = [],
+  } = options
   const findings: AuditFinding[] = []
   const skipped: string[] = []
   const enabled = (rule: string): boolean => !exclude.includes(rule)
@@ -216,24 +222,24 @@ export const auditAccessibility = (
       )
     }
 
-    if (
-      interactive &&
-      targetSize > 0 &&
-      w.bounds != null &&
-      w.type !== 'checkbox' &&
-      w.type !== 'radio' &&
-      (w.bounds.width < targetSize || w.bounds.height < targetSize) &&
-      w.bounds.width > 0 &&
-      w.bounds.height > 0 &&
-      // WCAG 2.5.8's inline exception: a link inside text is text-sized
-      !(w.tag === 'a' && name !== '')
-    ) {
+    // The rule itself lives in ./schematic — including the toggle exemption
+    // and WCAG 2.5.8's inline exception, which is geometric (text, and a box
+    // WIDER than tall) rather than "has a name": an aria-label never sized a
+    // box, and a square box was not sized by its text.
+    //
+    // The one condition kept HERE is zero-size. A 0×0 record is a hidden or
+    // unlaid-out element, not a target too small to hit, and the renderer has
+    // no reason to care (it draws nothing either way).
+    const tooSmall =
+      w.bounds != null && w.bounds.width > 0 && w.bounds.height > 0
+        ? targetSizeFinding(w, targetSize)
+        : null
+    if (tooSmall != null) {
       add(
         'target-size',
         'warn',
-        `<${w.tag}> is ${w.bounds.width}×${w.bounds.height} — below ` +
-          `${targetSize}×${targetSize} (WCAG 2.5.8). Small targets are hard ` +
-          `to hit and harder on touch.`
+        `<${w.tag}> is ${tooSmall}. Small targets are hard to hit and ` +
+          `harder on touch.`
       )
     }
 
