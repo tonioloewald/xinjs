@@ -707,6 +707,22 @@ in the DOM. <code>:host</code> selectors are automatically rewritten to the tag 
 <code>preferredTagName</code>, <code>lightStyleSpec</code>, <code>shadowStyleSpec</code>, and <code>extends</code>
 from the class&#39;s static properties.</p>
 <p><code>elementCreator</code> is memoized and only generated once.</p>
+<p><strong>Naming the creator&#39;s type: use <code>ElementCreator&lt;YourComponent&gt;</code>.</strong></p>
+<pre><code>import type { ElementCreator } from &#39;tosijs&#39;
+
+let toolBar: ElementCreator&lt;ToolBar&gt;
+toolBar = ToolBar.elementCreator()
+toolBar().someMethodOfYours()      // typed
+</code></pre>
+<p>The natural-looking alternative silently loses the type:</p>
+<pre><code>// DON&#39;T — resolves to unknown
+let toolBar: ReturnType&lt;typeof ToolBar.elementCreator&gt;
+toolBar().someMethodOfYours()      // TS18046: &#39;toolBar()&#39; is of type &#39;unknown&#39;
+</code></pre>
+<p><code>elementCreator</code> is declared <code>static elementCreator&lt;C = Component&gt;(this: new () =&gt; C)</code>, so the component type is inferred from <code>this</code>. <code>ReturnType&lt;&gt;</code> does not
+bind <code>this</code>, so <code>C</code> falls back and the result is <code>unknown</code> — with no error at
+the declaration, only later at every use. This accounted for 156 of the
+type errors in tosijs&#39;s own test suite before it was noticed.</p>
 <blockquote>
 <p><strong>Deprecated:</strong> Passing <code>{ tag, styleSpec, extends }</code> as options to
 <code>elementCreator()</code> still works but emits deprecation warnings.

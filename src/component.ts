@@ -786,6 +786,26 @@ from the class's static properties.
 
 `elementCreator` is memoized and only generated once.
 
+**Naming the creator's type: use `ElementCreator<YourComponent>`.**
+
+    import type { ElementCreator } from 'tosijs'
+
+    let toolBar: ElementCreator<ToolBar>
+    toolBar = ToolBar.elementCreator()
+    toolBar().someMethodOfYours()      // typed
+
+The natural-looking alternative silently loses the type:
+
+    // DON'T — resolves to unknown
+    let toolBar: ReturnType<typeof ToolBar.elementCreator>
+    toolBar().someMethodOfYours()      // TS18046: 'toolBar()' is of type 'unknown'
+
+`elementCreator` is declared `static elementCreator<C = Component>(this: new ()
+=> C)`, so the component type is inferred from `this`. `ReturnType<>` does not
+bind `this`, so `C` falls back and the result is `unknown` — with no error at
+the declaration, only later at every use. This accounted for 156 of the
+type errors in tosijs's own test suite before it was noticed.
+
 > **Deprecated:** Passing `{ tag, styleSpec, extends }` as options to
 > `elementCreator()` still works but emits deprecation warnings.
 > Use the static properties instead.
