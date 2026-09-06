@@ -1,5 +1,28 @@
 # todo
 
+## Mutation testing as a lane — the class fix I have NOT built
+
+Three of four round-4 items were "the guard did not guard". Two now have
+class-level fixes (a minimum-headroom assertion; content shapes in the type
+probe). The third does not, and it is the biggest:
+
+**A fix can land with no test that exercises the site it changed, and nothing
+notices.** Round 4 proved it mechanically — re-adding the pre-fix hydrate
+branch left all 987 tests green while fully restoring the bug. I have caught
+this by hand, inconsistently, four times this release, and missed it once,
+which is what produced that round.
+
+- [ ] A mutation lane, even a cheap one: for a named set of invariants, revert
+      the guarded line and assert the suite goes red. Slow, so not a per-commit
+      gate — a pre-tag or quarterly job.
+- [ ] Cheaper interim: make it a rule with teeth — a fix commit states the
+      mutation it survived. Prose has already failed once here (the
+      minimum-headroom assertion was filed by two review rounds and deferred
+      both times, and then the failure recurred), so prefer the lane.
+
+**Recorded as unbuilt on purpose.** "Filed as a follow-up" is where the
+headroom gate sat for two rounds while the thing it prevents happened again.
+
 ## Shadow DOM kills the bindings of anything placed inside it — including whole components
 
 Verified. The **same component**, light DOM vs inside another component's

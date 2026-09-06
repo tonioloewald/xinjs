@@ -61,12 +61,6 @@ const _btn = elements.button({ onClick: (evt) => evt.clientX })
 
 // @ts-expect-error a bare function is not an element part
 const _fn = elements.div(() => {})
-
-// NOTE: \`elements.div(new Date())\` is NOT asserted here. The review that
-// found this blocker listed it as a regression alongside the function case;
-// it is not — v1.10.0 accepted it too, because ElementProps carries an index
-// signature (tosijs#26). Asserting it would be asserting a fix nobody made.
-
 export { _notAny, _notAnyPath, _notAnyObserve, _btn, _fn }
 `
   const probePath = `${process.cwd()}/dist/.type-negative-probe.ts`
@@ -198,7 +192,7 @@ test.skipIf(!existsSync('dist/index.d.ts'))(
   'the documented spellings compile against the built package',
   async () => {
     const probe = `
-import { tosi, elements, bindings } from '${process.cwd()}/dist/index'
+import { tosi, elements, bindings, Component } from '${process.cwd()}/dist/index'
 
 const { app } = tosi({ app: { name: 'Ada', count: 0, items: [{ id: 1 }] } })
 
@@ -211,7 +205,21 @@ const off: () => void = app.name.observe((path: string) => void path)
 const off2: () => void = app.items.observe(() => {})
 // the accessor spelling must agree with the direct one
 const off3: () => void = app.name.tosi.observe(() => {})
-export { a, b, off, off2, off3, bindings }
+
+// AND THE COMPONENT CONTENT SHAPES. Round 4's B3: the runtime accepted values
+// and proxies in a content array and the docs described it, while ContentPart
+// still said Element | DocumentFragment | string — so writing the documented
+// shape was TS2416 on the property. This probe covered ELEMENT creators only,
+// which is exactly why it did not notice.
+class Probe extends Component {
+  static preferredTagName = 'type-probe'
+  content = [elements.span('x'), app.name, 10n, false, null]
+}
+class ProbeSingle extends Component {
+  static preferredTagName = 'type-probe-single'
+  content = app.name
+}
+export { a, b, off, off2, off3, bindings, Probe, ProbeSingle }
 `
     const probePath = `${process.cwd()}/dist/.type-usage-probe.ts`
     await Bun.write(probePath, probe)

@@ -310,6 +310,46 @@ describe('entry points', () => {
   // measured against the SAME declaration the build gates on, so a budget
   // that has quietly become meaningless (raised past reality, or attached to
   // an artifact nobody builds) fails here too
+  /*
+   * A BUDGET THAT PASSES BY A HAIR IS NOT A GATE.
+   *
+   * `bin/bundles.ts` says so twice in prose, and prose did not hold: 1.8.1
+   * shipped a bundle passing by SEVEN bytes, 1.10.0 left main.js with
+   * SEVENTEEN, and 1.10.1 put module.debug.js EIGHTEEN OVER with module.safe.js
+   * holding 36. Each time the next unrelated commit would have broken
+   * `bun start` for every developer, and the fix a stranger reaches for is
+   * raising the number without reading why.
+   *
+   * This assertion was filed as a follow-up by TWO separate review rounds
+   * ("add a minimum-headroom assertion", "the 5th unbuilt gate") and deferred
+   * both times — and then the failure it describes happened again. Writing the
+   * rule down is not the same as enforcing it.
+   *
+   * 1 kB is the slack `bin/bundles.ts` already specifies for the shipped
+   * bundles; the tjs pair carries more because it polices toolchain
+   * regressions rather than a promise to consumers.
+   */
+  test.skipIf(!existsSync('dist/module.js'))(
+    'no budget passes by a hair — every bundle keeps real headroom',
+    async () => {
+      const { BUNDLES } = await import('../bin/bundles')
+      const { gzipSync } = await import('node:zlib')
+      const MIN_HEADROOM = 1024
+      const tight: string[] = []
+      for (const { naming, budget } of BUNDLES as any[]) {
+        if (!existsSync(`dist/${naming}`)) continue
+        const bytes = gzipSync(await Bun.file(`dist/${naming}`).bytes()).length
+        const headroom = budget - bytes
+        if (headroom < MIN_HEADROOM) {
+          tight.push(
+            `${naming} has ${headroom}B headroom (want >=${MIN_HEADROOM})`
+          )
+        }
+      }
+      expect(tight).toEqual([])
+    }
+  )
+
   test.skipIf(!existsSync('dist/module.js'))(
     'every built artifact is actually under its declared budget',
     async () => {

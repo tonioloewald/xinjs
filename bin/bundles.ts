@@ -73,7 +73,10 @@ export const BUNDLES: BundleSpec[] = [
     // the IIFE cannot tree-shake, so it gets the slim entry (no agent
     // surface); ESM/CJS carry everything and consumers shake what they skip
     entry: './src/index-browser.ts',
-    budget: 30_000,
+    // 30_000 -> 31_000 in 1.10.1. Not because it failed — because the new
+    // minimum-headroom gate found it at 735 B, under the 1 kB this file
+    // specifies, which is the state that breaks on the NEXT unrelated commit.
+    budget: 31_000,
     probe: 'load',
     stage: 'main',
   },
@@ -119,7 +122,9 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'core.js',
     format: 'esm',
     entry: './src/index-core.ts',
-    budget: 27_500,
+    // 27_500 -> 28_500, same reason: 834 B of headroom, found by the gate
+    // rather than by a failing build.
+    budget: 28_500,
     probe: 'import',
     stage: 'alt',
   },
@@ -127,7 +132,8 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'state.js',
     format: 'esm',
     entry: './src/index-state.ts',
-    budget: 17_500,
+    // 17_500 -> 18_500 — the third one the headroom gate surfaced (753 B).
+    budget: 18_500,
     probe: 'import',
     stage: 'alt',
   },
