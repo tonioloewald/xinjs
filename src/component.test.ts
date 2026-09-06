@@ -1,4 +1,11 @@
-import { expect, test, describe, beforeAll } from 'bun:test'
+import {
+  expect,
+  test,
+  describe,
+  beforeAll,
+  beforeEach,
+  afterEach,
+} from 'bun:test'
 import type { ElementCreator } from './xin-types'
 import { Component, tosiSlot, withAttributes } from './component'
 import { elements } from './elements'
@@ -2540,5 +2547,81 @@ describe('withAttributes — attributes typed from a value (tosijs#36)', () => {
     expect(parent.label).toBe('parent') // the base is NOT mutated
     child.remove()
     parent.remove()
+  })
+})
+
+describe('hydrate() classifies content the same way create() does', () => {
+  /*
+   * `create()` and `hydrate()`'s content filter both classify positional
+   * arguments, and `mergeElementProps` was extracted specifically to keep them
+   * in step — its comment says so. That was not enough, because the
+   * CLASSIFICATION stayed duplicated: the value/array/warning rules landed in
+   * `create()` only, so `content = [span('a'), new Date()]` still dropped the
+   * Date and a nested array still turned its INDICES into host attributes —
+   * verbatim the symptom the release notes called fixed. One classifier now
+   * serves both; these tests are the thing that notices if they drift again.
+   */
+  const raf = () => new Promise((r) => requestAnimationFrame(r))
+  const warnings: string[] = []
+  let originalWarn: typeof console.warn
+  beforeEach(() => {
+    originalWarn = console.warn
+    warnings.length = 0
+    console.warn = (...args: any[]) => warnings.push(String(args[0]))
+  })
+  afterEach(() => {
+    console.warn = originalWarn
+  })
+
+  test('values in content render instead of vanishing', async () => {
+    class HydrateValues extends (Component as any) {
+      static preferredTagName = 'hydrate-values'
+      content = [
+        elements.span('a'),
+        new Date('2026-01-02T03:04:05Z'),
+        10n,
+        false,
+      ] as any
+    }
+    const el = (HydrateValues as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    expect(el.textContent).toContain('a')
+    expect(el.textContent).toContain('2026') // Date, was dropped
+    expect(el.textContent).toContain('10') // bigint, was dropped
+    expect(el.textContent).toContain('false') // boolean, was dropped
+    expect(warnings).toEqual([])
+    el.remove()
+  })
+
+  test('a nested array warns instead of becoming host attributes', async () => {
+    class HydrateNested extends (Component as any) {
+      static preferredTagName = 'hydrate-nested'
+      content = [
+        elements.span('a'),
+        [elements.span('b'), elements.span('c')],
+      ] as any
+    }
+    const el = (HydrateNested as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    expect(el.getAttribute('0')).toBe(null) // was <hydrate-nested 0="<span>b</span>">
+    expect(warnings.join(' ')).toContain('did you mean to spread it')
+    el.remove()
+  })
+
+  test('a Text node is legitimate content', async () => {
+    // create() tested `Element | DocumentFragment` while hydrate() tested
+    // `instanceof Node`; the shared classifier keeps the WIDER, correct one
+    class HydrateText extends (Component as any) {
+      static preferredTagName = 'hydrate-text'
+      content = [document.createTextNode('bare text')] as any
+    }
+    const el = (HydrateText as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    expect(el.textContent).toContain('bare text')
+    expect(warnings).toEqual([])
+    el.remove()
   })
 })

@@ -183,12 +183,43 @@ async function buildCli() {
 async function restoreCommittedDist(): Promise<void> {
   const tracked = await $`git ls-files dist`.nothrow().quiet()
   if (tracked.exitCode !== 0) return
+  // SKIP UNMERGED PATHS. `git ls-files` lists conflict stages too, and
+  // `git checkout -- <path>` on an unmerged path does not restore "the
+  // committed copy" — there isn't one — so it would either error or silently
+  // pick a stage mid-merge.
+  const unmerged = await $`git ls-files -u dist`.nothrow().quiet()
+  const conflicted = new Set(
+    unmerged.stdout
+      .toString()
+      .split('\n')
+      .map((l) => l.split('\t')[1])
+      .filter((f) => f != null && f !== '')
+  )
   const missing = tracked.stdout
     .toString()
     .split('\n')
-    .filter((f) => f.trim() !== '' && !existsSync(f))
+    .filter((f) => f.trim() !== '' && !conflicted.has(f) && !existsSync(f))
+  if (conflicted.size > 0) {
+    console.warn(
+      `dist/ has ${conflicted.size} unmerged path(s); not restoring those — ` +
+        'resolve the merge first.'
+    )
+  }
   if (missing.length === 0) return
-  await $`git checkout -- ${missing}`.nothrow().quiet()
+  // AND DO NOT ANNOUNCE A RESTORE THAT DID NOT HAPPEN. This ran `.nothrow()`
+  // and logged success unconditionally, so a failed checkout reported
+  // "restored N" and the deletions stayed — the message was the only signal
+  // anyone had.
+  const restored = await $`git checkout -- ${missing}`.nothrow().quiet()
+  const stillMissing = missing.filter((f) => !existsSync(f))
+  if (restored.exitCode !== 0 || stillMissing.length > 0) {
+    console.error(
+      `FAILED to restore ${stillMissing.length || missing.length} committed ` +
+        `dist artifact(s): ${stillMissing.join(', ') || missing.join(', ')}. ` +
+        'Do not commit — `git status` will show them deleted.'
+    )
+    return
+  }
   console.log(
     `restored ${missing.length} committed dist artifact(s) — these are the ` +
       `COMMITTED copies, which may be older than your source. Re-run ` +
