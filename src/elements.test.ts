@@ -1,4 +1,4 @@
-import { test, expect, describe } from 'bun:test'
+import { test, expect, describe, beforeEach, afterEach } from 'bun:test'
 import { tosi } from './xin-proxy'
 import { elements, svgElements, mathML } from './elements'
 import { updates } from './path-listener'
@@ -601,5 +601,92 @@ describe('deprecation advice must be typeable and true (review M2, M3)', () => {
       document.body.append(el)
     })
     expect(msgs).toEqual([])
+  })
+})
+
+describe('positional arguments: values render, props apply, mistakes complain', () => {
+  /*
+   * The contents loop used to be "Element | Fragment | string | number is a
+   * child; ANYTHING ELSE is a props bag". The props merge is Object.assign-
+   * shaped, so handed something with no enumerable own properties it iterated
+   * nothing, SUCCEEDED, and dropped the argument. `div(new Date())`,
+   * `div(10n)` and `div(false)` all rendered empty with no warning, and
+   * `div(items.map(…))` with the spread forgotten turned array INDICES into
+   * attributes: <div 0="<span>a</span>">.
+   *
+   * That is silent failure, not "garbage being accepted" — the API dispatches
+   * on what it is handed, and it was dispatching wrongly and saying nothing.
+   */
+  const warnings: string[] = []
+  let originalWarn: typeof console.warn
+  beforeEach(() => {
+    originalWarn = console.warn
+    warnings.length = 0
+    console.warn = (...args: any[]) => warnings.push(String(args[0]))
+  })
+  afterEach(() => {
+    console.warn = originalWarn
+  })
+
+  test('values with a text form render as text children', () => {
+    const { div } = elements
+    expect((div('hello') as any).textContent).toBe('hello')
+    expect((div(42) as any).textContent).toBe('42')
+    expect((div(10n as any) as any).textContent).toBe('10')
+    // the owner's expectation: <div>false</div>, not an empty div. The
+    // `cond && child` form is a React idiom and is not used here, so nothing
+    // depends on booleans vanishing.
+    expect((div(false as any) as any).textContent).toBe('false')
+    expect((div(true as any) as any).textContent).toBe('true')
+    expect((div(/re/ as any) as any).textContent).toBe('/re/')
+    expect(
+      (div(new Date('2026-01-02T03:04:05Z') as any) as any).textContent
+    ).toContain('2026')
+    expect(warnings).toEqual([])
+  })
+
+  test('null and undefined stay the nothing-signal', () => {
+    const { div } = elements
+    // conditional children are ternaries here, so these must remain silent
+    expect(
+      (div('a', null as any, 'b', undefined as any) as any).textContent
+    ).toBe('ab')
+    expect(warnings).toEqual([])
+  })
+
+  test('a Map is a props bag, allowed but never required', () => {
+    const el = elements.div(
+      new Map([
+        ['title', 'from a map'],
+        ['dataX', '1'],
+      ]) as any
+    ) as any
+    expect(el.getAttribute('title')).toBe('from a map')
+    expect(el.getAttribute('data-x')).toBe('1')
+    expect(warnings).toEqual([])
+  })
+
+  test('an array complains instead of becoming indexed attributes', () => {
+    const { div, span } = elements
+    const el = div([span('a'), span('b')] as any) as any
+    expect(el.getAttribute('0')).toBe(null) // was <div 0="<span>a</span>">
+    expect(warnings.join(' ')).toContain('did you mean to spread it')
+  })
+
+  test('something that is neither a child nor props says so', () => {
+    const el = elements.div(new WeakMap() as any) as any
+    expect(el.outerHTML).toBe('<div></div>')
+    expect(warnings.join(' ')).toContain('neither a child nor a props object')
+  })
+
+  test('a class instance carrying fields is still applied as props', () => {
+    // preserved behaviour: config objects that are not plain objects
+    const el = elements.div(
+      new (class {
+        title = 'kept'
+      })() as any
+    ) as any
+    expect(el.getAttribute('title')).toBe('kept')
+    expect(warnings).toEqual([])
   })
 })

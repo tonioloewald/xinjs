@@ -590,6 +590,35 @@ const elementPropBinding = (key: string): TosiBinding => {
  * content array are documented to apply "just as they would be applied to the
  * element being created by div()". One helper, so they cannot drift again.
  */
+/**
+ * Is this a CONFIG BAG rather than a value?
+ *
+ * A plain object always is — including `{}`, which a spread of a conditional
+ * (`{...(cond ? {class:'x'} : {})}`) legitimately produces, so it must stay
+ * silent. Anything else counts only if it actually carries enumerable own
+ * properties, which preserves the existing behaviour for class instances used
+ * as config (`div(new Settings())` sets its fields as attributes).
+ */
+const isPropsBag = (item: any): boolean => {
+  if (typeof item !== 'object') return false
+  // A MAP IS A PROPS BAG — a cleaner one than an object literal, in fact: no
+  // prototype to collide with, insertion-ordered, and it cannot accidentally
+  // inherit anything. Allowed, never required.
+  if (item instanceof Map) return true
+  const proto = Object.getPrototypeOf(item)
+  if (proto === Object.prototype || proto === null) return true
+  return Object.keys(item).length > 0
+}
+
+/** does this value know how to render itself as text? */
+const renderableAsText = (item: any): boolean => {
+  if (Array.isArray(item)) return false
+  const toString = (item as any).toString
+  return (
+    typeof toString === 'function' && toString !== Object.prototype.toString
+  )
+}
+
 export const mergeElementProps = (target: any, item: any): void => {
   if (item?.bind != null && target.bind != null) {
     target.bind = ([] as any[]).concat(target.bind, item.bind)
@@ -740,6 +769,43 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
       } else {
         elt.append(item as Node)
       }
+    } else if (item != null && !isPropsBag(item) && renderableAsText(item)) {
+      // A VALUE, NOT A CONFIG BAG — so render it.
+      //
+      // The props branch below is `Object.assign`-shaped: handed something
+      // with no enumerable own properties it iterates nothing, succeeds, and
+      // the argument DISAPPEARS. `div(new Date())`, `div(10n)` and
+      // `div(false)` all rendered empty with no warning — silent failure, not
+      // "garbage being rejected": the API dispatches on what it is handed, and
+      // it was dispatching wrongly and saying nothing.
+      //
+      // The discriminator is the owner's: an object that is not an Element and
+      // not a plain props bag, but which knows how to render itself as text
+      // (its `toString` is not `Object.prototype`'s), is a value the caller
+      // wanted shown. Booleans and bigints reach here too — `div(false)` is
+      // `<div>false</div>`, which is what a JS programmer expects.
+      // `null`/`undefined` stay the nothing-signal that conditional children
+      // rely on, so they are excluded above and remain silent.
+      const text = String(item)
+      if (elt instanceof HTMLTemplateElement) {
+        elt.content.append(text)
+      } else {
+        elt.append(text)
+      }
+    } else if (Array.isArray(item)) {
+      // DID YOU MEAN TO SPREAD IT? An array is not flattened on purpose —
+      // guessing would make `div(a)` and `div(...a)` mean the same thing and
+      // hide the mistake. Before this it fell through to the props branch,
+      // where the INDICES became attributes:
+      //   div([span('a')])  ->  <div 0="<span>a</span>"></div>
+      // which is what `div(items.map(…))` produced when the spread was
+      // forgotten. Documented idiom is `...items.map(…)` (Building-Apps.md).
+      console.warn(
+        `<${elt.tagName.toLowerCase()}> was passed an array as a child. ` +
+          `Arrays are not flattened — did you mean to spread it? ` +
+          `\`${elt.tagName.toLowerCase()}(...items.map(…))\``,
+        item
+      )
     } else if (tosiPath(item)) {
       // `elements.div(proxy)` — the most idiomatic call form in the library.
       // This used the DEPRECATED `bindText` key, so the library warned users
@@ -758,7 +824,26 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
       //   listBinding first    -> the ENTIRE LIST vanished, template unconsumed
       // A container that is both list-bound and carries its own binding (an
       // empty-state class, an aria-label) is ordinary composition.
-      mergeElementProps(elementProps, item)
+      //
+      // AND SAY SO IF THERE IS NOTHING TO MERGE. Reaching here with something
+      // that is not a props bag means the merge will iterate zero properties,
+      // succeed, and drop the argument — the silent failure this whole branch
+      // was rewritten for. `new Map()` and a class instance with neither a
+      // `toString` nor enumerable fields land here. `null`/`undefined` are
+      // excluded deliberately: they are the nothing-signal conditional
+      // children rely on.
+      if (item != null && !isPropsBag(item)) {
+        console.warn(
+          `<${elt.tagName.toLowerCase()}> was passed a value that is neither ` +
+            `a child nor a props object — it has no text form and no ` +
+            `properties to apply, so it was ignored.`,
+          item
+        )
+      }
+      mergeElementProps(
+        elementProps,
+        item instanceof Map ? Object.fromEntries(item) : item
+      )
     }
   }
   for (const key of Object.keys(elementProps)) {

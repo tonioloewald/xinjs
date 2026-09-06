@@ -86,7 +86,13 @@ export const BUNDLES: BundleSpec[] = [
     // over the old ceiling; almost all of it is the error strings, which is
     // the growth we want (the defect being fixed was a SILENT coercion). The
     // headroom matches main.js so the two budgets stop drifting apart.
-    budget: 43_500,
+    //
+    // 43_500 -> 45_000 in 1.10.1: the element factory now renders values that
+    // used to vanish (Date, bigint, boolean, anything with its own toString),
+    // accepts a Map as a props bag, and WARNS on an unspread array or a value
+    // that is neither — +264 gz. Most of it is the two warning strings, which
+    // are the point: they convert three silent no-ops into a named mistake.
+    budget: 45_000,
     probe: 'import',
     stage: 'main',
   },
@@ -103,7 +109,7 @@ export const BUNDLES: BundleSpec[] = [
     // broken `bun start` for every developer (the budget loop is not gated
     // on `full`), and the fix a stranger reaches for is raising the number
     // without reading it. Budget per bundle from its own measurement.
-    budget: 44_500,
+    budget: 46_000,
     probe: 'require',
     stage: 'main',
   },

@@ -10,6 +10,42 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 
 Type-only. No runtime change, no bundle change.
 
+### Changed
+
+- **Positional arguments to element creators: values render, `Map` applies,
+  mistakes complain.** The contents loop was "Element | Fragment | string |
+  number is a child, **anything else is a props bag**" — and the props merge is
+  `Object.assign`-shaped, so handed something with no enumerable own properties
+  it iterated nothing, *succeeded*, and dropped the argument.
+
+  ```js
+  div(new Date())   // was: <div></div>   now: <div>Sun Sep 06 2026 …</div>
+  div(10n)          // was: <div></div>   now: <div>10</div>
+  div(false)        // was: <div></div>   now: <div>false</div>
+  div([a, b])       // was: <div 0="<span>a</span>" 1="…">   now: warns
+  new Map([['title','x']])  // was: ignored   now: <div title="x">
+  ```
+
+  The rule: an argument that is **not** a props bag but knows how to render
+  itself as text (its `toString` is not `Object.prototype`'s) becomes a text
+  child. A **`Map` is a props bag** — a cleaner one than an object literal, and
+  now allowed though never required. An **array complains** rather than being
+  flattened, because guessing would make `div(a)` and `div(...a)` mean the same
+  thing and hide the forgotten spread that produced indexed attributes. Anything
+  that is neither says so instead of vanishing.
+
+  `null` and `undefined` still render nothing — they are the nothing-signal
+  conditional children rely on (`div('a', cond ? b : null, 'c')`), and remain
+  silent. A class instance carrying fields is still applied as props.
+
+  This was framed by a review as "silently accepts garbage". It is the
+  opposite: the API dispatches on what it is handed, and it was dispatching
+  wrongly and saying nothing — silent failure, the class this ecosystem tracks.
+  See `../tosijs-coding-practices/practices/model-priors.md` #12.
+
+  `module.js`/`main.js` gzip budgets raised (+264 gz), deliberately and in the
+  same commit; most of it is the two warning strings, which are the point.
+
 ### Fixed
 
 - **Four public types were unreachable from any entry.** `AgentPathRef` and

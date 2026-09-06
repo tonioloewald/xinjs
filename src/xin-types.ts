@@ -396,6 +396,8 @@ export type ElementPart<T = Element> =
   // consumer. Same family as the direct `.observe` being typed backwards:
   // a type narrower than the runtime it describes, invisible because no lane
   // typechecks `*.test.ts`.
+  // a Map is a props bag too — allowed, never required
+  | Map<string, any>
   | BoxedScalar<any>
   // NOT `BoxedProxy<any>`. `any` distributes through BoxedProxy's conditional
   // — the `T extends Function` branch yields `any & …` = `any` — and a union
