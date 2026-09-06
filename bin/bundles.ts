@@ -157,11 +157,19 @@ export const BUNDLES: BundleSpec[] = [
   // BYTES, and only under Bun's gzip; Node's measures the same artifact
   // under. The slack is restored rather than shaved to the new number, so the
   // gate keeps policing regressions instead of tripping on noise.
+  // RAISED 59_500 -> 61_500 in 1.10.1, deliberately and in this commit. The
+  // element-creator dispatch adds ~730 gz to each of these (they are whole-
+  // library builds carrying full __tjs metadata), which put module.debug.js
+  // 18 BYTES OVER and left module.safe.js with 36 — precisely the hair-trigger
+  // this file forbids twice, and which a pre-release review flagged. Restored
+  // to the ~2 kB slack that is right for a gate policing TOOLCHAIN
+  // regressions on two EXPERIMENTAL, inert bundles, rather than shaved to the
+  // new measurement.
   {
     naming: 'module.debug.js',
     format: 'esm',
     entry: './tjs-out/index-debug.js',
-    budget: 59_500,
+    budget: 61_500,
     probe: 'import',
     stage: 'tjs',
     // map excluded from `files` (1.64 MB for inert bundles) — so don't emit
@@ -172,7 +180,7 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'module.safe.js',
     format: 'esm',
     entry: './tjs-out/index-safe.js',
-    budget: 59_500,
+    budget: 61_500,
     probe: 'import',
     stage: 'tjs',
     // map excluded from `files` (1.64 MB for inert bundles) — so don't emit

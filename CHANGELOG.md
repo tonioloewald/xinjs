@@ -10,7 +10,9 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 
 Public types that were wrong or unreachable, and **silent failures in element
 creators**: positional arguments that rendered nothing now render, or say why
-they did not. `dist/` and the gzip budgets changed (+~290 gz per bundle).
+they did not. `dist/` and the gzip budgets changed — **+403 to +453 gz** per
+shipped bundle (+724/+734 for the two EXPERIMENTAL tjs bundles), measured with
+the build's own compressor.
 
 > **Why a patch.** Every behaviour change here fixes a bug rather than adding
 > functionality — `div(new Date())` producing an empty `<div>` was not a
@@ -62,6 +64,33 @@ they did not. `dist/` and the gzip budgets changed (+~290 gz per bundle).
 
   `module.js`/`main.js` gzip budgets raised (+264 gz), deliberately and in the
   same commit; most of it is the two warning strings, which are the point.
+
+- **`fragment()` now honours the same contract as every other creator**, in
+  `elements`, `svgElements` and `mathML`. It appended every argument raw, so:
+
+  | | before | now |
+  | --- | --- | --- |
+  | `fragment('a', null, 'b')` | `"anullb"` — the literal string `null` | `"ab"` |
+  | `fragment({class:'x'})` | `"[object Object]"` | warns, ignored |
+  | `fragment([span('a')])` | the element stringified as text | warns — spread it |
+  | `fragment(app.name)` | a dead one-time text node | a **live** bound `<span>` |
+
+- **Component `content` arrays go through the same dispatch as `div()`.**
+  Values that previously vanished now render *at their argument position*
+  (`content = [10n, span(' each')]` was `" each"`, is `"10 each"`), a nested
+  array warns instead of becoming indexed host attributes, and a **single**
+  non-array `content` is classified too — `content = someProxy` used to
+  **throw** `expect text content or document node`.
+
+  **Two shape changes worth checking against your CSS.** A proxy in `content`
+  now produces a bound `<span class="-tosi-data">` where a bare text node used
+  to sit, so selectors keyed on `:first-child`/`:nth-child`/`> *` or code
+  indexing `childNodes` can shift by one. And **in shadow DOM the value no
+  longer appears at all**: bindings are inert there by design, so where a stale
+  string used to be painted silently, you now get an empty span *and* a warning
+  naming the component and the correct pattern (bind its value from outside and
+  implement `render()`). That is deliberate — a wrong value that looks right is
+  worse than a visible gap that explains itself — but it is a visible change.
 
 ### Fixed
 
@@ -121,8 +150,8 @@ they did not. `dist/` and the gzip budgets changed (+~290 gz per bundle).
   `elements.test.ts` calls it "the most-used site" — but the type admitted only
   `Element | DocumentFragment | ElementProps | string | number`, so the
   idiomatic spelling was a type error for every consumer. Widened to accept
-  `BoxedScalar<any> | TosiProps<any>`. Runtime unchanged; verified before the
-  type was touched.
+  `BoxedScalar<any> | TosiProps<any>`. **`div()`'s runtime is unchanged** —
+  but `fragment()` and component `content` arrays are not; see below.
 
   **Not `BoxedProxy<any>`** — that spelling was written first and caught by
   review before it shipped. `any` distributes through `BoxedProxy`'s

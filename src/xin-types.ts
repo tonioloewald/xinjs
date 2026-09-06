@@ -419,7 +419,26 @@ export type FragmentCreator = (
   ...contents: ElementPart<Element>[]
 ) => DocumentFragment
 export type ElementCreator<T = Element> = (...contents: ElementPart<T>[]) => T
-export type ContentPart = Element | DocumentFragment | string
+// WIDENED to match what `hydrate()` actually accepts. The runtime went
+// through `applyPositional` — the same classifier `create()` uses — so a
+// content array may hold values (`Date`, `bigint`, `boolean`) and boxed
+// proxies, and the component docs describe that. The TYPE was never widened
+// with it, so writing the documented shape was TS2416 on the `content`
+// property. Deliberately NOT `BoxedProxy<any>`: `any` distributes through its
+// conditional and collapses the union to `any`, which is how ElementPart,
+// AgentPathRef and AgentObserveRef each lost their checking earlier in this
+// same release.
+export type ContentPart =
+  | Element
+  | DocumentFragment
+  | string
+  | number
+  | bigint
+  | boolean
+  | BoxedScalar<any>
+  | TosiProps<any>
+  | null
+  | undefined
 export type ContentType = ContentPart | ContentPart[]
 
 export type ListFilter = (array: any[], needle: any) => any[]

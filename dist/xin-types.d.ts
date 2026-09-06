@@ -268,7 +268,7 @@ export type ElementPart<T = Element> = Element | DocumentFragment | ElementProps
 export type HTMLElementCreator<T = HTMLElement> = (...contents: ElementPart<T>[]) => T;
 export type FragmentCreator = (...contents: ElementPart<Element>[]) => DocumentFragment;
 export type ElementCreator<T = Element> = (...contents: ElementPart<T>[]) => T;
-export type ContentPart = Element | DocumentFragment | string;
+export type ContentPart = Element | DocumentFragment | string | number | bigint | boolean | BoxedScalar<any> | TosiProps<any> | null | undefined;
 export type ContentType = ContentPart | ContentPart[];
 export type ListFilter = (array: any[], needle: any) => any[];
 export interface ListBindingOptions {

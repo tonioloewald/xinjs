@@ -1,5 +1,40 @@
 # todo
 
+## Shadow DOM kills the bindings of anything placed inside it — including whole components
+
+Verified. The **same component**, light DOM vs inside another component's
+shadow root:
+
+```
+light DOM  : "Alice"  ->  "Bob"     live
+in shadow  : ""       ->  ""        dead, and never recovers
+```
+
+Binding dispatch is document-level, so an element inside any shadow root is
+invisible to it — and that applies to a nested component's OWN internal
+bindings, not just to bindings written at the insertion point. Putting a
+bound web component in a shadow root silently disables it.
+
+**Already covered where it is detectable:** the existing per-class warning
+(`bind.ts` `warnIfShadowed` / the component's shadow-content check) fires for
+this case — `<nest-outer> has data-binding sugar in its shadow-DOM content` —
+naming the class and the correct pattern (bind the VALUE from outside,
+implement `render()`).
+
+- [ ] **Check the gap: a component that hydrates AFTER insertion.** The
+      warning is driven by scanning content for binding sugar at insertion
+      time. A component whose bindings appear later (blueprint-loaded, or
+      upgraded after `customElements.define`) may slip past it — the same
+      upgrade-timing seam that decides attribute-vs-property dispatch. If it
+      does slip, warn from the binding side instead of the content side.
+- [ ] Consider saying it in the component docs under shadow DOM: not just
+      "bindings do not operate here" but "and that includes any component you
+      place here".
+
+Not folded into 1.10.1: it is not a regression from that release, the common
+case already warns, and adding a diagnostic to a release that has been through
+four review rounds is the scope creep those rounds keep finding.
+
 ## Value children that silently vanish: `div(new Date())`, `div(10n)`, `div(false)`
 
 The child/props discriminator in `elements.ts` is `string | number` for children

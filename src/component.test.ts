@@ -2627,3 +2627,72 @@ describe('hydrate() classifies content the same way create() does', () => {
     el.remove()
   })
 })
+
+describe('a proxy in a content array is a LIVE child at its own position', () => {
+  /*
+   * THE TEST THAT WAS MISSING. Round 3 fixed a proxy in `content` rendering a
+   * dead one-time string; round 4 mutation-proved the suite could not see the
+   * fix — re-adding the pre-fix hydrate branch left all 987 tests green. The
+   * cross-site tests in elements.test.ts assert `div(proxy)` and
+   * `div(fragment(proxy))`, and NOTHING put a proxy in a Component content
+   * array, which is the one site the fix actually changed.
+   */
+  const raf = () => new Promise((r) => requestAnimationFrame(r))
+
+  test('light DOM: bound span, at its argument position, and live', async () => {
+    const { liveContent } = tosi({ liveContent: { name: 'Alice' } })
+    await updates()
+    class LiveContent extends (Component as any) {
+      static preferredTagName = 'live-content'
+      content = [
+        elements.span('x:'),
+        (liveContent as any).name,
+        elements.span(':y'),
+      ] as any
+    }
+    const el = (LiveContent as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    await updates()
+    expect(el.textContent).toBe('x:Alice:y')
+    // POSITION, not just presence: the bound span must be the middle child,
+    // because hydrate() once collected non-node items and appended them last
+    const kinds = [...el.children].map((c: any) => c.tagName.toLowerCase())
+    expect(kinds).toEqual(['span', 'span', 'span'])
+    expect((el.children[1] as any).className).toContain('-tosi-data')
+    // and LIVE — this was a dead one-time string
+    ;(liveContent as any).name = 'Bob'
+    await updates()
+    await raf()
+    expect(el.textContent).toBe('x:Bob:y')
+    el.remove()
+  })
+
+  test('shadow DOM: no binding, and it says so', async () => {
+    // Data bindings are inert in shadow DOM by design (bind.ts). v1.10.0
+    // stringified the proxy to a STALE value that looked right and said
+    // nothing; now the value is absent and the component warns, naming itself
+    // and the correct pattern. That is the trade this project makes
+    // everywhere: a visible gap with an explanation beats a silent wrong
+    // answer. Pinned so nobody "fixes" it back to a stale string.
+    const { shadowContent } = tosi({ shadowContent: { name: 'Alice' } })
+    await updates()
+    const warnings: string[] = []
+    const originalWarn = console.warn
+    console.warn = (...args: any[]) => warnings.push(String(args[0]))
+    class ShadowContent extends (Component as any) {
+      static preferredTagName = 'shadow-content'
+      static shadowStyleSpec = { ':host': { display: 'block' } }
+      content = [elements.span('x:'), (shadowContent as any).name] as any
+    }
+    const el = (ShadowContent as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    await updates()
+    console.warn = originalWarn
+    expect(el.shadowRoot.textContent).toContain('x:')
+    expect(el.shadowRoot.textContent).not.toContain('Alice')
+    expect(warnings.join(' ')).toContain('bindings do not operate')
+    el.remove()
+  })
+})

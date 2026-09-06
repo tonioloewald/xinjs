@@ -138,8 +138,26 @@ class MyButton extends Component {
 ```
 
 Multiple ElementProps objects are merged (later values override earlier ones).
-Only plain objects are treated as props — DOM nodes, strings, numbers, and proxied
-values pass through as children.
+
+Each item is classified exactly as `elements.div()` classifies its positional
+arguments — the same code, so the two cannot drift:
+
+| item | result |
+| --- | --- |
+| a node, string or number | a child, in place |
+| a tosijs proxy | a **live** child (a bound `<span>`) |
+| a `Date`, `bigint`, `boolean`, or anything with its own `toString` | text, in place |
+| a plain object or a `Map` | props applied to the host |
+| `null` / `undefined` | nothing, deliberately |
+| an array | a warning — spread it |
+
+A single non-array `content` is classified the same way, so `content = proxy`
+works rather than throwing.
+
+> **In shadow DOM a bound child renders nothing.** Data bindings are inert
+> inside a shadow root by design, so a proxy in the `content` of a
+> shadow-DOM component produces an empty span and a warning. Bind the
+> component's `value` from outside and implement `render()` instead.
 
 If you'd like to see a more complex example along the same lines, look at
 [form and field](https://ui.tosijs.net/form/).
@@ -837,6 +855,7 @@ import { settings } from './settings'
 import { deepClone } from './deep-clone'
 import {
   appendContentToElement,
+  type ResolvedContent,
   dispatch,
   resizeObserver,
   isBindingWrite,
@@ -2716,6 +2735,20 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
           ? this.content(elements)
           : this.content
 
+      // NORMALISE FIRST. This branch only ran for an ARRAY, so a single
+      // content item skipped classification entirely — `content = proxy`
+      // reached appendContentToElement raw and THREW ("expect text content or
+      // document node"), and `content = 10n` did the same. The docs describe
+      // both as working. Widening ContentPart to match the documented shape is
+      // what surfaced it: the type began permitting what the code threw on.
+      if (
+        _content != null &&
+        !Array.isArray(_content) &&
+        !(_content instanceof Node) &&
+        typeof _content !== 'string'
+      ) {
+        _content = [_content] as any
+      }
       if (Array.isArray(_content)) {
         const hostProps: Record<string, any> = {}
         // BUILD THE CHILD LIST IN ARGUMENT ORDER. This used to `filter` and
@@ -2763,7 +2796,12 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
       if (styleNode) {
         const shadow = this.attachShadow({ mode: 'open' })
         shadow.appendChild(styleNode.cloneNode(true))
-        appendContentToElement(shadow, _content, cloneElements)
+        // classified above — everything here is a Node or a string
+        appendContentToElement(
+          shadow,
+          _content as ResolvedContent,
+          cloneElements
+        )
         // Data-binding sugar in shadow content is inert by design (see the
         // docs above: dispatch does not see into shadow roots; micro-manage
         // with observe() + parts instead — on() event sugar DOES work, via
@@ -2794,7 +2832,11 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
         if (!cloneElements) {
           this._partsCache = capturePartsFrom(_content)
         }
-        appendContentToElement(this as HTMLElement, _content, cloneElements)
+        appendContentToElement(
+          this as HTMLElement,
+          _content as ResolvedContent,
+          cloneElements
+        )
         // querySelector returns null (never undefined) when there's no match,
         // so `!== undefined` was always true
         this.isSlotted = this.querySelector('slot,tosi-slot,xin-slot') !== null

@@ -1,5 +1,5 @@
 import { cloneWithBindings } from './metadata'
-import { ContentType, ValueElement } from './xin-types'
+import { ValueElement } from './xin-types'
 
 export const dispatch = (
   target: Element,
@@ -241,9 +241,20 @@ export const resizeObserver =
         unobserve() {},
       }
 
+/**
+ * Append ALREADY-CLASSIFIED content. Both callers run their items through
+ * `applyPositional` first, so by here everything is a Node or a string —
+ * which is why the parameter is not `ContentType`. It used to be, and that
+ * was only harmless while `ContentType` happened to be that narrow: widening
+ * `ContentPart` to match what `content` arrays really accept (values, boxed
+ * proxies, null) immediately made this a type error, correctly, because this
+ * function cannot handle those and is never given them.
+ */
+export type ResolvedContent = Node | string | Array<Node | string>
+
 export const appendContentToElement = (
   elt: Element | ShadowRoot | null | undefined,
-  content: ContentType | null | undefined,
+  content: ResolvedContent | null | undefined,
   cloneElements = true
 ): void => {
   if (elt != null && content != null) {

@@ -163,9 +163,49 @@ event handlers, classes, and bindings on the component from within <code>content
   ]
 }
 </code></pre>
-<p>Multiple ElementProps objects are merged (later values override earlier ones).
-Only plain objects are treated as props — DOM nodes, strings, numbers, and proxied
-values pass through as children.</p>
+<p>Multiple ElementProps objects are merged (later values override earlier ones).</p>
+<p>Each item is classified exactly as <code>elements.div()</code> classifies its positional
+arguments — the same code, so the two cannot drift:</p>
+<table>
+<thead>
+<tr>
+<th>item</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>a node, string or number</td>
+<td>a child, in place</td>
+</tr>
+<tr>
+<td>a tosijs proxy</td>
+<td>a <strong>live</strong> child (a bound <code>&lt;span&gt;</code>)</td>
+</tr>
+<tr>
+<td>a <code>Date</code>, <code>bigint</code>, <code>boolean</code>, or anything with its own <code>toString</code></td>
+<td>text, in place</td>
+</tr>
+<tr>
+<td>a plain object or a <code>Map</code></td>
+<td>props applied to the host</td>
+</tr>
+<tr>
+<td><code>null</code> / <code>undefined</code></td>
+<td>nothing, deliberately</td>
+</tr>
+<tr>
+<td>an array</td>
+<td>a warning — spread it</td>
+</tr>
+</tbody></table>
+<p>A single non-array <code>content</code> is classified the same way, so <code>content = proxy</code>
+works rather than throwing.</p>
+<blockquote>
+<p><strong>In shadow DOM a bound child renders nothing.</strong> Data bindings are inert
+inside a shadow root by design, so a proxy in the <code>content</code> of a
+shadow-DOM component produces an empty span and a warning. Bind the
+component&#39;s <code>value</code> from outside and implement <code>render()</code> instead.</p>
+</blockquote>
 <p>If you&#39;d like to see a more complex example along the same lines, look at
 <a href="https://ui.tosijs.net/form/">form and field</a>.</p>
 <h5><slot> names and the <code>slot</code> attribute</h5>
