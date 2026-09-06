@@ -128,7 +128,12 @@ bundles: `dist/module.debug.js` and `dist/module.safe.js` are `--build`-only.
 ships two subpaths that throw `ERR_MODULE_NOT_FOUND`. **The release checklist
 walks straight into it** — step 3 builds, step 4 (`bun run test:browser`) starts
 a dev server via Playwright's `webServer` and deletes them, step 8 publishes.
-**Re-run `bun run build` after the browser lane, before committing.** Three
+**Re-run `bun run build` after the browser lane, before committing.** This is
+now *more* important, not less: `buildLibrary()` restores the **committed**
+copies of anything a dev run deleted, so the tree stays valid — but those
+copies can be older than your source, and the restore makes that staleness
+invisible where a deletion at least showed up in `git status`. Tier 0's
+artifact-freshness check is the backstop. Three
 guards exist because no build-order fix on our side can close it: both bundles
 are tracked (so `git status` shows the deletion — untracked, it was
 invisible), and `buildLibrary()` and `prepublishOnly` both fail if any

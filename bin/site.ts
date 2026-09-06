@@ -189,7 +189,12 @@ async function restoreCommittedDist(): Promise<void> {
     .filter((f) => f.trim() !== '' && !existsSync(f))
   if (missing.length === 0) return
   await $`git checkout -- ${missing}`.nothrow().quiet()
-  console.log(`restored ${missing.length} committed dist artifact(s)`)
+  console.log(
+    `restored ${missing.length} committed dist artifact(s) — these are the ` +
+      `COMMITTED copies, which may be older than your source. Re-run ` +
+      `\`bun run build\` before committing (release-doctor's artifact-freshness ` +
+      `check catches it if you forget).`
+  )
 }
 
 async function buildLibrary(full = true) {
