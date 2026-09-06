@@ -8,6 +8,20 @@ same failure as the minimum-headroom gate, which two rounds filed and neither
 built, and which then recurred. Filing is not tracking.
 
 ### Gates whose scope is narrower than their own claim
+- [ ] **tosijs#39 — the IIFE exposes no global, and never has.**
+      `dist/index.js` is built with no `globalName`, so a `<script src=…>`
+      consumer can reach nothing; README.md:29 promises them "the library".
+      Found by executing the **published 1.10.1 tarball** during step 8c, which
+      is the only lane that could have found it. Confirmed against 1.7.9 and
+      1.8.0 too, so it is not a 1.10.1 regression — the blueprint-from-markup
+      path (README.md:57) works via side effects alone, which is why it
+      survived. **The gate is the point:** the smoke loop defines
+      `ASSERT_EXPORTS` and applies it to the `import`/`require` probes only —
+      the `load` probe used by the IIFE just checks the file evaluates, so an
+      artifact exposing nothing passes by construction. **Fourth instance of
+      "a gate that reports safety it has not established" in this repo.**
+      Fix `globalName` and the probe together; mutation-verify by removing
+      `globalName`.
 - [ ] `appendContentToElement` is the **fourth** site of the positional
       contract and was left out of the unification. Currently safe because both
       callers classify first, and its type now says so (`ResolvedContent`) —
