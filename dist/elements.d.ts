@@ -22,6 +22,27 @@ export type PositionalKind = 'child' | 'proxy' | 'text' | 'props' | 'array' | 'u
 export declare const classifyPositional: (item: any) => PositionalKind;
 /** the message for an argument that will do nothing, so both sites say it identically */
 export declare const positionalWarning: (kind: PositionalKind, tagName: string) => string | undefined;
+/**
+ * APPLY a positional argument. One implementation, for the three call sites.
+ *
+ * `classifyPositional` shared the QUESTION; this shares the ANSWER, which is
+ * what actually stops them diverging. Sharing only the classifier was not
+ * enough and the drift kept coming back at a new address each round:
+ *
+ *   round 1  `create()` fixed, `hydrate()` still dropped values silently
+ *   round 2  both classified alike — and `hydrate()` still emitted text at the
+ *            END of the child list, because it FILTERED and re-appended, so
+ *            `[10n, span(' each')]` rendered " each10" against create()'s
+ *            "10 each"
+ *   round 3  `fragment()` turned out to be the third site, never classified at
+ *            all, rendering `null` as the literal string "null" — directly
+ *            contradicting the contract added in the same release
+ *
+ * `append` is the caller's placement (append to an element, push into an
+ * ordered array, append to a fragment) and is called IN ARGUMENT ORDER, which
+ * is what makes position correct by construction rather than by remembering.
+ */
+export declare const applyPositional: (item: any, tagName: string, append: (node: any) => void, mergeProps?: (props: any) => void) => void;
 export declare const mergeElementProps: (target: any, item: any) => void;
 export declare const elementSet: (elt: HTMLElement, key: string, value: any) => void;
 /**

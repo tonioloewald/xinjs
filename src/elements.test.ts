@@ -690,3 +690,65 @@ describe('positional arguments: values render, props apply, mistakes complain', 
     expect(warnings).toEqual([])
   })
 })
+
+describe('all three call sites apply positional arguments identically', () => {
+  /*
+   * create(), Component.hydrate() and fragment() are the three places that
+   * consume `ElementPart[]`. Sharing only `mergeElementProps` was not enough,
+   * and neither was sharing `classifyPositional` — they agreed on the QUESTION
+   * and diverged on the ANSWER, so the drift returned at a new address each
+   * review round: hydrate() dropped values, then emitted them at the END, and
+   * fragment() was never classified at all and rendered `null` as the literal
+   * string "null". `applyPositional` is the shared answer; these tests are
+   * what notices if a fourth site appears.
+   */
+  const warnings: string[] = []
+  let originalWarn: typeof console.warn
+  beforeEach(() => {
+    originalWarn = console.warn
+    warnings.length = 0
+    console.warn = (...args: any[]) => warnings.push(String(args[0]))
+  })
+  afterEach(() => {
+    console.warn = originalWarn
+  })
+
+  test('fragment() honours the same contract as div()', () => {
+    const { div, fragment } = elements
+    // null is the nothing-signal — this rendered the literal "null"
+    expect((div(fragment('a', null as any, 'b')) as any).textContent).toBe('ab')
+    // values render rather than stringifying to [object Object] or vanishing
+    expect((div(fragment(10n as any)) as any).textContent).toBe('10')
+    expect(warnings).toEqual([])
+  })
+
+  test('fragment() warns on what div() warns on', () => {
+    const { fragment, span } = elements
+    fragment([span('a')] as any)
+    expect(warnings.join(' ')).toContain('did you mean to spread it')
+    warnings.length = 0
+    fragment({ class: 'x' } as any)
+    expect(warnings.join(' ')).toContain('no element to apply')
+  })
+
+  test('a proxy is a LIVE child from every site', async () => {
+    const { live } = tosi({ live: { n: 'one' } })
+    await updates()
+    const fromCreate = elements.div((live as any).n) as any
+    const fromFragment = elements.div(elements.fragment((live as any).n)) as any
+    document.body.append(fromCreate, fromFragment)
+    await updates()
+    expect([fromCreate.textContent, fromFragment.textContent]).toEqual([
+      'one',
+      'one',
+    ])
+    ;(live as any).n = 'two'
+    await updates()
+    expect([fromCreate.textContent, fromFragment.textContent]).toEqual([
+      'two',
+      'two',
+    ])
+    fromCreate.remove()
+    fromFragment.remove()
+  })
+})

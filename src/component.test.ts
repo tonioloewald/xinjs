@@ -2586,10 +2586,12 @@ describe('hydrate() classifies content the same way create() does', () => {
     const el = (HydrateValues as any).elementCreator()() as any
     document.body.append(el)
     await raf()
-    expect(el.textContent).toContain('a')
-    expect(el.textContent).toContain('2026') // Date, was dropped
-    expect(el.textContent).toContain('10') // bigint, was dropped
-    expect(el.textContent).toContain('false') // boolean, was dropped
+    // ORDER-SENSITIVE ON PURPOSE. The first version of this test used
+    // `toContain`, which passes under ANY permutation — and hydrate() was
+    // filtering text out and re-appending it at the END, so `[10n, span]`
+    // rendered " each10" against create()'s "10 each". The test reported
+    // safety it did not have; assert the exact string.
+    expect(el.textContent).toBe(`a${new Date('2026-01-02T03:04:05Z')}10false`)
     expect(warnings).toEqual([])
     el.remove()
   })

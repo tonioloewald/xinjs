@@ -846,8 +846,7 @@ import {
   elements,
   elementSet,
   mergeElementProps,
-  classifyPositional,
-  positionalWarning,
+  applyPositional,
 } from './elements'
 import { validateAgainstConstraints } from './form-validation'
 import { camelToKabob, kabobToCamel } from './string-case'
@@ -2719,36 +2718,23 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
 
       if (Array.isArray(_content)) {
         const hostProps: Record<string, any> = {}
-        const _textFromContent: string[] = []
-        _content = _content.filter((item) => {
-          // ONE CLASSIFIER, shared with create() — see classifyPositional.
-          // These two sites drifted: the value/array/warning rules landed in
-          // create() only, so `content = [span('a'), new Date()]` dropped the
-          // Date silently and a nested array turned its INDICES into host
-          // attributes, which is verbatim the symptom the release notes call
-          // fixed. `mergeElementProps` was extracted to stop exactly this and
-          // was not enough, because the CLASSIFICATION was still duplicated.
-          const kind = classifyPositional(item)
-          const warning = positionalWarning(kind, this.tagName)
-          if (warning != null) {
-            console.warn(warning, item)
-            return false
-          }
-          if (kind === 'child' || kind === 'proxy') return true
-          if (kind === 'text') {
-            _textFromContent.push(String(item))
-            return false
-          }
-          // `bind` accumulates rather than clobbering — a host-props object
-          // carrying `bind` and a spread `.tosi.listBinding()` destroyed each
-          // other otherwise (review round 2, B1).
-          mergeElementProps(
-            hostProps,
-            item instanceof Map ? Object.fromEntries(item) : item
+        // BUILD THE CHILD LIST IN ARGUMENT ORDER. This used to `filter` and
+        // push text into a side array that was appended AFTERWARDS, so
+        // `[10n, span(' each')]` rendered " each10" where create() gives
+        // "10 each" — the two sites agreed on classification and disagreed on
+        // PLACEMENT, and the test written to catch drift used `toContain`,
+        // which passes under any permutation. Emitting through the shared
+        // applier makes order correct by construction rather than by care.
+        const ordered: any[] = []
+        for (const item of _content) {
+          applyPositional(
+            item,
+            this.tagName,
+            (node: any) => ordered.push(node),
+            (props: any) => mergeElementProps(hostProps, props)
           )
-          return false
-        })
-        for (const text of _textFromContent) _content.push(text)
+        }
+        _content = ordered
         for (const key of Object.keys(hostProps)) {
           elementSet(this as HTMLElement, key, hostProps[key])
         }

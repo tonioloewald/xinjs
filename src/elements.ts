@@ -721,6 +721,59 @@ export const positionalWarning = (
   return undefined
 }
 
+/**
+ * APPLY a positional argument. One implementation, for the three call sites.
+ *
+ * `classifyPositional` shared the QUESTION; this shares the ANSWER, which is
+ * what actually stops them diverging. Sharing only the classifier was not
+ * enough and the drift kept coming back at a new address each round:
+ *
+ *   round 1  `create()` fixed, `hydrate()` still dropped values silently
+ *   round 2  both classified alike — and `hydrate()` still emitted text at the
+ *            END of the child list, because it FILTERED and re-appended, so
+ *            `[10n, span(' each')]` rendered " each10" against create()'s
+ *            "10 each"
+ *   round 3  `fragment()` turned out to be the third site, never classified at
+ *            all, rendering `null` as the literal string "null" — directly
+ *            contradicting the contract added in the same release
+ *
+ * `append` is the caller's placement (append to an element, push into an
+ * ordered array, append to a fragment) and is called IN ARGUMENT ORDER, which
+ * is what makes position correct by construction rather than by remembering.
+ */
+export const applyPositional = (
+  item: any,
+  tagName: string,
+  append: (node: any) => void,
+  mergeProps?: (props: any) => void
+): void => {
+  const kind = classifyPositional(item)
+  const warning = positionalWarning(kind, tagName)
+  if (warning != null) {
+    console.warn(warning, item)
+    return
+  }
+  if (kind === 'child') {
+    append(item)
+  } else if (kind === 'text') {
+    append(String(item))
+  } else if (kind === 'proxy') {
+    // `elements.div(proxy)` — the most idiomatic call form in the library
+    append(elements.span({ bind: { value: item, binding: 'text' } }))
+  } else if (mergeProps != null) {
+    // `bind` ACCUMULATES rather than clobbering — a container can be
+    // list-bound and carry its own binding
+    mergeProps(item instanceof Map ? Object.fromEntries(item) : item)
+  } else if (item != null) {
+    // a fragment has nothing to apply props TO
+    console.warn(
+      `fragment() was passed a props object, which has no element to apply ` +
+        `to — it was ignored.`,
+      item
+    )
+  }
+}
+
 export const mergeElementProps = (target: any, item: any): void => {
   if (item?.bind != null && target.bind != null) {
     target.bind = ([] as any[]).concat(target.bind, item.bind)
@@ -860,35 +913,18 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   const elt = templates[tagType].cloneNode() as HTMLElement
   const elementProps: ElementProps = {}
   for (const item of contents) {
-    const kind = classifyPositional(item)
-    const warning = positionalWarning(kind, elt.tagName)
-    if (warning != null) {
-      console.warn(warning, item)
-    } else if (kind === 'child') {
-      if (elt instanceof HTMLTemplateElement) {
-        elt.content.append(item as Node)
-      } else {
-        elt.append(item as Node)
-      }
-    } else if (kind === 'text') {
-      const text = String(item)
-      if (elt instanceof HTMLTemplateElement) {
-        elt.content.append(text)
-      } else {
-        elt.append(text)
-      }
-    } else if (kind === 'proxy') {
-      // `elements.div(proxy)` — the most idiomatic call form in the library.
-      elt.append(elements.span({ bind: { value: item, binding: 'text' } }))
-    } else {
-      // `bind` IS ACCUMULATED, NOT OVERWRITTEN — a container can be
-      // list-bound AND carry its own binding; a plain Object.assign silently
-      // destroyed one of the two.
-      mergeElementProps(
-        elementProps,
-        item instanceof Map ? Object.fromEntries(item) : item
-      )
-    }
+    applyPositional(
+      item,
+      elt.tagName,
+      (node) => {
+        if (elt instanceof HTMLTemplateElement) {
+          elt.content.append(node)
+        } else {
+          elt.append(node)
+        }
+      },
+      (props) => mergeElementProps(elementProps, props)
+    )
   }
   for (const key of Object.keys(elementProps)) {
     const value: any = elementProps[key]
@@ -900,7 +936,15 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
 const fragment = (...contents: ElementPart[]): DocumentFragment => {
   const frag = globalThis.document.createDocumentFragment()
   for (const item of contents) {
-    frag.append(item as Node)
+    // THE THIRD CALL SITE, and it was never classified at all: it appended
+    // every argument raw, so `fragment('a', null, 'b')` rendered the literal
+    // string "null" — contradicting the contract added in the same release —
+    // a props object became "[object Object]", and a proxy became a DEAD
+    // one-time string where `div(proxy)` gives a live binding. The type
+    // widening in this release made those calls newly legal, so it invited
+    // them. Documented as "otherwise just like other element factory
+    // functions"; now actually is.
+    applyPositional(item, 'fragment', (node) => frag.append(node))
   }
   return frag
 }
