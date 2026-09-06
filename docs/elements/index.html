@@ -93,9 +93,57 @@ referred to throughout this documentation as <code>elementCreator</code>s, funct
 of type <code>ElementCreator</code>. So <code>elements.div</code> is a function that returns a <code>&lt;div&gt;</code>
 element, <code>elements.foo</code> creates <foo> elements, and elements.fooBar creates
 <code>&lt;foo-bar&gt;</code> elements.</p>
-<p>The arguments of <code>elementCreator</code>s can be strings, numbers, other
-elements, or property-maps, which are converted into attributes or properties
-(or bindings).</p>
+<h3>What a positional argument means</h3>
+<p>Every argument is classified by what it <em>is</em>, and there is exactly one rule per
+kind:</p>
+<table>
+<thead>
+<tr>
+<th>you pass</th>
+<th>you get</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>a node, string or number</td>
+<td>appended as a child</td>
+</tr>
+<tr>
+<td>a tosijs proxy</td>
+<td>a <strong>live</strong> child, re-rendered as the value changes</td>
+</tr>
+<tr>
+<td>any other value with a text form — <code>Date</code>, <code>bigint</code>, <code>boolean</code>, a <code>RegExp</code>, anything whose <code>toString</code> is its own</td>
+<td>appended as text</td>
+</tr>
+<tr>
+<td>a plain object, or a <code>Map</code></td>
+<td>applied as props → attributes, properties or bindings</td>
+</tr>
+<tr>
+<td><code>null</code> / <code>undefined</code></td>
+<td><strong>nothing</strong>, deliberately</td>
+</tr>
+<tr>
+<td>an array</td>
+<td>a warning — arrays are not flattened, so spread it: <code>ul(...items.map(li))</code></td>
+</tr>
+<tr>
+<td>anything else (a function, a <code>WeakMap</code>, a class with neither text form nor fields)</td>
+<td>a warning, and it is ignored</td>
+</tr>
+</tbody></table>
+<p><strong><code>null</code> is the way to render nothing, and it is the only way.</strong> That is a
+deliberate choice rather than an oversight: a conditional child should <em>say</em> it
+is conditional, so write <code>div(cond ? label : null)</code>. <code>false</code> is a value and
+renders as <code>&quot;false&quot;</code> — <code>div(cond &amp;&amp; label)</code> is a JSX habit that relies on
+short-circuit evaluation producing a falsy value, and importing it would mean
+booleans could never be shown. <code>null</code> is the intentional version of the same
+idea, and it reads as intent at the call site.</p>
+<p><strong>Nothing is silently dropped.</strong> An argument that cannot be used says so, once,
+with the value attached — because the previous behaviour was to treat every
+unrecognised argument as a props bag, which meant <code>div(new Date())</code> rendered an
+empty <code>&lt;div&gt;</code> and <code>div(items.map(…))</code> with the spread forgotten turned array
+indices into attributes. Both were silent.</p>
 <p>E.g.</p>
 <pre><code class="language-js">import { elements, tosi } from &#39;tosijs&#39;
 

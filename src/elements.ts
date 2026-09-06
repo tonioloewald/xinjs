@@ -53,9 +53,34 @@ of type `ElementCreator`. So `elements.div` is a function that returns a `<div>`
 element, `elements.foo` creates <foo> elements, and elements.fooBar creates
 `<foo-bar>` elements.
 
-The arguments of `elementCreator`s can be strings, numbers, other
-elements, or property-maps, which are converted into attributes or properties
-(or bindings).
+### What a positional argument means
+
+Every argument is classified by what it *is*, and there is exactly one rule per
+kind:
+
+| you pass | you get |
+| --- | --- |
+| a node, string or number | appended as a child |
+| a tosijs proxy | a **live** child, re-rendered as the value changes |
+| any other value with a text form — `Date`, `bigint`, `boolean`, a `RegExp`, anything whose `toString` is its own | appended as text |
+| a plain object, or a `Map` | applied as props → attributes, properties or bindings |
+| `null` / `undefined` | **nothing**, deliberately |
+| an array | a warning — arrays are not flattened, so spread it: `ul(...items.map(li))` |
+| anything else (a function, a `WeakMap`, a class with neither text form nor fields) | a warning, and it is ignored |
+
+**`null` is the way to render nothing, and it is the only way.** That is a
+deliberate choice rather than an oversight: a conditional child should *say* it
+is conditional, so write `div(cond ? label : null)`. `false` is a value and
+renders as `"false"` — `div(cond && label)` is a JSX habit that relies on
+short-circuit evaluation producing a falsy value, and importing it would mean
+booleans could never be shown. `null` is the intentional version of the same
+idea, and it reads as intent at the call site.
+
+**Nothing is silently dropped.** An argument that cannot be used says so, once,
+with the value attached — because the previous behaviour was to treat every
+unrecognised argument as a props bag, which meant `div(new Date())` rendered an
+empty `<div>` and `div(items.map(…))` with the spread forgotten turned array
+indices into attributes. Both were silent.
 
 E.g.
 
