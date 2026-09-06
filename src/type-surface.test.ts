@@ -28,6 +28,73 @@ import { existsSync } from 'node:fs'
  *    that cannot fail is worse than no gate, because it reports safety.
  */
 /*
+ * A GATE THAT ONLY ASSERTS SUCCESS CANNOT SEE A TYPE WIDENED TO `any`.
+ *
+ * The idiomatic-spellings probe below compiles a file and requires no errors.
+ * That is satisfied trivially once a type becomes `any` — and it was: widening
+ * `ElementPart` with `BoxedProxy<any>` collapsed the union to `any` (any
+ * distributes through the conditional), which made the probe pass while
+ * deleting argument checking on the whole element factory. THE WIDENING MADE
+ * TO SATISFY THE GATE IS WHAT BLINDED THE GATE.
+ *
+ * So this asserts the other direction: things that MUST NOT compile, and the
+ * anti-`any` property directly. A success-only type gate is half a gate.
+ */
+test('the element factory still REJECTS what it should, and is not `any`', async () => {
+  const probe = `
+import { elements } from '${process.cwd()}/dist/index'
+import type { ElementPart } from '${process.cwd()}/dist/xin-types'
+
+// if ElementPart ever becomes \`any\` this flips to true and the assignment fails
+type IsAny<T> = 0 extends (1 & T) ? true : false
+const _notAny: IsAny<ElementPart> = false
+
+// inline handlers must still infer their event type (TS7006 if the factory
+// signature has degraded to any)
+const _btn = elements.button({ onClick: (evt) => evt.clientX })
+
+// @ts-expect-error a bare function is not an element part
+const _fn = elements.div(() => {})
+
+// NOTE: \`elements.div(new Date())\` is NOT asserted here. The review that
+// found this blocker listed it as a regression alongside the function case;
+// it is not — v1.10.0 accepted it too, because ElementProps carries an index
+// signature (tosijs#26). Asserting it would be asserting a fix nobody made.
+
+export { _notAny, _btn, _fn }
+`
+  const probePath = `${process.cwd()}/dist/.type-negative-probe.ts`
+  await Bun.write(probePath, probe)
+  const result = Bun.spawnSync(
+    [
+      'npx',
+      'tsc',
+      '--noEmit',
+      '--strict',
+      '--target',
+      'es2022',
+      '--module',
+      'esnext',
+      '--moduleResolution',
+      'bundler',
+      '--skipLibCheck',
+      probePath,
+    ],
+    { stdout: 'pipe', stderr: 'pipe' }
+  )
+  const output = result.stdout.toString() + result.stderr.toString()
+  await Bun.file(probePath)
+    .unlink?.()
+    .catch(() => {})
+  // an UNUSED @ts-expect-error is itself an error, so this fails in BOTH
+  // directions: if the rejections stop happening, and if they start over-firing
+  expect({ errors: output.trim(), exitCode: result.exitCode }).toEqual({
+    errors: '',
+    exitCode: 0,
+  })
+}, 60_000)
+
+/*
  * THE DECLARED ACCESSOR SURFACE MUST MATCH THE IMPLEMENTATION'S OWN LIST.
  *
  * `ACCESSOR_PROP_NAMES` in `xin.ts` is what the `get` trap actually serves —

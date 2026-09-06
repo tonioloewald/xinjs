@@ -67,8 +67,20 @@ Type-only. No runtime change, no bundle change.
   `div(app.name)` renders the value and keeps rendering it as state changes —
   `elements.test.ts` calls it "the most-used site" — but the type admitted only
   `Element | DocumentFragment | ElementProps | string | number`, so the
-  idiomatic spelling was a type error for every consumer. Widened to include
-  boxed proxies. Runtime unchanged; verified before the type was touched.
+  idiomatic spelling was a type error for every consumer. Widened to accept
+  `BoxedScalar<any> | TosiProps<any>`. Runtime unchanged; verified before the
+  type was touched.
+
+  **Not `BoxedProxy<any>`** — that spelling was written first and caught by
+  review before it shipped. `any` distributes through `BoxedProxy`'s
+  conditional and a union containing `any` *is* `any`, so it collapsed
+  `ElementPart` to `any` and deleted argument checking on the whole element
+  factory: `div(() => {})` began typechecking and
+  `button({ onClick: (evt) => … })` broke with `TS7006` because there was no
+  signature left to infer from. The type-surface gate could not see it —
+  it asserted only that a probe compiles, which is trivially true once
+  everything is `any`. It now also asserts what must *not* compile, and that
+  `ElementPart` is not `any`.
 
 - **The direct `.observe` on a boxed proxy was typed backwards.**
   `ProxyObserveFunc` declared `(path: string) => void`; the runtime takes a

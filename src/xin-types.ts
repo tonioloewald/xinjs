@@ -397,7 +397,19 @@ export type ElementPart<T = Element> =
   // a type narrower than the runtime it describes, invisible because no lane
   // typechecks `*.test.ts`.
   | BoxedScalar<any>
-  | BoxedProxy<any>
+  // NOT `BoxedProxy<any>`. `any` distributes through BoxedProxy's conditional
+  // — the `T extends Function` branch yields `any & …` = `any` — and a union
+  // containing `any` IS `any`. Writing it that way collapsed this entire type
+  // to `any`, which deleted argument checking on the most-used API in the
+  // library: `div(() => {})` and `div(new Date())` started typechecking, and
+  // `button({ onClick: (evt) => evt.clientX })` broke with TS7006 because
+  // there was no longer a signature to infer from. That is tosijs#36's defect
+  // (an index signature making every typo compile) reproduced one layer up,
+  // in the release that exists to fix it.
+  //
+  // TosiProps<any> covers object and array proxies without the conditional,
+  // so the union stays a union.
+  | TosiProps<any>
 export type HTMLElementCreator<T = HTMLElement> = (
   ...contents: ElementPart<T>[]
 ) => T

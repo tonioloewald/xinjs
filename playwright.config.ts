@@ -36,6 +36,10 @@ export default defineConfig({
   webServer: {
     command: 'bun start',
     env: {
+      // the browser lane runs `bun start`, whose WATCHER deletes tracked
+      // dist/ artifacts on every rebuild (tosijs-ui#130). No watching needed
+      // for a test run.
+      DEV_NO_WATCH: '1',
       PORT: String(E2E_PORT),
       HALTIJA_DEV: '0', // no haltija overlay during the Playwright run
       DEV_SKIP_PREFLIGHT: '1', // the machine-health guard would flake CI

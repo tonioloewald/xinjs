@@ -159,6 +159,39 @@ async function buildCli() {
  * currently inert — the dev server never serves them, and `tjs convert` emits
  * 527 unknown-type warnings producing them.
  */
+/**
+ * PUT BACK EVERY TRACKED dist/ ARTIFACT THIS RUN DID NOT BUILD.
+ *
+ * `buildSite()`'s prebuild does an unconditional `rm -rf dist` on EVERY run
+ * (tosijs-ui#130), and a dev run rebuilds only some of what lives there. Since
+ * `dist/` is committed in this repo, the next `git add -A` records deletions
+ * nobody made — which has happened three times, twice reaching a release
+ * commit.
+ *
+ * This lived inside `buildLibrary()` and therefore ran ONCE, on the first
+ * build. The watcher calls `rebuild()`, which is `buildSite` + docs bundle and
+ * never touches `buildLibrary` — so saving any watched file under `bun start`
+ * deleted all eight tracked bundles again with no restore, and the comment
+ * claiming the problem was "ended by not relying on remembering" was false: it
+ * still relied on remembering not to save a file while the dev server ran,
+ * which is the ordinary dev loop.
+ *
+ * Widened past the tjs pair to ANY tracked `dist/*` that is currently missing,
+ * because `dist/cli.mjs` is `bin`, not `exports`, and no publish gate covers
+ * it.
+ */
+async function restoreCommittedDist(): Promise<void> {
+  const tracked = await $`git ls-files dist`.nothrow().quiet()
+  if (tracked.exitCode !== 0) return
+  const missing = tracked.stdout
+    .toString()
+    .split('\n')
+    .filter((f) => f.trim() !== '' && !existsSync(f))
+  if (missing.length === 0) return
+  await $`git checkout -- ${missing}`.nothrow().quiet()
+  console.log(`restored ${missing.length} committed dist artifact(s)`)
+}
+
 async function buildLibrary(full = true) {
   console.time('library')
 
@@ -230,32 +263,7 @@ async function buildLibrary(full = true) {
   // CJS consumers.)
   // only the bundles this run actually produced — a dev run skips the tjs
   // pair, and smoking a file that was never built fails for the wrong reason
-  // RESTORE WHAT A DEV RUN DOES NOT REBUILD.
-  //
-  // buildSite()'s prebuild does `rm -rf dist` on EVERY run, dev server
-  // included (tosijs-ui#130), and a dev run deliberately skips the slow tjs
-  // pair — so `bun start`, and every Playwright run whose webServer is
-  // `bun start`, leaves dist/module.{debug,safe}.js deleted. `dist/` is
-  // COMMITTED in this repo, so the next `git add -A` records the deletion and
-  // the release ships two exports pointing at nothing.
-  //
-  // That happened three times: as unnoticed collateral in a build-speed
-  // commit, again in the commit that declared it fixed, and again in 1.10.1
-  // after two extra browser-lane runs. Twice it was caught only by a gate, and
-  // the gate fires at build/publish time — after the bad commit exists. A rule
-  // that says "remember to rebuild afterwards" has now failed three times, so
-  // stop relying on remembering: put the committed copies back.
-  if (!full) {
-    for (const bundle of BUNDLES.filter((b) => b.stage === 'tjs')) {
-      const file = `dist/${bundle.naming}`
-      const tracked = await $`git ls-files --error-unmatch ${file}`
-        .nothrow()
-        .quiet()
-      if (tracked.exitCode === 0 && !existsSync(file)) {
-        await $`git checkout -- ${file}`.nothrow().quiet()
-      }
-    }
-  }
+  if (!full) await restoreCommittedDist()
 
   const BUILT = full ? BUNDLES : BUNDLES.filter((b) => b.stage !== 'tjs')
   // NEVER DELETE A PUBLISHED BUNDLE THIS RUN DID NOT BUILD.
@@ -739,6 +747,8 @@ async function checkInternalLinks(): Promise<void> {
 const rebuild = async () => {
   if (!(await buildSite(config))) throw new Error('site build failed')
   await buildDocsBundle()
+  // the watcher's rm -rf dist deletes tracked artifacts it will not rebuild
+  await restoreCommittedDist()
 }
 
 const ok = await buildSite(config)
