@@ -1,5 +1,5 @@
 import { WebMCPAdapterOptions } from './webmcp';
-import type { BoxedProxy, BoxedScalar } from './xin-types';
+import type { BoxedScalar, TosiProps } from './xin-types';
 /**
  * The contract seam — tosijs stays zero-dependency, so the core doesn't know
  * any schema language; it knows a CHECK. The blessed adapter is a few lines
@@ -374,7 +374,7 @@ export declare const isAgentRefusal: (e: unknown) => e is AgentRefusalError;
  * session confused the two. A **wrong string** is still just a wrong string;
  * only the proxy form is checked, and only because it isn't a string at all.
  */
-export type AgentPathRef = string | BoxedProxy<any> | BoxedScalar<any>;
+export type AgentPathRef = string | BoxedScalar<any> | TosiProps<any>;
 /**
  * What `observe()` accepts: a path or proxy, or — under `expose: 'all'` only
  * — a pattern matching many paths, which the underlying observer has always

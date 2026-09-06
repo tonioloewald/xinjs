@@ -842,8 +842,13 @@ import {
   isBindingWrite,
 } from './dom'
 import { ElementsProxy } from './elements-types'
-import { elements, elementSet, mergeElementProps } from './elements'
-import { tosiPath } from './metadata'
+import {
+  elements,
+  elementSet,
+  mergeElementProps,
+  classifyPositional,
+  positionalWarning,
+} from './elements'
 import { validateAgainstConstraints } from './form-validation'
 import { camelToKabob, kabobToCamel } from './string-case'
 import { ElementCreator, ContentType, PartsMap } from './xin-types'
@@ -2714,22 +2719,36 @@ export abstract class Component<T = PartsMap> extends HTMLElement {
 
       if (Array.isArray(_content)) {
         const hostProps: Record<string, any> = {}
+        const _textFromContent: string[] = []
         _content = _content.filter((item) => {
-          if (
-            item instanceof Node ||
-            typeof item === 'string' ||
-            typeof item === 'number' ||
-            tosiPath(item)
-          ) {
-            return true
+          // ONE CLASSIFIER, shared with create() — see classifyPositional.
+          // These two sites drifted: the value/array/warning rules landed in
+          // create() only, so `content = [span('a'), new Date()]` dropped the
+          // Date silently and a nested array turned its INDICES into host
+          // attributes, which is verbatim the symptom the release notes call
+          // fixed. `mergeElementProps` was extracted to stop exactly this and
+          // was not enough, because the CLASSIFICATION was still duplicated.
+          const kind = classifyPositional(item)
+          const warning = positionalWarning(kind, this.tagName)
+          if (warning != null) {
+            console.warn(warning, item)
+            return false
           }
-          // SAME merge as create() — `bind` accumulates. This was a plain
-          // Object.assign, so a host-props object carrying `bind` and a
-          // spread `.tosi.listBinding()` clobbered each other and one order
-          // silently destroyed the whole list (review round 2, B1).
-          mergeElementProps(hostProps, item)
+          if (kind === 'child' || kind === 'proxy') return true
+          if (kind === 'text') {
+            _textFromContent.push(String(item))
+            return false
+          }
+          // `bind` accumulates rather than clobbering — a host-props object
+          // carrying `bind` and a spread `.tosi.listBinding()` destroyed each
+          // other otherwise (review round 2, B1).
+          mergeElementProps(
+            hostProps,
+            item instanceof Map ? Object.fromEntries(item) : item
+          )
           return false
         })
+        for (const text of _textFromContent) _content.push(text)
         for (const key of Object.keys(hostProps)) {
           elementSet(this as HTMLElement, key, hostProps[key])
         }

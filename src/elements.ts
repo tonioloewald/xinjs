@@ -613,10 +613,87 @@ const isPropsBag = (item: any): boolean => {
 /** does this value know how to render itself as text? */
 const renderableAsText = (item: any): boolean => {
   if (Array.isArray(item)) return false
+  // A FUNCTION IS NEVER A VALUE YOU MEANT TO SHOW. `Function.prototype
+  // .toString` is not `Object.prototype`'s, so functions passed the text test
+  // and rendered their own SOURCE into the DOM — silently, and in the release
+  // whose headline is "mistakes complain":
+  //   div(span)                  -> the factory's source, from a forgotten ()
+  //   div(class Foo { … })       -> the whole class body, method bodies and all
+  // Falls through to the "neither a child nor a props object" warning instead.
+  if (typeof item === 'function') return false
   const toString = (item as any).toString
   return (
     typeof toString === 'function' && toString !== Object.prototype.toString
   )
+}
+
+/**
+ * WHAT IS THIS POSITIONAL ARGUMENT? One answer, for the two places that ask.
+ *
+ * `create()` and `Component.hydrate()`'s content filter both classify the same
+ * arguments, and `mergeElementProps` was extracted precisely to keep them in
+ * step — its comment says so. They drifted anyway: the value/array/warning
+ * rules landed in `create()` only, so `content = [span('a'), new Date()]`
+ * still dropped the Date silently and a nested array still turned its INDICES
+ * into host attributes — verbatim the symptom the release notes call fixed.
+ *
+ * So the classification is the shared thing now, not just the merge.
+ *
+ * `Node`, not `Element | DocumentFragment`: hydrate() already used the wider
+ * test and it is the correct one — a `Text` or `Comment` node is legitimate
+ * content, and create() rejecting it was the narrower of two disagreeing
+ * copies.
+ */
+export type PositionalKind =
+  | 'child'
+  | 'proxy'
+  | 'text'
+  | 'props'
+  | 'array'
+  | 'unusable'
+
+export const classifyPositional = (item: any): PositionalKind => {
+  const Node = (globalThis as any).Node
+  if (
+    (Node != null && item instanceof Node) ||
+    typeof item === 'string' ||
+    typeof item === 'number'
+  ) {
+    return 'child'
+  }
+  // BEFORE the array test: `Array.isArray` is true for a Proxy over an array,
+  // so testing arrays first turned `div(app.items)` from a bound child into a
+  // warn-and-drop.
+  if (tosiPath(item)) return 'proxy'
+  if (Array.isArray(item)) return 'array'
+  // null/undefined stay the nothing-signal conditional children rely on:
+  // merged (a no-op) and silent.
+  if (item == null) return 'props'
+  if (isPropsBag(item)) return 'props'
+  if (renderableAsText(item)) return 'text'
+  return 'unusable'
+}
+
+/** the message for an argument that will do nothing, so both sites say it identically */
+export const positionalWarning = (
+  kind: PositionalKind,
+  tagName: string
+): string | undefined => {
+  const tag = tagName.toLowerCase()
+  if (kind === 'array') {
+    return (
+      `<${tag}> was passed an array as a child. Arrays are not flattened — ` +
+      `did you mean to spread it? \`${tag}(...items.map(…))\``
+    )
+  }
+  if (kind === 'unusable') {
+    return (
+      `<${tag}> was passed a value that is neither a child nor a props ` +
+      `object — it has no text form and no properties to apply, so it was ` +
+      `ignored.`
+    )
+  }
+  return undefined
 }
 
 export const mergeElementProps = (target: any, item: any): void => {
@@ -758,88 +835,30 @@ const create = (tagType: string, ...contents: ElementPart[]): HTMLElement => {
   const elt = templates[tagType].cloneNode() as HTMLElement
   const elementProps: ElementProps = {}
   for (const item of contents) {
-    if (
-      item instanceof Element ||
-      item instanceof DocumentFragment ||
-      typeof item === 'string' ||
-      typeof item === 'number'
-    ) {
+    const kind = classifyPositional(item)
+    const warning = positionalWarning(kind, elt.tagName)
+    if (warning != null) {
+      console.warn(warning, item)
+    } else if (kind === 'child') {
       if (elt instanceof HTMLTemplateElement) {
         elt.content.append(item as Node)
       } else {
         elt.append(item as Node)
       }
-    } else if (item != null && !isPropsBag(item) && renderableAsText(item)) {
-      // A VALUE, NOT A CONFIG BAG — so render it.
-      //
-      // The props branch below is `Object.assign`-shaped: handed something
-      // with no enumerable own properties it iterates nothing, succeeds, and
-      // the argument DISAPPEARS. `div(new Date())`, `div(10n)` and
-      // `div(false)` all rendered empty with no warning — silent failure, not
-      // "garbage being rejected": the API dispatches on what it is handed, and
-      // it was dispatching wrongly and saying nothing.
-      //
-      // The discriminator is the owner's: an object that is not an Element and
-      // not a plain props bag, but which knows how to render itself as text
-      // (its `toString` is not `Object.prototype`'s), is a value the caller
-      // wanted shown. Booleans and bigints reach here too — `div(false)` is
-      // `<div>false</div>`, which is what a JS programmer expects.
-      // `null`/`undefined` stay the nothing-signal that conditional children
-      // rely on, so they are excluded above and remain silent.
+    } else if (kind === 'text') {
       const text = String(item)
       if (elt instanceof HTMLTemplateElement) {
         elt.content.append(text)
       } else {
         elt.append(text)
       }
-    } else if (Array.isArray(item)) {
-      // DID YOU MEAN TO SPREAD IT? An array is not flattened on purpose —
-      // guessing would make `div(a)` and `div(...a)` mean the same thing and
-      // hide the mistake. Before this it fell through to the props branch,
-      // where the INDICES became attributes:
-      //   div([span('a')])  ->  <div 0="<span>a</span>"></div>
-      // which is what `div(items.map(…))` produced when the spread was
-      // forgotten. Documented idiom is `...items.map(…)` (Building-Apps.md).
-      console.warn(
-        `<${elt.tagName.toLowerCase()}> was passed an array as a child. ` +
-          `Arrays are not flattened — did you mean to spread it? ` +
-          `\`${elt.tagName.toLowerCase()}(...items.map(…))\``,
-        item
-      )
-    } else if (tosiPath(item)) {
+    } else if (kind === 'proxy') {
       // `elements.div(proxy)` — the most idiomatic call form in the library.
-      // This used the DEPRECATED `bindText` key, so the library warned users
-      // about API they had not written, on the most ordinary call there is.
-      // It is verbatim cause #1 of tosijs#31 and the fix originally missed it,
-      // which is why the first live example on the list-binding page still
-      // warned after the release that was named for stopping exactly that.
       elt.append(elements.span({ bind: { value: item, binding: 'text' } }))
     } else {
-      // `bind` IS ACCUMULATED, NOT OVERWRITTEN. Everything else is
-      // last-write-wins, which is right for scalar props — but a plain
-      // Object.assign silently destroyed one of two bindings the moment
-      // `.tosi.listBinding()` started emitting `bind` instead of the
-      // deprecated `bindList` key. Both orders failed, silently:
-      //   caller's bind first  -> the caller's binding never ran
-      //   listBinding first    -> the ENTIRE LIST vanished, template unconsumed
-      // A container that is both list-bound and carries its own binding (an
-      // empty-state class, an aria-label) is ordinary composition.
-      //
-      // AND SAY SO IF THERE IS NOTHING TO MERGE. Reaching here with something
-      // that is not a props bag means the merge will iterate zero properties,
-      // succeed, and drop the argument — the silent failure this whole branch
-      // was rewritten for. `new Map()` and a class instance with neither a
-      // `toString` nor enumerable fields land here. `null`/`undefined` are
-      // excluded deliberately: they are the nothing-signal conditional
-      // children rely on.
-      if (item != null && !isPropsBag(item)) {
-        console.warn(
-          `<${elt.tagName.toLowerCase()}> was passed a value that is neither ` +
-            `a child nor a props object — it has no text form and no ` +
-            `properties to apply, so it was ignored.`,
-          item
-        )
-      }
+      // `bind` IS ACCUMULATED, NOT OVERWRITTEN — a container can be
+      // list-bound AND carry its own binding; a plain Object.assign silently
+      // destroyed one of the two.
       mergeElementProps(
         elementProps,
         item instanceof Map ? Object.fromEntries(item) : item

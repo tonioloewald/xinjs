@@ -44,10 +44,16 @@ test('the element factory still REJECTS what it should, and is not `any`', async
   const probe = `
 import { elements } from '${process.cwd()}/dist/index'
 import type { ElementPart } from '${process.cwd()}/dist/xin-types'
+import type { AgentPathRef, AgentObserveRef } from '${process.cwd()}/dist/agent'
 
-// if ElementPart ever becomes \`any\` this flips to true and the assignment fails
+// if any of these ever becomes \`any\` the assignment fails. THREE addresses
+// so far: ElementPart, AgentPathRef and AgentObserveRef all collapsed the same
+// way, because \`any\` distributes through BoxedProxy's conditional and a union
+// containing \`any\` IS \`any\`. Two were found by review, one by extending this.
 type IsAny<T> = 0 extends (1 & T) ? true : false
 const _notAny: IsAny<ElementPart> = false
+const _notAnyPath: IsAny<AgentPathRef> = false
+const _notAnyObserve: IsAny<AgentObserveRef> = false
 
 // inline handlers must still infer their event type (TS7006 if the factory
 // signature has degraded to any)
@@ -61,7 +67,7 @@ const _fn = elements.div(() => {})
 // it is not — v1.10.0 accepted it too, because ElementProps carries an index
 // signature (tosijs#26). Asserting it would be asserting a fix nobody made.
 
-export { _notAny, _btn, _fn }
+export { _notAny, _notAnyPath, _notAnyObserve, _btn, _fn }
 `
   const probePath = `${process.cwd()}/dist/.type-negative-probe.ts`
   await Bun.write(probePath, probe)

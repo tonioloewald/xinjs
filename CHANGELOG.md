@@ -6,9 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 For releases before 1.6.0, see the git history (`git log`) and tags.
 
-## [1.10.1] - 2026-09-04
+## [1.11.0] - 2026-09-06
 
-Type-only. No runtime change, no bundle change.
+Public types that were wrong or unreachable, **and** a deliberate change to how
+element creators dispatch their positional arguments. `dist/` changes and the
+gzip budgets moved (+~290 gz per bundle).
+
+> **Why a minor, not the 1.10.1 this started as.** It began as a type-only
+> patch and stopped being one: `create()` and `Component.hydrate()` now render
+> values that previously vanished, treat a `Map` as props, and warn on an
+> unspread array. That is observable behaviour in the most-used API in the
+> library, so the number follows the narrative rather than the original intent.
 
 ### Changed
 

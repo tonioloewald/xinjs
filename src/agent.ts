@@ -152,7 +152,7 @@ import { contractViolation, ownContract } from './contract-check'
 import { bindings } from './bindings'
 import { propBindingKey } from './elements'
 import { webmcpAdapter, WebMCPAdapterOptions } from './webmcp'
-import type { BoxedProxy, BoxedScalar } from './xin-types'
+import type { BoxedScalar, TosiProps } from './xin-types'
 
 /**
  * The contract seam — tosijs stays zero-dependency, so the core doesn't know
@@ -552,7 +552,13 @@ const refuse = (kind: AgentRefusalKind, message: string): AgentRefusalError => {
  * session confused the two. A **wrong string** is still just a wrong string;
  * only the proxy form is checked, and only because it isn't a string at all.
  */
-export type AgentPathRef = string | BoxedProxy<any> | BoxedScalar<any>
+export type AgentPathRef = string | BoxedScalar<any> | TosiProps<any>
+// NOT `BoxedProxy<any>` — `any` distributes through its conditional and a
+// union containing `any` IS `any`, so both these types silently became `any`
+// and every verb stopped checking its argument. The identical mistake was made
+// in `ElementPart` in the same release and caught by review; this is the
+// second address. `TosiProps<any>` covers object and array proxies without the
+// conditional.
 
 /**
  * What `observe()` accepts: a path or proxy, or — under `expose: 'all'` only
