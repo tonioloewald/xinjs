@@ -1,5 +1,47 @@
 # todo
 
+## Value children that silently vanish: `div(new Date())`, `div(10n)`, `div(false)`
+
+The child/props discriminator in `elements.ts` is `string | number` for children
+and **any other object is a props bag**. So:
+
+```
+div('hello')      -> "hello"        child
+div(42)           -> "42"           child
+div(10n)          -> ""             props bag with no enumerable keys -> NOTHING
+div(new Date())   -> ""             ditto
+div(false)        -> ""             ditto
+div({title:'x'})  -> ""             props, correctly sets title
+```
+
+Three *values* land in the props branch and disappear with no warning. This is
+**silent failure**, not "garbage being accepted" — the API deliberately
+dispatches on what it is handed, and the failure is that it dispatches wrongly
+and says nothing. (A review framed it the other way; see
+`../tosijs-coding-practices/practices/model-priors.md` #12.)
+
+**Owner's expectation, recorded:** `div(false)` should render `<div>false</div>`.
+The `cond && child` form is a React idiom and is not used here, so nothing
+depends on booleans rendering as nothing — conditional children use a ternary
+with `null`/`undefined`, which already skip correctly (`div('a', null, 'b')` →
+`"ab"`).
+
+- [ ] Render **primitives** as text children: add `boolean` and `bigint`
+      alongside `string`/`number`. Unambiguous, and matches the expectation.
+- [ ] Decide `Date` deliberately. It is an object, so it falls to the props
+      branch, and `toString()` is timezone-dependent and rarely what anyone
+      wants rendered — auto-stringifying trades a silent no-op for silently
+      wrong-looking output. Options: render it anyway (JS-consistent), or warn.
+- [ ] **Warn on the residual class**, whichever is chosen: a positional
+      argument that is neither a child nor a usable props bag — not a plain
+      object (prototype is not `Object.prototype`/`null`) **and** no enumerable
+      own properties. Catches `Date`, `RegExp`, `Map`, class instances and
+      functions; leaves `{}` and real props alone. Says "this did nothing"
+      instead of doing nothing.
+
+Note `null`/`undefined` must keep rendering nothing — that is the nothing-signal
+the ternary form depends on, and it already works.
+
 ## Test-typecheck mining: where it stands, and what is left
 
 No lane typechecks `*.test.ts` (`tsconfig.json` excludes them), so the errors
