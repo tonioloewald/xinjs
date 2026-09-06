@@ -419,26 +419,23 @@ export type FragmentCreator = (
   ...contents: ElementPart<Element>[]
 ) => DocumentFragment
 export type ElementCreator<T = Element> = (...contents: ElementPart<T>[]) => T
-// WIDENED to match what `hydrate()` actually accepts. The runtime went
-// through `applyPositional` — the same classifier `create()` uses — so a
-// content array may hold values (`Date`, `bigint`, `boolean`) and boxed
-// proxies, and the component docs describe that. The TYPE was never widened
-// with it, so writing the documented shape was TS2416 on the `content`
-// property. Deliberately NOT `BoxedProxy<any>`: `any` distributes through its
-// conditional and collapses the union to `any`, which is how ElementPart,
-// AgentPathRef and AgentObserveRef each lost their checking earlier in this
-// same release.
-export type ContentPart =
-  | Element
-  | DocumentFragment
-  | string
-  | number
-  | bigint
-  | boolean
-  | BoxedScalar<any>
-  | TosiProps<any>
-  | null
-  | undefined
+// CONTENT IS ELEMENT-CREATOR ARGUMENTS. `hydrate()` runs every item through
+// `applyPositional` — the same code `create()` uses — so the accepted set is
+// by construction the same set, and this should not be a second hand-written
+// union that drifts from it.
+//
+// It was one, briefly: a partial union whose only object arm was
+// `TosiProps<any>` (24 required members), which admitted proxies and values
+// and rejected a `Date`, a plain props object and a `Map` — three of the six
+// rows in the doc table shipped in the same commit, all of which RUN
+// correctly. The probe written to catch that tested exactly the shapes the
+// partial union already admitted.
+//
+// `ElementPart` carries `ElementProps<T> | Map<string, any>`, and
+// `ElementProps` has the index signature that absorbs props bags. Aliasing is
+// the fix: one definition, so "the same code, so the two cannot drift" is true
+// of the types as well as the runtime.
+export type ContentPart = ElementPart | null | undefined
 export type ContentType = ContentPart | ContentPart[]
 
 export type ListFilter = (array: any[], needle: any) => any[]

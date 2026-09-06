@@ -1,5 +1,55 @@
 # todo
 
+## Deferred from the 1.10.1 review rounds (transferred 2026-09-06)
+
+**Filed, and then not transferred, for a whole round.** Round 4 produced 15
+follow-up checkboxes and round 5 found that zero had reached this file — the
+same failure as the minimum-headroom gate, which two rounds filed and neither
+built, and which then recurred. Filing is not tracking.
+
+### Gates whose scope is narrower than their own claim
+- [ ] `appendContentToElement` is the **fourth** site of the positional
+      contract and was left out of the unification. Currently safe because both
+      callers classify first, and its type now says so (`ResolvedContent`) —
+      but the contract lives in four places and three share code.
+- [ ] `sourceFingerprint()` hashes `src/**/*.ts` + `bin/bundles.ts` +
+      `bin/site.ts` + version. Its header implies "everything that determines
+      dist/", which also includes `tsconfig.build.json`, the bundler version
+      and `tjs-lang`'s. Narrow the claim or widen the input.
+- [ ] `FINGERPRINT_PATH` is cwd-relative while the hash is computed from an
+      absolute `PROJECT_ROOT` — they agree only when cwd is the repo root.
+- [ ] The minimum-headroom gate never measures a real artifact in the
+      `bun run build` lane (round 5 major): it runs against tsc stubs there, so
+      it is vacuous in exactly the lane that matters. **This is the third
+      "gate that does not measure what it claims" in this release.**
+
+### Cheap correctness / hygiene
+- [ ] Hoist the per-argument closures in `create()` and make
+      `positionalWarning` lazy (~3–4% on the hot path, measured).
+- [ ] Decide the export status of `classifyPositional` / `positionalWarning`
+      once, for the group — two currently have zero importers.
+- [ ] Correct the overclaim at `src/elements.test.ts:698` ("these tests are
+      what notices if a fourth site appears" — they do not; see above).
+- [ ] Print gzip **deltas** in the budget loop, not just absolutes.
+- [ ] Re-word the missing-fingerprint branch in `check-publish-tag.ts`.
+- [ ] A string `content` in a shadow-DOM component erases the component's own
+      stylesheet (round 5 major) — `appendContentToElement` sets
+      `textContent` on the shadow root.
+
+### Process / elsewhere
+- [ ] `UPSTREAM.md` is one gate behind on the tosijs-ui#130 defence.
+- [ ] `reviews/AAR.md` does not exist; every round has asked for a line in it.
+- [ ] Push the two transferable generalisations to
+      `../tosijs-coding-practices` (gate-scope, and filing≠tracking).
+- [ ] Add the post-browser-lane rebuild inline to CLAUDE.md's numbered
+      Releasing list.
+- [ ] Consider adding `docs` + `coverage` to the always-on lens set for
+      releases touching rendered output — they owned most blockers in rounds
+      4 and 5 and were not run either time.
+- [ ] **The composite `v1.10.0…HEAD` has never been reviewed as a whole** —
+      every round reviewed a remediation diff. Worth one pass before the next
+      release, not this one.
+
 ## Mutation testing as a lane — the class fix I have NOT built
 
 Three of four round-4 items were "the guard did not guard". Two now have

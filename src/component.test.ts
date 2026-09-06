@@ -2696,3 +2696,65 @@ describe('a proxy in a content array is a LIVE child at its own position', () =>
     el.remove()
   })
 })
+
+describe('SINGLE (non-array) content is classified too', () => {
+  /*
+   * The eight-line normalisation in hydrate() had zero runtime tests, and
+   * round 5 mutation-proved it: deleting it left all 990 tests green while
+   * `content = proxy` and `content = 10n` went back to THROWING
+   * "expect text content or document node".
+   *
+   * Both tests added in the same commit used content ARRAYS — the
+   * pre-existing branch, not the new one. That is the failure class this
+   * repo's own TODO.md describes, repeated one commit after writing it down:
+   * a fix landed with no test exercising the site it changed.
+   *
+   * Each assertion below fails with the normalisation removed.
+   */
+  const raf = () => new Promise((r) => requestAnimationFrame(r))
+
+  test('a bare proxy as content is a live child', async () => {
+    const { singleProxy } = tosi({ singleProxy: { name: 'Alice' } })
+    await updates()
+    class SingleProxy extends (Component as any) {
+      static preferredTagName = 'single-proxy-content'
+      content = (singleProxy as any).name
+    }
+    const el = (SingleProxy as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    await updates()
+    expect(el.textContent).toBe('Alice')
+    expect(el.querySelector('.-tosi-data')).not.toBe(null)
+    ;(singleProxy as any).name = 'Bob'
+    await updates()
+    await raf()
+    expect(el.textContent).toBe('Bob')
+    el.remove()
+  })
+
+  test('a bare value as content renders as text', async () => {
+    class SingleValue extends (Component as any) {
+      static preferredTagName = 'single-value-content'
+      content = 10n as any
+    }
+    const el = (SingleValue as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    expect(el.textContent).toBe('10')
+    el.remove()
+  })
+
+  test('a bare props object as content applies to the host', async () => {
+    class SingleProps extends (Component as any) {
+      static preferredTagName = 'single-props-content'
+      content = { title: 'from content' } as any
+    }
+    const el = (SingleProps as any).elementCreator()() as any
+    document.body.append(el)
+    await raf()
+    expect(el.getAttribute('title')).toBe('from content')
+    expect(el.childNodes.length).toBe(0)
+    el.remove()
+  })
+})
