@@ -6,17 +6,26 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 For releases before 1.6.0, see the git history (`git log`) and tags.
 
-## [1.11.0] - 2026-09-06
+## [1.10.1] - 2026-09-06
 
-Public types that were wrong or unreachable, **and** a deliberate change to how
-element creators dispatch their positional arguments. `dist/` changes and the
-gzip budgets moved (+~290 gz per bundle).
+Public types that were wrong or unreachable, and **silent failures in element
+creators**: positional arguments that rendered nothing now render, or say why
+they did not. `dist/` and the gzip budgets changed (+~290 gz per bundle).
 
-> **Why a minor, not the 1.10.1 this started as.** It began as a type-only
-> patch and stopped being one: `create()` and `Component.hydrate()` now render
-> values that previously vanished, treat a `Map` as props, and warn on an
-> unspread array. That is observable behaviour in the most-used API in the
-> library, so the number follows the narrative rather than the original intent.
+> **Why a patch.** Every behaviour change here fixes a bug rather than adding
+> functionality — `div(new Date())` producing an empty `<div>` was not a
+> contract anyone relied on, and nobody passing a Date was expecting nothing.
+> Warnings are additive, `Map`-as-props is additive, and the type changes are
+> corrections. This project's policy makes patch the default even when the
+> public API grows, and reserves a minor for a coherent body of new
+> functionality — which this is not (`practices/releasing.md`).
+>
+> The one change that is not purely a fix is `div(false)`, which now renders
+> `false` instead of nothing. Checked before calling it safe: **zero**
+> occurrences of the `cond && child` shape in tosijs-ui's shipped bundle and
+> **zero** in this repo's own docs and examples. If you do rely on a falsy
+> positional argument rendering nothing, use `null`/`undefined`, which remain
+> the nothing-signal.
 
 ### Changed
 
