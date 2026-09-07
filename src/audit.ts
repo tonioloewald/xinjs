@@ -42,11 +42,18 @@ the element — or hand the pair to `schematicSVG`'s `flags` to *draw* them.
 > keeps only what it uniquely knows (the accessible name, the contrast
 > math) and the rule wording.
 >
-> Adopting the shared rule changed some verdicts, deliberately, in both
-> directions — see the 1.11.0 CHANGELOG entry. The one exemption this module
-> still applies on top is **zero-size**: a `0×0` element is hidden, not a
-> small target, and `targetSizeFinding` (correctly, for a renderer) has no
-> opinion about that.
+> Adopting the shared rule changed five verdicts, deliberately, in both
+> directions — see the 1.11.0 CHANGELOG entry.
+>
+> **It is one definition of evidence, not one set of answers.** Three questions
+> a *drawing* answers differently from a *lint* are adjusted here, by handing
+> the shared predicate an adjusted record rather than by keeping a copy of it:
+> **zero-size** (a `0×0` element is hidden, not a small target — the renderer
+> draws nothing either way), **list containers** that are themselves controls
+> (floorplan#7), and **producer `flags`**, which a renderer may honour because
+> it already drew them and a lint may not because it never reads them
+> (floorplan#8). All three are filed upstream; if they land, these become
+> no-ops.
 
 > **EXPERIMENTAL.** Ships with the agent surface; rules and shapes may change.
 */
@@ -90,6 +97,42 @@ export interface AuditOptions {
   contrastRatio?: number
   /** rule ids to skip */
   exclude?: string[]
+}
+
+/**
+ * THE RECORD AS A LINT MUST SEE IT.
+ *
+ * The shared rules answer a RENDERER's questions, and two of those answers are
+ * wrong for an audit — not because the renderer is wrong, but because it has a
+ * compensating half that a lint does not:
+ *
+ *  - **`flags`** (tosijs-floorplan#8). Any producer flag whose `kind` contains
+ *    `"target"` suppresses the target-size finding. That is right for a
+ *    drawing — it already painted the producer's flag and must not double-mark
+ *    — but `auditAccessibility` never reads `flags` into `findings`, so
+ *    suppression here means reporting *nothing*. Worse, `auditFlags()` emits
+ *    `kind: 'target-size'`, so the documented draw-then-re-audit round trip
+ *    would clear the very elements it just flagged. The audit never passes
+ *    `flags` down. (This also sidesteps floorplan#12: a flag with no `kind`
+ *    throws inside the shared rule, and we no longer hand it one.)
+ *
+ *  - **`list`** (tosijs-floorplan#7). `isGround` makes list-ness decisive, so a
+ *    list-bound element that IS the control — `select({bindList, bindValue})`,
+ *    exactly what 1.10.1 shipped a fix to enable — is classified as structure
+ *    and goes silent on THREE rules, two of them errors. For a lint, direct
+ *    evidence on the element wins over its container role.
+ *
+ * Both adjustments COMPOSE the shared predicate over an adjusted record; they
+ * do not re-implement it. That distinction is the whole point of floorplan#4 —
+ * there is still exactly one definition of what evidence *is*, and this file
+ * contains none of it. Both are forward-compatible: if upstream takes #7 and
+ * #8, these become no-ops rather than a second opinion.
+ */
+const auditView = (w: AgentWiringRecord): AgentWiringRecord => {
+  const { flags: _flags, ...rest } = w as any
+  if (rest.list == null || rest.structural === true) return rest
+  const { list: _list, ...withoutList } = rest
+  return isInteractive(withoutList) ? withoutList : rest
 }
 
 const accessibleName = (w: AgentWiringRecord): string =>
@@ -182,7 +225,11 @@ export const auditAccessibility = (
       if (enabled(rule))
         findings.push({ rule, severity, message, index, record: w })
     }
-    const interactive = isInteractive(w)
+    // the two shared rules see the audit's view; every MESSAGE and the
+    // `record` on each finding keep the original, so a caller still gets back
+    // exactly what it handed in
+    const view = auditView(w)
+    const interactive = isInteractive(view)
     const name = accessibleName(w)
 
     if (interactive && name === '' && w.value === undefined) {
@@ -238,7 +285,7 @@ export const auditAccessibility = (
     // closed, one level up. tosijs-floorplan#9 asks for it to move in.
     const tooSmall =
       w.bounds != null && w.bounds.width > 0 && w.bounds.height > 0
-        ? targetSizeFinding(w, targetSize)
+        ? targetSizeFinding(view, targetSize)
         : null
     if (tooSmall != null) {
       add(

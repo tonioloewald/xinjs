@@ -6,20 +6,13 @@ Report: `reviews/1.11.0-preminor.md`. Both majors are **upstream-gated** —
 `src/schematic.ts` is machine-vendored and carries a DO-NOT-EDIT banner — so
 each is filed on tosijs-floorplan and needs a local decision here.
 
-### The two majors: local mitigation pending upstream
-- [ ] **M1 / floorplan#7 — a list-bound element that IS the control audits as
-      structure.** `select({bindList, bindValue})` — the exact shape tosijs
-      1.10.1 shipped a fix to enable — now returns `[]`, silencing
-      `anonymous-affordance` and `missing-role` (**both error**) as well as
-      `target-size`. Decide: local override in `audit.ts` (the 0×0 precedent),
-      or wait for upstream. Add a pin built from a real `describe()` of a
-      list-bound `<select>`, not a hand-written record.
-- [ ] **M2 / floorplan#8 — producer `flags` silence the audit's own rule.**
-      Any `kind` containing `"target"` suppresses the finding, and
-      `auditFlags()` emits `kind: 'target-size'` — so the documented
-      draw-then-re-audit flow clears the elements it just flagged. Tests
-      wanted: the round trip must still report; a foreign `{kind:'target-ok'}`
-      must not suppress.
+### The two majors — FIXED locally, still filed upstream
+Both are now handled by `auditView()` in `src/audit.ts`, which composes the
+shared predicate over an adjusted record (M1 = floorplan#7, M2 = floorplan#8,
+and #12 falls out for free). Pinned by 8 tests, 5 of which fail with
+`auditView` neutered to the identity function; the other 3 are controls.
+- [ ] Re-check when floorplan #7/#8 land: the local adjustments should become
+      no-ops, and `auditView` can shrink to the 0×0 guard (#9) or vanish.
 
 ### Coverage the release did not add
 - [ ] `src/schematic.test.ts` is **untouched** against a 267-line vendor

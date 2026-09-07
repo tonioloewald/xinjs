@@ -46,9 +46,6 @@ Looser (now clean, previously flagged):
   forged arrow in `text` or an unrecognised key still counts as evidence.
   tosijs's own `describe()` strips arrows at every harvest, so this is reachable
   only with a FOREIGN map. Filed upstream.
-- **A list container is ground.** It is wired — the collection binds there —
-  but its *items* are the affordances, so it is no longer audited as a control
-  too small to hit.
 - **An empty `href` is not a destination.** `href != null` counted; `href` must
   now be a non-empty string.
 
@@ -56,24 +53,50 @@ Looser (now clean, previously flagged):
 small to hit, and the shared rule (correctly, for a renderer) has no opinion
 about that — so `audit.ts` keeps that one condition itself, and says so.
 
-There is a **seventh** change, and it is a regression rather than an
-improvement: `targetSizeFinding` honours the renderer's producer-flag
-supersession, so any `flags` entry whose `kind` merely *contains* `"target"`
-silences the rule. That is right for a renderer — it already drew the
-producer's flag and must not double-mark — and wrong for a lint, which never
-reads `flags` into its findings and so simply reports nothing. It is reachable
-two ways: a foreign map disables the rule with one substring, and `auditFlags()`
-emits `kind: 'target-size'`, so the documented draw-then-re-audit flow returns
-a clean verdict on the very elements it just flagged. Filed upstream; tosijs's
-own `describe()` never emits `flags`.
-
-**The seven changes are pinned by tests written to fail against the 1.10.1
+**The five changes are pinned by tests written to fail against the 1.10.1
 predicate, and watched doing so** — the existing audit suite went 11/11 green
 straight through the adoption, reaching not one changed case. Two of the pins
 were themselves no-ops on first writing (their fixtures were cleared by a
 *different* clause of the same predicate, so they passed against 1.10.1 too);
 a pre-release review caught that, and both were rebuilt around fixtures that
 discriminate.
+
+### Fixed — where a lint and a drawing legitimately differ
+
+Adopting the shared rule wholesale imported **two silences** that are correct
+for a renderer and wrong for an audit. Both were caught by the pre-release
+review; both are fixed here, and both are also filed upstream because the
+better home for them is tosijs-floorplan.
+
+- **A list-bound element that IS the control is audited again**
+  ([floorplan#7](https://github.com/tonioloewald/tosijs-floorplan/issues/7)).
+  `isGround` makes list-ness decisive, so `select({bindList, bindValue})` — the
+  exact shape 1.10.1 shipped a fix to *enable* — was classified as structure
+  and went silent on **three** rules, two of them errors. A bare `<ul
+  bindList>` is still ground; direct evidence on the element now wins over its
+  container role.
+- **Producer `flags` no longer silence the audit's own rule**
+  ([floorplan#8](https://github.com/tonioloewald/tosijs-floorplan/issues/8)).
+  Any flag whose `kind` merely *contains* `"target"` suppressed the finding.
+  Right for a drawing, which already painted the flag and must not double-mark;
+  wrong for a lint, which never reads `flags` into its findings and so just
+  reported nothing. `auditFlags()` emits `kind: 'target-size'`, so the
+  documented draw-then-re-audit flow was clearing the very elements it had just
+  flagged. Incidentally closes
+  [floorplan#12](https://github.com/tonioloewald/tosijs-floorplan/issues/12) —
+  a flag with no `kind` used to throw out of `auditAccessibility()`.
+
+Both are a single `auditView()` that **composes** the shared predicate over an
+adjusted record — it re-implements nothing, so there is still exactly one
+definition of what evidence *is*, and `audit.ts` contains none of it. If
+upstream takes #7 and #8 these become no-ops rather than a second opinion. The
+`record` on every finding is the original, unadjusted one.
+
+**These two were regressions this release introduced**, which is why the
+verdict list above is five and not seven: "a list container is ground" was
+never an improvement, and against 1.10.1 it is not even a change — 1.10.1 also
+called a bare container non-interactive, so the only records list-ness ever
+decided were the ones carrying real evidence.
 
 ### Changed — schematic rendering
 

@@ -112,11 +112,17 @@ contradicting each other on real elements. Both now come from
 construction. <strong>Geometry is judged where the geometry lives</strong>; this module
 keeps only what it uniquely knows (the accessible name, the contrast
 math) and the rule wording.</p>
-<p>Adopting the shared rule changed some verdicts, deliberately, in both
-directions — see the 1.11.0 CHANGELOG entry. The one exemption this module
-still applies on top is <strong>zero-size</strong>: a <code>0×0</code> element is hidden, not a
-small target, and <code>targetSizeFinding</code> (correctly, for a renderer) has no
-opinion about that.</p>
+<p>Adopting the shared rule changed five verdicts, deliberately, in both
+directions — see the 1.11.0 CHANGELOG entry.</p>
+<p><strong>It is one definition of evidence, not one set of answers.</strong> Three questions
+a <em>drawing</em> answers differently from a <em>lint</em> are adjusted here, by handing
+the shared predicate an adjusted record rather than by keeping a copy of it:
+<strong>zero-size</strong> (a <code>0×0</code> element is hidden, not a small target — the renderer
+draws nothing either way), <strong>list containers</strong> that are themselves controls
+(floorplan#7), and <strong>producer <code>flags</code></strong>, which a renderer may honour because
+it already drew them and a lint may not because it never reads them
+(floorplan#8). All three are filed upstream; if they land, these become
+no-ops.</p>
 </blockquote>
 <blockquote>
 <p><strong>EXPERIMENTAL.</strong> Ships with the agent surface; rules and shapes may change.</p>

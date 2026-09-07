@@ -316,28 +316,14 @@ describe('shared interactivity/target-size rule (floorplan#4)', () => {
       ).toContain('target-size')
     })
 
-    test('a list container is ground, not an affordance', () => {
-      // it is wired — the collection binds there — but its ITEMS are the
-      // affordances. The old rule made the container itself a small target.
-      //
-      // THE EVIDENCE MUST SIT IN A BINDABLE FIELD. This fixture originally
-      // put the arrow in `label`, which the forged-arrow change closes on a
-      // DIFFERENT clause — so it passed with the list rule deleted and pinned
-      // nothing. `value` is bindable, so only the list clause can clear it.
-      const container = {
-        tag: 'div',
-        list: { path: 'app.rows' },
-        value: `x ${BOUND_TWO_WAY} app.q`,
-        bounds: at(20, 20),
-      }
-      expect(rules(container)).toEqual([])
-
-      // …and the control that proves it is the LIST clause doing the work,
-      // not the bindable-field narrowing. The rule lives in the vendored
-      // (DO-NOT-EDIT) schematic, so it cannot be mutated out; the same record
-      // without `list` is the next best isolation.
-      const { list: _dropped, ...notAList } = container
-      expect(rules(notAList)).toContain('target-size')
+    test('a bare list container is still ground — and that is NOT new', () => {
+      // An invariant, not a verdict change: 1.10.1 also called this
+      // non-interactive (no handlers, no href, no arrow anywhere). Kept as a
+      // guard that the auditView adjustment below did not resurrect plain
+      // containers.
+      expect(
+        rules({ tag: 'ul', list: { path: 'app.rows' }, bounds: at(20, 20) })
+      ).toEqual([])
     })
 
     test('an empty href is not a destination', () => {
@@ -375,5 +361,122 @@ describe('shared interactivity/target-size rule (floorplan#4)', () => {
         bounds: at(0, 0),
       })
     ).toEqual([])
+  })
+})
+
+/*
+ * THE AUDIT'S OWN VIEW OF A RECORD (tosijs-floorplan#7 / #8).
+ *
+ * Two of the shared rules answer a RENDERER's question, and a lint needs the
+ * other answer. `auditView()` composes the shared predicate over an adjusted
+ * record — it re-implements nothing — so there is still one definition of what
+ * evidence IS. These pin both, and both were found by the 1.11.0 pre-release
+ * review as regressions introduced by the adoption itself.
+ */
+describe('auditView — where a lint and a drawing differ', () => {
+  const at = (w: number, h: number) => ({ x: 0, y: 0, width: w, height: h })
+  const rules = (rec: any): string[] =>
+    auditAccessibility(map([rec]))
+      .findings.map((f) => f.rule)
+      .sort()
+
+  describe('#7 — a list-bound element that IS the control', () => {
+    test('<select> with bindList AND bindValue is audited, not skipped', () => {
+      // exactly the shape tosijs 1.10.1 shipped a fix to ENABLE. Under the
+      // bare shared rule it returns [] — list-ness is decisive — which
+      // silences target-size AND two error-severity rules.
+      expect(
+        rules({
+          tag: 'select',
+          list: { path: 'app.options', idPath: 'id' },
+          value: `b ${BOUND_TWO_WAY} app.choice`,
+          bounds: at(20, 20),
+        })
+      ).toContain('target-size')
+    })
+
+    test('the error-severity rules come back too, not just target-size', () => {
+      // the review's completeness gap: `interactive` gates THREE rules and
+      // every other test here asserts only the warn-level one. A nameless,
+      // role-less, editable list-bound div trips all three — `editable` is
+      // edit evidence without being `contentEditable`, which missing-role
+      // deliberately exempts, and carrying no `value` leaves
+      // anonymous-affordance free to fire.
+      expect(
+        rules({
+          tag: 'div',
+          list: { path: 'app.rows' },
+          editable: true,
+          bounds: at(20, 20),
+        })
+      ).toEqual(['anonymous-affordance', 'missing-role', 'target-size'])
+    })
+
+    test('a forged arrow does NOT resurrect a container', () => {
+      // the control: auditView must not undo the identity-field narrowing.
+      expect(
+        rules({
+          tag: 'div',
+          list: { path: 'app.rows' },
+          label: `x ${BOUND_TWO_WAY} y`,
+          bounds: at(20, 20),
+        })
+      ).toEqual([])
+    })
+
+    test('structural stays ground even with evidence and a list', () => {
+      expect(
+        rules({
+          tag: 'div',
+          structural: true,
+          list: { path: 'app.rows' },
+          value: `x ${BOUND_TWO_WAY} app.q`,
+          bounds: at(20, 20),
+        })
+      ).toEqual([])
+    })
+  })
+
+  describe('#8 — producer flags do not silence the lint', () => {
+    const base = {
+      tag: 'button',
+      on: { click: 'app.go' },
+      label: 'Go',
+      bounds: at(10, 10),
+    }
+
+    test('a foreign flag cannot suppress the finding', () => {
+      expect(
+        rules({ ...base, flags: [{ kind: 'target-ok', label: 'x' }] })
+      ).toContain('target-size')
+    })
+
+    test('THE ROUND TRIP: auditFlags output fed back must still report', () => {
+      // auditFlags() emits `kind: finding.rule` — literally 'target-size' —
+      // and the docs say to hand findings to the renderer as `flags`. Any tool
+      // that draws findings and re-audits must not get a clean bill.
+      // auditFlags returns Record<index, flag[]> — flags for record 0
+      const flags = auditFlags(auditAccessibility(map([base])))[0]
+      expect(flags.some((f) => f.kind === 'target-size')).toBe(true)
+      expect(rules({ ...base, flags })).toContain('target-size')
+    })
+
+    test('a flag with no `kind` does not crash the audit', () => {
+      // floorplan#12: `f.kind.toLowerCase()` throws inside the shared rule on
+      // a malformed foreign map. The audit never hands it flags at all.
+      expect(() =>
+        rules({ ...base, flags: [{ label: 'no kind' }] })
+      ).not.toThrow()
+    })
+
+    test('flags are not stripped from the RETURNED record', () => {
+      // the adjustment is for the predicates only — a caller gets back
+      // exactly what it handed in.
+      const withFlags = { ...base, flags: [{ kind: 'contrast', label: 'x' }] }
+      const rep = auditAccessibility(map([withFlags]))
+      expect((rep.findings[0].record as any).flags).toEqual([
+        { kind: 'contrast', label: 'x' },
+      ])
+    })
   })
 })
