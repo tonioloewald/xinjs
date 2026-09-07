@@ -319,20 +319,34 @@ describe('shared interactivity/target-size rule (floorplan#4)', () => {
     test('a list container is ground, not an affordance', () => {
       // it is wired — the collection binds there — but its ITEMS are the
       // affordances. The old rule made the container itself a small target.
-      expect(
-        rules({
-          tag: 'div',
-          list: { path: 'app.rows' },
-          label: `x ${BOUND_TWO_WAY} y`,
-          bounds: at(20, 20),
-        })
-      ).toEqual([])
+      //
+      // THE EVIDENCE MUST SIT IN A BINDABLE FIELD. This fixture originally
+      // put the arrow in `label`, which the forged-arrow change closes on a
+      // DIFFERENT clause — so it passed with the list rule deleted and pinned
+      // nothing. `value` is bindable, so only the list clause can clear it.
+      const container = {
+        tag: 'div',
+        list: { path: 'app.rows' },
+        value: `x ${BOUND_TWO_WAY} app.q`,
+        bounds: at(20, 20),
+      }
+      expect(rules(container)).toEqual([])
+
+      // …and the control that proves it is the LIST clause doing the work,
+      // not the bindable-field narrowing. The rule lives in the vendored
+      // (DO-NOT-EDIT) schematic, so it cannot be mutated out; the same record
+      // without `list` is the next best isolation.
+      const { list: _dropped, ...notAList } = container
+      expect(rules(notAList)).toContain('target-size')
     })
 
     test('an empty href is not a destination', () => {
-      expect(
-        rules({ tag: 'a', href: '', label: 'Nowhere', bounds: at(20, 20) })
-      ).toEqual([])
+      // ALSO originally a no-op: with `label: 'Nowhere'` the record audits
+      // clean under BOTH predicates (a name suppresses anonymous-affordance,
+      // and <a> is semantic so missing-role never fires). Nameless is the
+      // fixture that can tell the two apart — 1.10.1 called it interactive on
+      // `href != null` and raised two findings.
+      expect(rules({ tag: 'a', href: '', bounds: at(20, 20) })).toEqual([])
     })
   })
 

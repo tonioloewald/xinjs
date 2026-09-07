@@ -1,5 +1,77 @@
 # todo
 
+## Deferred from the 1.11.0 pre-minor review (GO_WITH_FOLLOWUPS, 0 blockers)
+
+Report: `reviews/1.11.0-preminor.md`. Both majors are **upstream-gated** —
+`src/schematic.ts` is machine-vendored and carries a DO-NOT-EDIT banner — so
+each is filed on tosijs-floorplan and needs a local decision here.
+
+### The two majors: local mitigation pending upstream
+- [ ] **M1 / floorplan#7 — a list-bound element that IS the control audits as
+      structure.** `select({bindList, bindValue})` — the exact shape tosijs
+      1.10.1 shipped a fix to enable — now returns `[]`, silencing
+      `anonymous-affordance` and `missing-role` (**both error**) as well as
+      `target-size`. Decide: local override in `audit.ts` (the 0×0 precedent),
+      or wait for upstream. Add a pin built from a real `describe()` of a
+      list-bound `<select>`, not a hand-written record.
+- [ ] **M2 / floorplan#8 — producer `flags` silence the audit's own rule.**
+      Any `kind` containing `"target"` suppresses the finding, and
+      `auditFlags()` emits `kind: 'target-size'` — so the documented
+      draw-then-re-audit flow clears the elements it just flagged. Tests
+      wanted: the round trip must still report; a foreign `{kind:'target-ok'}`
+      must not suppress.
+
+### Coverage the release did not add
+- [ ] `src/schematic.test.ts` is **untouched** against a 267-line vendor
+      change. Four 0.4.0 behaviours are covered only by upstream tests that do
+      not run in our gates — including the `flagColor` prototype-chain fix (a
+      security fix with no regression test here). A golden-SVG comparison
+      would also settle the "byte-identical to 0.3.0" claim we currently
+      repeat rather than measure.
+- [ ] `src/entries.test.ts` and `src/type-surface.test.ts` are untouched, so
+      no gate observed that the release's headline predicate is reachable from
+      no published entry point (see below).
+- [ ] The `isInteractive` swap changes **three** rules, and every new test
+      asserts only `target-size`. The error-severity deltas
+      (`anonymous-affordance`, `missing-role`) are undescribed and unpinned.
+- [ ] Pin that a read-only `describe()` produces no "blind map" note
+      (floorplan#10).
+- [ ] Pin a forged arrow in `text` — that is where the class lands now
+      (floorplan#11).
+
+### Cheap, decided, not yet done
+- [ ] **Re-export the shared predicate.** `src/index-agent.ts` names only
+      `schematicSVG`/`rasterizeSVG`/`boundsOf`, so `isInteractive`,
+      `targetSizeFinding`, `TARGET_SIZE_DEFAULT`, `schematic()` and
+      `SchematicResult` reach no consumer — "one implementation" stops at this
+      repo's boundary, and a downstream must re-implement or install a second
+      copy of tosijs-floorplan. Already linked in, so ~0 bytes. **A minor is
+      the release where this is free.** Mind the explicit-export-list hazard.
+- [ ] `BOUND_TWO_WAY`/`BOUND_TO_DOM` are now defined **twice** in `src/` —
+      `agent.ts` (what `describe()` emits) and `schematic.ts` (what the audit
+      now matches against). Two copies of the exact constant whose duplication
+      *was* the mechanism of floorplan#4. One line closes it:
+      `expect(agentTwoWay).toBe(schematicTwoWay)`.
+- [ ] Guard `f?.kind` where the audit reaches producer flags (floorplan#12) —
+      a malformed foreign map currently throws out of `auditAccessibility`.
+- [ ] Print gzip **deltas** in the budget loop. The ceiling tracks growth
+      upward by policy, so only a spike larger than the slack can ever fire:
+      `module.js` is +6.3% gz over six releases while the ceiling moved four
+      times. ~5 lines from data the build already holds (`dist/` is committed,
+      so `git show HEAD:dist/<f>` is available). *Re-measure the tag-by-tag
+      numbers before acting — the review did not verify them.*
+- [ ] `src/agent.ts` structural-tier heading harvest is the one `describe()`
+      text site that does not `stripArrows`, under a docstring claiming there
+      is no exception. Inert today; do it in whatever commit next touches
+      `agent.ts`.
+- [ ] `auditAccessibility` computes `isInteractive(w)` and then
+      `targetSizeFinding(w, …)` recomputes it; `hasTwoWayBinding` does
+      `Object.entries` where 1.10.1 did `Object.values`. Measurable regression
+      on the code this diff touched. Probably not worth fixing — decide once.
+- [ ] Clear the 15 stale `Verdict: BLOCK` stamps in `reviews/` (all resolved,
+      never marked `**STATUS: CLEARED**`). Tier 0 warns on every run, which is
+      noise that will mask a real one.
+
 ## Deferred from the 1.10.1 review rounds (transferred 2026-09-06)
 
 **Filed, and then not transferred, for a whole round.** Round 4 produced 15

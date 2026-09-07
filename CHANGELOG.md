@@ -36,11 +36,16 @@ Stricter (now flagged, previously clean):
 
 Looser (now clean, previously flagged):
 
-- **A forged arrow confers nothing.** The old predicate scanned *every* string
-  property for the two-way binding glyph, so user-controlled text in a `label`
-  or `placeholder` could dress an inert `<div>` as a control. Identity fields
+- **A forged arrow in an IDENTITY field confers nothing.** The old predicate
+  scanned *every* string property for the two-way binding glyph, so
+  user-controlled text in a `label` or `placeholder` could dress an inert
+  `<div>` as a control. The eleven never-bindable fields
   (`tag`/`id`/`part`/`role`/`label`/`placeholder`/`type`/`description`/`href`/
-  `ref`/`image`) are never bindable and are no longer scanned.
+  `ref`/`image`) are no longer scanned. **This narrows the hole; it does not
+  close it** — the record shape is open (`[boundProp: string]: unknown`), so a
+  forged arrow in `text` or an unrecognised key still counts as evidence.
+  tosijs's own `describe()` strips arrows at every harvest, so this is reachable
+  only with a FOREIGN map. Filed upstream.
 - **A list container is ground.** It is wired — the collection binds there —
   but its *items* are the affordances, so it is no longer audited as a control
   too small to hit.
@@ -51,16 +56,38 @@ Looser (now clean, previously flagged):
 small to hit, and the shared rule (correctly, for a renderer) has no opinion
 about that — so `audit.ts` keeps that one condition itself, and says so.
 
-**These six changes are pinned by tests written to fail against the 1.10.1
+There is a **seventh** change, and it is a regression rather than an
+improvement: `targetSizeFinding` honours the renderer's producer-flag
+supersession, so any `flags` entry whose `kind` merely *contains* `"target"`
+silences the rule. That is right for a renderer — it already drew the
+producer's flag and must not double-mark — and wrong for a lint, which never
+reads `flags` into its findings and so simply reports nothing. It is reachable
+two ways: a foreign map disables the rule with one substring, and `auditFlags()`
+emits `kind: 'target-size'`, so the documented draw-then-re-audit flow returns
+a clean verdict on the very elements it just flagged. Filed upstream; tosijs's
+own `describe()` never emits `flags`.
+
+**The seven changes are pinned by tests written to fail against the 1.10.1
 predicate, and watched doing so** — the existing audit suite went 11/11 green
-straight through the adoption, reaching not one changed case.
+straight through the adoption, reaching not one changed case. Two of the pins
+were themselves no-ops on first writing (their fixtures were cleared by a
+*different* clause of the same predicate, so they passed against 1.10.1 too);
+a pre-release review caught that, and both were rebuilt around fixtures that
+discriminate.
 
 ### Changed — schematic rendering
 
-`src/schematic.ts` is re-vendored from tosijs-floorplan 0.4.0. Maps with none
-of the new constructs render byte-identical to 0.3.0; `href` now draws as an
-affordance, and captions containing arrow tokens are neutralized at one choke
-point (a forged arrow no longer earns the two-way badge). Full detail in
+`src/schematic.ts` is re-vendored from tosijs-floorplan 0.4.0. `href` now draws
+as an affordance, and caption text is neutralized at one choke point rather
+than on two of the paths that reach it. Upstream reports that maps using none
+of the new constructs render byte-identical to 0.3.0; **that is upstream's
+measurement, not ours** — this repo has no golden-SVG comparison, and
+`src/schematic.test.ts` is untouched against a 267-line vendor change. Tracked
+in `TODO.md`.
+
+Note the neutralization is a caption-rendering fix, **not** a fix to what
+counts as a binding: a forged arrow in a bindable field still earns the badge
+(see the identity-field note above). Full detail in
 [tosijs-floorplan's CHANGELOG](https://github.com/tonioloewald/tosijs-floorplan/blob/main/CHANGELOG.md).
 
 ## [1.10.1] - 2026-09-06

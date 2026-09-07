@@ -332,7 +332,8 @@ issues (repo redirects post-rename), mirrored here. Adopting a new
 version = bump the devDep, `bun update`, rebuild, sync any output-truth
 tests deliberately.
 
-### 🚧 FILED — Provenance-arrow parsing is forgeable from data (tosijs 1.8.0 SEC-8)
+### ✅ RESOLVED (NARROWED) — tosijs-floorplan 0.4.0, adopted in tosijs 1.11.0 (2026-09-06)
+### Provenance-arrow parsing is forgeable from data (tosijs 1.8.0 SEC-8)
 
 **Issue:** https://github.com/tonioloewald/tosijs-floorplan/issues/5
 The renderer splits `"<value> ⟷ <path>"` with `indexOf` and decides
@@ -345,9 +346,22 @@ tosijs fixed the producer side in 1.8.0 (both tokens are neutralized to
 maps it did not generate — over a wire, from an older tosijs, or from
 another producer — so the parse should be robust on its own:
 `lastIndexOf`, and decide editability from the arrow at that position
-rather than from a bare `includes`. **Filed upstream.**
+rather than from a bare `includes`.
 
-### 🚧 FILED — Target-size + "is interactive" implemented twice, and they disagree
+**0.4.0 does the `lastIndexOf` split and neutralizes every caption source at
+one choke point — but it NARROWS this hole rather than closing it, and the
+close-out should say so.** The binding scan now skips eleven never-bindable
+identity fields, which is a denylist over an OPEN key set
+(`SchematicRecord` ends in `[boundProp: string]: unknown`): a forged arrow in
+`text`, `title` or any unrecognised key is still read as evidence and still
+earns the `↔` badge. Verified against the adopted vendor. Reachable only with
+a FOREIGN map — tosijs's own `describe()` strips arrows at every harvest — so
+the producer-side fix from 1.8.0 remains the real defence. Re-filed as
+[#11](https://github.com/tonioloewald/tosijs-floorplan/issues/11) rather than
+left implied by a closed issue.
+
+### ✅ RESOLVED — tosijs-floorplan 0.4.0, adopted in tosijs 1.11.0 (2026-09-06)
+### Target-size + "is interactive" implemented twice, and they disagree
 
 **Issue:** https://github.com/tonioloewald/tosijs-floorplan/issues/4
 tosijs's `auditAccessibility` and the vendored renderer each decide WCAG
@@ -360,7 +374,46 @@ does the reverse — inside the very workflow `audit.ts` recommends. Because
 `src/schematic.ts` is machine-vendored (DO NOT EDIT), the reconciliation
 must happen in tosijs-floorplan: export the predicate and the target-size
 rule so one implementation serves both, or accept producer `flags` as
-authoritative and drop the built-in audit. **Filed upstream.**
+authoritative and drop the built-in audit.
+
+**0.4.0 took the first route** — `isInteractive`, `targetSizeFinding` and
+`TARGET_SIZE_DEFAULT` are exported, and tosijs 1.11.0 deletes its local
+copies. Seven audit verdicts moved; see the 1.11.0 CHANGELOG.
+
+**Adopting it surfaced three NEW asks, all filed rather than patched here**
+(the vendor is DO-NOT-EDIT), and two of them exist because the renderer and
+the audit are asking different questions of one rule:
+
+1. **[#7](https://github.com/tonioloewald/tosijs-floorplan/issues/7) — `isGround` treats list-ness as decisive.** A list-bound element that IS
+   the control — `select({ bindList: …, bindValue: … })`, which tosijs 1.10.1
+   deliberately enabled — is classified as structure, so `isInteractive` is
+   false and the audit silences `anonymous-affordance` and `missing-role`
+   (both **error**) as well as `target-size`. Suggested:
+   `w.structural === true || (w.list != null && !hasActEvidence(w) && !hasEditEvidence(w))`.
+2. **[#8](https://github.com/tonioloewald/tosijs-floorplan/issues/8) — `targetSizeFinding` honours producer `flags`.** Any flag whose `kind`
+   merely *contains* `"target"` suppresses the finding. Correct for a renderer
+   (it already drew the flag, and must not double-mark); wrong for a lint,
+   which never reads `flags` into its findings. Worse, `auditFlags()` emits
+   `kind: 'target-size'`, so the documented draw-then-re-audit flow returns a
+   clean verdict on the elements it just flagged. Ask: an explicit
+   `{ honorProducerFlags = false }` opt, and an exact kind match.
+3. **[#9](https://github.com/tonioloewald/tosijs-floorplan/issues/9) — `targetSizeFinding` reports `0×0` as undersized.** Hidden is not small.
+   `schematic()` pre-filters 0×0 so parity holds today, but the function is
+   now documented as the general exported rule, and the next caller writes its
+   own guard — reproducing the drift #4 closed, one level up. tosijs carries
+   that guard locally at `src/audit.ts`.
+
+Plus two more found while adopting:
+**[#10](https://github.com/tonioloewald/tosijs-floorplan/issues/10)** — the
+"blind map" note fires on read-only tosijs pages and recommends
+`interactive`/`editable`, fields tosijs never emits because it introspects
+handlers directly; and
+**[#12](https://github.com/tonioloewald/tosijs-floorplan/issues/12)** — a
+`flags` entry with no `kind` throws in both `targetSizeFinding` and
+`schematic()`, newly reachable from an audit path.
+
+(**[#11](https://github.com/tonioloewald/tosijs-floorplan/issues/11)** is the
+narrowed-not-closed follow-up to #5, recorded in the section above.)
 
 ### ✅ RESOLVED (tosijs-floorplan 0.3.0, adopted 2026-08-09)
 

@@ -230,6 +230,12 @@ export const auditAccessibility = (
     // The one condition kept HERE is zero-size. A 0×0 record is a hidden or
     // unlaid-out element, not a target too small to hit, and the renderer has
     // no reason to care (it draws nothing either way).
+    //
+    // THIS IS A WORKAROUND WITH AN OWNER, not a settled division of labour:
+    // targetSizeFinding() itself returns "0×0 — below 24×24" for such a
+    // record, and it is now documented as the general exported rule — so the
+    // next caller writes this guard again, which is the drift floorplan#4
+    // closed, one level up. tosijs-floorplan#9 asks for it to move in.
     const tooSmall =
       w.bounds != null && w.bounds.width > 0 && w.bounds.height > 0
         ? targetSizeFinding(w, targetSize)

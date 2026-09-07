@@ -119,7 +119,13 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'main.js',
     format: 'cjs',
     entry: './src/index.ts',
-    // 43_500 -> 44_500. THE TWO CEILINGS ARE DELIBERATELY NOT EQUAL: the CJS
+    // 43_500 -> 44_500 -> 46_000. The last step landed in 1.10.1 (b04caf9)
+    // and this header was not updated with it, so for a whole release it read
+    // `-> 44_500` above a `budget: 46_000` — 1.5 kB wrong, in the file whose
+    // whole thesis is "a budget is a DECISION, read the comment before you
+    // raise it." A pre-release review caught it. 1.11.0 did NOT move this
+    // number: main.js measured 44_516 and keeps 1_484 B under the existing
+    // ceiling. THE TWO CEILINGS ARE DELIBERATELY NOT EQUAL: the CJS
     // artifact runs ~290 gz bytes over the ESM one (271 B at v1.9.2, 287 B
     // now), so copying module.js's number here — which is what the previous
     // comment reasoned itself into — cannot give equal headroom, and left
