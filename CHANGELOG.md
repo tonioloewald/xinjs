@@ -61,6 +61,27 @@ were themselves no-ops on first writing (their fixtures were cleared by a
 a pre-release review caught that, and both were rebuilt around fixtures that
 discriminate.
 
+### Added — the shared affordance rules are reachable
+
+`isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` and `schematic()`
+now export from `tosijs` and `tosijs/agent`, with the record/result types their
+signatures name (`SchematicRecord`, `SchematicDescription`, `SchematicResult`,
+`SchematicLegendEntry`). Adopting one implementation is worth little if it
+stops at this package's boundary: a downstream wanting the same verdict
+`auditAccessibility()` reaches had to re-implement it or install a second,
+independently-versioned copy of tosijs-floorplan — which is the duplication
+floorplan#4 closed, one level out.
+
+Types ship with the values on purpose. A value whose parameter type cannot be
+named is only half-exported, and that is precisely the defect 1.10.1 spent a
+release fixing. `src/type-surface.test.ts` now compiles a probe that *calls*
+each of them against the built `.d.ts`; removing the exports fails it with
+TS2305, watched.
+
+Costs +59 gz on the two EXPERIMENTAL tjs bundles (budget 61_500 → 62_500, in
+this commit, with the measurement) and +53/+56 on `module.js`/`main.js`, which
+absorbed it inside their existing ceilings.
+
 ### Fixed — where a lint and a drawing legitimately differ
 
 Adopting the shared rule wholesale imported **two silences** that are correct

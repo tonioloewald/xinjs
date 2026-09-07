@@ -193,6 +193,30 @@ test.skipIf(!existsSync('dist/index.d.ts'))(
   async () => {
     const probe = `
 import { tosi, elements, bindings, Component } from '${process.cwd()}/dist/index'
+import {
+  isInteractive, targetSizeFinding, TARGET_SIZE_DEFAULT, schematic,
+  auditAccessibility,
+} from '${process.cwd()}/dist/index'
+import type { SchematicRecord, SchematicResult } from '${process.cwd()}/dist/index'
+
+// THE SHARED AFFORDANCE RULES ARE REACHABLE AND USABLE (1.11.0). Exporting
+// them is the point of adopting one implementation: a consumer that reaches a
+// DIFFERENT verdict from auditAccessibility() is the drift floorplan#4 closed,
+// reappearing one level out. A value whose parameter type cannot be named is
+// only half-exported, so the types are exercised here too, not just imported.
+const rec: SchematicRecord = {
+  tag: 'button',
+  on: { click: 'app.go' },
+  bounds: { x: 0, y: 0, width: 20, height: 20 },
+}
+const act: boolean = isInteractive(rec)
+const finding: string | null = targetSizeFinding(rec, TARGET_SIZE_DEFAULT)
+const floor: number = TARGET_SIZE_DEFAULT
+void act
+void finding
+void floor
+void ((d: Parameters<typeof schematic>[0]): SchematicResult => schematic(d))
+void auditAccessibility
 
 const { app } = tosi({ app: { name: 'Ada', count: 0, items: [{ id: 1 }] } })
 
@@ -278,6 +302,16 @@ test.skipIf(!existsSync('dist/index.d.ts'))(
       'AgentObserveRef',
       'AgentRefusalKind',
       'AgentRefusalError',
+      // the schematic / shared affordance rules (1.11.0) — these are named in
+      // the signatures of exported VALUES (isInteractive, targetSizeFinding,
+      // schematic), and shipping a value whose parameter type is unreachable
+      // is the defect 1.10.1 spent a release fixing
+      'SchematicRecord',
+      'SchematicDescription',
+      'SchematicOptions',
+      'SchematicBounds',
+      'SchematicResult',
+      'SchematicLegendEntry',
       // blueprints
       'TosiBlueprint',
       'TosiComponentSpec',

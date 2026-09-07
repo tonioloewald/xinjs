@@ -15,6 +15,8 @@ Everything that describes an app to a *non-human* user, behind one door:
 | `enableAgentInterface` | the surface: describe / read / write / observe / call / changes / when / log |
 | `webmcpTools`, `webmcpAdapter` | the generated WebMCP tool set (auto-registered by `enableAgentInterface` where a host exists) |
 | `schematicSVG`, `rasterizeSVG`, `boundsOf` | the map, drawn (from **tosijs-floorplan**, vendored) |
+| `schematic` | the same map as DATA (boxes, legend, `note`) instead of an SVG string |
+| `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` | the shared affordance rules `auditAccessibility` itself uses — so a consumer can reach the same verdict instead of re-implementing it |
 | `auditAccessibility`, `auditFlags`, `contrastRatio` | findings over the map |
 | `exerciseContract`, `exerciseComponent` | contracts as tests |
 
@@ -58,8 +60,36 @@ export type {
 } from './agent'
 export { webmcpTools, webmcpAdapter } from './webmcp'
 export type { WebMCPTool, WebMCPAdapterOptions } from './webmcp'
-export { schematicSVG, rasterizeSVG, boundsOf } from './schematic'
-export type { SchematicOptions, SchematicBounds } from './schematic'
+// THE SHARED AFFORDANCE RULES, reachable by a consumer (1.11.0). Adopting
+// tosijs-floorplan 0.4.0 gave the audit and the renderer ONE definition of
+// "can I act here" and "is this big enough" — but the definition stopped at
+// this package's boundary, so a downstream wanting the same verdict had to
+// re-implement it or install a second, independently-versioned copy of
+// tosijs-floorplan. That is the duplication floorplan#4 closed, one level out.
+//
+// NB this list is EXPLICIT, and a symbol not named here reaches nobody (the
+// 1.8.2 near-miss: renaming types silently REMOVED the old spellings from the
+// public surface, invisible to our own tsc because our code had already
+// moved). The types below are not optional decoration — they are named in the
+// signatures above, and shipping a value whose parameter type is unreachable
+// is exactly the defect 1.10.1 spent a release fixing.
+export {
+  schematicSVG,
+  rasterizeSVG,
+  boundsOf,
+  schematic,
+  isInteractive,
+  targetSizeFinding,
+  TARGET_SIZE_DEFAULT,
+} from './schematic'
+export type {
+  SchematicOptions,
+  SchematicBounds,
+  SchematicRecord,
+  SchematicDescription,
+  SchematicResult,
+  SchematicLegendEntry,
+} from './schematic'
 export { auditAccessibility, auditFlags, contrastRatio } from './audit'
 export type {
   AuditReport,

@@ -73,6 +73,14 @@ agent.describe()                       // the affordance map
 <td>the map, drawn (from <strong>tosijs-floorplan</strong>, vendored)</td>
 </tr>
 <tr>
+<td><code>schematic</code></td>
+<td>the same map as DATA (boxes, legend, <code>note</code>) instead of an SVG string</td>
+</tr>
+<tr>
+<td><code>isInteractive</code>, <code>targetSizeFinding</code>, <code>TARGET_SIZE_DEFAULT</code></td>
+<td>the shared affordance rules <code>auditAccessibility</code> itself uses — so a consumer can reach the same verdict instead of re-implementing it</td>
+</tr>
+<tr>
 <td><code>auditAccessibility</code>, <code>auditFlags</code>, <code>contrastRatio</code></td>
 <td>findings over the map</td>
 </tr>

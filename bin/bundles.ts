@@ -84,7 +84,10 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'module.js',
     format: 'esm',
     entry: './src/index.ts',
-    // 43_000 -> 43_500 in 1.11.0, deliberately. The agent surface's
+    // 43_000 -> 43_500 in 1.10.0 (set by 9589f89, which was numbered 1.11.0 at
+    // the time — that numbering was reverted as version inflation and the work
+    // shipped as 1.10.0, so the fossil label collided with the REAL 1.11.0
+    // below). Deliberately. The agent surface's
     // path-or-proxy resolution and its refusal text cost ~100 bytes gzipped
     // over the old ceiling; almost all of it is the error strings, which is
     // the growth we want (the defect being fixed was a SILENT coercion). The
@@ -185,7 +188,20 @@ export const BUNDLES: BundleSpec[] = [
   // BYTES, and only under Bun's gzip; Node's measures the same artifact
   // under. The slack is restored rather than shaved to the new number, so the
   // gate keeps policing regressions instead of tripping on noise.
-  // RAISED 59_500 -> 61_500 in 1.10.1, deliberately and in this commit. The
+  // RAISED 61_500 -> 62_500 in 1.11.0, deliberately and in the commit that
+  // caused the growth. Re-exporting the shared affordance rules
+  // (isInteractive, targetSizeFinding, TARGET_SIZE_DEFAULT, schematic) so a
+  // CONSUMER can reach the same verdict the audit reaches costs +59 gz here
+  // and +56 on module.safe.js — the export names survive in the bundle, so
+  // "~0 bytes" (what I predicted) was optimistic by about fifty. That left
+  // module.debug.js with 993 B, THIRTY-ONE BYTES under the 1 kB minimum this
+  // file specifies, which the headroom gate caught. Restored to the ~2 kB
+  // slack that is right for a gate policing TOOLCHAIN regressions on two
+  // EXPERIMENTAL, inert bundles. The shipped bundles absorbed the same growth
+  // inside their existing ceilings (module.js 44_377, 1_623 B spare;
+  // main.js 44_642, 1_358 B) and were NOT raised.
+  //
+  // RAISED 59_500 -> 61_500 in 1.10.1, deliberately and in that commit. The
   // element-creator dispatch adds ~730 gz to each of these (they are whole-
   // library builds carrying full __tjs metadata), which put module.debug.js
   // 18 BYTES OVER and left module.safe.js with 36 — precisely the hair-trigger
@@ -197,7 +213,7 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'module.debug.js',
     format: 'esm',
     entry: './tjs-out/index-debug.js',
-    budget: 61_500,
+    budget: 62_500,
     probe: 'import',
     stage: 'tjs',
     // map excluded from `files` (1.64 MB for inert bundles) — so don't emit
@@ -208,7 +224,7 @@ export const BUNDLES: BundleSpec[] = [
     naming: 'module.safe.js',
     format: 'esm',
     entry: './tjs-out/index-safe.js',
-    budget: 61_500,
+    budget: 62_500,
     probe: 'import',
     stage: 'tjs',
     // map excluded from `files` (1.64 MB for inert bundles) — so don't emit

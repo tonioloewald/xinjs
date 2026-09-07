@@ -2,8 +2,8 @@ export { enableAgentInterface, isAgentRefusal, BOUND_TO_DOM, BOUND_TWO_WAY, AGEN
 export type { AgentInterface, AgentInterfaceOptions, AgentContract, AgentDescription, AgentWiringRecord, AgentLogEntry, AgentSurfaceVersion, AgentExpose, AgentRefusalKind, AgentRefusalError, AgentPathRef, AgentObserveRef, ComponentMap, ComponentTestStep, } from './agent';
 export { webmcpTools, webmcpAdapter } from './webmcp';
 export type { WebMCPTool, WebMCPAdapterOptions } from './webmcp';
-export { schematicSVG, rasterizeSVG, boundsOf } from './schematic';
-export type { SchematicOptions, SchematicBounds } from './schematic';
+export { schematicSVG, rasterizeSVG, boundsOf, schematic, isInteractive, targetSizeFinding, TARGET_SIZE_DEFAULT, } from './schematic';
+export type { SchematicOptions, SchematicBounds, SchematicRecord, SchematicDescription, SchematicResult, SchematicLegendEntry, } from './schematic';
 export { auditAccessibility, auditFlags, contrastRatio } from './audit';
 export type { AuditReport, AuditFinding, AuditOptions, AuditSeverity, } from './audit';
 export { exerciseContract, exerciseComponent } from './contract';
