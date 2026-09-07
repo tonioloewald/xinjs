@@ -6,7 +6,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 For releases before 1.6.0, see the git history (`git log`) and tags.
 
-## [1.11.0] - 2026-09-06
+## [1.11.0] - 2026-09-07
 
 **One implementation of "can I act here" and "is this big enough."**
 `auditAccessibility()` and the vendored floorplan renderer drew their verdicts

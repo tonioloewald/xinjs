@@ -129,9 +129,21 @@ export interface AuditOptions {
  * #8, these become no-ops rather than a second opinion.
  */
 const auditView = (w: AgentWiringRecord): AgentWiringRecord => {
-  const { flags: _flags, ...rest } = w as any
-  if (rest.list == null || rest.structural === true) return rest
-  const { list: _list, ...withoutList } = rest
+  // FAST PATH FIRST — most records carry neither `flags` nor `list`, and this
+  // runs once per wired element on a page. Spreading unconditionally would add
+  // an allocation per record to a rule set the pre-release review already
+  // flagged for doing more per-record work than 1.10.1 did.
+  const anyW = w as any
+  const hasFlags = anyW.flags != null
+  const listed = anyW.list != null && anyW.structural !== true
+  if (!hasFlags && !listed) return w
+
+  const rest = hasFlags ? { ...anyW } : anyW
+  if (hasFlags) delete rest.flags
+  if (!listed) return rest
+
+  const withoutList = { ...rest }
+  delete withoutList.list
   return isInteractive(withoutList) ? withoutList : rest
 }
 
