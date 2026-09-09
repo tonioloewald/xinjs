@@ -5,11 +5,11 @@
 Report: `reviews/1.11.0-round5.md`. B-1 (live state vs path secrecy) and B-3
 (the CHANGELOG naming a removed helper) are fixed. B-2 is filed as **#41**.
 
-- [x] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing).** ONE-LEVEL
-      case fixed and pinned with four negative controls. **#41 stays open for
-      the multi-level case** (`<form bindValue>` → `<div>` → password): a
-      distance bound is arbitrary and "nearest bound ancestor" is not a bound
-      at all — needs a real discriminator, which is a design question.
+- [x] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing).** BOTH cases
+      fixed: the immediate parent, and the owning `<form>` at any depth via
+      `el.form`. The form is the real bound the distance guess was standing in
+      for — a form owns every control beneath it, and a `<div>` app shell is
+      not a form. Pinned with six negative controls.
 - [ ] Consider whether the SHADOW arm should adopt the same
       `type="hidden"`-does-not-propagate restriction the light arm now has.
       Deliberately left asymmetric — new code took the conservative default —

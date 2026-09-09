@@ -1371,6 +1371,48 @@ const refreshSecretPaths = (): void => {
         if (b.binding?.fromDOM != null) addSecretPath(b.path)
       }
     }
+
+    /*
+     * AND THE ENCLOSING <form>, AT ANY DEPTH — the real bound, replacing the
+     * distance guess.
+     *
+     * The multi-level case (`<form bindValue>` → `<div>` → password) needed a
+     * discriminator better than "how many levels up", and HTML already has
+     * one: a form OWNS every form control below it, however deeply nested.
+     * That is a structural relationship the author declared, not a heuristic —
+     * which is exactly what "nearest ancestor with a binding" was not, and why
+     * that version marked a bound app shell three levels up.
+     *
+     * A `<div>` app shell is not a form, so the hazard does not apply here: an
+     * unrelated container cannot become the owner by accident. And a
+     * `fromDOM` binding on a form that contains a password field is a form
+     * that collects the password — if the author does not mean that, the
+     * binding is on the wrong element.
+     *
+     * Same `propagates` gate: strong evidence only, so a bare hidden input
+     * still does not drag its form's path into the secret set.
+     */
+    /*
+     * `el.form`, NOT `closest('form')`. The DOM's own ownership property is
+     * both the correct semantics — it honours the `form=` attribute, so a
+     * control physically outside its form still resolves — and the only
+     * lookup that returns the SAME NODE the bindings were registered against.
+     * Measured under happy-dom: `closest('form')`, a manual parent walk and
+     * even `parentElement.parentElement` all return distinct wrapper objects
+     * for the same element, so `getElementBindings()` on any of them comes
+     * back empty and the arm silently does nothing. It cost an hour to see,
+     * because the arm LOOKED right and the form was found — just not the form
+     * that owned the binding.
+     */
+    const owningForm = propagates
+      ? ((el as any).form as Element | null | undefined) ?? null
+      : null
+    if (owningForm != null && owningForm !== parent) {
+      const { dataBindings } = getElementBindings(owningForm)
+      for (const b of dataBindings ?? []) {
+        if (b.binding?.fromDOM != null) addSecretPath(b.path)
+      }
+    }
   }
 }
 

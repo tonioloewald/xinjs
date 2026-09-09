@@ -116,9 +116,9 @@ assertion is inherited automatically by whatever harvest is added next. Both
 fail with the withholding reverted; a third test is the over-redaction control
 and passes either way.
 
-### Security — secrecy is now learned through a one-level light-DOM wrapper
+### Security — secrecy is now learned through a light-DOM wrapper and its form
 
-**[#41](https://github.com/tonioloewald/tosijs/issues/41), partially fixed.**
+**[#41](https://github.com/tonioloewald/tosijs/issues/41).**
 `refreshSecretPaths` walked up from a secret control only across a **shadow**
 boundary. Light DOM has no `.host`, so a wrapper carrying the value binding
 over a contained `<input type="password">` was never harvested and the path was
@@ -126,15 +126,23 @@ never learned as secret — which defeated `read()` and `changes()` as well as
 `describe()`, with no `describe()` call involved. Present in every released
 version; verified back to v1.10.1, so this is a fix rather than a regression.
 
-`div({ bindValue: creds.password })` wrapping a password input now reads back
-`⟨secret⟩`. The walk is **exactly one step**, the light-DOM analogue of the
-shadow arm, and propagates only for a password, a `cc-*`-style autocomplete, or
-an explicit `data-tosi-secret` — not for a bare `input[type="hidden"]`.
+Two arms, both narrow. **The immediate parent** — `div({ bindValue:
+creds.password })` wrapping a password input — and **the owning `<form>`, at
+any depth**, because a form owns every control beneath it. That second one is a
+structural relationship the author declared, which is a real bound where "how
+many levels up" was a guess: a `<div>` app shell three levels above a password
+is *not* a form and stays readable.
 
-**Still open: the binding two or more levels up** (`<form bindValue>` → `<div>`
-→ `<input type=password>`). Bounding that needs a better discriminator than
-"how many levels", which is a design question rather than a patch, so #41 stays
-open with the repro.
+It uses `el.form`, not `closest('form')` — the DOM's own ownership property,
+which also honours the `form=` attribute so a control physically outside its
+form still resolves. (Under happy-dom `closest('form')`, a manual parent walk
+and `parentElement.parentElement` all return a *different wrapper object* for
+the same element, so the binding lookup comes back empty and the arm silently
+does nothing while appearing to find the form.)
+
+Both arms propagate only for a password, a `cc-*`-style autocomplete, or an
+explicit `data-tosi-secret` — never a bare `input[type="hidden"]`, which carries
+ids and flags at least as often as tokens.
 
 Two earlier cuts of this fix passed the positive case and were caught only by
 the controls, both reproducing the append-only availability break this code has
@@ -185,10 +193,10 @@ turn, so the numbers now come from the thing that measures them):
 | `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
 | `core.js` | 26_666 | 26_666 | **+0** |
 | `state.js` | 16_747 | 16_747 | **+0** |
-| `module.js` | 43_928 | 44_460 | **+532** |
-| `main.js` | 44_201 | 44_714 | **+513** |
-| `module.debug.js` | 59_515 | 60_879 | **+1364** |
-| `module.safe.js` | 59_375 | 60_737 | **+1362** |
+| `module.js` | 43_928 | 44_478 | **+550** |
+| `main.js` | 44_201 | 44_742 | **+541** |
+| `module.debug.js` | 59_515 | 60_942 | **+1427** |
+| `module.safe.js` | 59_375 | 60_807 | **+1432** |
 
 The three bundles that do not carry the agent surface are unchanged, so a
 consumer who never imports it pays nothing for this release. The 61_500 →

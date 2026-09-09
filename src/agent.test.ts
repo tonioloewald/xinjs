@@ -3336,6 +3336,77 @@ describe('#41: light-DOM wrapper secrecy, and what must NOT be marked', () => {
     agent.disable()
   })
 
+  test('the OWNING FORM is learned at any depth (el.form, not closest)', async () => {
+    /*
+     * The multi-level case: the binding on the `<form>`, the password two
+     * levels below. A form OWNS every control under it — a structural
+     * relationship the author declared — which is a real bound where "how
+     * many levels up" was a guess.
+     *
+     * `el.form`, deliberately, NOT `closest('form')`: under happy-dom that
+     * (and a manual walk, and `parentElement.parentElement`) returns a
+     * DIFFERENT wrapper object for the same element, so `getElementBindings`
+     * comes back empty and the arm silently does nothing while appearing to
+     * find the form. `.form` also honours the `form=` attribute, so a control
+     * outside its form still resolves.
+     */
+    document.body.innerHTML = ''
+    const { f41 } = tosi({ f41: { login: '' } })
+    await updates()
+    const form = elements.form({ bindValue: f41.login })
+    const row = elements.div({ class: 'row' })
+    row.append(elements.input({ type: 'password' }))
+    form.append(row)
+    document.body.append(form)
+    rect(form)
+    await updates()
+    f41.login.value = 'FORM-PW-41'
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [f41] },
+    })
+    expect(agent.read('f41.login')).toBe('⟨secret⟩')
+    expect(JSON.stringify(agent.describe())).not.toContain('FORM-PW-41')
+    agent.disable()
+  })
+
+  test('CONTROL — a form with NO secret control is untouched', async () => {
+    document.body.innerHTML = ''
+    const { f41b } = tosi({ f41b: { plain: 'p' } })
+    await updates()
+    const form = elements.form({ bindValue: f41b.plain })
+    form.append(elements.input({ type: 'text' }))
+    document.body.append(form)
+    rect(form)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [f41b] },
+    })
+    agent.describe()
+    expect(agent.read('f41b.plain')).toBe('p')
+    agent.disable()
+  })
+
+  test('CONTROL — a form whose only secret is a bare hidden CSRF is untouched', async () => {
+    document.body.innerHTML = ''
+    const { f41c } = tosi({ f41c: { csrf: 'v' } })
+    await updates()
+    const form = elements.form({ bindValue: f41c.csrf })
+    form.append(elements.input({ type: 'hidden', name: 'csrf' }))
+    document.body.append(form)
+    rect(form)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [f41c] },
+    })
+    agent.describe()
+    expect(agent.read('f41c.csrf')).toBe('v')
+    agent.disable()
+  })
+
   test('CONTROL — a toDOM-only container over a password is NOT marked', async () => {
     // the round-4 regression fixture. `fromDOM != null` is what keeps it
     // readable; without that narrowing this is a permanent availability break.
