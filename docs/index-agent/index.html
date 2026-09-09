@@ -80,6 +80,14 @@ agent.describe()                       // the affordance map
 <td><code>isInteractive</code>, <code>targetSizeFinding</code>, <code>TARGET_SIZE_DEFAULT</code></td>
 <td>the shared affordance rules, over a <strong><code>SchematicRecord</code> from <code>describe()</code> — not over a DOM element</strong>. <code>isInteractive(someAnchor)</code> compiles in plain JS and is meaningless.</td>
 </tr>
+<tr>
+<td><code>auditAccessibility</code>, <code>auditFlags</code>, <code>contrastRatio</code></td>
+<td>findings over the map</td>
+</tr>
+<tr>
+<td><code>exerciseContract</code>, <code>exerciseComponent</code></td>
+<td>contracts as tests</td>
+</tr>
 </tbody></table>
 <blockquote>
 <p>⚠️ <strong>These are the RENDERER&#39;s answers, and <code>auditAccessibility()</code> deliberately
@@ -88,9 +96,7 @@ differs from them in three places</strong> — it ignores producer <code>flags</
 (tosijs-floorplan #7/#8/#9). So the exported rules do <strong>not</strong> reproduce the
 audit&#39;s verdict on those shapes; the adjustment (<code>auditView</code>) is private
 because it is a workaround, not API. Use <code>auditAccessibility()</code> if you want
-the audit&#39;s answer, and these if you want the drawing&#39;s.
-| <code>auditAccessibility</code>, <code>auditFlags</code>, <code>contrastRatio</code> | findings over the map |
-| <code>exerciseContract</code>, <code>exerciseComponent</code> | contracts as tests |</p>
+the audit&#39;s answer, and these if you want the drawing&#39;s.</p>
 </blockquote>
 <p><strong>Why a subpath and not the main entry.</strong> This is ~11 kB gzipped, and an app
 that never describes itself should not carry it. Bundler users would shake

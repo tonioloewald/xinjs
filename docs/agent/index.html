@@ -111,6 +111,17 @@ agent.read(&#39;app.login&#39;)           // { user: &#39;ada&#39;, password: &#
 <p>This matters for what you DID expose — an undeclared path is absent, not
 redacted, so redaction is what protects a secret sitting <em>inside</em> a declared
 root (and it is the only thing protecting you under <code>expose: &#39;all&#39;</code>).</p>
+<p><strong>And <code>describe()</code> withholds the element&#39;s own content, not just its bound
+value.</strong> A secret-marked element — or any element inside a
+<code>data-tosi-secret</code> region — publishes its tag, role, name, bound path and
+geometry, but <em>not</em> its <code>href</code>, <code>placeholder</code>, <code>title</code>/<code>alt</code>-derived name,
+<code>aria-description</code> or a toggle&#39;s <code>checked</code> state. A reset-link token lives in
+an <code>href</code>, not in a bound path, and until 1.11.0 it travelled in cleartext
+beside a <code>text</code> field that had been correctly withheld. The record carries
+<code>secret: true</code> so a consumer can tell suppression from absence.</p>
+<p>An <strong><code>aria-label</code> survives</strong> — it is authored to be announced, and dropping it
+would make every secret control anonymous to assistive tech and to the audit.
+Names survive secrecy; content and live state do not.</p>
 <p><strong>Secrecy is a property of the PATH, not of an element.</strong> Marking one control
 secret withholds that path everywhere it surfaces — <code>read</code>, <code>describe</code>,
 <code>changes</code>, <code>when</code> — including from <em>other</em> elements bound to the same path,

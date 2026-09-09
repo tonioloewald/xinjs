@@ -460,6 +460,46 @@ async function buildLibrary(full = true) {
   }
   console.log('gzip budgets:', sizes.join(', '))
 
+  // EMIT THE DELTA, DO NOT RETYPE IT. Three consecutive pre-release reviews
+  // found hand-transcribed byte figures drifted in CHANGELOG.md and
+  // bin/bundles.ts, and one of those was a correction that drifted in turn.
+  // Both artifacts are on disk (`dist/` is committed) and both are measured
+  // by the same Bun zlib, so the release table can be COPIED from here.
+  try {
+    const prevTag = Bun.spawnSync(
+      ['git', 'describe', '--tags', '--abbrev=0', '--match', 'v*'],
+      { stdout: 'pipe', stderr: 'pipe' }
+    )
+    const tag = prevTag.stdout.toString().trim()
+    if (tag !== '') {
+      const rows: string[] = []
+      for (const { naming } of BUILT) {
+        const show = Bun.spawnSync(['git', 'show', `${tag}:dist/${naming}`], {
+          stdout: 'pipe',
+          stderr: 'pipe',
+        })
+        if (show.exitCode !== 0) continue
+        const was = gzipSync(show.stdout).length
+        const now = gzipSync(await Bun.file(`${DIST}/${naming}`).bytes()).length
+        rows.push(
+          `| \`${naming}\` | ${was
+            .toLocaleString('en-US')
+            .replace(/,/g, '_')} | ` +
+            `${now.toLocaleString('en-US').replace(/,/g, '_')} | ` +
+            `**${now - was >= 0 ? '+' : ''}${now - was}** |`
+        )
+      }
+      if (rows.length > 0) {
+        console.log(`gz delta since ${tag} — paste into the CHANGELOG:`)
+        console.log('| bundle | ' + tag + ' | this build | Δ |')
+        console.log('| --- | --- | --- | --- |')
+        for (const r of rows) console.log(r)
+      }
+    }
+  } catch {
+    // a shallow clone or a missing tag is not a build failure
+  }
+
   // EVERY EXPORTS TARGET MUST EXIST. Keyed off package.json's `exports`, not
   // off BUNDLES, because `exports` is the promise made to consumers — and it
   // is the promise that was broken: ./debug and ./safe pointed at bundles a

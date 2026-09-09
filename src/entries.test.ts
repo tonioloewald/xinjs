@@ -453,3 +453,45 @@ describe('settings.quiet silences advice, never defect reports', () => {
     expect(errors.some((e) => e.includes('refused'))).toBe(true)
   })
 })
+
+test('every budget comment mentions the number it sits above', async () => {
+  /*
+   * THIRD CONSECUTIVE ROUND finding drifted byte figures in `bin/bundles.ts`,
+   * and the second in which the CORRECTION drifted. Nothing checked the prose
+   * against the `budget` beneath it, so a stale figure read as authoritative —
+   * in the file whose thesis is "a budget is a DECISION, read the comment
+   * before raising it".
+   *
+   * DELIBERATELY WEAK, and that is the point. The first version of this gate
+   * asserted "the LAST `-> N` equals the budget" and failed on correct code:
+   * comments legitimately quote history ("it read `-> 44_500` above a
+   * `budget: 46_000`"), and splitting the source per spec mis-attributed the
+   * shared tjs comment to `state.js`. A gate that fails on correct code
+   * teaches people to delete it. This asks only the question that cannot have
+   * a false positive: does the comment above a budget mention that budget at
+   * all? A raise that leaves the prose untouched fails; a comment that
+   * narrates its own history passes.
+   */
+  const src = await Bun.file(`${process.cwd()}/bin/bundles.ts`).text()
+  const lines = src.split('\n')
+  const silent: string[] = []
+  for (const [i, line] of lines.entries()) {
+    const m = line.match(/budget: ([\d_]+)/)
+    if (m == null) continue
+    const budget = m[1]
+    const spelled = String(Number(budget.replace(/_/g, '')))
+    // the comment block immediately above this spec
+    const above = lines.slice(Math.max(0, i - 40), i).join('\n')
+    if (!above.includes(budget) && !above.includes(spelled)) {
+      const naming =
+        lines
+          .slice(Math.max(0, i - 40), i + 1)
+          .join('\n')
+          .match(/naming: '([^']+)'/)?.[1] ?? `line ${i + 1}`
+      silent.push(
+        `${naming}: budget ${budget} is never mentioned in its comment`
+      )
+    }
+  }
+  expect(silent).toEqual([])
+})

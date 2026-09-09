@@ -77,6 +77,19 @@ This matters for what you DID expose — an undeclared path is absent, not
 redacted, so redaction is what protects a secret sitting *inside* a declared
 root (and it is the only thing protecting you under `expose: 'all'`).
 
+**And `describe()` withholds the element's own content, not just its bound
+value.** A secret-marked element — or any element inside a
+`data-tosi-secret` region — publishes its tag, role, name, bound path and
+geometry, but *not* its `href`, `placeholder`, `title`/`alt`-derived name,
+`aria-description` or a toggle's `checked` state. A reset-link token lives in
+an `href`, not in a bound path, and until 1.11.0 it travelled in cleartext
+beside a `text` field that had been correctly withheld. The record carries
+`secret: true` so a consumer can tell suppression from absence.
+
+An **`aria-label` survives** — it is authored to be announced, and dropping it
+would make every secret control anonymous to assistive tech and to the audit.
+Names survive secrecy; content and live state do not.
+
 **Secrecy is a property of the PATH, not of an element.** Marking one control
 secret withholds that path everywhere it surfaces — `read`, `describe`,
 `changes`, `when` — including from *other* elements bound to the same path,
@@ -384,8 +397,14 @@ export interface AgentWiringRecord {
   invalid?: boolean
   /** a link's destination — "says X" is not "goes to Y". Links are
    * intrinsic affordances: enumerated even when nothing else wires them;
-   * the renderer captions nameless links by their href and always carries
-   * href in the legend (URLs are the facts most often too long to draw) */
+   * the renderer captions nameless links by their href and normally carries
+   * href in the legend (URLs are the facts most often too long to draw)
+   *
+   * WITHHELD on a secret-marked element or one inside a `data-tosi-secret`
+   * region (1.11.0): a reset/magic-link token lives here, not in a bound
+   * path. Such a record carries `secret: true` and no `href` at all, so a
+   * renderer's caption fallback has nothing to fall back to — filed upstream.
+   */
   href?: string
   /** contenteditable: surfaces AS an input field. What matters to an agent
    * is that the region EXISTS and which path feeds it — it will read and
@@ -1541,7 +1560,35 @@ const describeElement = (
    * where one password field marked a whole state root secret. This asks the
    * SECRECY arm only.
    */
-  const secretHere = referencedNodeIsSecret(el)
+  /*
+   * ELEMENT-OR-ANCESTOR, DELIBERATELY NOT `referencedNodeIsSecret`.
+   *
+   * That helper's middle arm is `deepHas(el, SECRET_CONTROL_SELECTOR)` —
+   * "contains a secret control anywhere BELOW" — which is right for deciding
+   * whether harvesting a referenced node's TEXT would expose a secret, and
+   * catastrophically wrong here, because `record.secret` is read downstream as
+   * an IDENTITY signal: `recordFor` does `if (record.secret === true)
+   * addSecretPath(b.path)`, and `secretPaths` is module-level and append-only
+   * for the session.
+   *
+   * So an ordinary bound container that merely CONTAINED a password field —
+   * a login form — permanently marked its own bound path `⟨secret⟩` for every
+   * later `read()`, surviving removal of the password field, `disable()`, and
+   * a fresh `enableAgentInterface()`. Measured: `read('pe.theme')` was `dark`
+   * before one `describe()` and `⟨secret⟩` after, forever.
+   *
+   * That is the 1.10.0 over-redaction — one password field marking a whole
+   * state root secret — reintroduced by the commit whose comment said it was
+   * avoiding it. It avoided it on the SCOPE arm and walked into it on the
+   * containment arm. Containment must never imply "the paths bound HERE are
+   * secret".
+   *
+   * Ancestor marking DOES belong: `<div data-tosi-secret>` is the author
+   * declaring the region secret, which is a statement about what is bound
+   * inside it. Containment is not a statement about anything.
+   */
+  const secretHere =
+    isSecretControl(el) || closestAcrossRoots(el, '[data-tosi-secret]') != null
   // and say so, always. In the region case (`data-tosi-secret` on an
   // ANCESTOR) nothing was previously marked, so suppression read as absence
   // and a consumer could not tell anything had been withheld.
@@ -1602,9 +1649,24 @@ const describeElement = (
       record.checked = (el as any).checked === true
     }
   }
-  const description =
-    referencedText(el, 'aria-describedby', withheld) ||
-    el.getAttribute('aria-description')
+  /*
+   * A DESCRIPTION IS CONTENT, NOT A NAME — this file says so itself, at the
+   * `aria-description` note near the top: "a description is NOT a name". The
+   * B1 fix enumerated `title`/`alt`, `placeholder`, `href` and `checked` and
+   * missed this, the FIFTH free-text attribute in the same harvest, eight
+   * lines below the fix.
+   *
+   * Both arms are gated, not just the raw one. `referencedText()` asks
+   * `referencedNodeIsSecret` about the TARGET only, never about `el` — so a
+   * `data-tosi-secret` control whose `aria-describedby` points at an unmarked
+   * node published cleartext too. Gating the whole expression closes the
+   * channel rather than one spelling of it, which is the lesson B1 was
+   * supposed to have taught: a guard is only as good as its enumeration.
+   */
+  const description = secretHere
+    ? null
+    : referencedText(el, 'aria-describedby', withheld) ||
+      el.getAttribute('aria-description')
   if (description) record.description = description
   if (
     (el as any).disabled === true ||

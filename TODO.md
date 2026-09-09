@@ -1,5 +1,42 @@
 # todo
 
+## Deferred from the 1.11.0 round-4 review (BLOCK → cleared)
+
+Report: `reviews/1.11.0-round4-post-b1.md`. All three blockers were inside the
+B1 security fix itself and are fixed + pinned. These are the rest.
+
+- [ ] **`auditAccessibility` has no notion of a withheld name.** Withholding
+      the `title`/`alt`-derived label makes a secret-marked control emit a
+      false `anonymous-affordance` at **error** severity. `src/audit.ts`
+      contains zero occurrences of `secret`. The hole PRE-DATES this release
+      (text-named and `<label for>`-named controls in a secret region already
+      did it); 1.11.0 widens it by one naming source. Fix at class level:
+      skip/downgrade `anonymous-affordance` for records carrying
+      `secret: true`, or emit a `nameWithheld` marker.
+- [ ] **The structural-tier `stripArrows` fix has no test that fails without
+      it.** SEC-8 asserts arrow-stripping for a bound `<span>` and a plain
+      `<div>` — neither is a heading, so reverting the hunk leaves the suite
+      green. Needs an `<h2>` fixture with a forged `BOUND_TWO_WAY` AND mocked
+      bounds (the structural tier drops 0×0, and happy-dom returns zero
+      geometry — the trap CLAUDE.md documents).
+- [ ] **`targetSizeFinding` is public and still throws on `flags:[{label:'x'}]`**
+      (floorplan#12). `auditView` mitigated only the private path. Round 3
+      reviewed the export's PARITY with the audit; nobody reviewed its
+      ROBUSTNESS as a public entry point, which is where "validate at
+      boundaries" applies. Mitigating: `kind` is declared required, so a TS
+      consumer needs a cast. NOTE — the throw was ALREADY consumer-reachable
+      via `schematicSVG` since v1.10.1, so 1.11.0 adds a second door, not the
+      first; that correction belongs in UPSTREAM.md too.
+- [ ] **`describe()` perf** — round 4 measured +45–55% in real Chromium from
+      the per-element subtree scan. The narrowing to element-or-ancestor
+      removes the O(subtree) arm (happy-dom: 17.4ms → 16.3ms against a 15.6ms
+      baseline), but **this has NOT been re-measured in Chromium**, which is
+      where the regression was found and the only environment that counts for
+      this question.
+- [ ] `schematic()` is public API with no gate that executes it — carried from
+      round 3, now also the subject of floorplan#15 (nobody has drawn a
+      redacted record).
+
 ## Deferred from the 1.11.0 remediation re-review (BLOCK → cleared)
 
 Report: `reviews/1.11.0-preminor-remediation.md`. The blocker (B1, the

@@ -102,12 +102,16 @@ and passes either way.
 
 `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` and `schematic()`
 now export from the **ESM and CJS** builds of `tosijs`, and from `tosijs/agent`,
-with the record/result types their signatures name. **Not from the
-`<script src=…>` IIFE** — `dist/index.js` is built from `index-browser.ts`,
-which omits the agent surface by design so a script tag does not pay for an
-opt-in feature (verified: zero occurrences of `isInteractive` in that bundle).
-A CDN reader needs the ES module build; see also tosijs#39 (`SchematicRecord`, `SchematicDescription`, `SchematicResult`,
-`SchematicLegendEntry`). Adopting one implementation is worth little if it
+with the record/result types their signatures name — `SchematicRecord`,
+`SchematicDescription`, `SchematicResult` and `SchematicLegendEntry`.
+
+**Not from the `<script src=…>` IIFE.** `dist/index.js` is built from
+`index-browser.ts`, which omits the agent surface by design so a script tag
+does not pay for an opt-in feature (verified: zero occurrences of
+`isInteractive` in that bundle). A CDN reader needs the ES module build; see
+also tosijs#39.
+
+Adopting one implementation is worth little if it
 stops at this package's boundary: a downstream wanting the same verdict
 `auditAccessibility()` reaches had to re-implement it or install a second,
 independently-versioned copy of tosijs-floorplan — which is the duplication
@@ -124,18 +128,20 @@ the measurement) and +53/+56 on `module.js`/`main.js`, which absorbed it inside
 their existing ceilings.
 
 **Release totals** (v1.10.1 → this tag, Bun zlib, the same measurement the gate
-uses — per-commit deltas are what get written and release totals are what get
-read):
+uses — and **emitted by the build**, not retyped: `bun run build` now prints
+this table. Three consecutive reviews found hand-transcribed byte figures
+drifted here and in `bin/bundles.ts`, one of them a correction that drifted in
+turn, so the numbers now come from the thing that measures them):
 
-| bundle | 1.10.1 | 1.11.0 | Δ |
+| bundle | v1.10.1 | 1.11.0 | Δ |
 | --- | --- | --- | --- |
 | `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
 | `core.js` | 26_666 | 26_666 | **+0** |
 | `state.js` | 16_747 | 16_747 | **+0** |
-| `module.js` | 43_928 | 44_381 | **+453** |
-| `main.js` | 44_201 | 44_641 | **+440** |
-| `module.debug.js` | 59_515 | 60_472 | **+957** |
-| `module.safe.js` | 59_375 | 60_328 | **+953** |
+| `module.js` | 43_928 | 44_411 | **+483** |
+| `main.js` | 44_201 | 44_669 | **+468** |
+| `module.debug.js` | 59_515 | 60_541 | **+1026** |
+| `module.safe.js` | 59_375 | 60_398 | **+1023** |
 
 The three bundles that do not carry the agent surface are unchanged, so a
 consumer who never imports it pays nothing for this release. The 61_500 →

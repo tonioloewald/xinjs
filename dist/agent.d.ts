@@ -231,8 +231,14 @@ export interface AgentWiringRecord {
     invalid?: boolean;
     /** a link's destination — "says X" is not "goes to Y". Links are
      * intrinsic affordances: enumerated even when nothing else wires them;
-     * the renderer captions nameless links by their href and always carries
-     * href in the legend (URLs are the facts most often too long to draw) */
+     * the renderer captions nameless links by their href and normally carries
+     * href in the legend (URLs are the facts most often too long to draw)
+     *
+     * WITHHELD on a secret-marked element or one inside a `data-tosi-secret`
+     * region (1.11.0): a reset/magic-link token lives here, not in a bound
+     * path. Such a record carries `secret: true` and no `href` at all, so a
+     * renderer's caption fallback has nothing to fall back to — filed upstream.
+     */
     href?: string;
     /** contenteditable: surfaces AS an input field. What matters to an agent
      * is that the region EXISTS and which path feeds it — it will read and

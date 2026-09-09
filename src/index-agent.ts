@@ -17,6 +17,8 @@ Everything that describes an app to a *non-human* user, behind one door:
 | `schematicSVG`, `rasterizeSVG`, `boundsOf` | the map, drawn (from **tosijs-floorplan**, vendored) |
 | `schematic` | the same map as DATA (boxes, legend, `note`) instead of an SVG string |
 | `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` | the shared affordance rules, over a **`SchematicRecord` from `describe()` — not over a DOM element**. `isInteractive(someAnchor)` compiles in plain JS and is meaningless. |
+| `auditAccessibility`, `auditFlags`, `contrastRatio` | findings over the map |
+| `exerciseContract`, `exerciseComponent` | contracts as tests |
 
 > ⚠️ **These are the RENDERER's answers, and `auditAccessibility()` deliberately
 > differs from them in three places** — it ignores producer `flags`, exempts
@@ -25,8 +27,6 @@ Everything that describes an app to a *non-human* user, behind one door:
 > audit's verdict on those shapes; the adjustment (`auditView`) is private
 > because it is a workaround, not API. Use `auditAccessibility()` if you want
 > the audit's answer, and these if you want the drawing's.
-| `auditAccessibility`, `auditFlags`, `contrastRatio` | findings over the map |
-| `exerciseContract`, `exerciseComponent` | contracts as tests |
 
 **Why a subpath and not the main entry.** This is ~11 kB gzipped, and an app
 that never describes itself should not carry it. Bundler users would shake

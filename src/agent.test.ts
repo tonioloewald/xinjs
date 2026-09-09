@@ -3046,6 +3046,120 @@ describe('describe(): secrecy covers the ATTRIBUTE harvest, not just text', () =
     agent.disable()
   })
 
+  test('the DESCRIPTION channel is closed — both arms (round 4, B-2)', async () => {
+    /*
+     * `aria-description` was the FIFTH free-text attribute in this harvest and
+     * the B1 fix missed it, eight lines below the fix itself. And
+     * `referencedText()` asks `referencedNodeIsSecret` about the TARGET only,
+     * never about `el` — so a marked control pointing at an UNMARKED node
+     * leaked too. Both arms, plus the structural tier.
+     */
+    document.body.innerHTML = ''
+    const { desc } = tosi({ desc: { name: 'Ada' } })
+    await updates()
+    const raw = elements.input({
+      'data-tosi-secret': '',
+      'aria-label': 'One-time code',
+      'aria-description': 'OTP-987654',
+      bindValue: desc.name,
+    })
+    const note = elements.div({ id: 'r4note' }, 'DESCBY-555')
+    const viaRef = elements.input({
+      'data-tosi-secret': '',
+      'aria-label': 'Card',
+      'aria-describedby': 'r4note',
+      bindValue: desc.name,
+    })
+    const heading = elements.h2(
+      { 'data-tosi-secret': '', 'aria-description': 'HEAD-777' },
+      'Title'
+    )
+    document.body.append(raw, note, viaRef, heading)
+    ;[raw, viaRef, heading].forEach(rect)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [desc] },
+    })
+    const json = JSON.stringify(agent.describe())
+    for (const token of ['OTP-987654', 'DESCBY-555', 'HEAD-777']) {
+      expect(json).not.toContain(token)
+    }
+    // the NAME still survives — secrecy withholds content, not identity
+    expect(json).toContain('One-time code')
+    agent.disable()
+  })
+
+  test('CONTAINING a secret control must not poison a bound path (round 4, B-1)', async () => {
+    /*
+     * THE MOST DANGEROUS THING THIS RELEASE DID, and it was in the security
+     * fix. `record.secret` is read downstream as an IDENTITY signal —
+     * `recordFor` does `if (record.secret === true) addSecretPath(b.path)`,
+     * and `secretPaths` is module-level and append-only for the session. The
+     * B1 fix set it from `referencedNodeIsSecret`, whose middle arm is
+     * "contains a secret control anywhere BELOW".
+     *
+     * So an ordinary login form — a bound container that merely CONTAINS a
+     * password field — permanently marked its own bound path `⟨secret⟩` for
+     * every later read, surviving removal of the password field, `disable()`,
+     * and a fresh agent. Availability break, not a leak, and exactly the
+     * 1.10.0 over-redaction the fix's own comment claimed to avoid.
+     *
+     * `bindText` cannot express this fixture: it sets `textContent` and
+     * destroys the password child before `describe()` runs, so the first two
+     * attempts to reproduce it came back clean. The binding must leave
+     * children alone.
+     */
+    document.body.innerHTML = ''
+    const { poison } = tosi({ poison: { theme: 'dark' } })
+    await updates()
+    const wrap = elements.div({ 'data-theme': poison.theme })
+    wrap.append(elements.input({ type: 'password' }))
+    document.body.append(wrap)
+    rect(wrap)
+    await updates()
+
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [poison] },
+    })
+    expect(agent.read('poison.theme')).toBe('dark')
+    agent.describe()
+    expect(agent.read('poison.theme')).toBe('dark')
+    expect(agent.read('poison')).toEqual({ theme: 'dark' })
+    agent.disable()
+    // and it must not have leaked into the module-level, append-only set
+    const fresh = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [poison] },
+    })
+    expect(fresh.read('poison.theme')).toBe('dark')
+    fresh.disable()
+  })
+
+  test('an ANCESTOR marker still withholds — the narrowing kept what B1 fixed', async () => {
+    // the control on the fix above: element-or-ancestor must still work, or
+    // the B1 region case silently regressed while the tests stayed green
+    document.body.innerHTML = ''
+    const { region } = tosi({ region: { v: 'visible' } })
+    await updates()
+    const marked = elements.div({ 'data-tosi-secret': '' })
+    const inner = elements.a(
+      { href: '/reset?t=REGION-TOKEN', bindText: region.v },
+      'go'
+    )
+    marked.append(inner)
+    document.body.append(marked)
+    rect(inner)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [region] },
+    })
+    expect(JSON.stringify(agent.describe())).not.toContain('REGION-TOKEN')
+    agent.disable()
+  })
+
   test('a secret toggle does not publish its live state', async () => {
     document.body.innerHTML = ''
     const { sec2 } = tosi({ sec2: { on: true } })

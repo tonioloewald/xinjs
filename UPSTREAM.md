@@ -418,7 +418,20 @@ Plus two more found while adopting:
 handlers directly; and
 **[#12](https://github.com/tonioloewald/tosijs-floorplan/issues/12)** — a
 `flags` entry with no `kind` throws in both `targetSizeFinding` and
-`schematic()`, newly reachable from an audit path.
+`schematic()`. ⚠️ **Correction worth keeping:** it is tempting to say 1.11.0
+"widened this from internal to consumer-reachable" by exporting
+`targetSizeFinding`. It did not. `schematicSVG` has been a public export of
+`tosijs/agent` since **v1.10.1**, takes a caller-supplied description, and
+already throws the identical error — verified against
+`git show v1.10.1:dist/module.js`. 1.11.0 adds a SECOND door to a crash that
+was already public, and `targetSizeFinding` in fact returns early on
+`!isInteractive`/null bounds where the renderer computed unconditionally, so
+its throw surface is slightly NARROWER.
+
+**[#15](https://github.com/tonioloewald/tosijs-floorplan/issues/15)** — the
+renderer has never been drawn against a REDACTED record. After 1.11.0's
+secrecy fix a secret-marked link publishes neither `label` nor `href`, so the
+caption fallback documented in `AgentWiringRecord.href` has nothing left.
 
 (**[#11](https://github.com/tonioloewald/tosijs-floorplan/issues/11)** is the
 narrowed-not-closed follow-up to #5, recorded in the section above.)
