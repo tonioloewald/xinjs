@@ -3090,6 +3090,43 @@ describe('describe(): secrecy covers the ATTRIBUTE harvest, not just text', () =
     agent.disable()
   })
 
+  test('LIVE STATE follows PATH secrecy, not just element marking (round 5, B-1)', async () => {
+    /*
+     * Two checkboxes bound to ONE secret path. `describeElement` computes
+     * `checked` before bindings are known, so it could only ask element-local
+     * secrecy — the marked one withheld, the unmarked MIRROR published
+     * `checked: true` beside its own `secret: true`, disclosing exactly the
+     * value `read()` returns `⟨secret⟩` for. A radio group over a secret path
+     * leaked which option was selected the same way.
+     *
+     * Fixed at `suppressHarvest`, the one place that already knows
+     * path-derived secrecy at record level — NOT a ninth per-site gate, which
+     * is the shape three consecutive reviews have found a hole in.
+     */
+    document.body.innerHTML = ''
+    const { r5 } = tosi({ r5: { twoFactorEnabled: true } })
+    await updates()
+    const marked = elements.input({
+      type: 'checkbox',
+      'data-tosi-secret': '',
+      'aria-label': '2FA',
+      bindValue: r5.twoFactorEnabled,
+    })
+    const mirror = elements.input({
+      type: 'checkbox',
+      'aria-label': 'mirror',
+      bindValue: r5.twoFactorEnabled,
+    })
+    document.body.append(marked, mirror)
+    ;[marked, mirror].forEach(rect)
+    await updates()
+    const agent = enableAgentInterface({ quiet: true, expose: { roots: [r5] } })
+    expect(agent.read('r5.twoFactorEnabled')).toBe('⟨secret⟩')
+    // neither record may carry the state the read gate refuses
+    expect(JSON.stringify(agent.describe())).not.toContain('"checked"')
+    agent.disable()
+  })
+
   test('CONTAINING a secret control must not poison a bound path (round 4, B-1)', async () => {
     /*
      * THE MOST DANGEROUS THING THIS RELEASE DID, and it was in the security
@@ -3195,19 +3232,30 @@ describe('describe(): secrecy covers the ATTRIBUTE harvest, not just text', () =
      * marked a whole state root secret, permanently.
      */
     document.body.innerHTML = ''
-    const { ord } = tosi({ ord: { name: 'Ada' } })
+    /*
+     * EVERY ORDINARY CONTROL IS ON ITS OWN PATH, and the password has one to
+     * itself. The first version of this test bound the checkbox AND the
+     * password to a single path, so that path was legitimately secret and the
+     * assertion below demanded that `checked` be published anyway — the
+     * control was asserting a leak, and round 5 found it that way. Secrecy is
+     * a property of the PATH, so a fixture that shares one cannot ask "does
+     * ordinary data survive?"
+     */
+    const { ord } = tosi({
+      ord: { name: 'Ada', email: 'a@b.c', on: true, secret: '' },
+    })
     await updates()
     const link = elements.a({ href: '/docs', bindText: ord.name }, 'Docs')
     const input = elements.input({
       placeholder: 'your email',
       title: 'Email',
-      bindValue: ord.name,
+      bindValue: ord.email,
     })
-    const toggle = elements.input({ type: 'checkbox', bindValue: ord.name })
+    const toggle = elements.input({ type: 'checkbox', bindValue: ord.on })
     const password = elements.input({
       type: 'password',
       'aria-label': 'Password',
-      bindValue: ord.name,
+      bindValue: ord.secret,
     })
     document.body.append(link, input, toggle, password)
     ;[link, input, toggle, password].forEach(rect)

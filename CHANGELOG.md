@@ -63,8 +63,8 @@ discriminate.
 
 ### Security — `describe()` published secrets in cleartext through the attribute harvest
 
-**`describe()` emitted `href`, `placeholder`, `title`-as-`label` and a
-checkbox's `checked` state past `data-tosi-secret`.** A password-reset or
+**`describe()` emitted `href`, `placeholder`, `title`-as-`label`,
+`aria-description` and a checkbox's `checked` state past `data-tosi-secret`.** A password-reset or
 magic-link token in an `href` travelled in cleartext — beside a `text` field on
 the *same record* that had been correctly withheld, so the response contradicted
 itself. In the ancestor-region case no `secret: true` was set either, so the
@@ -82,14 +82,32 @@ and it is the same defect wording as the 1.8.3 blocker. Pre-existing — the cod
 is untouched by the rest of this release — and found by a scoped re-review of
 the remediation.
 
-The fix asks the **secrecy** arm (`referencedNodeIsSecret`), deliberately *not*
-the `contentWithheld` guard the text harvests use: that one answers secrecy
-**and scope**, so routing `href` through it would strip the destination from
-every link outside the exposed roots. Over-redaction is this class's other
+The fix asks **element-or-ancestor** secrecy —
+`isSecretControl(el) || closestAcrossRoots(el, '[data-tosi-secret]')` —
+deliberately *not* the `contentWithheld` guard the text harvests use (that one
+answers secrecy **and scope**, so routing `href` through it would strip the
+destination from every link outside the exposed roots), and deliberately *not*
+`referencedNodeIsSecret`, whose third arm is **containment**. An earlier cut of
+this fix did use `referencedNodeIsSecret`, and containment turned out to be
+catastrophic there: `record.secret` is read downstream as an *identity* signal
+that appends to a module-level, append-only secret-path set, so an ordinary
+login form — a bound container that merely *contained* a password field —
+permanently marked its own state path `⟨secret⟩` for the rest of the session.
+Caught pre-tag; the narrow guard is what ships. Over-redaction is this class's other
 failure mode — in 1.10.0 one password field marked a whole state root secret,
 permanently — so a name still survives secrecy (`aria-label` is kept; dropping
 it would trade a leak for a false `anonymous-affordance` on every secret control
 in the app) while content and live state do not.
+
+Two further holes in the same harvest were found by re-reviewing this fix and
+are closed here: **`aria-description`** (both its spellings — `referencedText`
+asked about the referenced *target* and never about the element itself), and a
+checkbox's **`checked`**, which was gated on element-local marking while every
+sibling channel asks the *path* — so two toggles bound to one secret path gave
+opposite answers, the unmarked mirror publishing the state `read()` refuses.
+That one is fixed at `suppressHarvest`, the single place that already knows
+path-derived secrecy at record level, so a live-state field added later
+inherits the guard instead of needing another gate.
 
 Pinned by tests that assert the **token substring is absent from the whole
 serialised map**, not that a named field is missing — the previous fixtures used
@@ -97,6 +115,26 @@ serialised map**, not that a named field is missing — the previous fixtures us
 assertion is inherited automatically by whatever harvest is added next. Both
 fail with the withholding reverted; a third test is the over-redaction control
 and passes either way.
+
+### Known issue — secrecy is not learned through a light-DOM wrapper
+
+**[#41](https://github.com/tonioloewald/tosijs/issues/41).** If an *ancestor*
+carries the two-way binding and the `<input type="password">` sits inside it —
+a plain `<form>` or wrapper with a custom `fromDOM` binding — the path is never
+learned as secret, so `read()`, `changes()` and `describe()` all return
+cleartext. `refreshSecretPaths` walks up from a secret control only across a
+**shadow** boundary; light DOM has no `.host`, so the walk never happens.
+
+**Present in every released version**, verified back to v1.10.1 — this release
+does not regress it and holding the release would protect nobody. It is not
+fixed here because the proposed remedy is new logic in exactly the code path
+that produced a blocker in each of three consecutive pre-release review rounds,
+every one of them in a same-session patch to a previous same-session patch. It
+gets its own change and its own review. The issue carries the repro, the
+measured cross-version table, and the proposed fix.
+
+Marking the control itself (`<input type="password" data-tosi-secret>`) or the
+region works correctly and is the recommended mitigation today.
 
 ### Added — the shared affordance rules are reachable
 
@@ -138,10 +176,10 @@ turn, so the numbers now come from the thing that measures them):
 | `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
 | `core.js` | 26_666 | 26_666 | **+0** |
 | `state.js` | 16_747 | 16_747 | **+0** |
-| `module.js` | 43_928 | 44_411 | **+483** |
-| `main.js` | 44_201 | 44_669 | **+468** |
-| `module.debug.js` | 59_515 | 60_541 | **+1026** |
-| `module.safe.js` | 59_375 | 60_398 | **+1023** |
+| `module.js` | 43_928 | 44_418 | **+490** |
+| `main.js` | 44_201 | 44_675 | **+474** |
+| `module.debug.js` | 59_515 | 60_555 | **+1040** |
+| `module.safe.js` | 59_375 | 60_414 | **+1039** |
 
 The three bundles that do not carry the agent surface are unchanged, so a
 consumer who never imports it pays nothing for this release. The 61_500 →

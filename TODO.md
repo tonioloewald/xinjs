@@ -1,5 +1,25 @@
 # todo
 
+## Deferred from the 1.11.0 round-5 review
+
+Report: `reviews/1.11.0-round5.md`. B-1 (live state vs path secrecy) and B-3
+(the CHANGELOG naming a removed helper) are fixed. B-2 is filed as **#41**.
+
+- [ ] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing).** The fix is
+      the light-DOM twin of `refreshSecretPaths`' shadow arm, gated on
+      `fromDOM != null` so it cannot reintroduce the round-4 over-redaction.
+      Needs its own change and its own review — not a sixth consecutive
+      same-session patch to this code path.
+- [ ] **`describe()` perf was never re-measured in Chromium.** Round 4 measured
+      +45–55% there; the round-4 narrowing removed the O(subtree) arm and
+      happy-dom shows it recovered, but happy-dom is explicitly not the
+      environment that question can be settled in.
+- [ ] The build's "paste this" gz table prints an incomplete set on dev runs
+      (the tjs bundles are `--build`-only), so a dev-run paste silently drops
+      two rows. Print only under `--build`, or label the partial set.
+- [ ] `stripArrows` on the structural tier and the deliberate `title`/`alt`
+      loosening both still ship unpinned (carried from round 4).
+
 ## Deferred from the 1.11.0 round-4 review (BLOCK → cleared)
 
 Report: `reviews/1.11.0-round4-post-b1.md`. All three blockers were inside the

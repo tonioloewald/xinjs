@@ -1469,6 +1469,24 @@ const suppressHarvest = (
 ): boolean => {
   if (!harvestWouldLeak(el, record, boundPaths)) return false
   record.secret = true
+  /*
+   * LIVE STATE GOES WITH THE HARVEST, and it is stripped HERE rather than
+   * gated at the site that wrote it — the ninth per-site restatement is what
+   * three consecutive reviews have found a hole in.
+   *
+   * `describeElement` computes `checked` before bindings are known, so it can
+   * only ask ELEMENT-local secrecy. Every sibling channel asks the PATH:
+   * `boundValue` checks `isSecretPath`, `harvestWouldLeak` checks
+   * `containsSecret`, `read()` returns the sentinel. So two checkboxes bound
+   * to one secret path published opposite answers — the marked one withheld,
+   * the unmarked MIRROR emitting `checked: true` next to its own
+   * `secret: true`, disclosing exactly the value `read()` refuses.
+   *
+   * This function is the one place that already knows path-derived secrecy at
+   * record level, so a live-state field added later inherits the guard by
+   * construction instead of needing a tenth gate.
+   */
+  delete record.checked
   return true
 }
 
