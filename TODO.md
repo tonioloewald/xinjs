@@ -1,5 +1,51 @@
 # todo
 
+## Deferred from the 1.11.0 remediation re-review (BLOCK → cleared)
+
+Report: `reviews/1.11.0-preminor-remediation.md`. The blocker (B1, the
+`describe()` attribute-harvest leak) is fixed and pinned. These are the rest.
+
+### The one that is still a real defect
+- [ ] **M1 (security, verified) — inline-contract validation on `write()` is
+      fail-open on DOM presence.** Same call, same posture: mounted → REFUSED
+      with a contract violation; after `inp.remove()` → ACCEPTED, and the bad
+      value lands. `inlineSchemaFor()` resolves the governing schema by
+      scanning `document.getElementsByClassName(BOUND_CLASS)`, so enforcement
+      is a function of what is currently RENDERED — and `bindList` recycles
+      rows, so a per-row contract binds only while the row is in the viewport.
+      SPA route changes and hidden tab panels do the same. Nothing announces
+      the downgrade (contrast `warnIfFailsOpen` in `contract-check.ts`).
+      Pre-existing; not gating because `describe()` scans the same live set,
+      so the map never advertises what `write()` will not enforce.
+
+### Coverage (untested surfaces, not failing tests)
+- [ ] `schematic()` became public API in `a253a1e` and **no gate executes it** —
+      `schematic.test.ts` never calls it, the type probe only constructs the
+      arrow, and the smoke gate asserts `typeof !== 'undefined'`.
+- [ ] `src/schematic.test.ts` (487 lines) predates the 0.4.0 vendor bump and
+      references none of the new symbols. 267 vendored lines with **no local
+      test delta**, including floorplan's `flagColor` prototype-chain security
+      fix.
+- [ ] No test asserts the RENDERER still honours `flags`/`list`, so nothing
+      would catch the deliberate audit/renderer divergence widening.
+
+### Build/doc hygiene
+- [ ] **Harden the budget-comment class**: parse the trailing `-> N` out of
+      each spec's comment and assert it equals `budget`. The 1.5 kB drift fixed
+      last round was caught by human review, and the fix for it introduced a
+      126 B drift of its own — corrected by hand again this round. Two rounds
+      of hand-fixing is the signal to automate it (~5 lines over `BUNDLES`).
+- [ ] **`docs/version.json` stamps its own PARENT commit**, so every build
+      dirties it and "clean tree after `bun run build`" is unreachable. Three
+      of this diff's commits are that self-chase, and it makes Tier 0's
+      artifact-freshness warning permanently noisy — which is how a real
+      staleness signal gets ignored. Stamp the build's own commit, or exclude
+      the field from the freshness check. (Upstream: tosijs-ui.)
+- [ ] `auditView` discards producer `flags` unconditionally — including a DOM
+      producer's legitimate WCAG exemption — and says nothing, in a module
+      whose stated principle is "an audit must not fail silently". One
+      `skipped.push` behind a `seen` guard.
+
 ## Deferred from the 1.11.0 pre-minor review (GO_WITH_FOLLOWUPS, 0 blockers)
 
 Report: `reviews/1.11.0-preminor.md`. Both majors are **upstream-gated** —
@@ -33,35 +79,36 @@ and #12 falls out for free). Pinned by 8 tests, 5 of which fail with
       (floorplan#11).
 
 ### Cheap, decided, not yet done
-- [ ] **Re-export the shared predicate.** `src/index-agent.ts` names only
+- [x] **Re-export the shared predicate.** DONE in `a253a1e`. `src/index-agent.ts` names only
       `schematicSVG`/`rasterizeSVG`/`boundsOf`, so `isInteractive`,
       `targetSizeFinding`, `TARGET_SIZE_DEFAULT`, `schematic()` and
       `SchematicResult` reach no consumer — "one implementation" stops at this
       repo's boundary, and a downstream must re-implement or install a second
       copy of tosijs-floorplan. Already linked in, so ~0 bytes. **A minor is
       the release where this is free.** Mind the explicit-export-list hazard.
-- [ ] `BOUND_TWO_WAY`/`BOUND_TO_DOM` are now defined **twice** in `src/` —
+- [x] `BOUND_TWO_WAY`/`BOUND_TO_DOM` are now defined **twice** in `src/` — DONE: pinned by a test in `agent.test.ts`. Still two declarations —
       `agent.ts` (what `describe()` emits) and `schematic.ts` (what the audit
       now matches against). Two copies of the exact constant whose duplication
       *was* the mechanism of floorplan#4. One line closes it:
       `expect(agentTwoWay).toBe(schematicTwoWay)`.
-- [ ] Guard `f?.kind` where the audit reaches producer flags (floorplan#12) —
-      a malformed foreign map currently throws out of `auditAccessibility`.
+- [x] Guard `f?.kind` where the audit reaches producer flags (floorplan#12) —
+      DONE via `auditView` (the audit never passes `flags` down), and pinned.
+      ⚠️ But the exported `targetSizeFinding` DOES still throw on
+      `flags:[{label:'x'}]`, and 1.11.0 makes that reachable from tosijs's
+      PUBLIC API — new information for floorplan#12.
 - [ ] Print gzip **deltas** in the budget loop. The ceiling tracks growth
       upward by policy, so only a spike larger than the slack can ever fire:
       `module.js` is +6.3% gz over six releases while the ceiling moved four
       times. ~5 lines from data the build already holds (`dist/` is committed,
       so `git show HEAD:dist/<f>` is available). *Re-measure the tag-by-tag
       numbers before acting — the review did not verify them.*
-- [ ] `src/agent.ts` structural-tier heading harvest is the one `describe()`
-      text site that does not `stripArrows`, under a docstring claiming there
-      is no exception. Inert today; do it in whatever commit next touches
-      `agent.ts`.
+- [x] `src/agent.ts` structural-tier heading harvest missing `stripArrows` —
+      DONE, folded into the B1 security commit as the review suggested.
 - [ ] `auditAccessibility` computes `isInteractive(w)` and then
       `targetSizeFinding(w, …)` recomputes it; `hasTwoWayBinding` does
       `Object.entries` where 1.10.1 did `Object.values`. Measurable regression
       on the code this diff touched. Probably not worth fixing — decide once.
-- [ ] Clear the 15 stale `Verdict: BLOCK` stamps in `reviews/` (all resolved,
+- [x] Clear the 15 stale `Verdict: BLOCK` stamps in `reviews/` — DONE in `a253a1e` (all resolved,
       never marked `**STATUS: CLEARED**`). Tier 0 warns on every run, which is
       noise that will mask a real one.
 

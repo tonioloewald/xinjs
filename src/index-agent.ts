@@ -16,7 +16,15 @@ Everything that describes an app to a *non-human* user, behind one door:
 | `webmcpTools`, `webmcpAdapter` | the generated WebMCP tool set (auto-registered by `enableAgentInterface` where a host exists) |
 | `schematicSVG`, `rasterizeSVG`, `boundsOf` | the map, drawn (from **tosijs-floorplan**, vendored) |
 | `schematic` | the same map as DATA (boxes, legend, `note`) instead of an SVG string |
-| `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` | the shared affordance rules `auditAccessibility` itself uses — so a consumer can reach the same verdict instead of re-implementing it |
+| `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` | the shared affordance rules, over a **`SchematicRecord` from `describe()` — not over a DOM element**. `isInteractive(someAnchor)` compiles in plain JS and is meaningless. |
+
+> ⚠️ **These are the RENDERER's answers, and `auditAccessibility()` deliberately
+> differs from them in three places** — it ignores producer `flags`, exempts
+> `0×0`, and treats a list-bound element carrying direct evidence as a control
+> (tosijs-floorplan #7/#8/#9). So the exported rules do **not** reproduce the
+> audit's verdict on those shapes; the adjustment (`auditView`) is private
+> because it is a workaround, not API. Use `auditAccessibility()` if you want
+> the audit's answer, and these if you want the drawing's.
 | `auditAccessibility`, `auditFlags`, `contrastRatio` | findings over the map |
 | `exerciseContract`, `exerciseComponent` | contracts as tests |
 

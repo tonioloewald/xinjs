@@ -2492,7 +2492,16 @@ export function enableAgentInterface(
               !suppressHarvest(el, record, structuralPaths) &&
               !contentWithheld(el)
             ) {
-              const text = (el.textContent || '').trim().slice(0, 60)
+              // stripArrows like the other three text harvests (2234, 2255,
+              // 2296). This was the one exception, under a docstring saying
+              // there is none — inert, because a structural record is ground
+              // and never interactive, but an agent reading the description
+              // JSON directly saw a heading that appeared to carry a live
+              // two-way binding.
+              const text = stripArrows((el.textContent || '').trim()).slice(
+                0,
+                60
+              )
               if (text) record.text = text
             }
             const measured = measureBounds(el, viewportView)

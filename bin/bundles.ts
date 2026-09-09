@@ -107,12 +107,19 @@ export const BUNDLES: BundleSpec[] = [
     // map, replacing two copies that had drifted into contradicting each
     // other. The minimum-headroom gate caught this at 754 B — under the 1 kB
     // this file specifies — which is the state that breaks on the next
-    // unrelated commit. Restored to the ~1.75 kB slack every other bundle
-    // carries, from THIS bundle's own measurement (44_246), rather than
-    // shaved to it.
+    // unrelated commit. Restored to the ~1.6 kB slack every other bundle
+    // carries rather than shaved to the measurement.
+    //
+    // ⚠️ RELEASE-FINAL FIGURES, not the raising commit's: module.js ships at
+    // 44_377 (1_623 B spare) and main.js at 44_642 (1_358 B). This header
+    // said 44_246 / 44_516 — true when written, 126 B stale by the time later
+    // commits landed. That is the SAME drift the pre-release review caught in
+    // main.js's header one round earlier, reintroduced by hand in the fix for
+    // it. TODO.md carries the ask to assert `-> N` against `budget` in the
+    // build so this class stops being a human-review dependency.
     //
     // That it lands on the same number as main.js is a coincidence, not a
-    // copy: main.js measured 44_516 and keeps 1_484 B under its existing
+    // copy: main.js ships at 44_642 and keeps 1_358 B under its existing
     // ceiling, so it needed no change at all. See the warning below.
     budget: 46_000,
     probe: 'import',
@@ -127,7 +134,7 @@ export const BUNDLES: BundleSpec[] = [
     // `-> 44_500` above a `budget: 46_000` — 1.5 kB wrong, in the file whose
     // whole thesis is "a budget is a DECISION, read the comment before you
     // raise it." A pre-release review caught it. 1.11.0 did NOT move this
-    // number: main.js measured 44_516 and keeps 1_484 B under the existing
+    // number: main.js ships at 44_642 and keeps 1_358 B under the existing
     // ceiling. THE TWO CEILINGS ARE DELIBERATELY NOT EQUAL: the CJS
     // artifact runs ~290 gz bytes over the ESM one (271 B at v1.9.2, 287 B
     // now), so copying module.js's number here — which is what the previous

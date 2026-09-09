@@ -101,8 +101,12 @@ and passes either way.
 ### Added — the shared affordance rules are reachable
 
 `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` and `schematic()`
-now export from `tosijs` and `tosijs/agent`, with the record/result types their
-signatures name (`SchematicRecord`, `SchematicDescription`, `SchematicResult`,
+now export from the **ESM and CJS** builds of `tosijs`, and from `tosijs/agent`,
+with the record/result types their signatures name. **Not from the
+`<script src=…>` IIFE** — `dist/index.js` is built from `index-browser.ts`,
+which omits the agent surface by design so a script tag does not pay for an
+opt-in feature (verified: zero occurrences of `isInteractive` in that bundle).
+A CDN reader needs the ES module build; see also tosijs#39 (`SchematicRecord`, `SchematicDescription`, `SchematicResult`,
 `SchematicLegendEntry`). Adopting one implementation is worth little if it
 stops at this package's boundary: a downstream wanting the same verdict
 `auditAccessibility()` reaches had to re-implement it or install a second,
@@ -115,9 +119,27 @@ release fixing. `src/type-surface.test.ts` now compiles a probe that *calls*
 each of them against the built `.d.ts`; removing the exports fails it with
 TS2305, watched.
 
-Costs +59 gz on the two EXPERIMENTAL tjs bundles (budget 61_500 → 62_500, in
-this commit, with the measurement) and +53/+56 on `module.js`/`main.js`, which
-absorbed it inside their existing ceilings.
+Costs +59 gz on the two EXPERIMENTAL tjs bundles (budget 61_500 → 62_500, with
+the measurement) and +53/+56 on `module.js`/`main.js`, which absorbed it inside
+their existing ceilings.
+
+**Release totals** (v1.10.1 → this tag, Bun zlib, the same measurement the gate
+uses — per-commit deltas are what get written and release totals are what get
+read):
+
+| bundle | 1.10.1 | 1.11.0 | Δ |
+| --- | --- | --- | --- |
+| `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
+| `core.js` | 26_666 | 26_666 | **+0** |
+| `state.js` | 16_747 | 16_747 | **+0** |
+| `module.js` | 43_928 | 44_381 | **+453** |
+| `main.js` | 44_201 | 44_641 | **+440** |
+| `module.debug.js` | 59_515 | 60_472 | **+957** |
+| `module.safe.js` | 59_375 | 60_328 | **+953** |
+
+The three bundles that do not carry the agent surface are unchanged, so a
+consumer who never imports it pays nothing for this release. The 61_500 →
+62_500 raise on the tjs pair is right-sized by that +957, not generous.
 
 ### Fixed — where a lint and a drawing legitimately differ
 

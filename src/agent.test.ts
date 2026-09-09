@@ -3115,3 +3115,17 @@ describe('describe(): secrecy covers the ATTRIBUTE harvest, not just text', () =
     agent.disable()
   })
 })
+
+test('the two provenance tokens are declared once, not twice (floorplan#4 class)', async () => {
+  /*
+   * `BOUND_TWO_WAY`/`BOUND_TO_DOM` exist in BOTH src/agent.ts (what describe()
+   * emits) and src/schematic.ts (what the now-EXPORTED isInteractive matches
+   * against). Two independently-maintained copies of the exact constant whose
+   * duplication WAS the mechanism of floorplan#4 — and 1.11.0 makes the
+   * consumer of one copy public while exporting only the other. Coverage
+   * existed but was incidental, riding on audit fixtures.
+   */
+  const schematic = await import('./schematic')
+  expect(BOUND_TWO_WAY).toBe(schematic.BOUND_TWO_WAY)
+  expect(BOUND_TO_DOM).toBe(schematic.BOUND_TO_DOM)
+})
