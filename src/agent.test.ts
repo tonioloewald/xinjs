@@ -2972,3 +2972,146 @@ describe('redaction stays NARROW — fail-closed must not mean fail-everything',
     host.remove()
   })
 })
+
+/*
+ * THE ATTRIBUTE HARVEST IS GUARDED TOO (1.11.0 remediation re-review, B1).
+ *
+ * `describeElement` received a ContentGuard and asked it only inside
+ * `referencedText()` and `associatedLabel()`, so `href`, `placeholder`,
+ * `title`-as-label and `checked` were published in cleartext past
+ * `data-tosi-secret` — beside a `text` on the SAME record that had been
+ * correctly withheld. Reachable through `tosi_describe`, which `webmcp.ts`
+ * registers unconditionally while gating `tosi_read`, so the value the read
+ * gate withholds reached a model-context host anyway.
+ *
+ * The seventh address of the invariant the ContentGuard exists to close, and
+ * the same wording as the 1.8.3 blocker.
+ *
+ * THESE ASSERT ON THE TOKEN SUBSTRING IN THE WHOLE SERIALISED MAP, not on a
+ * named field. The previous fixtures used UNWIRED anchors, so they passed for
+ * a reason unrelated to secrecy and could not have caught this. A substring
+ * assertion over `JSON.stringify(describe())` is inherited automatically by
+ * whatever harvest someone adds next.
+ */
+describe('describe(): secrecy covers the ATTRIBUTE harvest, not just text', () => {
+  const rect = (el: Element): Element =>
+    Object.defineProperty(el, 'getBoundingClientRect', {
+      value: () => ({ x: 0, y: 0, width: 200, height: 30 }),
+      configurable: true,
+    })
+
+  test('no token survives describe(), in any of four harvests', async () => {
+    document.body.innerHTML = ''
+    const { sec } = tosi({ sec: { name: 'Ada', tick: false } })
+    await updates()
+
+    // (a) marker on an ANCESTOR region — this one also published NO
+    //     `secret: true`, so the suppression read as plain absence
+    const region = elements.div({ 'data-tosi-secret': '' })
+    const inRegion = elements.a(
+      { href: 'https://x/reset?token=TOKEN-AAA', bindText: sec.name },
+      'go'
+    )
+    region.append(inRegion)
+    // (b) marker directly on the anchor
+    const marked = elements.a({
+      'data-tosi-secret': '',
+      href: '/reset?t=TOKEN-BBB',
+      bindText: sec.name,
+    })
+    // (c) placeholder and (d) title, on a marked control
+    const field = elements.input({
+      'data-tosi-secret': '',
+      placeholder: 'TOKEN-DDD',
+      title: 'TOKEN-EEE',
+      bindValue: sec.name,
+    })
+    document.body.append(region, marked, field)
+    ;[inRegion, marked, field].forEach(rect)
+    await updates()
+
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [sec] },
+    })
+    const json = JSON.stringify(agent.describe())
+    for (const token of ['TOKEN-AAA', 'TOKEN-BBB', 'TOKEN-DDD', 'TOKEN-EEE']) {
+      expect(json).not.toContain(token)
+    }
+    // and suppression must never read as absence
+    const region_record = (agent.describe().wiring as any[]).find(
+      (r) => r.tag === 'a' && r.text != null
+    )
+    expect(region_record?.secret).toBe(true)
+    agent.disable()
+  })
+
+  test('a secret toggle does not publish its live state', async () => {
+    document.body.innerHTML = ''
+    const { sec2 } = tosi({ sec2: { on: true } })
+    await updates()
+    const cb = elements.input({
+      type: 'checkbox',
+      'data-tosi-secret': '',
+      bindValue: sec2.on,
+    })
+    document.body.append(cb)
+    rect(cb)
+    ;(cb as any).checked = true
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [sec2] },
+    })
+    const rec = (agent.describe().wiring as any[]).find(
+      (r) => r.type === 'checkbox'
+    )
+    expect(rec?.secret).toBe(true)
+    expect(rec?.checked).toBeUndefined()
+    agent.disable()
+  })
+
+  test('AND ORDINARY MAP DATA SURVIVES — the over-redaction control', async () => {
+    /*
+     * The other half, and the reason this uses `referencedNodeIsSecret` rather
+     * than the `contentWithheld` guard the other harvests use: that guard
+     * answers secrecy AND SCOPE, so routing `href` through it would strip the
+     * destination from every link outside the exposed roots. Over-redaction is
+     * the failure this class produced in 1.10.0, where one password field
+     * marked a whole state root secret, permanently.
+     */
+    document.body.innerHTML = ''
+    const { ord } = tosi({ ord: { name: 'Ada' } })
+    await updates()
+    const link = elements.a({ href: '/docs', bindText: ord.name }, 'Docs')
+    const input = elements.input({
+      placeholder: 'your email',
+      title: 'Email',
+      bindValue: ord.name,
+    })
+    const toggle = elements.input({ type: 'checkbox', bindValue: ord.name })
+    const password = elements.input({
+      type: 'password',
+      'aria-label': 'Password',
+      bindValue: ord.name,
+    })
+    document.body.append(link, input, toggle, password)
+    ;[link, input, toggle, password].forEach(rect)
+    ;(toggle as any).checked = true
+    await updates()
+
+    const agent = enableAgentInterface({ quiet: true, expose: 'all' })
+    const w = agent.describe().wiring as any[]
+    expect(w.find((r) => r.href === '/docs')).toBeDefined()
+    expect(w.find((r) => r.placeholder === 'your email')).toBeDefined()
+    expect(w.find((r) => r.label === 'Email')).toBeDefined()
+    expect(w.find((r) => r.checked === true)).toBeDefined()
+    // a password keeps its NAME while losing its content: dropping the name
+    // would trade a leak for a false `anonymous-affordance` on every secret
+    // control in the app
+    const pw = w.find((r) => r.type === 'password')
+    expect(pw?.label).toBe('Password')
+    expect(pw?.secret).toBe(true)
+    agent.disable()
+  })
+})

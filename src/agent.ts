@@ -1522,22 +1522,53 @@ const describeElement = (
   if (part) record.part = part
   const role = el.getAttribute('role')
   if (role) record.role = role
+  /*
+   * SECRECY IS DECIDED ONCE, BEFORE ANY CONTENT-BEARING ATTRIBUTE IS READ.
+   *
+   * `withheld` was threaded into this function and then asked only by
+   * `referencedText()` and `associatedLabel()`, so the attribute harvest below
+   * ran unguarded: a token in an `href` was published in cleartext beside a
+   * `text` that had been correctly withheld ON THE SAME RECORD — a response
+   * that contradicts itself. Reachable through `tosi_describe`, which
+   * `webmcp.ts` registers unconditionally while gating `tosi_read`, so the
+   * value the read gate withholds was handed to a model-context host anyway.
+   * That is the SEVENTH address of the invariant ContentGuard exists to close.
+   *
+   * Deliberately NOT `withheld` (a.k.a. `contentWithheld`): that guard answers
+   * secrecy AND SCOPE, and an out-of-scope link's destination is ordinary map
+   * data. Routing `href` through it would strip the destination from every
+   * link outside the exposed roots — the over-redaction failure of 1.10.0,
+   * where one password field marked a whole state root secret. This asks the
+   * SECRECY arm only.
+   */
+  const secretHere = referencedNodeIsSecret(el)
+  // and say so, always. In the region case (`data-tosi-secret` on an
+  // ANCESTOR) nothing was previously marked, so suppression read as absence
+  // and a consumer could not tell anything had been withheld.
+  if (secretHere) record.secret = true
   // the accessible-name algorithm, abridged: what a screen reader would say.
   // placeholder is deliberately NOT folded in — it's a hint, not a name, and
   // conflating them makes an empty input read like it has content
+  //
+  // A NAME SURVIVES SECRECY, CONTENT DOES NOT. `aria-label` is authored to be
+  // announced, and dropping it would make every secret control anonymous —
+  // which the audit would then flag, trading a leak for a false a11y defect.
+  // `title`/`alt` are free-text fallbacks far likelier to carry incidental
+  // content, so they are withheld here; the referenced/associated sources
+  // already ask `withheld` themselves.
   const label =
     el.getAttribute('aria-label') ||
     referencedText(el, 'aria-labelledby', withheld) ||
     associatedLabel(el, withheld) ||
-    el.getAttribute('title') ||
-    el.getAttribute('alt')
+    (secretHere ? null : el.getAttribute('title') || el.getAttribute('alt'))
   if (label) record.label = label
   const placeholder =
     el.getAttribute('placeholder') || el.getAttribute('aria-placeholder')
-  if (placeholder) record.placeholder = placeholder
-  // a link IS an affordance — its destination is a fact of the map
+  if (placeholder && !secretHere) record.placeholder = placeholder
+  // a link IS an affordance — its destination is a fact of the map, EXCEPT
+  // where the destination is the secret (a reset/magic-link token)
   const href = el.getAttribute?.('href')
-  if (href) record.href = href
+  if (href && !secretHere) record.href = href
   // contenteditable IS an input field — an affordance in itself, whatever
   // custom bindings ride it (and they usually do)
   const editableAttr = el.getAttribute?.('contenteditable')
@@ -1565,7 +1596,9 @@ const describeElement = (
     // the map. The affordance is still described — kind, name, bound path,
     // geometry — just never its content.
     if (isSecretControl(el, type)) record.secret = true
-    if (type === 'checkbox' || type === 'radio') {
+    // LIVE STATE IS CONTENT. Whether a secret-marked toggle is on is exactly
+    // the fact its marking withholds.
+    if ((type === 'checkbox' || type === 'radio') && !secretHere) {
       record.checked = (el as any).checked === true
     }
   }

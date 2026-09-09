@@ -61,6 +61,43 @@ were themselves no-ops on first writing (their fixtures were cleared by a
 a pre-release review caught that, and both were rebuilt around fixtures that
 discriminate.
 
+### Security — `describe()` published secrets in cleartext through the attribute harvest
+
+**`describe()` emitted `href`, `placeholder`, `title`-as-`label` and a
+checkbox's `checked` state past `data-tosi-secret`.** A password-reset or
+magic-link token in an `href` travelled in cleartext — beside a `text` field on
+the *same record* that had been correctly withheld, so the response contradicted
+itself. In the ancestor-region case no `secret: true` was set either, so the
+suppression that did happen read as plain absence.
+
+Reachable by a different principal: `webmcp.ts` gates `tosi_read` and
+`tosi_changes` behind `canRead` but registers **`tosi_describe`
+unconditionally**, so the surface handed a model-context host exactly the value
+the read gate exists to withhold.
+
+`describeElement` was *given* a `ContentGuard` and asked it only inside
+`referencedText()` and `associatedLabel()`; the attribute harvest ran unguarded.
+This is the seventh address of the invariant that guard was introduced to close,
+and it is the same defect wording as the 1.8.3 blocker. Pre-existing — the code
+is untouched by the rest of this release — and found by a scoped re-review of
+the remediation.
+
+The fix asks the **secrecy** arm (`referencedNodeIsSecret`), deliberately *not*
+the `contentWithheld` guard the text harvests use: that one answers secrecy
+**and scope**, so routing `href` through it would strip the destination from
+every link outside the exposed roots. Over-redaction is this class's other
+failure mode — in 1.10.0 one password field marked a whole state root secret,
+permanently — so a name still survives secrecy (`aria-label` is kept; dropping
+it would trade a leak for a false `anonymous-affordance` on every secret control
+in the app) while content and live state do not.
+
+Pinned by tests that assert the **token substring is absent from the whole
+serialised map**, not that a named field is missing — the previous fixtures used
+*unwired* anchors and so passed for a reason unrelated to secrecy. A substring
+assertion is inherited automatically by whatever harvest is added next. Both
+fail with the withholding reverted; a third test is the over-redaction control
+and passes either way.
+
 ### Added — the shared affordance rules are reachable
 
 `isInteractive`, `targetSizeFinding`, `TARGET_SIZE_DEFAULT` and `schematic()`
