@@ -116,42 +116,50 @@ assertion is inherited automatically by whatever harvest is added next. Both
 fail with the withholding reverted; a third test is the over-redaction control
 and passes either way.
 
-### Security — secrecy is now learned through a light-DOM wrapper and its form
+### Security — secrecy is learned through more light-DOM shapes (partial)
 
-**[#41](https://github.com/tonioloewald/tosijs/issues/41).**
-`refreshSecretPaths` walked up from a secret control only across a **shadow**
-boundary. Light DOM has no `.host`, so a wrapper carrying the value binding
-over a contained `<input type="password">` was never harvested and the path was
-never learned as secret — which defeated `read()` and `changes()` as well as
-`describe()`, with no `describe()` call involved. Present in every released
-version; verified back to v1.10.1, so this is a fix rather than a regression.
+**[#41](https://github.com/tonioloewald/tosijs/issues/41), and it is still
+open.** `refreshSecretPaths` walked up from a secret control only across a
+**shadow** boundary. Light DOM has no `.host`, so a container carrying the value
+binding over a contained `<input type="password">` was never harvested and the
+path was never learned as secret — defeating `read()` and `changes()` as well as
+`describe()`. Present in every released version; verified back to v1.10.1, so
+this is a fix, not a regression.
 
-Two arms, both narrow. **The immediate parent** — `div({ bindValue:
-creds.password })` wrapping a password input — and **the owning `<form>`, at
-any depth**, because a form owns every control beneath it. That second one is a
-structural relationship the author declared, which is a real bound where "how
-many levels up" was a guess: a `<div>` app shell three levels above a password
-is *not* a form and stays readable.
+**Now covered**, each pinned by a test that fails without it:
 
-It uses `el.form`, not `closest('form')` — the DOM's own ownership property,
-which also honours the `form=` attribute so a control physically outside its
-form still resolves. (Under happy-dom `closest('form')`, a manual parent walk
-and `parentElement.parentElement` all return a *different wrapper object* for
-the same element, so the binding lookup comes back empty and the arm silently
-does nothing while appearing to find the form.)
+- the immediate parent — `div({ bindValue: creds.password })`
+- through a wrapping `<label>` — `<label>Password <input type="password"></label>`,
+  the commonest way to write a labelled field
+- the owning `<form>` at any depth, via `el.form` (not `closest('form')`: under
+  happy-dom that returns a *different wrapper object* for the same element, so
+  the binding lookup silently comes back empty)
+- controls whose secrecy comes from `autocomplete` (`cc-*`, `one-time-code`,
+  `current-password`, `new-password`), not only from `type`
 
-Both arms propagate only for a password, a `cc-*`-style autocomplete, or an
-explicit `data-tosi-secret` — never a bare `input[type="hidden"]`, which carries
-ids and flags at least as often as tokens.
+**Still NOT covered — verified leaking at this tag:**
 
-Two earlier cuts of this fix passed the positive case and were caught only by
-the controls, both reproducing the append-only availability break this code has
-now hit three separate ways: "nearest ancestor carrying any binding" bounds by
-*bindedness*, not *distance*, so a bound app shell three levels up was marked
-permanently; and propagating on `input[type="hidden"]` marked an ordinary CSRF
-wrapper. **The four negative tests are the valuable ones here** — marking the
-control itself or the region has always worked and remains the recommended
-belt-and-braces mitigation.
+- a **custom element** carrying `data-tosi-secret` inside a bound `<form>`.
+  `el.form` is `undefined` on a custom element (a form-associated one puts its
+  owner on `internals.form`), so **an explicit author marker is currently
+  weaker than the heuristic** — the worst shape on this list.
+- a **shadow component containing a password**, inside a bound `<form>`: the
+  shadow arm reaches the host, and the form above the host is not consulted.
+- a **light-DOM container two or more levels up with no `<form>`** —
+  `div({bindValue}) > div.row > input[type=password]`.
+
+Marking the **control itself** (`<input type="password" data-tosi-secret>`) or
+its immediate region works in all of these and remains the reliable mitigation.
+
+The gap is bounded by construction — every uncovered shape needs a binding on an
+ancestor *and* a secret control below it *and* no `<form>` or direct parent
+relationship between them. But it is a real gap, it is enumerated in #41 with
+repros, and this release does **not** close the class.
+
+> **On the previous wording.** An earlier draft of this entry said the form arm
+> covered the case "at any depth" and called #41 closed. A sixth pre-release
+> review found six shapes that still leaked, three of which survive above. The
+> code was never worse than 1.10.1 at any point — the claim was.
 
 ### Added — the shared affordance rules are reachable
 
@@ -193,10 +201,10 @@ turn, so the numbers now come from the thing that measures them):
 | `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
 | `core.js` | 26_666 | 26_666 | **+0** |
 | `state.js` | 16_747 | 16_747 | **+0** |
-| `module.js` | 43_928 | 44_478 | **+550** |
-| `main.js` | 44_201 | 44_742 | **+541** |
-| `module.debug.js` | 59_515 | 60_942 | **+1427** |
-| `module.safe.js` | 59_375 | 60_807 | **+1432** |
+| `module.js` | 43_928 | 44_533 | **+605** |
+| `main.js` | 44_201 | 44_793 | **+592** |
+| `module.debug.js` | 59_515 | 60_994 | **+1479** |
+| `module.safe.js` | 59_375 | 60_862 | **+1487** |
 
 The three bundles that do not carry the agent surface are unchanged, so a
 consumer who never imports it pays nothing for this release. The 61_500 →

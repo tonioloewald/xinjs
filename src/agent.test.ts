@@ -3371,6 +3371,61 @@ describe('#41: light-DOM wrapper secrecy, and what must NOT be marked', () => {
     agent.disable()
   })
 
+  test('a wrapping <label> is stepped through (round 6)', async () => {
+    /*
+     * `<label>Password <input type="password"></label>` inside a bound
+     * container is the commonest way to write a labelled field, and it
+     * defeated the one-step parent arm outright — the parent is the LABEL,
+     * which carries no binding. This file already treats a wrapping label as
+     * belonging to the control (`associatedLabel` reads `closest('label')`),
+     * so stepping through one is consistent. Bounded to a single label.
+     */
+    document.body.innerHTML = ''
+    const { lb } = tosi({ lb: { pw: '' } })
+    await updates()
+    const wrap = elements.div({ bindValue: lb.pw })
+    wrap.append(
+      elements.label({}, 'Password ', elements.input({ type: 'password' }))
+    )
+    document.body.append(wrap)
+    rect(wrap)
+    await updates()
+    lb.pw.value = 'TOK-LABEL-6'
+    await updates()
+    const agent = enableAgentInterface({ quiet: true, expose: { roots: [lb] } })
+    expect(agent.read('lb.pw')).toBe('⟨secret⟩')
+    expect(JSON.stringify(agent.describe())).not.toContain('TOK-LABEL-6')
+    agent.disable()
+  })
+
+  test('the upward gate consults autocomplete, not only type (round 6)', async () => {
+    /*
+     * The gate keyed only on `type`, so `input[type="hidden"
+     * autocomplete="cc-number"]` fell into the bare-hidden exclusion while the
+     * comment above it and the CHANGELOG both said a `cc-*` autocomplete
+     * propagates. `isSecretControl` has always consulted this list; the upward
+     * gate did not, so the two disagreed about the same element.
+     */
+    document.body.innerHTML = ''
+    const { ac } = tosi({ ac: { pan: '', plain: 'p' } })
+    await updates()
+    const ccForm = elements.form({ bindValue: ac.pan })
+    ccForm.append(elements.input({ type: 'hidden', autocomplete: 'cc-number' }))
+    // the control: a bare hidden input still must NOT propagate
+    const bareForm = elements.form({ bindValue: ac.plain })
+    bareForm.append(elements.input({ type: 'hidden', name: 'csrf' }))
+    document.body.append(ccForm, bareForm)
+    ;[ccForm, bareForm].forEach(rect)
+    await updates()
+    ac.pan.value = '4111111111111111'
+    await updates()
+    const agent = enableAgentInterface({ quiet: true, expose: { roots: [ac] } })
+    expect(agent.read('ac.pan')).toBe('⟨secret⟩')
+    expect(JSON.stringify(agent.describe())).not.toContain('4111111111111111')
+    expect(agent.read('ac.plain')).toBe('p')
+    agent.disable()
+  })
+
   test('CONTROL — a form with NO secret control is untouched', async () => {
     document.body.innerHTML = ''
     const { f41b } = tosi({ f41b: { plain: 'p' } })

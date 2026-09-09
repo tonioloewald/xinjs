@@ -5,11 +5,19 @@
 Report: `reviews/1.11.0-round5.md`. B-1 (live state vs path secrecy) and B-3
 (the CHANGELOG naming a removed helper) are fixed. B-2 is filed as **#41**.
 
-- [x] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing).** BOTH cases
-      fixed: the immediate parent, and the owning `<form>` at any depth via
-      `el.form`. The form is the real bound the distance guess was standing in
-      for — a form owns every control beneath it, and a `<div>` app shell is
-      not a form. Pinned with six negative controls.
+- [ ] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing, STILL OPEN).**
+      Covered now: immediate parent, through a wrapping `<label>`, the owning
+      `<form>` via `el.form`, and `autocomplete`-derived secrecy. **Verified
+      still leaking:** a custom element carrying `data-tosi-secret` inside a
+      bound form (`el.form` is undefined on custom elements — a
+      form-associated one puts it on `internals.form`, so the EXPLICIT MARKER
+      IS WEAKER THAN THE HEURISTIC); a shadow component holding a password
+      inside a bound form; and a light-DOM container 2+ levels up with no
+      form. Repros on the issue.
+      **I marked this `[x]` and closed the issue before it was true.** Four
+      rounds running I judged this subsystem complete and was wrong; the code
+      was never worse than 1.10.1, but the claims were. Whatever closes this
+      next needs the uncovered shapes as failing tests FIRST.
 - [ ] Consider whether the SHADOW arm should adopt the same
       `type="hidden"`-does-not-propagate restriction the light arm now has.
       Deliberately left asymmetric — new code took the conservative default —

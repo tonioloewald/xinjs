@@ -1362,9 +1362,48 @@ const refreshSecretPaths = (): void => {
      * line, and un-poisoning an append-only set is not.
      */
     const kind = ((el as any).type ?? '') as string
+    const autocomplete = el.getAttribute?.('autocomplete') ?? ''
     const propagates =
-      el.hasAttribute?.('data-tosi-secret') === true || kind !== 'hidden'
-    const parent = propagates ? el.parentElement : null
+      el.hasAttribute?.('data-tosi-secret') === true ||
+      SECRET_AUTOCOMPLETE_PREFIXES.some((prefix) =>
+        autocomplete.startsWith(prefix)
+      ) ||
+      kind !== 'hidden'
+    /*
+     * THE AUTOCOMPLETE ARM IS NOT DECORATION. Without it this gate keys ONLY
+     * on `type`, so `input[type="hidden" autocomplete="cc-number"]` — a real
+     * shape — fell into the bare-hidden exclusion, while the comment above and
+     * the CHANGELOG both said a `cc-*` autocomplete propagates. The word doing
+     * the work in "never a BARE hidden input" was `bare`, and the code had no
+     * notion of it. `isSecretControl` has always consulted this list; the
+     * upward gate did not, so the two disagreed about the same element.
+     *
+     * (Round 6 filed this as a live leak. It did not reproduce for me — that
+     * shape reads `⟨secret⟩` through another route both before and after this
+     * change — so this is not a leak fix. It is a gate that now means what it
+     * says, which is worth doing on its own: the next person will read the
+     * comment, not trace the other route.)
+     */
+    /*
+     * A WRAPPING <label> IS PART OF THE CONTROL, NOT A CONTAINER.
+     *
+     * `<label>Password <input type="password"></label>` inside a bound `<div>`
+     * is the commonest way to write a labelled field, and it defeated the
+     * one-step parent arm outright: the parent is the LABEL, which carries no
+     * binding, so nothing was learned and the password read back in cleartext.
+     * Verified at HEAD before this line existed.
+     *
+     * This file already treats a wrapping label as belonging to the control —
+     * `associatedLabel` reads `el.closest('label')` for the accessible name —
+     * so stepping through one is consistent, not a special case. Bounded to a
+     * single label: this does not become a walk.
+     */
+    let stepFrom: Element | null = el
+    const wrappingLabel = el.parentElement
+    if (wrappingLabel != null && wrappingLabel.tagName === 'LABEL') {
+      stepFrom = wrappingLabel
+    }
+    const parent = propagates ? stepFrom?.parentElement ?? null : null
     if (parent != null) {
       const { dataBindings } = getElementBindings(parent)
       for (const b of dataBindings ?? []) {
