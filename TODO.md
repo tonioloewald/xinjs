@@ -5,11 +5,15 @@
 Report: `reviews/1.11.0-round5.md`. B-1 (live state vs path secrecy) and B-3
 (the CHANGELOG naming a removed helper) are fixed. B-2 is filed as **#41**.
 
-- [ ] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing).** The fix is
-      the light-DOM twin of `refreshSecretPaths`' shadow arm, gated on
-      `fromDOM != null` so it cannot reintroduce the round-4 over-redaction.
-      Needs its own change and its own review — not a sixth consecutive
-      same-session patch to this code path.
+- [x] **#41 — light-DOM wrapper secrecy (SECURITY, pre-existing).** ONE-LEVEL
+      case fixed and pinned with four negative controls. **#41 stays open for
+      the multi-level case** (`<form bindValue>` → `<div>` → password): a
+      distance bound is arbitrary and "nearest bound ancestor" is not a bound
+      at all — needs a real discriminator, which is a design question.
+- [ ] Consider whether the SHADOW arm should adopt the same
+      `type="hidden"`-does-not-propagate restriction the light arm now has.
+      Deliberately left asymmetric — new code took the conservative default —
+      but the asymmetry should be a decision, not a leftover.
 - [ ] **`describe()` perf was never re-measured in Chromium.** Round 4 measured
       +45–55% there; the round-4 narrowing removed the O(subtree) arm and
       happy-dom shows it recovered, but happy-dom is explicitly not the

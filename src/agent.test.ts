@@ -3291,3 +3291,134 @@ test('the two provenance tokens are declared once, not twice (floorplan#4 class)
   expect(BOUND_TWO_WAY).toBe(schematic.BOUND_TWO_WAY)
   expect(BOUND_TO_DOM).toBe(schematic.BOUND_TO_DOM)
 })
+
+/*
+ * tosijs#41 — SECRECY THROUGH A LIGHT-DOM WRAPPER (partial fix).
+ *
+ * `refreshSecretPaths` walked up from a secret control only across a SHADOW
+ * boundary. Light DOM has no `.host`, so a wrapper carrying the value binding
+ * over a contained password field was never harvested and the path was never
+ * learned — defeating `read()` and `changes()` too, with no `describe()`
+ * involved. Present in every released version, verified back to v1.10.1.
+ *
+ * THE CONTROLS ARE THE POINT. Two earlier cuts of this fix passed the positive
+ * case and were caught only by these:
+ *   - "nearest ancestor carrying any binding" bounds by BINDEDNESS, not
+ *     DISTANCE, so the app-shell fixture below marked a whole root permanently;
+ *   - propagating on `input[type="hidden"]` marked an ordinary CSRF wrapper.
+ * Both are the append-only availability break this file has now hit three
+ * separate ways. A negative test here is worth more than the positive one.
+ */
+describe('#41: light-DOM wrapper secrecy, and what must NOT be marked', () => {
+  const rect = (el: Element): Element =>
+    Object.defineProperty(el, 'getBoundingClientRect', {
+      value: () => ({ x: 0, y: 0, width: 200, height: 30 }),
+      configurable: true,
+    })
+
+  test('a wrapper carrying the binding over a password IS learned', async () => {
+    document.body.innerHTML = ''
+    const { w41 } = tosi({ w41: { pw: '' } })
+    await updates()
+    const wrap = elements.div({ bindValue: w41.pw })
+    wrap.append(elements.input({ type: 'password' }))
+    document.body.append(wrap)
+    rect(wrap)
+    await updates()
+    w41.pw.value = 'PW-LEAK-41'
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [w41] },
+    })
+    expect(agent.read('w41.pw')).toBe('⟨secret⟩')
+    expect(JSON.stringify(agent.describe())).not.toContain('PW-LEAK-41')
+    agent.disable()
+  })
+
+  test('CONTROL — a toDOM-only container over a password is NOT marked', async () => {
+    // the round-4 regression fixture. `fromDOM != null` is what keeps it
+    // readable; without that narrowing this is a permanent availability break.
+    document.body.innerHTML = ''
+    const { c41a } = tosi({ c41a: { theme: 'dark' } })
+    await updates()
+    const wrap = elements.div({ 'data-theme': c41a.theme })
+    wrap.append(elements.input({ type: 'password' }))
+    document.body.append(wrap)
+    rect(wrap)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [c41a] },
+    })
+    agent.describe()
+    expect(agent.read('c41a.theme')).toBe('dark')
+    agent.disable()
+  })
+
+  test('CONTROL — a bound APP SHELL far above a password is NOT climbed to', async () => {
+    // caught the first cut: "nearest bound ancestor" is not a distance bound,
+    // so unbound elements in between let the walk reach the shell.
+    document.body.innerHTML = ''
+    const { c41b } = tosi({ c41b: { deep: 'shell' } })
+    await updates()
+    const shell = elements.div({ bindValue: c41b.deep })
+    const mid = elements.div({ class: 'mid' })
+    const inner = elements.div({ class: 'inner' })
+    inner.append(elements.input({ type: 'password' }))
+    mid.append(inner)
+    shell.append(mid)
+    document.body.append(shell)
+    rect(shell)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [c41b] },
+    })
+    agent.describe()
+    expect(agent.read('c41b.deep')).toBe('shell')
+    agent.disable()
+  })
+
+  test('CONTROL — a bare hidden CSRF input does NOT propagate upward', async () => {
+    // caught the second cut. Hidden inputs carry ids and flags at least as
+    // often as tokens; the element stays classified secret, the upward claim
+    // does not follow from it.
+    document.body.innerHTML = ''
+    const { c41c } = tosi({ c41c: { wrap: 'v' } })
+    await updates()
+    const wrap = elements.div({ bindValue: c41c.wrap })
+    wrap.append(elements.input({ type: 'hidden', name: 'csrf' }))
+    document.body.append(wrap)
+    rect(wrap)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [c41c] },
+    })
+    agent.describe()
+    expect(agent.read('c41c.wrap')).toBe('v')
+    agent.disable()
+  })
+
+  test('an EXPLICIT data-tosi-secret hidden input DOES propagate', async () => {
+    // the author saying so is the strong evidence the bare `type` is not
+    document.body.innerHTML = ''
+    const { c41d } = tosi({ c41d: { wrap: 'v' } })
+    await updates()
+    const wrap = elements.div({ bindValue: c41d.wrap })
+    wrap.append(
+      elements.input({ type: 'hidden', 'data-tosi-secret': '', name: 'csrf' })
+    )
+    document.body.append(wrap)
+    rect(wrap)
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [c41d] },
+    })
+    agent.describe()
+    expect(agent.read('c41d.wrap')).toBe('⟨secret⟩')
+    agent.disable()
+  })
+})

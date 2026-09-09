@@ -116,25 +116,34 @@ assertion is inherited automatically by whatever harvest is added next. Both
 fail with the withholding reverted; a third test is the over-redaction control
 and passes either way.
 
-### Known issue — secrecy is not learned through a light-DOM wrapper
+### Security — secrecy is now learned through a one-level light-DOM wrapper
 
-**[#41](https://github.com/tonioloewald/tosijs/issues/41).** If an *ancestor*
-carries the two-way binding and the `<input type="password">` sits inside it —
-a plain `<form>` or wrapper with a custom `fromDOM` binding — the path is never
-learned as secret, so `read()`, `changes()` and `describe()` all return
-cleartext. `refreshSecretPaths` walks up from a secret control only across a
-**shadow** boundary; light DOM has no `.host`, so the walk never happens.
+**[#41](https://github.com/tonioloewald/tosijs/issues/41), partially fixed.**
+`refreshSecretPaths` walked up from a secret control only across a **shadow**
+boundary. Light DOM has no `.host`, so a wrapper carrying the value binding
+over a contained `<input type="password">` was never harvested and the path was
+never learned as secret — which defeated `read()` and `changes()` as well as
+`describe()`, with no `describe()` call involved. Present in every released
+version; verified back to v1.10.1, so this is a fix rather than a regression.
 
-**Present in every released version**, verified back to v1.10.1 — this release
-does not regress it and holding the release would protect nobody. It is not
-fixed here because the proposed remedy is new logic in exactly the code path
-that produced a blocker in each of three consecutive pre-release review rounds,
-every one of them in a same-session patch to a previous same-session patch. It
-gets its own change and its own review. The issue carries the repro, the
-measured cross-version table, and the proposed fix.
+`div({ bindValue: creds.password })` wrapping a password input now reads back
+`⟨secret⟩`. The walk is **exactly one step**, the light-DOM analogue of the
+shadow arm, and propagates only for a password, a `cc-*`-style autocomplete, or
+an explicit `data-tosi-secret` — not for a bare `input[type="hidden"]`.
 
-Marking the control itself (`<input type="password" data-tosi-secret>`) or the
-region works correctly and is the recommended mitigation today.
+**Still open: the binding two or more levels up** (`<form bindValue>` → `<div>`
+→ `<input type=password>`). Bounding that needs a better discriminator than
+"how many levels", which is a design question rather than a patch, so #41 stays
+open with the repro.
+
+Two earlier cuts of this fix passed the positive case and were caught only by
+the controls, both reproducing the append-only availability break this code has
+now hit three separate ways: "nearest ancestor carrying any binding" bounds by
+*bindedness*, not *distance*, so a bound app shell three levels up was marked
+permanently; and propagating on `input[type="hidden"]` marked an ordinary CSRF
+wrapper. **The four negative tests are the valuable ones here** — marking the
+control itself or the region has always worked and remains the recommended
+belt-and-braces mitigation.
 
 ### Added — the shared affordance rules are reachable
 
@@ -176,10 +185,10 @@ turn, so the numbers now come from the thing that measures them):
 | `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
 | `core.js` | 26_666 | 26_666 | **+0** |
 | `state.js` | 16_747 | 16_747 | **+0** |
-| `module.js` | 43_928 | 44_418 | **+490** |
-| `main.js` | 44_201 | 44_675 | **+474** |
-| `module.debug.js` | 59_515 | 60_555 | **+1040** |
-| `module.safe.js` | 59_375 | 60_414 | **+1039** |
+| `module.js` | 43_928 | 44_460 | **+532** |
+| `main.js` | 44_201 | 44_714 | **+513** |
+| `module.debug.js` | 59_515 | 60_879 | **+1364** |
+| `module.safe.js` | 59_375 | 60_737 | **+1362** |
 
 The three bundles that do not carry the agent surface are unchanged, so a
 consumer who never imports it pays nothing for this release. The 61_500 →

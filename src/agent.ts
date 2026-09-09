@@ -1306,6 +1306,71 @@ const refreshSecretPaths = (): void => {
         if (b.binding?.fromDOM != null) addSecretPath(b.path)
       }
     }
+
+    /*
+     * AND THE LIGHT-DOM TWIN (tosijs#41).
+     *
+     * The arm above walks up only across a SHADOW boundary. Light DOM has no
+     * `.host`, so a wrapper carrying the binding over a contained password
+     * field — a plain `<form>`, or any container with a custom `fromDOM`
+     * binding — was never harvested and the path was never learned. Because
+     * the miss is in PATH LEARNING, it defeated `read()` and `changes()` too,
+     * with no `describe()` involved. Present in every released version;
+     * verified back to v1.10.1.
+     *
+     * EXACTLY ONE STEP — the immediate parent — because that is what the
+     * shadow arm does, and the shadow arm is the one that has survived review.
+     *
+     * My first cut walked up to the "nearest ancestor carrying any data
+     * binding", which sounds bounded and is not: it bounds by BINDEDNESS, not
+     * by DISTANCE, so an app shell with unbound elements between it and the
+     * password is still "nearest". A control fixture caught it —
+     * `div(bindValue) > div > div > input[type=password]` marked the shell's
+     * path `⟨secret⟩` permanently, which is precisely the availability break
+     * the paragraph above records, reached by a different route.
+     *
+     * `fromDOM != null` is the same narrowing as the shadow arm, and it is
+     * what keeps the round-4 over-redaction fixed: that container carries a
+     * `data-theme` binding, toDOM-only, so it is not marked.
+     *
+     * ⚠️ THIS COVERS THE ONE-LEVEL WRAPPER ONLY. `<form bindValue> <div> <input
+     * type=password>` — the binding two or more levels up — is still not
+     * learned, and tosijs#41 stays open for it. A partial fix that cannot
+     * poison state is worth more than a complete one that can; the remaining
+     * shape needs a discriminator better than "how many levels up", which is
+     * a design question, not a patch.
+     */
+    /*
+     * AND NOT ON `type="hidden"` ALONE. Propagating secrecy UP is a stronger
+     * claim than classifying the element itself, so it needs stronger
+     * evidence. `input[type="hidden"]` is in SECRET_CONTROL_SELECTOR because a
+     * CSRF token lives there — but hidden inputs just as often carry ids,
+     * flags and redirect URLs, and this file already records what happened
+     * when one of them propagated: "a component with an internal hidden input
+     * did it with no secret involved", permanently, because secret paths are
+     * append-only. A control fixture caught the same thing here (`div(bindValue)
+     * > input[type=hidden]` marked the div's path ⟨secret⟩ where it had been
+     * readable).
+     *
+     * So this arm propagates for a password, a `cc-*`-style autocomplete, or
+     * an EXPLICIT `data-tosi-secret` — where the author or the input kind says
+     * so unambiguously — and not for a bare hidden input. The element itself
+     * is classified exactly as before; only the upward claim is narrowed.
+     *
+     * Deliberately stricter than the shadow arm above, which does propagate on
+     * `hidden`. New code gets the conservative default; widening later is one
+     * line, and un-poisoning an append-only set is not.
+     */
+    const kind = ((el as any).type ?? '') as string
+    const propagates =
+      el.hasAttribute?.('data-tosi-secret') === true || kind !== 'hidden'
+    const parent = propagates ? el.parentElement : null
+    if (parent != null) {
+      const { dataBindings } = getElementBindings(parent)
+      for (const b of dataBindings ?? []) {
+        if (b.binding?.fromDOM != null) addSecretPath(b.path)
+      }
+    }
   }
 }
 

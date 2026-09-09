@@ -83,7 +83,7 @@ age of AI assistants, also means **fewer tokens** to generate and reason about.
   DOM-free `tosijs/state`; the full ESM entry is ~43 kB.
   <!-- sizes:end -->
   The agent surface is opt-in and shakes away if you never import it: it is
-  <!--agentgz-->~17.3 kB<!--/agentgz--> of the full ESM entry — exactly what
+  <!--agentgz-->~17.4 kB<!--/agentgz--> of the full ESM entry — exactly what
   `tosijs` carries over `tosijs/core`, measured by the build, including the
   schematic renderer, the accessibility audit and the contract harnesses.
   <!-- as-of: 2026-08-08 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
