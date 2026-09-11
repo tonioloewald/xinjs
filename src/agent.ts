@@ -1256,6 +1256,31 @@ const SECRET_CONTROL_SELECTOR = [
  * Two lessons in one comment: do not benchmark a DOM operation in happy-dom,
  * and do not write a number into a comment phrased to close future argument.
  */
+/**
+ * Learn the secret paths an ANCESTOR carries for a secret control below it.
+ *
+ * ONE implementation, because there are now four ancestors worth asking — the
+ * shadow host, the immediate parent, a wrapping `<label>`, and the owning
+ * `<form>` — and each was added by a separate pre-release blocker, three
+ * rounds apart. They had accreted into three copies of the same four lines,
+ * and the copies had already begun to disagree in their comments about what
+ * `fromDOM` was for. That is the shape whose duplication caused
+ * tosijs-floorplan#4, reappearing inside one function.
+ *
+ * `fromDOM != null` is the whole rule and belongs in one place: a typed secret
+ * can only reach state through a binding that READS the DOM. A `toDOM`-only
+ * text/class/enabled binding on an ancestor cannot be where it lands, and
+ * treating it as if it could is what permanently marked an app shell's state
+ * root `⟨secret⟩` in the round-4 regression.
+ */
+const learnFromAncestor = (ancestor: Element | null | undefined): void => {
+  if (ancestor == null) return
+  const { dataBindings } = getElementBindings(ancestor)
+  for (const b of dataBindings ?? []) {
+    if (b.binding?.fromDOM != null) addSecretPath(b.path)
+  }
+}
+
 const refreshSecretPaths = (): void => {
   if (typeof document === 'undefined') return
   let candidates: Element[]
@@ -1319,12 +1344,7 @@ const refreshSecretPaths = (): void => {
     // enabled / class / list binding on the host cannot be where it goes.
     const root = el.getRootNode?.() as ShadowRoot | Document | undefined
     const host = (root as ShadowRoot | undefined)?.host
-    if (host != null) {
-      const { dataBindings } = getElementBindings(host)
-      for (const b of dataBindings ?? []) {
-        if (b.binding?.fromDOM != null) addSecretPath(b.path)
-      }
-    }
+    learnFromAncestor(host)
 
     /*
      * AND THE LIGHT-DOM TWIN (tosijs#41).
@@ -1443,12 +1463,7 @@ const refreshSecretPaths = (): void => {
         if (beyondLabel != null) upward.push(beyondLabel)
       }
     }
-    for (const ancestor of upward) {
-      const { dataBindings } = getElementBindings(ancestor)
-      for (const b of dataBindings ?? []) {
-        if (b.binding?.fromDOM != null) addSecretPath(b.path)
-      }
-    }
+    for (const ancestor of upward) learnFromAncestor(ancestor)
     const parent = directParent
 
     /*
@@ -1486,12 +1501,7 @@ const refreshSecretPaths = (): void => {
     const owningForm = propagates
       ? ((el as any).form as Element | null | undefined) ?? null
       : null
-    if (owningForm != null && owningForm !== parent) {
-      const { dataBindings } = getElementBindings(owningForm)
-      for (const b of dataBindings ?? []) {
-        if (b.binding?.fromDOM != null) addSecretPath(b.path)
-      }
-    }
+    if (owningForm !== parent) learnFromAncestor(owningForm)
   }
 }
 

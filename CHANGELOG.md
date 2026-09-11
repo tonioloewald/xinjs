@@ -75,10 +75,26 @@ Reachable by a different principal: `webmcp.ts` gates `tosi_read` and
 unconditionally**, so the surface handed a model-context host exactly the value
 the read gate exists to withhold.
 
+> **Which versions are affected: 1.8.0, 1.8.1, 1.8.2, 1.9.0, 1.9.1, 1.9.2,
+> 1.10.0 and 1.10.1 — every release that has ever had the agent surface.**
+> Verified by reading each tag: all of them harvest `href` with no secrecy
+> check *and* honour `data-tosi-secret`, so an author who marked a
+> password-reset region had reason to believe they were covered and was not.
+> Fixed in 1.11.0.
+>
+> **If you enabled the agent surface on a page with token-bearing links, treat
+> those tokens as disclosed** to anything that called `describe()` — including
+> any model-context host, since `tosi_describe` is registered unconditionally
+> in every posture. Rotate them. `read()` was never affected; this is the
+> `describe()` channel only.
+
 `describeElement` was *given* a `ContentGuard` and asked it only inside
 `referencedText()` and `associatedLabel()`; the attribute harvest ran unguarded.
 This is the seventh address of the invariant that guard was introduced to close,
-and it is the same defect wording as the 1.8.3 blocker. Pre-existing — the code
+and it is the same defect wording as the blocker found in the 1.8.x review
+cycle — the work that shipped as 1.9.0. (**There is no 1.8.3 release**; tags go
+`v1.8.2` → `v1.9.0`, and `1.8.3-*` is a review-round label in `reviews/`. An
+earlier draft of this entry cited it as though a consumer could be running it.) Pre-existing — the code
 is untouched by the rest of this release — and found by a scoped re-review of
 the remediation.
 
@@ -849,7 +865,8 @@ warning its own users about API they never wrote.
   app and every verb refuses.
 
   This is the root-cause fix for four separate secret leaks found across four
-  review rounds of 1.8.3. **Every one of them was reachable only in that
+  review rounds of the 1.8.x cycle that shipped as this release. **Every one of
+  them was reachable only in that
   default posture.** Each was patched where it was found — `boundValue`, then
   the list-redaction walk, then the same walk's descent, then `describe()`'s
   live-DOM harvests — which was four symptoms of one permissive default. An

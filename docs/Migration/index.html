@@ -30,15 +30,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
   <title>Migrating from xinjs to tosijs</title>
-  <meta name="description" content="Upgrading tosijs: the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." />
+  <meta name="description" content="Upgrading tosijs: the 1.11.0 agent-surface disclosure fix (rotate link tokens), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." />
   <link rel="canonical" href="https://tosijs.net/Migration/" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Migrating from xinjs to tosijs" />
-  <meta property="og:description" content="Upgrading tosijs: the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." />
+  <meta property="og:description" content="Upgrading tosijs: the 1.11.0 agent-surface disclosure fix (rotate link tokens), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." />
   <meta property="og:url" content="https://tosijs.net/Migration/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrating from xinjs to tosijs","description":"Upgrading tosijs: the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.","url":"https://tosijs.net/Migration/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrating from xinjs to tosijs","description":"Upgrading tosijs: the 1.11.0 agent-surface disclosure fix (rotate link tokens), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.","url":"https://tosijs.net/Migration/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
@@ -46,7 +46,7 @@
   <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
   <article class="doc-content">
 <h1>Migrating from <code>xinjs</code> to <code>tosijs</code></h1>
-<!--{ "pin": "bottom", "description": "Upgrading tosijs: the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." }-->
+<!--{ "pin": "bottom", "description": "Upgrading tosijs: the 1.11.0 agent-surface disclosure fix (rotate link tokens), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." }-->
 
 <p>In a nutshell:</p>
 <ol>
@@ -59,6 +59,45 @@ should be the module names.</p>
 <blockquote>
 <p>Please <a href="https://discord.gg/ramJ9rgky5">let me know</a> if there are any issues.</p>
 </blockquote>
+<h1>Upgrading to 1.11.0</h1>
+<p><strong>Nothing you wrote needs to change.</strong> No API is removed or renamed. Two
+behaviours move, both narrowing what the <em>agent surface</em> discloses, and one is
+worth acting on outside your code.</p>
+<h2>If you use the agent surface: rotate tokens in links</h2>
+<p><code>describe()</code> published an element&#39;s <code>href</code>, <code>placeholder</code>, <code>title</code>-derived name
+and a checkbox&#39;s <code>checked</code> state <strong>past <code>data-tosi-secret</code></strong> — in cleartext,
+beside a record already stamped <code>secret: true</code>. This affects <strong>1.8.0 through
+1.10.1</strong>, every release that has had the agent surface, and those versions
+<em>do</em> honour <code>data-tosi-secret</code>, so marking a region was reasonable and did not
+protect the destination.</p>
+<p><code>tosi_describe</code> is registered with model-context hosts unconditionally in every
+posture, so if you enabled the surface on a page with token-bearing links
+(password reset, magic links), treat those tokens as disclosed to anything that
+called <code>describe()</code> and rotate them. <code>read()</code> was never affected.</p>
+<h2>If you audit: five verdicts changed</h2>
+<p><code>auditAccessibility()</code> reports differently for the same input — stricter on
+icon-only and square links (an <code>aria-label</code> never sized a box), looser where
+evidence was forged or absent. The full list is in the CHANGELOG. If you
+snapshot audit output, re-baseline it.</p>
+<h2>If you rely on <code>describe()</code> output shape</h2>
+<p>Records for secret-marked elements no longer carry <code>href</code>, <code>placeholder</code>,
+<code>title</code>-as-<code>label</code>, <code>aria-description</code> or <code>checked</code>. <code>aria-label</code> survives —
+names survive secrecy, content and live state do not. A consumer that read
+<code>record.href</code> unconditionally should now expect it to be absent on those
+records.</p>
+<h2>Nice surprise: the package is 44% smaller, and ships its source</h2>
+<p>4.51 MB → 2.51 MB unpacked. Source maps stopped inlining <code>sourcesContent</code> and
+<code>src/</code> ships once instead, so devtools now opens the real <code>src/*.ts</code> from
+<code>node_modules</code> — comments and design rationale included — rather than a copy
+embedded in a map file. Nothing to do; maps keep working.</p>
+<h2>Known limitation</h2>
+<p>Secrecy is discovered by finding a secret control and locating the binding that
+feeds it. Three shapes are not yet discovered — a custom element carrying
+<code>data-tosi-secret</code> inside a bound <code>&lt;form&gt;</code>, a shadow component holding a
+password inside a bound <code>&lt;form&gt;</code>, and a light-DOM container two or more levels
+up with no <code>&lt;form&gt;</code> between. <strong>Marking the control itself, or its immediate
+wrapper, works in all of them</strong> and is the reliable form. Tracked as
+<a href="https://github.com/tonioloewald/tosijs/issues/41">tosijs#41</a>.</p>
 <h1>Upgrading to 1.10.0</h1>
 <p><strong>Type-only. Nothing changes at runtime</strong>, and if you do not write components
 in TypeScript there is nothing to do.</p>

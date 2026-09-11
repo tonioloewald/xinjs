@@ -1,6 +1,6 @@
 # Migrating from `xinjs` to `tosijs`
 
-<!--{ "pin": "bottom", "description": "Upgrading tosijs: the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." }-->
+<!--{ "pin": "bottom", "description": "Upgrading tosijs: the 1.11.0 agent-surface disclosure fix (rotate link tokens), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." }-->
 
 In a nutshell:
 
@@ -12,6 +12,58 @@ In a nutshell:
 should be the module names.
 
 > Please [let me know](https://discord.gg/ramJ9rgky5) if there are any issues.
+
+# Upgrading to 1.11.0
+
+**Nothing you wrote needs to change.** No API is removed or renamed. Two
+behaviours move, both narrowing what the *agent surface* discloses, and one is
+worth acting on outside your code.
+
+## If you use the agent surface: rotate tokens in links
+
+`describe()` published an element's `href`, `placeholder`, `title`-derived name
+and a checkbox's `checked` state **past `data-tosi-secret`** — in cleartext,
+beside a record already stamped `secret: true`. This affects **1.8.0 through
+1.10.1**, every release that has had the agent surface, and those versions
+*do* honour `data-tosi-secret`, so marking a region was reasonable and did not
+protect the destination.
+
+`tosi_describe` is registered with model-context hosts unconditionally in every
+posture, so if you enabled the surface on a page with token-bearing links
+(password reset, magic links), treat those tokens as disclosed to anything that
+called `describe()` and rotate them. `read()` was never affected.
+
+## If you audit: five verdicts changed
+
+`auditAccessibility()` reports differently for the same input — stricter on
+icon-only and square links (an `aria-label` never sized a box), looser where
+evidence was forged or absent. The full list is in the CHANGELOG. If you
+snapshot audit output, re-baseline it.
+
+## If you rely on `describe()` output shape
+
+Records for secret-marked elements no longer carry `href`, `placeholder`,
+`title`-as-`label`, `aria-description` or `checked`. `aria-label` survives —
+names survive secrecy, content and live state do not. A consumer that read
+`record.href` unconditionally should now expect it to be absent on those
+records.
+
+## Nice surprise: the package is 44% smaller, and ships its source
+
+4.51 MB → 2.51 MB unpacked. Source maps stopped inlining `sourcesContent` and
+`src/` ships once instead, so devtools now opens the real `src/*.ts` from
+`node_modules` — comments and design rationale included — rather than a copy
+embedded in a map file. Nothing to do; maps keep working.
+
+## Known limitation
+
+Secrecy is discovered by finding a secret control and locating the binding that
+feeds it. Three shapes are not yet discovered — a custom element carrying
+`data-tosi-secret` inside a bound `<form>`, a shadow component holding a
+password inside a bound `<form>`, and a light-DOM container two or more levels
+up with no `<form>` between. **Marking the control itself, or its immediate
+wrapper, works in all of them** and is the reliable form. Tracked as
+[tosijs#41](https://github.com/tonioloewald/tosijs/issues/41).
 
 # Upgrading to 1.10.0
 

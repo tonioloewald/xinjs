@@ -63,7 +63,7 @@ use it to inspect STATE; a painted-output check needs a real test lane.
 - https://tosijs.net/metadata/ — metadata
   Proxy accessor helpers: tosiAccessor(), the TOSI_ACCESSOR symbol, and tosiPath()/tosiValue() for inspecting boxed proxies safely.
 - https://tosijs.net/Migration/ — Migrating from xinjs to tosijs
-  Upgrading tosijs: the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.
+  Upgrading tosijs: the 1.11.0 agent-surface disclosure fix (rotate link tokens), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.
 - https://tosijs.net/more-math/ — more-math
   Math utilities missing from the standard Math object: clamp, lerp, and the radians/degrees conversion constants.
 - https://tosijs.net/one-user-interface/ — One User Interface

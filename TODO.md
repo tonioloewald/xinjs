@@ -1,5 +1,32 @@
 # todo
 
+## Deferred from the 1.11.0 DX-tier review (BLOCK → cleared)
+
+Report: `reviews/1.11.0-dx.md`. First run of the `dx`/`docs`/`coverage`/
+`dryness` lenses — they are in the pool and in no tier, so eight rounds went by
+without them. The blocker and both majors are fixed; these are the rest.
+
+- [ ] **`src/schematic.test.ts` passed UNCHANGED across the floorplan 0.4.0
+      vendor adoption while five renderer-observable behaviours moved.** 487
+      lines that cannot fail on a 267-line vendor change.
+- [ ] **`agent.test.ts` SEC-8's final arm has never executed** — it is
+      `if (forged != null) { … }` over an unbound `<div>` no harvest tier
+      selects, while claiming to cover forged arrows in static page text.
+      Same class as the unwired-anchor fixtures round 4 found.
+- [ ] The `#41` light-DOM matrix still has **no real-engine witness** in
+      `tests/*.pw.ts`. (The DX round's verifiers DID execute the four arms and
+      both over-redaction controls against the committed `dist/module.js` in
+      Chromium and Firefox and all passed — but that was a reviewer's scratch
+      run, not a gate this repo owns.)
+- [ ] `stripArrows` on the structural tier still ships unpinned.
+- [ ] Two root exports are named for a shape they do not take, and the new
+      public entry point has a known throw (floorplan#12).
+- [ ] Two published doc blocks claim the agent surface is ~59% smaller than
+      the build reports.
+- [ ] `bin/bundles.ts` byte figures stale again — **fifth** recurrence — and
+      one now contradicts the build-emitted table 20 lines above it. The
+      emitter exists; the comments should point at it rather than restate it.
+
 ## Deferred from the 1.11.0 round-7 review (BLOCK)
 
 Report: `reviews/1.11.0-round7.md`. Blockers B-1 (label trade), B-2 (`checked`
