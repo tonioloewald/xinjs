@@ -277,6 +277,42 @@ async function buildLibrary(full = true) {
       for (const m of result.logs) console.error(m)
       throw new Error(`library build failed: ${bundle.naming}`)
     }
+    await dropInlinedSources(bundle)
+  }
+
+  /**
+   * SHIP THE SOURCE ONCE, NOT FIVE TIMES INSIDE JSON.
+   *
+   * Bun emits `sourcesContent` — the full text of every file that went into a
+   * bundle, inlined into its `.map`. Measured on 1.11.0: 2.71 MB of the
+   * 4.51 MB tarball, because five bundles each embed the subset of `src/`
+   * they compiled, and `module.js.map`/`main.js.map` are byte-identical (the
+   * same library built ESM and CJS).
+   *
+   * Worse, 60% of what was inlined is PROSE — 0.90 MB of `/*#` doc blocks and
+   * 0.72 MB of design comments. The doc blocks are already published twice,
+   * as tosijs.net and as `llms.txt` (which ships in this same tarball), so
+   * every install downloaded the documentation a third time, encoded as JSON
+   * strings that nothing reads.
+   *
+   * `sources` was already `../src/foo.ts`, relative to `dist/` — so shipping
+   * `src/` at the package root makes every entry resolve with no rewriting,
+   * and a consumer gets the REAL file, docs and rationale included, once.
+   *
+   * NOT done by deleting the prose from `sourcesContent`: `mappings` encodes
+   * line/column offsets into that exact text, so removing 0.9 MB of comments
+   * would leave devtools pointing at the wrong lines. Dropping the field is
+   * the only edit that keeps the map honest.
+   */
+  const dropInlinedSources = async (bundle: BundleSpec): Promise<void> => {
+    if (bundle.sourcemap === false) return
+    const mapPath = `${DIST}/${bundle.naming}.map`
+    const file = Bun.file(mapPath)
+    if (!(await file.exists())) return
+    const map = JSON.parse(await file.text())
+    if (map.sourcesContent == null) return
+    delete map.sourcesContent
+    await Bun.write(mapPath, JSON.stringify(map))
   }
 
   for (const bundle of BUNDLES.filter((b) => b.stage !== 'tjs')) {
@@ -617,18 +653,22 @@ async function buildLibrary(full = true) {
   const scale: Record<string, number> = { kb: 1 / 1024, mb: 1, gb: 1024 }
   const unpackedMb =
     Number(unpackedMatch[1]) * scale[unpackedMatch[2].toLowerCase()]
-  // RAISED 4.5 -> 4.75 in 1.11.0, deliberately and in the commit that tripped
-  // it, with the measurement. Tier 0 caught the tarball at 4.511 MB. Growth
-  // since v1.10.1 is +81 kB: +63 kB across `module.js.map` and `main.js.map`
-  // (the two whole-library builds, whose maps track the secrecy work), +15 kB
-  // of CHANGELOG, +3 kB of actual code. That is ordinary growth, not the case
-  // this gate is worded for ("a new bundle brought a map nobody needs").
+  // 4.5 -> 4.75 -> 3.0 in 1.11.0. The raise lasted about an hour: Tier 0
+  // caught the tarball at 4.511 MB, I raised the ceiling with the measurement,
+  // and then the repo owner pointed out that the maps were carrying the
+  // documentation. They were — `sourcesContent` was 2.71 MB of the payload and
+  // 60% of THAT was prose (0.90 MB of `/*#` doc blocks already published as
+  // the website and as llms.txt, plus 0.72 MB of design comments), inlined
+  // once per bundle across five bundles.
   //
-  // WORTH A REAL DECISION SOMEDAY, THOUGH, AND NOT A SILENT RAISE PER RELEASE:
-  // source maps are 3.27 MB of the 4.51 MB payload — 72% — and `module.js.map`
-  // and `main.js.map` are 886 kB each for what is the same library built two
-  // ways. Every installer pays for both while using one. TODO.md carries it.
-  const PAYLOAD_BUDGET_MB = 4.75
+  // Dropping `sourcesContent` and shipping `src/` ONCE took the tarball to
+  // 2.51 MB — smaller than any ceiling this gate has ever had — and consumers
+  // gained a readable source tree they never had. So the number comes DOWN,
+  // to 3.0, which is ~0.5 MB of headroom over the measurement.
+  //
+  // Worth remembering when a budget next trips: the first move was to raise
+  // it, and the right move was to ask what was inside.
+  const PAYLOAD_BUDGET_MB = 3.0
   console.log(`package payload: ${unpackedMb.toFixed(2)} MB unpacked`)
   if (unpackedMb > PAYLOAD_BUDGET_MB) {
     throw new Error(

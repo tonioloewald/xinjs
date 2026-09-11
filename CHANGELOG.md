@@ -116,6 +116,36 @@ assertion is inherited automatically by whatever harvest is added next. Both
 fail with the withholding reverted; a third test is the over-redaction control
 and passes either way.
 
+### Packaging — the tarball is 44% smaller, and you get the source
+
+**4.51 MB → 2.51 MB unpacked.** Source maps no longer inline `sourcesContent`;
+`src/` ships once instead, and `sources` entries already read `../src/foo.ts`
+relative to `dist/`, so every one resolves with no rewriting.
+
+What was in there: 3.27 MB of the old payload was maps, and **2.71 MB of that
+was inlined source** — five bundles each embedding the subset of `src/` they
+compiled, with `module.js.map` and `main.js.map` byte-identical because they
+are the same library built ESM and CJS.
+
+And 60% of the inlined text was **prose**: 0.90 MB of `/*# … */` doc blocks and
+0.72 MB of design comments. The doc blocks are already published twice — as
+tosijs.net and as the `llms.txt` in this same tarball — so every install was
+downloading the documentation a third time, as JSON strings nothing reads.
+
+**This is a strict gain for consumers.** Maps still work; devtools now opens the
+real `src/*.ts` from `node_modules` — comments, rationale and all — rather than
+a copy embedded in a map file. Nothing is removed from the published API.
+
+Not done by stripping prose out of `sourcesContent`, which would break the maps:
+`mappings` encodes line/column offsets into that exact text, so deleting 0.9 MB
+of comments points devtools at the wrong lines. Dropping the field is the only
+edit that keeps a map honest.
+
+Pinned by a gate that asks **the tarball** — not the working tree — whether
+every source in every shipped map is actually packed. Checking `existsSync` on
+disk would pass while `files` shipped none of it, which is exactly how the
+exports gate once went green over a commit whose bundles had been deleted.
+
 ### Security — secrecy is learned through more light-DOM shapes (partial)
 
 **[#41](https://github.com/tonioloewald/tosijs/issues/41), and it is still

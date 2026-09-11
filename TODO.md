@@ -19,13 +19,10 @@ closed on the tracker) are all fixed. The rest:
 - [ ] Upward propagation is now three arms (parent, label, form) plus a fourth
       predicate spelling (`propagates`). No keep-decision records why these
       four and not a single rule.
-- [ ] **Source maps are 72% of the npm payload** (3.27 MB of 4.51 MB), and
-      `module.js.map` + `main.js.map` are 886 kB EACH for the same library
-      built two ways — every installer pays for both and uses one. The payload
-      budget was raised 4.5 -> 4.75 MB in 1.11.0 rather than decide this under
-      a release. Options: ship maps for the ESM build only, publish them as a
-      separate `-maps` package, or drop them and keep `sourcesContent` out.
-      Decide once, deliberately.
+- [x] **Source maps were 72% of the npm payload** — DONE in 1.11.0.
+      `sourcesContent` dropped, `src/` shipped once: 4.51 -> 2.51 MB, and
+      consumers gain a readable source tree. Pinned by a gate that asks the
+      TARBALL (not the working tree) whether every map source is packed.
 - [ ] `bin/bundles.ts`'s "RELEASE-FINAL" figures are stale again — fifth
       recurrence. The build emits the real numbers now; the comment should
       point at the emitter rather than restating it.

@@ -495,3 +495,74 @@ test('every budget comment mentions the number it sits above', async () => {
   }
   expect(silent).toEqual([])
 })
+
+test.skipIf(!existsSync('dist/module.js.map'))(
+  'shipped source maps point at shipped sources, and inline none',
+  async () => {
+    /*
+     * 1.11.0 stopped inlining `sourcesContent` and started shipping `src/`
+     * once instead: 2.71 MB of duplicated source (60% of it PROSE — doc blocks
+     * already published as the website and as llms.txt) became a 0.79 MB tree
+     * a consumer can actually read. Tarball 4.51 -> 2.51 MB.
+     *
+     * Two ways that regresses silently, so both are asserted:
+     *   - a future Bun/config change re-inlines the content (size creeps back)
+     *   - `files` stops shipping `src/`, or a source moves, and every map
+     *     points at a file the consumer does not have — WORSE than inlining,
+     *     because devtools then shows nothing at all.
+     *
+     * SKIPPED WHEN dist/ IS ABSENT, and that is load-bearing rather than lazy:
+     * `buildLibrary` runs `bun test src/` AFTER `rm -rf dist` and BEFORE the
+     * bundles are written, so a hard assertion here fails the build, which
+     * deletes the maps, which fails the assertion — the build could not
+     * complete at all. It runs for real in the ordinary `bun test` lane, where
+     * dist/ is the previous build's output, and Tier 0's artifact-freshness
+     * check is what proves that output matches this source.
+     */
+    const { readFileSync, existsSync } = await import('node:fs')
+    const { normalize, join, dirname } = await import('node:path')
+    const { BUNDLES } = await import('../bin/bundles')
+
+    /*
+     * ASK THE TARBALL, NOT THE WORKING TREE. Checking `existsSync` on disk
+     * would pass while `files` shipped none of it — which is precisely how
+     * the exports gate went green over a commit whose bundles had been
+     * deleted ("on disk is not in the commit"). A map whose sources are not
+     * PACKED is the failure this test exists for, so it has to look at what
+     * npm would actually send.
+     */
+    const packed = new Set<string>(
+      (
+        JSON.parse(
+          Bun.spawnSync(['npm', 'pack', '--dry-run', '--json'], {
+            stdout: 'pipe',
+            stderr: 'pipe',
+          })
+            .stdout.toString()
+            .trim()
+        )[0].files as Array<{ path: string }>
+      ).map((f) => f.path)
+    )
+    expect(packed.size).toBeGreaterThan(20)
+    const SHIPPED = BUNDLES.filter(
+      (b) => b.sourcemap !== false && existsSync(`dist/${b.naming}.map`)
+    )
+    expect(SHIPPED.length).toBeGreaterThan(0)
+
+    const inlined: string[] = []
+    const unresolvable: string[] = []
+    for (const { naming } of SHIPPED) {
+      const mapPath = `dist/${naming}.map`
+      const map = JSON.parse(readFileSync(mapPath, 'utf8'))
+      if (map.sourcesContent != null) inlined.push(naming)
+      expect(typeof map.mappings).toBe('string')
+      expect(map.mappings.length).toBeGreaterThan(0)
+      for (const src of map.sources as string[]) {
+        const resolved = normalize(join(dirname(mapPath), src))
+        if (!packed.has(resolved)) unresolvable.push(`${naming} -> ${src}`)
+      }
+    }
+    expect(inlined).toEqual([])
+    expect(unresolvable).toEqual([])
+  }
+)
