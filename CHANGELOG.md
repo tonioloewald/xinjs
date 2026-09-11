@@ -130,12 +130,20 @@ this is a fix, not a regression.
 
 - the immediate parent — `div({ bindValue: creds.password })`
 - through a wrapping `<label>` — `<label>Password <input type="password"></label>`,
-  the commonest way to write a labelled field
+  the commonest way to write a labelled field — **and on the label itself**
+  (`label({ bindValue: creds.pw }, …)`). The first cut of this made the two a
+  straight trade: stepping *through* the label stopped harvesting the label's
+  own bindings, so one shape closed and another opened. Both directions are
+  pinned together now.
 - the owning `<form>` at any depth, via `el.form` (not `closest('form')`: under
   happy-dom that returns a *different wrapper object* for the same element, so
   the binding lookup silently comes back empty)
 - controls whose secrecy comes from `autocomplete` (`cc-*`, `one-time-code`,
   `current-password`, `new-password`), not only from `type`
+- a toggle's `checked` state is stripped for path-derived secrecy **even when
+  the record already carries a text binding** — the guard that strips it sat
+  behind `record.text === undefined`, so a mirror checkbox with `bindText`
+  published the state `read()` refuses
 
 **Still NOT covered — verified leaking at this tag:**
 
@@ -201,10 +209,10 @@ turn, so the numbers now come from the thing that measures them):
 | `index.js` (IIFE) | 29_265 | 29_266 | **+1** |
 | `core.js` | 26_666 | 26_666 | **+0** |
 | `state.js` | 16_747 | 16_747 | **+0** |
-| `module.js` | 43_928 | 44_533 | **+605** |
-| `main.js` | 44_201 | 44_793 | **+592** |
-| `module.debug.js` | 59_515 | 60_994 | **+1479** |
-| `module.safe.js` | 59_375 | 60_862 | **+1487** |
+| `module.js` | 43_928 | 44_568 | **+640** |
+| `main.js` | 44_201 | 44_839 | **+638** |
+| `module.debug.js` | 59_515 | 60_965 | **+1450** |
+| `module.safe.js` | 59_375 | 60_823 | **+1448** |
 
 The three bundles that do not carry the agent surface are unchanged, so a
 consumer who never imports it pays nothing for this release. The 61_500 →

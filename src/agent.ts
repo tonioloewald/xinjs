@@ -97,6 +97,25 @@ and from every field beneath it if the path names an object. It is also
 one-way for the session: a path that was ever secret stays secret, because the
 alternative is a window in which it isn't.
 
+> ⚠️ **The path has to be LEARNED first, and that is where the gap is.**
+> tosijs discovers a secret path by finding a secret control and looking for
+> the binding that feeds it: on the control, on its immediate parent, through
+> a wrapping `<label>`, on its owning `<form>`, or across one shadow boundary.
+> **Where the binding sits somewhere else, the path is never learned and the
+> value reads back in cleartext.** Known-uncovered as of 1.11.0, each verified
+> by execution:
+>
+> - a **custom element** carrying `data-tosi-secret` inside a bound `<form>`
+>   (`el.form` is undefined on custom elements; a form-associated one keeps its
+>   owner on `internals.form`, unreachable from outside) — so an explicit
+>   marker is currently *weaker* than the heuristic
+> - a **shadow component containing a password**, inside a bound `<form>`
+> - a **light-DOM container two or more levels up** with no `<form>` between
+>
+> Tracked as [tosijs#41](https://github.com/tonioloewald/tosijs/issues/41).
+> **Marking the control itself, or its immediate wrapper, works in all of
+> these** and is the reliable form. Prefer it to relying on discovery.
+
 **What this is for, and what it is not.** It is not a defence against script
 running in your page — that code can read the state directly and never asks
 the agent surface. It exists because `describe()` output is *designed to
@@ -1398,18 +1417,39 @@ const refreshSecretPaths = (): void => {
      * so stepping through one is consistent, not a special case. Bounded to a
      * single label: this does not become a walk.
      */
-    let stepFrom: Element | null = el
-    const wrappingLabel = el.parentElement
-    if (wrappingLabel != null && wrappingLabel.tagName === 'LABEL') {
-      stepFrom = wrappingLabel
+    const upward: Element[] = []
+    const directParent = propagates ? el.parentElement : null
+    if (directParent != null) {
+      upward.push(directParent)
+      /*
+       * ADDITIVE, NOT A SUBSTITUTION — and the first cut of this got it wrong
+       * in a way no test could see.
+       *
+       * `<label>Password <input type="password"></label>` inside a bound
+       * container defeated the plain parent step, because the parent is the
+       * LABEL. Stepping THROUGH the label fixed that shape and broke the
+       * other one: a binding ON the label itself
+       * (`label({ bindValue: creds.pw }, …)`) stopped being harvested, so it
+       * went from `⟨secret⟩` to cleartext. Measured both directions against
+       * the previous commit — a straight trade, one shape closed and one
+       * opened, in the round convened to stop over-claiming coverage.
+       *
+       * Nothing in the suite bound a prop to a `<label>`, so 113 tests were
+       * green over it. Both directions are pinned now, together, so the trade
+       * cannot be made again silently.
+       */
+      if (directParent.tagName === 'LABEL') {
+        const beyondLabel = directParent.parentElement
+        if (beyondLabel != null) upward.push(beyondLabel)
+      }
     }
-    const parent = propagates ? stepFrom?.parentElement ?? null : null
-    if (parent != null) {
-      const { dataBindings } = getElementBindings(parent)
+    for (const ancestor of upward) {
+      const { dataBindings } = getElementBindings(ancestor)
       for (const b of dataBindings ?? []) {
         if (b.binding?.fromDOM != null) addSecretPath(b.path)
       }
     }
+    const parent = directParent
 
     /*
      * AND THE ENCLOSING <form>, AT ANY DEPTH — the real bound, replacing the
@@ -2452,9 +2492,28 @@ export function enableAgentInterface(
           // is then the rendered form of a value `read()` refuses.
           // `allBoundPaths`, not `boundPaths` — the latter is scope-filtered,
           // so the guard was blind to exactly the bindings that matter here.
+          /*
+           * ASK ONCE, UNCONDITIONALLY — "may this record carry content?" is a
+           * different question from "does it already have text?", and
+           * short-circuiting the first behind the second is how `checked`
+           * kept leaking across three rounds.
+           *
+           * `suppressHarvest` is the choke point that strips live state for
+           * PATH-derived secrecy (it deletes `record.checked`). It sat behind
+           * `record.text === undefined &&`, so an element that already had a
+           * text binding never reached it: two checkboxes on one secret path,
+           * the unmarked one additionally carrying `bindText`, published
+           * `checked: true` beside a `read()` that returns `⟨secret⟩` — and
+           * carried no `secret: true` to say anything had been withheld.
+           *
+           * The claim this file makes three screens up — "a live-state field
+           * added later inherits the guard by construction" — is only true if
+           * the guard is reached unconditionally. Now it is.
+           */
+          const mayNotCarryContent = suppressHarvest(el, record, allBoundPaths)
           if (
             record.text === undefined &&
-            !suppressHarvest(el, record, allBoundPaths) &&
+            !mayNotCarryContent &&
             !contentWithheld(el)
           ) {
             const text = stripArrows((el.textContent || '').trim()).slice(0, 40)
@@ -2516,7 +2575,7 @@ export function enableAgentInterface(
             // bindings the publishing loop skipped as out of scope.
             if (
               record.value === undefined &&
-              !suppressHarvest(el, record, allBoundPaths) &&
+              !mayNotCarryContent &&
               !contentWithheld(el)
             ) {
               const liveText = stripArrows((el.textContent || '').trim()).slice(

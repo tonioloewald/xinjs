@@ -128,6 +128,26 @@ secret withholds that path everywhere it surfaces — <code>read</code>, <code>d
 and from every field beneath it if the path names an object. It is also
 one-way for the session: a path that was ever secret stays secret, because the
 alternative is a window in which it isn&#39;t.</p>
+<blockquote>
+<p>⚠️ <strong>The path has to be LEARNED first, and that is where the gap is.</strong>
+tosijs discovers a secret path by finding a secret control and looking for
+the binding that feeds it: on the control, on its immediate parent, through
+a wrapping <code>&lt;label&gt;</code>, on its owning <code>&lt;form&gt;</code>, or across one shadow boundary.
+<strong>Where the binding sits somewhere else, the path is never learned and the
+value reads back in cleartext.</strong> Known-uncovered as of 1.11.0, each verified
+by execution:</p>
+<ul>
+<li>a <strong>custom element</strong> carrying <code>data-tosi-secret</code> inside a bound <code>&lt;form&gt;</code>
+(<code>el.form</code> is undefined on custom elements; a form-associated one keeps its
+owner on <code>internals.form</code>, unreachable from outside) — so an explicit
+marker is currently <em>weaker</em> than the heuristic</li>
+<li>a <strong>shadow component containing a password</strong>, inside a bound <code>&lt;form&gt;</code></li>
+<li>a <strong>light-DOM container two or more levels up</strong> with no <code>&lt;form&gt;</code> between</li>
+</ul>
+<p>Tracked as <a href="https://github.com/tonioloewald/tosijs/issues/41">tosijs#41</a>.
+<strong>Marking the control itself, or its immediate wrapper, works in all of
+these</strong> and is the reliable form. Prefer it to relying on discovery.</p>
+</blockquote>
 <p><strong>What this is for, and what it is not.</strong> It is not a defence against script
 running in your page — that code can read the state directly and never asks
 the agent surface. It exists because <code>describe()</code> output is <em>designed to

@@ -1,5 +1,28 @@
 # todo
 
+## Deferred from the 1.11.0 round-7 review (BLOCK)
+
+Report: `reviews/1.11.0-round7.md`. Blockers B-1 (label trade), B-2 (`checked`
+behind `record.text`), B-3 (published guarantee unqualified) and B-4 (#41
+closed on the tracker) are all fixed. The rest:
+
+- [ ] **The `#41` coverage matrix has ZERO real-engine witnesses.**
+      `git diff v1.10.1...HEAD -- tests/` is empty — every secrecy fixture is
+      happy-dom only, and happy-dom is where `closest()` returns wrong wrapper
+      objects. The `tests/*.pw.ts` lane exists; the matrix belongs in it.
+- [ ] `refreshSecretPaths` fails **open** if a DOM accessor throws (the outer
+      `catch` returns rather than marking). Elsewhere this file's rule is
+      "cannot tell === must not publish".
+- [ ] `record.secret` is set beside cleartext in the container case
+      (round-6 B-1) — describe() still emits `secret: true` on records whose
+      bound value is published, for the three uncovered `#41` shapes.
+- [ ] Upward propagation is now three arms (parent, label, form) plus a fourth
+      predicate spelling (`propagates`). No keep-decision records why these
+      four and not a single rule.
+- [ ] `bin/bundles.ts`'s "RELEASE-FINAL" figures are stale again — fifth
+      recurrence. The build emits the real numbers now; the comment should
+      point at the emitter rather than restating it.
+
 ## Deferred from the 1.11.0 round-5 review
 
 Report: `reviews/1.11.0-round5.md`. B-1 (live state vs path secrecy) and B-3

@@ -3398,6 +3398,72 @@ describe('#41: light-DOM wrapper secrecy, and what must NOT be marked', () => {
     agent.disable()
   })
 
+  test('a binding ON the wrapping label is harvested TOO (round 7)', async () => {
+    /*
+     * THE REGRESSION CONTROL, placed beside the round-6 label test so the two
+     * directions are pinned together and the trade cannot be made again.
+     *
+     * Round 6 made the label step a SUBSTITUTION — it read
+     * `label.parentElement` instead of `el.parentElement` — so this shape went
+     * from `⟨secret⟩` to cleartext while the shape below went the other way.
+     * A straight trade, and 113 tests were green over it because nothing in
+     * the suite bound a prop to a `<label>`.
+     */
+    document.body.innerHTML = ''
+    const { onlbl } = tosi({ onlbl: { pw: '' } })
+    await updates()
+    const lbl = elements.label(
+      { bindValue: onlbl.pw },
+      'Password ',
+      elements.input({ type: 'password' })
+    )
+    document.body.append(lbl)
+    rect(lbl)
+    await updates()
+    onlbl.pw.value = 'TOK-ON-LABEL'
+    await updates()
+    const agent = enableAgentInterface({
+      quiet: true,
+      expose: { roots: [onlbl] },
+    })
+    expect(agent.read('onlbl.pw')).toBe('⟨secret⟩')
+    expect(JSON.stringify(agent.describe())).not.toContain('TOK-ON-LABEL')
+    agent.disable()
+  })
+
+  test('live state is stripped even when the record has a text binding (round 7)', async () => {
+    /*
+     * `suppressHarvest` — the choke point that deletes `record.checked` for
+     * PATH-derived secrecy — sat behind `record.text === undefined &&`, so a
+     * record that already had a text binding never reached it. The unmarked
+     * mirror published `checked: true` beside a `read()` returning
+     * `⟨secret⟩`. The round-5 pin used a bare mirror with no text binding and
+     * passed either way.
+     */
+    document.body.innerHTML = ''
+    const { r7 } = tosi({ r7: { twoFactor: true, caption: 'mirror' } })
+    await updates()
+    const marked = elements.input({
+      type: 'checkbox',
+      'data-tosi-secret': '',
+      'aria-label': '2FA',
+      bindValue: r7.twoFactor,
+    })
+    const mirror = elements.input({
+      type: 'checkbox',
+      'aria-label': 'm',
+      bindValue: r7.twoFactor,
+      bindText: r7.caption,
+    })
+    document.body.append(marked, mirror)
+    ;[marked, mirror].forEach(rect)
+    await updates()
+    const agent = enableAgentInterface({ quiet: true, expose: { roots: [r7] } })
+    expect(agent.read('r7.twoFactor')).toBe('⟨secret⟩')
+    expect(JSON.stringify(agent.describe())).not.toContain('"checked"')
+    agent.disable()
+  })
+
   test('the upward gate consults autocomplete, not only type (round 6)', async () => {
     /*
      * The gate keyed only on `type`, so `input[type="hidden"
