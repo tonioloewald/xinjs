@@ -566,3 +566,61 @@ test.skipIf(!existsSync('dist/module.js.map'))(
     expect(unresolvable).toEqual([])
   }
 )
+
+test.skipIf(!existsSync('docs/docs.json'))(
+  'every executable doc fence declares where its identifiers come from',
+  async () => {
+    /*
+     * A ```js or ```ts fence in a doc block RUNS on the doc site. One that
+     * references identifiers it never brings into scope throws, and the page
+     * ships a red error box under the prose it was meant to illustrate. That
+     * happened in 1.11.0 on `/path-listener/`, and cleared the build, this
+     * suite, the smoke gate and nine review rounds.
+     *
+     * The authority is the browser lane (`tests/doc-tests.pw.ts` visits every
+     * built page and asserts no `.preview-error`). This is the cheap twin, so
+     * the signal arrives at `bun test` speed rather than at CI.
+     *
+     * WHAT IT CHECKS, and why this shape rather than the obvious one: NOT
+     * "is every identifier declared" — three attempts at that fired on correct
+     * pages, because distinguishing a free identifier from a method call, a
+     * method DEFINITION and a destructured element creator is a growing pile
+     * of special cases. This asks the one question with no false positives:
+     * does the fence say where its names come from at all — an import from
+     * tosijs, or a destructure off the ambient `tosijs`/`tosijsui` global?
+     *
+     * Verified against all 43 executable fences in the corpus: zero false
+     * positives. The 1.11.0 defect had neither form.
+     */
+    const { readFileSync } = await import('node:fs')
+    const pages = JSON.parse(readFileSync('docs/docs.json', 'utf8')) as Array<{
+      text?: string
+      title?: string
+      filename?: string
+    }>
+    const orphans: string[] = []
+    let fences = 0
+    for (const page of pages) {
+      const text = page.text ?? ''
+      for (const m of text.matchAll(
+        /^\s*```(?:js|ts)\s*\n([\s\S]*?)^\s*```/gm
+      )) {
+        fences++
+        const body = m[1]
+        const importsIt = /from\s+['"]tosijs/.test(body)
+        const ambient = /=\s*tosijs(ui)?\b/.test(body)
+        if (!importsIt && !ambient) {
+          const first = body.trim().split('\n')[0].slice(0, 60)
+          orphans.push(
+            `${
+              page.title ?? page.filename
+            }: \`\`\`js/ts fence brings nothing into scope — ${first}`
+          )
+        }
+      }
+    }
+    // a floor, so the check cannot pass by finding nothing
+    expect(fences).toBeGreaterThan(20)
+    expect(orphans).toEqual([])
+  }
+)

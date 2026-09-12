@@ -445,6 +445,22 @@ from the package name), `href` harvested by describe() with bare-link
 enumeration (links are intrinsic affordances — the contenteditable
 precedent), suite synced.
 
+### 🚧 FILED — live examples run as free smoke tests, but failures never reach the harness
+
+**Issue:** https://github.com/tonioloewald/tosijs-ui/issues/161
+⚠️ **First description was wrong and is corrected on the issue.** Two
+mechanisms already exist: `checkExamples` compiles every executable block and
+throws on failure, and the Playwright lane runs the ```test tier across two
+browsers. The gap is one step wide — `checkExamples` uses
+`new AsyncFunction(js)`, which COMPILES and does not CALL, so a block that
+compiles and throws on invocation passes. A page
+can ship a red error box with the doc-test lane green. It cost tosijs 1.11.0 a
+shipped "div is not defined" on `/path-listener/` that cleared the build, the
+suite, the smoke gate, CI and **nine review rounds**; the same scrape then
+found two more pre-existing on `/Migration/`. Asked for an `exampleErrors`
+field so every `tosijs-ui/site` consumer gets it free. **Interim workaround
+lives here** in `tests/doc-tests.pw.ts` — delete it when the upstream lands.
+
 ## tosijs-schema
 
 ### ✅ SHIPPED (tosijs-schema 1.6.0) — `inferSchema(sample)`: derived schemas

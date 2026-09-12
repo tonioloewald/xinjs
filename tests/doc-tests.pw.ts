@@ -107,6 +107,15 @@ test('no live example on any doc page renders an error', async ({
    * smoke gate and NINE review rounds — because nothing in this project ever
    * EXECUTED a live example.
    *
+   * THE MECHANISM ALREADY EXISTS — only the reporting is missing. The doc-site
+   * build runs every example on page load (that is the free smoke test), and
+   * `live-example/execution.ts` catches a throw and appends `.preview-error`.
+   * What it does NOT do is feed that into `window.__docTestResults`, whose
+   * passed/failed counts come from the ```test tier alone. So a page can ship a
+   * red error box with the doc-test lane green. Filed upstream as
+   * tosijs-ui#161; when it lands, this test can be deleted in favour of the
+   * host build reporting it for every consumer.
+   *
    * A static check was tried first and abandoned: distinguishing a free
    * identifier from a method call, a method definition, a destructured element
    * creator and an ambient from the example context is a growing pile of
