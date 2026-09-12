@@ -54,6 +54,39 @@ a reference to the listener to allow you to dispose of it later.
 
 `unobserve(listener)` removes the listener.
 
+### If the callback updates the DOM, you almost certainly want `bind` instead
+
+This is the single commonest way to write more code than you need in tosijs,
+and the cost is not the extra lines — it is that **the element becomes
+invisible to the agent surface.**
+
+Two divs, both driven by state:
+
+```js
+// hand-rolled: observe, then write the DOM yourself
+const rolled = div({})
+observe('app.name', () => { rolled.textContent = app.name.value })
+
+// bound
+const bound = div({ bindText: app.name })
+```
+
+Both update correctly. But `describe()` returns **one record, not two** — the
+agent map is built from bound elements, and an element becomes *wired* by being
+bound and by nothing else. The hand-rolled div is absent from the map, so an
+agent cannot see what it shows or what drives it.
+
+`bind` also brings what you would otherwise write yourself: the initial value
+applied on setup, surgical list updates via `idPath`, the async-batched touch,
+and bindings that accumulate on one element rather than clobbering each other.
+
+**`observe` is right when the reaction is not a DOM update** — persisting to
+storage, sending an analytics event, kicking off a fetch, driving a canvas or a
+WebGL scene. Reach for it there, and for anything the DOM is not the output of.
+
+If you are calling `touch()` often, that is usually the same signal from the
+other end: bindings would be doing that work.
+
 ### Which path does the callback receive?
 
 **The path that was TOUCHED — as specific as the write was — not the path you

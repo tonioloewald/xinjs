@@ -132,8 +132,9 @@ This eliminates the need for most custom bindings.</p>
 <p><code>textContent</code> and <code>bindValue</code> bind a <strong>proxy</strong>; <code>bindValue</code> also handles <code>fromDOM</code>.
 For a path <strong>string</strong> rather than a proxy, use the inline form —
 <code>bind: { value: &#39;app.user.name&#39;, binding: &#39;text&#39; }</code> — because <code>textContent: &#39;app.user.name&#39;</code>
-would set that literal text instead of binding. (<code>bindText</code> is deprecated — it
-warns, and the naive migration to <code>textContent</code> silently drops the binding.)</p>
+would set that literal text instead of binding. (<code>bindText</code> is <strong>not</strong>
+deprecated — 1.9.0 deprecated it and 1.9.1 reversed that, precisely because it
+is the only form that takes a path string. It does not warn.)</p>
 <p>For anything truly custom, use <code>bind: { value, binding: { toDOM, fromDOM } }</code>.
 A function is also accepted as shorthand for <code>{ toDOM: fn }</code>:</p>
 <pre><code>div({ bind: {

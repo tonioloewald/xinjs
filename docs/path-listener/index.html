@@ -89,6 +89,30 @@ unobserve(listener);
 be passed the path that changed and you can do whatever you like. It returns
 a reference to the listener to allow you to dispose of it later.</p>
 <p><code>unobserve(listener)</code> removes the listener.</p>
+<h3>If the callback updates the DOM, you almost certainly want <code>bind</code> instead</h3>
+<p>This is the single commonest way to write more code than you need in tosijs,
+and the cost is not the extra lines — it is that <strong>the element becomes
+invisible to the agent surface.</strong></p>
+<p>Two divs, both driven by state:</p>
+<pre><code class="language-js">// hand-rolled: observe, then write the DOM yourself
+const rolled = div({})
+observe(&#39;app.name&#39;, () =&gt; { rolled.textContent = app.name.value })
+
+// bound
+const bound = div({ bindText: app.name })
+</code></pre>
+<p>Both update correctly. But <code>describe()</code> returns <strong>one record, not two</strong> — the
+agent map is built from bound elements, and an element becomes <em>wired</em> by being
+bound and by nothing else. The hand-rolled div is absent from the map, so an
+agent cannot see what it shows or what drives it.</p>
+<p><code>bind</code> also brings what you would otherwise write yourself: the initial value
+applied on setup, surgical list updates via <code>idPath</code>, the async-batched touch,
+and bindings that accumulate on one element rather than clobbering each other.</p>
+<p><strong><code>observe</code> is right when the reaction is not a DOM update</strong> — persisting to
+storage, sending an analytics event, kicking off a fetch, driving a canvas or a
+WebGL scene. Reach for it there, and for anything the DOM is not the output of.</p>
+<p>If you are calling <code>touch()</code> often, that is usually the same signal from the
+other end: bindings would be doing that work.</p>
 <h3>Which path does the callback receive?</h3>
 <p><strong>The path that was TOUCHED — as specific as the write was — not the path you
 observed.</strong> An observer on a root therefore sees different spellings depending

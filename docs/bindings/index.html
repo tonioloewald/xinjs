@@ -65,8 +65,11 @@ elements.</p>
 <p>The <code>text</code> binding copies state from <code>xin</code> to the bound element&#39;s <code>textContent</code> property.</p>
 <h2>enabled &amp; disabled</h2>
 <blockquote>
-<p><strong>Note:</strong> <code>bindEnabled</code> and <code>bindDisabled</code> are deprecated. Use bare proxy
-property bindings instead:</p>
+<p><strong>Note:</strong> <code>bindEnabled</code> and <code>bindDisabled</code> are NOT deprecated (1.9.0
+deprecated them; 1.9.1 removed that, because the shortcut is the only form
+that accepts a path STRING — <code>disabled: &#39;path&#39;</code> sets an always-truthy string
+and permanently disables the control). Both spellings are correct. Prefer the
+plain prop with a proxy where you have one:</p>
 <pre><code>button({ disabled: proxy.flag })
 button({ disabled: proxy.items.tosi.take(list =&gt; !list.length) })
 </code></pre>
