@@ -993,7 +993,17 @@ let deprecationWarned = false
 function warnDeprecation() {
   if (!deprecationWarned) {
     console.warn(
-      'xinValue, tosiValue, xinPath, tosiPath, etc. are deprecated. Use .tosi.value, .tosi.path, .tosi.observe(), etc. instead.'
+      // NAME ONLY WHAT IS ACTUALLY DEPRECATED. This message used to say
+      // "xinValue, tosiValue, xinPath, tosiPath ... are deprecated", which is
+      // false for two of them: `tosiValue()` and `tosiPath()` are the
+      // CANONICAL free functions (metadata.ts), they work on non-proxies, and
+      // this file alone calls `tosiValue` 22 times. A user obeying the warning
+      // migrated off the recommended API. The deprecated things are the
+      // PROPERTY spellings and the `xin*` free functions.
+      'The .xinValue / .tosiValue / .xinPath / .tosiPath properties and the ' +
+        'xinValue() / xinPath() functions are deprecated. Use .tosi.value, ' +
+        '.tosi.path, .tosi.observe() — or the tosiValue() / tosiPath() ' +
+        'functions, which are NOT deprecated and work on non-proxies too.'
     )
     deprecationWarned = true
   }

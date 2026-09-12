@@ -169,7 +169,7 @@ guard.
 State (xin) ─────────────────────────────────────────────
     │
     ├── tosi({ key: value })     # Register + get typed proxy (preferred)
-    ├── xinProxy({ key: value }) # Alias for tosi()
+    ├── xinProxy({ key: value }) # NOT an alias: returns `xin` (unboxed)
     ├── observe(path, callback)  # React to state changes
     ├── touch(path)              # Force update notification
     └── bind(element, bindings)  # Connect DOM to state

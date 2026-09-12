@@ -31,8 +31,11 @@ The `text` binding copies state from `xin` to the bound element's `textContent` 
 
 ## enabled & disabled
 
-> **Note:** `bindEnabled` and `bindDisabled` are deprecated. Use bare proxy
-> property bindings instead:
+> **Note:** `bindEnabled` and `bindDisabled` are NOT deprecated (1.9.0
+> deprecated them; 1.9.1 removed that, because the shortcut is the only form
+> that accepts a path STRING — `disabled: 'path'` sets an always-truthy string
+> and permanently disables the control). Both spellings are correct. Prefer the
+> plain prop with a proxy where you have one:
 >
 >     button({ disabled: proxy.flag })
 >     button({ disabled: proxy.items.tosi.take(list => !list.length) })

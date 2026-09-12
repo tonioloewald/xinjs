@@ -101,8 +101,9 @@ This eliminates the need for most custom bindings.
 `textContent` and `bindValue` bind a **proxy**; `bindValue` also handles `fromDOM`.
 For a path **string** rather than a proxy, use the inline form —
 `bind: { value: 'app.user.name', binding: 'text' }` — because `textContent: 'app.user.name'`
-would set that literal text instead of binding. (`bindText` is deprecated — it
-warns, and the naive migration to `textContent` silently drops the binding.)
+would set that literal text instead of binding. (`bindText` is **not**
+deprecated — 1.9.0 deprecated it and 1.9.1 reversed that, precisely because it
+is the only form that takes a path string. It does not warn.)
 
 For anything truly custom, use `bind: { value, binding: { toDOM, fromDOM } }`.
 A function is also accepted as shorthand for `{ toDOM: fn }`:
