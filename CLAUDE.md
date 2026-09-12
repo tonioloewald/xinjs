@@ -257,7 +257,7 @@ examples, direct assignment is the intended spelling. ~15 sites in the test
 suite use it and are correct; `TODO.md` has the detail, including why a
 tests-typecheck ratchet must exclude this class deliberately.
 
-Both are created in `xin.ts` via `regHandler(path, boxScalars)`. The `boxScalars` flag controls whether primitives are wrapped. `tosi()` / `xinProxy()` in `xin-proxy.ts` are sugar for assigning to `xin` and returning from `boxed`.
+Both are created in `xin.ts` via `regHandler(path, boxScalars)`. The `boxScalars` flag controls whether primitives are wrapped. **`tosi()` assigns and returns from `boxed`; `xinProxy()` assigns and returns from `xin`** — they are NOT the same, and an `xinProxy` result serves no `.value` / `.path` / `.tosi`.
 
 ### Accessor API (`.tosi` / `TOSI_ACCESSOR`)
 
@@ -285,7 +285,7 @@ When a list binding specifies `idPath: 'id'`, the proxy `set` handler in `xin.ts
   - `.value` / `.path` - Get underlying value and path string
   - `.observe()`, `.bind()`, `.on()`, `.binding()`, `.listBinding()` - Reactive bindings
   - `.valueOf()`, `.toJSON()` - Type coercion
-  - Note: `xinValue`, `xinPath`, `tosiValue`, `tosiPath`, etc. are deprecated; use `.value` / `.path`
+  - Note: the `.xinValue` / `.xinPath` / `.tosiValue` / `.tosiPath` PROPERTIES and the `xinValue()` / `xinPath()` functions are deprecated; use `.value` / `.path`. **`tosiValue()` and `tosiPath()` the FUNCTIONS are canonical and not deprecated** — they work on non-proxies, which `.value` does not.
 - `BoxedScalar<T>` - Lightweight proxy for primitives (string/number/boolean); same API as `BoxedProxy`
 - `XinBinding<T>` - Binding specification with `toDOM` and `fromDOM` functions
 - `Component` - Abstract base class for web components

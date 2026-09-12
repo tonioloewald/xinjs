@@ -591,9 +591,14 @@ Arrays also have:
 - `.listUpdate(selector, newValue)` updates an existing item in place or pushes if not found
 - `.listRemove(selector, value)` removes an item by field match
 
-> Note: The `xinValue`, `xinPath`, `xinObserve`, `xinBind`, `xinOn`, and
-> `tosiValue`, `tosiPath`, etc. names still work but are deprecated.
-> Use `.tosi.*` instead.
+> Note: the `xinValue` / `xinPath` / `xinObserve` / `xinBind` / `xinOn`
+> **properties** on a boxed proxy still work but are deprecated — use
+> `.tosi.value`, `.tosi.path`, `.tosi.observe()` and friends.
+>
+> **The `tosiValue()` and `tosiPath()` FUNCTIONS are not deprecated.** They are
+> canonical, they are what this file uses internally (26 call sites), and they
+> accept a non-proxy — which `.tosi.value` cannot. Migrating off them onto
+> `.tosi.*` loses that.
 
 ## `.take()` — Reactive Binding Transforms
 

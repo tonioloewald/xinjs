@@ -185,7 +185,7 @@ If you hit it, you have three options, cheapest first:
 2. **Declare the attributes yourself**, in your own project, without touching
    theirs:
 
-   ```ts
+   ```typescript
    import type { ComponentAttrs } from 'tosijs'
    import type { TosiMonth } from 'their-library'
 
@@ -210,7 +210,7 @@ disappears when the library migrates.
   it and add more with `static initAttributes` — they compose, with the
   subclass winning per key:
 
-  ```ts
+  ```typescript
   class Base extends withAttributes({ label: 'base' }) {
     /* … */
   }

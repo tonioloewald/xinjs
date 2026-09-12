@@ -105,8 +105,13 @@ the original <code>string</code>, <code>boolean</code>, or <code>number</code>. 
 strong typing in general, at the cost of slight annoyances (e.g. having to write
 <code>myThing.path.to.string.valueOf() === &#39;some value&#39;</code>). That&#39;s the tradeoff. In
 practice it&#39;s really very nice.</p>
-<p><code>xinProxy(foo)</code> is simply declared as a function that takes an object of type T and
-returns a BoxedProxy<T>.</p>
+<p><code>xinProxy(foo)</code> takes an object of type T and returns a <strong><code>TosiProxy&lt;T&gt;</code></strong> — the
+raw <code>xin</code> proxy, NOT a boxed one. <strong>It is not an alias for <code>tosi()</code>.</strong> <code>tosi()</code>
+assigns into <code>boxed</code> and returns <code>boxed</code>; <code>xinProxy()</code> assigns into <code>xin</code> and
+returns <code>xin</code>, and <code>xin</code> is created with <code>boxScalars: false</code>. So a scalar read
+off an <code>xinProxy</code> result is the raw value: <code>foo.value</code>, <code>foo.path</code>,
+<code>foo.observe()</code> and <code>[TOSI_ACCESSOR]</code> are all absent.</p>
+<p>Prefer <code>tosi()</code> unless you specifically want unboxed scalars.</p>
 <pre><code>import { xinProxy } from &#39;tosijs&#39;
 
 const { foo, bar } = boxedProxy({

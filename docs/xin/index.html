@@ -529,9 +529,13 @@ if (proxy.flag.valueOf()) ...
 <li><code>.listRemove(selector, value)</code> removes an item by field match</li>
 </ul>
 <blockquote>
-<p>Note: The <code>xinValue</code>, <code>xinPath</code>, <code>xinObserve</code>, <code>xinBind</code>, <code>xinOn</code>, and
-<code>tosiValue</code>, <code>tosiPath</code>, etc. names still work but are deprecated.
-Use <code>.tosi.*</code> instead.</p>
+<p>Note: the <code>xinValue</code> / <code>xinPath</code> / <code>xinObserve</code> / <code>xinBind</code> / <code>xinOn</code>
+<strong>properties</strong> on a boxed proxy still work but are deprecated — use
+<code>.tosi.value</code>, <code>.tosi.path</code>, <code>.tosi.observe()</code> and friends.</p>
+<p><strong>The <code>tosiValue()</code> and <code>tosiPath()</code> FUNCTIONS are not deprecated.</strong> They are
+canonical, they are what this file uses internally (26 call sites), and they
+accept a non-proxy — which <code>.tosi.value</code> cannot. Migrating off them onto
+<code>.tosi.*</code> loses that.</p>
 </blockquote>
 <h2><code>.take()</code> — Reactive Binding Transforms</h2>
 <p><code>.take()</code> creates a reactive binding descriptor that transforms values before

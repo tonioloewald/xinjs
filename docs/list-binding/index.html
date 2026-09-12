@@ -89,10 +89,11 @@ element never appears in the live DOM</strong> — it&#39;s consumed during init
 })
 </code></pre>
 <h3><code>bindList</code> + <code>template</code> — the low-level form</h3>
-<p><code>.tosi.listBinding()</code> is <strong>sugar over <code>bindList</code></strong>, and <code>bindList</code> is not
-deprecated. A <code>bind*</code> shortcut is deprecated only when a plain prop expresses
-it exactly — <code>bindText</code> → <code>textContent</code>, <code>bindDisabled</code> → <code>disabled</code>. Neither
-<code>bindList</code> nor <code>bindValue</code> has such an equivalent (one needs a <code>&lt;template&gt;</code>
+<p><code>.tosi.listBinding()</code> is <strong>sugar over <code>bindList</code></strong>, and <strong>no <code>bind*</code> shortcut is
+deprecated</strong> — 1.9.0 deprecated some and 1.9.1 reversed it, because the shortcut
+is the only form that takes a path STRING (<code>disabled: &#39;app.busy&#39;</code> sets an
+always-truthy string and permanently disables the control). Neither
+<code>bindList</code> nor <code>bindValue</code> has a plain-prop equivalent either (one needs a <code>&lt;template&gt;</code>
 sibling and options, the other is two-way), so both stay.</p>
 <pre><code>div( // container element
   {

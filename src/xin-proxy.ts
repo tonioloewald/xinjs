@@ -75,8 +75,14 @@ strong typing in general, at the cost of slight annoyances (e.g. having to write
 `myThing.path.to.string.valueOf() === 'some value'`). That's the tradeoff. In
 practice it's really very nice.
 
-`xinProxy(foo)` is simply declared as a function that takes an object of type T and
-returns a BoxedProxy<T>.
+`xinProxy(foo)` takes an object of type T and returns a **`TosiProxy<T>`** — the
+raw `xin` proxy, NOT a boxed one. **It is not an alias for `tosi()`.** `tosi()`
+assigns into `boxed` and returns `boxed`; `xinProxy()` assigns into `xin` and
+returns `xin`, and `xin` is created with `boxScalars: false`. So a scalar read
+off an `xinProxy` result is the raw value: `foo.value`, `foo.path`,
+`foo.observe()` and `[TOSI_ACCESSOR]` are all absent.
+
+Prefer `tosi()` unless you specifically want unboxed scalars.
 
     import { xinProxy } from 'tosijs'
 

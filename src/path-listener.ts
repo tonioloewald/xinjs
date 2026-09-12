@@ -62,7 +62,7 @@ invisible to the agent surface.**
 
 Two divs, both driven by state:
 
-```js
+```
 // hand-rolled: observe, then write the DOM yourself
 const rolled = div({})
 observe('app.name', () => { rolled.textContent = app.name.value })

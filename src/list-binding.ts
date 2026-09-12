@@ -56,10 +56,11 @@ Pass options as the second argument:
 
 ### `bindList` + `template` — the low-level form
 
-`.tosi.listBinding()` is **sugar over `bindList`**, and `bindList` is not
-deprecated. A `bind*` shortcut is deprecated only when a plain prop expresses
-it exactly — `bindText` → `textContent`, `bindDisabled` → `disabled`. Neither
-`bindList` nor `bindValue` has such an equivalent (one needs a `<template>`
+`.tosi.listBinding()` is **sugar over `bindList`**, and **no `bind*` shortcut is
+deprecated** — 1.9.0 deprecated some and 1.9.1 reversed it, because the shortcut
+is the only form that takes a path STRING (`disabled: 'app.busy'` sets an
+always-truthy string and permanently disables the control). Neither
+`bindList` nor `bindValue` has a plain-prop equivalent either (one needs a `<template>`
 sibling and options, the other is two-way), so both stay.
 
     div( // container element

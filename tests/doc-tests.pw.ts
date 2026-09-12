@@ -90,3 +90,56 @@ test('every inline doc test passes (the whole ```test tier)', async ({
     throw new Error(`${results.failed} inline doc test(s) failed:\n${detail}`)
   }
 })
+
+test('no live example on any doc page renders an error', async ({
+  page,
+  browserName,
+}) => {
+  /*
+   * A ```js fence in a doc block becomes a LIVE EXAMPLE — the doc site runs it
+   * eagerly on connect. One that references identifiers it never imports
+   * throws, and the page ships a red box under the prose it was meant to
+   * illustrate.
+   *
+   * That happened in 1.11.0: a snippet added to `observe()`'s docs, arguing
+   * that `bind` is the better-engineered path, rendered "div is not defined"
+   * directly beneath the argument. It cleared the build, the unit suite, the
+   * smoke gate and NINE review rounds — because nothing in this project ever
+   * EXECUTED a live example.
+   *
+   * A static check was tried first and abandoned: distinguishing a free
+   * identifier from a method call, a method definition, a destructured element
+   * creator and an ambient from the example context is a growing pile of
+   * special cases, and it fired on correct pages. A gate that fails on correct
+   * code teaches people to delete it. Execution answers the question exactly
+   * and needs no heuristics — the page either errors or it does not.
+   */
+  test.skip(browserName === 'webkit', 'WebKit: iframe runner does not signal')
+  test.setTimeout(180_000)
+
+  // SLUGS FROM THE BUILT DIRECTORIES, which is what the site actually serves.
+  // Two earlier cuts were vacuous: the first visited only '/', and the second
+  // derived slugs from docs.json — where a source-derived page has
+  // path='src/path-listener.ts', so it visited '/path-listener.ts/' and got a
+  // 404 with no examples on it. Fifth version; every previous one passed
+  // against the very defect it was written for, and only mutation-verification
+  // said so.
+  const { readdirSync, existsSync: exists } = await import('node:fs')
+  const slugs = readdirSync('docs', { withFileTypes: true })
+    .filter((d) => d.isDirectory() && exists(`docs/${d.name}/index.html`))
+    .map((d) => d.name)
+  expect(slugs.length, 'no built doc pages found to visit').toBeGreaterThan(10)
+
+  const failures: string[] = []
+  for (const slug of slugs) {
+    await page.goto(`/${slug}/`, { waitUntil: 'domcontentloaded' })
+    await page.waitForTimeout(600)
+    const errs = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('.preview-error')).map((el) =>
+        (el.textContent || '').trim().slice(0, 120)
+      )
+    )
+    for (const e of errs) failures.push(`/${slug}/ → ${e}`)
+  }
+  expect(failures, `live example(s) threw:\n${failures.join('\n')}`).toEqual([])
+})

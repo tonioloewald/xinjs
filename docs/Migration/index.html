@@ -194,7 +194,7 @@ side (see above), and nothing about your code is wrong.</p>
 </li>
 <li><p><strong>Declare the attributes yourself</strong>, in your own project, without touching
 theirs:</p>
-<pre><code class="language-ts">import type { ComponentAttrs } from &#39;tosijs&#39;
+<pre><code class="language-typescript">import type { ComponentAttrs } from &#39;tosijs&#39;
 import type { TosiMonth } from &#39;their-library&#39;
 
 declare module &#39;their-library&#39; {
@@ -217,7 +217,7 @@ disappears when the library migrates.</p>
 an <strong>existing</strong> component class. Build a base with <code>withAttributes</code>, extend
 it and add more with <code>static initAttributes</code> — they compose, with the
 subclass winning per key:</p>
-<pre><code class="language-ts">class Base extends withAttributes({ label: &#39;base&#39; }) {
+<pre><code class="language-typescript">class Base extends withAttributes({ label: &#39;base&#39; }) {
   /* … */
 }
 

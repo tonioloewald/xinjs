@@ -94,7 +94,7 @@ a reference to the listener to allow you to dispose of it later.</p>
 and the cost is not the extra lines — it is that <strong>the element becomes
 invisible to the agent surface.</strong></p>
 <p>Two divs, both driven by state:</p>
-<pre><code class="language-js">// hand-rolled: observe, then write the DOM yourself
+<pre><code>// hand-rolled: observe, then write the DOM yourself
 const rolled = div({})
 observe(&#39;app.name&#39;, () =&gt; { rolled.textContent = app.name.value })
 
