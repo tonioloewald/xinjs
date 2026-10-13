@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="docs.json?v=5193d7800134" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="tosijs">tosijs</h1>
 <!--{ "pin": "top", "order": 1, "description": "tosijs is a path-based state-management library for web apps. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." }-->
@@ -71,18 +71,34 @@ document.body.append(
 &lt;/script&gt;
 </code></pre>
 <p><strong>New here? <a href="https://tosijs.net/start-here/">Start Here</a></strong> is a ten-minute tutorial on the
-two ideas everything else is built on. <a href="https://tosijs.net/Building-Apps/">Building Apps</a>
+two tools everything else is built on: the observer proxy and element creators. <a href="https://tosijs.net/Building-Apps/">Building Apps</a>
 is the full guide.</p>
+<h2 id="principles">Principles</h2>
+<p>A web page is a set of visible things (<strong>elements</strong>) on a screen, showing information
+(<strong>data</strong>). An app differs from a static page in one way: the data can change.
+<code>tosijs</code> is built on three principles that follow from that:</p>
+<ol>
+<li><strong>The browser is incredible. Let it do what it does best.</strong> HTML, the DOM, CSS, real
+events and standard <code>&lt;input&gt;</code>s with their native accessibility are the platform, not
+something to re-implement.</li>
+<li><strong>Elements are the user interface.</strong> Creating them, fine-tuning them and updating
+them should be insanely easy. That is what
+<a href="https://tosijs.net/elements/">element creators</a> are for.</li>
+<li><strong>State is why the app exists.</strong> Maintaining it, updating it from what the user does
+and from what happens elsewhere, and showing every change to the user quickly and
+accurately should be insanely easy. That is what the
+<a href="https://tosijs.net/xin/">observer proxy</a> is for.</li>
+</ol>
+<p>And one about you: <strong>what you already know about the browser is leveraged, not set
+aside.</strong> The more you know about what goes on behind the scenes, the better you will be
+with <code>tosijs</code>; the less you know, the less you will have to learn that is not universally
+true and useful. There is no framework-shaped replacement for the platform to learn, and
+re-learn at every major version.</p>
 <h2 id="better-apps-with-less-code">Better apps with less code</h2>
 <p>Less code to <strong>write, read, run, debug, and maintain</strong> — which, as a bonus in the
 age of AI assistants, also means <strong>fewer tokens</strong> to generate and reason about.
-<code>tosijs</code> gets there by leaning <em>into</em> the browser instead of re-implementing it:</p>
+What the principles buy you:</p>
 <ul>
-<li><strong>Your knowledge of the browser <em>is</em> the API.</strong> HTML, the DOM, CSS, real events,
-standard <code>&lt;input&gt;</code>s with their native accessibility — not a framework-shaped
-replacement you have to learn (and re-learn every major version).</li>
-<li><strong>Learn how the browser works, not how some framework works.</strong> The skills are
-durable and transferable; they don&#39;t evaporate with the next migration guide.</li>
 <li><strong>O(1) DOM updates, even for big lists.</strong> A state change surgically updates exactly
 the bound nodes — no virtual DOM, no diffing, no re-render-the-world. And because
 virtual list bindings are built in, a 100,000-row list only ever renders (and

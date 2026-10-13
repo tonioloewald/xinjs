@@ -48,20 +48,38 @@ No build step at all? The same code runs from a CDN in a module script:
 ```
 
 **New here? [Start Here](https://tosijs.net/start-here/)** is a ten-minute tutorial on the
-two ideas everything else is built on. [Building Apps](https://tosijs.net/Building-Apps/)
+two tools everything else is built on: the observer proxy and element creators. [Building Apps](https://tosijs.net/Building-Apps/)
 is the full guide.
+
+## Principles
+
+A web page is a set of visible things (**elements**) on a screen, showing information
+(**data**). An app differs from a static page in one way: the data can change.
+`tosijs` is built on three principles that follow from that:
+
+1. **The browser is incredible. Let it do what it does best.** HTML, the DOM, CSS, real
+   events and standard `<input>`s with their native accessibility are the platform, not
+   something to re-implement.
+2. **Elements are the user interface.** Creating them, fine-tuning them and updating
+   them should be insanely easy. That is what
+   [element creators](https://tosijs.net/elements/) are for.
+3. **State is why the app exists.** Maintaining it, updating it from what the user does
+   and from what happens elsewhere, and showing every change to the user quickly and
+   accurately should be insanely easy. That is what the
+   [observer proxy](https://tosijs.net/xin/) is for.
+
+And one about you: **what you already know about the browser is leveraged, not set
+aside.** The more you know about what goes on behind the scenes, the better you will be
+with `tosijs`; the less you know, the less you will have to learn that is not universally
+true and useful. There is no framework-shaped replacement for the platform to learn, and
+re-learn at every major version.
 
 ## Better apps with less code
 
 Less code to **write, read, run, debug, and maintain** — which, as a bonus in the
 age of AI assistants, also means **fewer tokens** to generate and reason about.
-`tosijs` gets there by leaning _into_ the browser instead of re-implementing it:
+What the principles buy you:
 
-- **Your knowledge of the browser _is_ the API.** HTML, the DOM, CSS, real events,
-  standard `<input>`s with their native accessibility — not a framework-shaped
-  replacement you have to learn (and re-learn every major version).
-- **Learn how the browser works, not how some framework works.** The skills are
-  durable and transferable; they don't evaporate with the next migration guide.
 - **O(1) DOM updates, even for big lists.** A state change surgically updates exactly
   the bound nodes — no virtual DOM, no diffing, no re-render-the-world. And because
   virtual list bindings are built in, a 100,000-row list only ever renders (and

@@ -159,7 +159,7 @@ A path bound to a password field, a `cc-*` autocomplete, a hidden CSRF token,
 or anything you mark `data-tosi-secret` is withheld — it reads back as the
 sentinel `⟨secret⟩` rather than its value:
 
-    <input type="password" data-bind="value=app.login.password">
+    input({ type: 'password', bindValue: app.login.password })
 
     agent.read('app.login.password')  // '⟨secret⟩'
     agent.read('app.login')           // { user: 'ada', password: '⟨secret⟩' }

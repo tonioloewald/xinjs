@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=5193d7800134" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="agent-api-reference-experimental">Agent API reference (EXPERIMENTAL)</h1>
 <p><code>enableAgentInterface()</code> turns a tosijs app&#39;s existing records — the state
@@ -215,7 +215,7 @@ in markup, are planned for 1.12.0.</p>
 <p>A path bound to a password field, a <code>cc-*</code> autocomplete, a hidden CSRF token,
 or anything you mark <code>data-tosi-secret</code> is withheld — it reads back as the
 sentinel <code>⟨secret⟩</code> rather than its value:</p>
-<pre><code>&lt;input type=&quot;password&quot; data-bind=&quot;value=app.login.password&quot;&gt;
+<pre><code>input({ type: &#39;password&#39;, bindValue: app.login.password })
 
 agent.read(&#39;app.login.password&#39;)  // &#39;⟨secret⟩&#39;
 agent.read(&#39;app.login&#39;)           // { user: &#39;ada&#39;, password: &#39;⟨secret⟩&#39; }

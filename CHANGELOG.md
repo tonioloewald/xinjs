@@ -20,6 +20,11 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 - **Start Here**, a ten-minute tutorial on the observer proxy and the element
   creators, built around one small example with the code, a console and its
   test in the page.
+- **Principles**, stated once, in the README: a page is elements showing data,
+  an app is a page whose data changes, and the three principles (let the
+  browser do what it does best; elements; state) plus the one about what you
+  already know. Start Here now opens from them: element creators for the
+  elements, the observer proxy for the state.
 - **A documentation pass**, from three cold reads of the published docs
   (newcomer, coding agent, expert lookup). The README now opens with what
   tosijs is, an install line and a first example, and moves entry points and

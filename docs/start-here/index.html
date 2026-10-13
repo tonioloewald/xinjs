@@ -30,15 +30,21 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=5193d7800134" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="start-here">Start Here</h1>
 <!--{ "pin": "top", "order": 1.5, "description": "A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does." }-->
 
-<p>Two things in <code>tosijs</code> carry everything else: the <strong>observer proxy</strong> you get from
-<code>tosi()</code>, and the <strong>element creators</strong> you get from <code>elements</code>. This page is one small
-example that uses both, followed by what each part does. It takes about ten minutes, and
-every example on it is live: edit the code and it re-runs.</p>
+<p>A web page is a set of visible things (<strong>elements</strong>) on a screen, showing information
+(<strong>data</strong>). An app differs from a static page in one way: the data can change.</p>
+<p><code>tosijs</code> has one tool for each half. <strong>Element creators</strong>, which you get from <code>elements</code>,
+make the elements. The <strong>observer proxy</strong>, which you get from <code>tosi()</code>, holds the data
+(the app&#39;s <em>state</em>) and tells the elements when it changes. Everything else in the
+library is built on those two, and both lean on the browser instead of replacing it:
+the elements are real DOM elements and the state is a plain object. (The
+<a href="/#principles">principles</a> behind that are on the home page.)</p>
+<p>This page is one small example that uses both, followed by what each part does. It takes
+about ten minutes, and every example on it is live: edit the code and it re-runs.</p>
 <h2 id="the-whole-thing">The whole thing</h2>
 <pre data-example-options="{&quot;view&quot;:&quot;code&quot;}"><code class="language-js">import { tosi, elements } from &#39;tosijs&#39;
 

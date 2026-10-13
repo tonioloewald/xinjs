@@ -2,10 +2,18 @@
 
 <!--{ "pin": "top", "order": 1.5, "description": "A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does." }-->
 
-Two things in `tosijs` carry everything else: the **observer proxy** you get from
-`tosi()`, and the **element creators** you get from `elements`. This page is one small
-example that uses both, followed by what each part does. It takes about ten minutes, and
-every example on it is live: edit the code and it re-runs.
+A web page is a set of visible things (**elements**) on a screen, showing information
+(**data**). An app differs from a static page in one way: the data can change.
+
+`tosijs` has one tool for each half. **Element creators**, which you get from `elements`,
+make the elements. The **observer proxy**, which you get from `tosi()`, holds the data
+(the app's *state*) and tells the elements when it changes. Everything else in the
+library is built on those two, and both lean on the browser instead of replacing it:
+the elements are real DOM elements and the state is a plain object. (The
+[principles](/#principles) behind that are on the home page.)
+
+This page is one small example that uses both, followed by what each part does. It takes
+about ten minutes, and every example on it is live: edit the code and it re-runs.
 
 ## The whole thing
 
