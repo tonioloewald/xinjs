@@ -1,6 +1,7 @@
 {
-  "generator": "1.12.0",
+  "generator": "1.16.13",
   "site": "tosijs",
-  "commit": "c3b55a2",
-  "commitTime": "2026-09-29T14:00:07+03:00"
+  "commit": "635c0e1",
+  "commitTime": "2026-10-08T11:03:47+03:00",
+  "contentHash": "b7b1c470ebf1c1d7"
 }

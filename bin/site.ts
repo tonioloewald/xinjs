@@ -932,6 +932,19 @@ async function buildLibrary(full = true) {
 
 async function buildDocsBundle() {
   console.time('docs iife')
+  // CodeMirror keys extensions by object identity, so a second copy of
+  // @codemirror/state or /view in the bundle leaves every `<tosi-code>` blank
+  // ("Unrecognized extension value") while the build and the doc tests stay
+  // green. A tosijs-ui bump produces exactly that when the lockfile still holds
+  // older hoisted copies: bun nests the newer ones under tosijs-ui.
+  const nested = './node_modules/tosijs-ui/node_modules/@codemirror'
+  if (existsSync(nested)) {
+    throw new Error(
+      `two copies of CodeMirror: ${nested} exists beside the hoisted one, so ` +
+        'the doc site would bundle both and its code editors would not render. ' +
+        'Run `bun update @codemirror/state @codemirror/view` to dedupe.'
+    )
+  }
   const result = await Bun.build({
     entrypoints: ['./src/index-iife.ts'],
     outdir: PUBLIC,
@@ -947,7 +960,34 @@ async function buildDocsBundle() {
     for (const m of result.logs) console.error(m)
     throw new Error('docs iife bundle failed')
   }
+  await restampDocsBundle()
   console.timeEnd('docs iife')
+}
+
+// buildSite() stamps `iife.js?v=<hash>` into every page from the bundle IT
+// wrote (tosijs-ui's own), and we then replace that bundle with ours. The
+// stamp therefore only changed when tosijs-ui did: a browser holding a cached
+// /iife.js kept running the previous build's library against the new pages.
+// Re-stamp from the bytes actually served.
+async function restampDocsBundle() {
+  const bytes = await Bun.file(path.join(PUBLIC, 'iife.js')).arrayBuffer()
+  const stamp = new Bun.CryptoHasher('sha256')
+    .update(bytes)
+    .digest('hex')
+    .slice(0, 12)
+  let pages = 0
+  for await (const file of new Bun.Glob('**/*.html').scan(PUBLIC)) {
+    const full = path.join(PUBLIC, file)
+    const html = await Bun.file(full).text()
+    const restamped = html.replace(/(iife\.js\?v=)[0-9a-f]+/g, `$1${stamp}`)
+    if (/iife\.js\?v=[0-9a-f]+/.test(html)) pages++
+    if (restamped !== html) await Bun.write(full, restamped)
+  }
+  if (pages === 0) {
+    throw new Error(
+      'no page references iife.js?v=… — the cache stamp format changed upstream, and the docs bundle is no longer cache-busted'
+    )
+  }
 }
 
 const config = {

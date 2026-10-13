@@ -148,7 +148,7 @@ not what was wanted.
 
     span({style: {border: '1px solid red'}, {style: {fontSize: '15px'}}})
 
-…produces `<span style="border: 1px solid red; fon-size: 15px></span>`
+…produces `<span style="border: 1px solid red; font-size: 15px"></span>`
 which is probably what was wanted.
 
 ## class property
@@ -230,6 +230,15 @@ as syntax sugar, e.g.
     on(aButton, 'click', () => {
       alert('clicked!')
     })
+
+A handler can also be a **proxy** (or a path string) for a function in state:
+
+    const { app } = tosi({ app: { save() { … } } })
+    button('Save', { onClick: app.save })
+
+The element is given the *path* `app.save`, not the function, and the handler is
+looked up when the event fires. Replace `app.save` later and the button runs the
+new function.
     document.body.append(
       aButton
     )

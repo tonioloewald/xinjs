@@ -79,7 +79,7 @@ When the reaction touches no DOM at all:
 | **sync** | replicate to another realm — another tab, the network, the URL |
 | **telemetry** | analytics, logging, an audit trail |
 | **process** | start or stop something — a timer, a worker, a poll |
-| **derived state** | compute *other state* — though [`take`](#take) is usually better |
+| **derived state** | compute *other state* — though [`take`](/xin/#take--reactive-binding-transforms) is usually better |
 
 ```
 // legitimate: nothing here touches the DOM

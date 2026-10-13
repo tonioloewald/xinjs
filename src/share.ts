@@ -4,7 +4,8 @@
 
 `share()` synchronizes state across browser tabs and windows. Pass it
 boxed proxies from `tosi()` and those paths will be kept in sync via
-`BroadcastChannel` and persisted to `IndexedDB`.
+[`BroadcastChannel`](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) and persisted to
+[`IndexedDB`](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API).
 
 ```
 import { tosi, share } from 'tosijs'

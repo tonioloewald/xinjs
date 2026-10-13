@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>bindings — tosijs</title>
   <meta name="description" content="The built-in collection of common bindings: value (two-way), text, enabled, disabled, list — plus how to write your own." />
   <link rel="canonical" href="https://tosijs.net/bindings/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="bindings — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="bindings — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>bindings</h1>
+<h1 id="bindings">bindings</h1>
 <p><code>bindings</code> is simply a collection of common bindings.</p>
 <p>You can create your own bindings easily enough (and add them to <code>bindings</code> if so desired).</p>
 <p>A <code>binding</code> looks like this:</p>
@@ -57,13 +44,16 @@
 <p>The <code>fromDOM</code> function is only needed for bindings to elements that trigger <code>change</code> or <code>input</code>
 events, typically <code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code>, and <code>&lt;select&gt;</code> elements, and of course your
 own <a href="/component/">Custom Elements</a>.</p>
-<h2>value</h2>
-<p>The <code>value</code> binding syncs state from <code>xin</code> to the bound element&#39;s <code>value</code> property. In
-general this should only be used for binding simple things, like <code>&lt;input&gt;</code> and <code>&lt;textarea&gt;</code>
-elements.</p>
-<h2>text</h2>
+<h2 id="value">value</h2>
+<p>The <code>value</code> binding syncs state with the bound element&#39;s value, in both directions. It is
+what <code>bindValue</code> uses. It is meant for form controls: <code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code>, <code>&lt;select&gt;</code>
+and components that implement <code>value</code>.</p>
+<p>It reads and writes the property that carries the control&#39;s value, which is not always
+<code>value</code>: a <strong>checkbox</strong> is bound through <code>checked</code> (a boolean), and a <strong>radio</strong> group
+through whichever radio is checked (its <code>value</code>). So <code>input({ type: &#39;checkbox&#39;, bindValue: app.done })</code> binds a boolean.</p>
+<h2 id="text">text</h2>
 <p>The <code>text</code> binding copies state from <code>xin</code> to the bound element&#39;s <code>textContent</code> property.</p>
-<h2>enabled &amp; disabled</h2>
+<h2 id="enabled--disabled">enabled &amp; disabled</h2>
 <blockquote>
 <p><strong>Note:</strong> <code>bindEnabled</code> and <code>bindDisabled</code> are NOT deprecated (1.9.0
 deprecated them; 1.9.1 removed that, because the shortcut is the only form
@@ -103,7 +93,7 @@ document.body.append(
     )
 )
 </code></pre>
-<h2>list</h2>
+<h2 id="list">list</h2>
 <p>The <code>list</code> binding makes a copy of a <code>template</code> element inside the bound element
 for every item in the bound <code>Array</code>.</p>
 <p>It uses the existing <strong>single</strong> child element it finds inside the bound element
@@ -130,7 +120,7 @@ for each item in the source array.</p>
 that element and the array value that it represents.</p>
 <p>Meanwhile, <code>updateInstance</code> is called once on creation and then any time the
 array value is updated.</p>
-<h3>Long lists: virtualize, or say why</h3>
+<h3 id="long-lists-virtualize-or-say-why">Long lists: virtualize, or say why</h3>
 <p>A list of <strong>more than 10 items</strong> with neither <code>virtual</code> nor <code>nonVirtualReason</code>
 logs a warning, once per list. An unvirtualized list keeps one live, bound DOM
 subtree per item and updates them all, which is the commonest way a tosijs page
@@ -142,12 +132,12 @@ and the two fixes:</p>
 <p>The reason does nothing at runtime except silence the warning; it is there so
 the next reader knows the choice was made, not missed. <code>settings.quiet</code>
 silences this along with tosijs&#39;s other advice.</p>
-<h3>Virtual List Binding</h3>
+<h3 id="virtual-list-binding">Virtual List Binding</h3>
 <p>If you want to bind large arrays with minimal performance impact, you can make a list
 binding <code>virtual</code> by passing the <code>height</code> (and optionally <code>width</code>) of an item.
 Only visible elements will be rendered. Just make sure the values passed represent
 the <em>minimum</em> dimensions of the individual rendered items if they can vary in size.</p>
-<h3>Filtered Lists and Detail Views</h3>
+<h3 id="filtered-lists-and-detail-views">Filtered Lists and Detail Views</h3>
 <p>You can <strong>filter</strong> the elements you wish to display in a bound list by using the
 <code>hiddenProp</code> (to hide elements of the list) and/or <code>visibleProp</code> (to show elements
 of the list).</p>
@@ -164,11 +154,11 @@ in the array will be ignored <em>unless</em> <code>item[visibleProp] === true</c
 <p>If, for some reason, you specify both then an item will only be visible if
 it <code>item[visibleProp] === true</code> and <code>item[hiddenProp] !== true</code>.</p>
 </blockquote>
-<h3>Binding custom-elements using idPath</h3>
+<h3 id="binding-custom-elements-using-idpath">Binding custom-elements using idPath</h3>
 <p>If you list-bind a custom-element with <code>bindValue</code> implemented and providing an
 <code>idPath</code> then the list-binding will bind the array items to the value of the
 custom-element.</p>
-<h3>xin-empty-list class</h3>
+<h3 id="xin-empty-list-class">xin-empty-list class</h3>
 <p>The <code>list</code> binding will automatically add the class <code>-xin-empty-list</code> to a
 container bound to an empty array, making it easier to conditionally render
 instructions or explanations when a list is empty.</p>
@@ -177,6 +167,7 @@ instructions or explanations when a list is empty.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -208,20 +199,13 @@ instructions or explanations when a list is empty.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -233,9 +217,16 @@ instructions or explanations when a list is empty.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -247,6 +238,6 @@ instructions or explanations when a list is empty.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

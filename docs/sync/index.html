@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>sync — tosijs</title>
   <meta name="description" content="sync() synchronizes tosijs state across the network in real-time via a pluggable transport (websocket, fetch, or your own)." />
   <link rel="canonical" href="https://tosijs.net/sync/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="sync — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="sync — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>sync</h1>
+<h1 id="sync">sync</h1>
 <p><code>sync()</code> synchronizes state across the network in real-time. Pass it a
 transport, options, and boxed proxies from <code>tosi()</code> — local changes are
 throttled and sent as batched deltas, and inbound messages from other
@@ -67,7 +54,7 @@ const { disconnect } = await sync(
 // Later, to disconnect:
 disconnect()
 </code></pre>
-<h2>Transport interface</h2>
+<h2 id="transport-interface">Transport interface</h2>
 <p><code>sync()</code> is transport-agnostic. You provide an object that satisfies
 <code>SyncTransport</code>:</p>
 <pre><code>interface SyncTransport {
@@ -91,7 +78,7 @@ throwing, or buffer inside the transport.</p>
 <p>Messages are <strong>batched</strong> — <code>send()</code> receives an array of accumulated
 deltas flushed at the throttle interval, and <code>onReceive()</code> delivers
 batches from the server.</p>
-<h2>WebSocket transport helper</h2>
+<h2 id="websocket-transport-helper">WebSocket transport helper</h2>
 <pre><code>function websocketTransport(ws) {
   let handler = null
   let pingInterval = null
@@ -127,7 +114,7 @@ batches from the server.</p>
   }
 }
 </code></pre>
-<h2>Firebase Realtime Database transport</h2>
+<h2 id="firebase-realtime-database-transport">Firebase Realtime Database transport</h2>
 <p>For Firebase, implement <code>SyncTransport</code> using <code>onValue</code> for inbound
 and <code>update</code> for outbound. This is a sketch — adapt to your data model:</p>
 <pre><code>import { ref, onValue, update } from &#39;firebase/database&#39;
@@ -162,7 +149,7 @@ function firebaseTransport(db, rootPath) {
   }
 }
 </code></pre>
-<h2>Server architecture</h2>
+<h2 id="server-architecture">Server architecture</h2>
 <p>The transport carries <code>SyncMessage[]</code> arrays. The <strong>server</strong> decides:</p>
 <ul>
 <li><strong>Broadcasting</strong>: relay deltas to other connected clients</li>
@@ -173,7 +160,7 @@ custom logic — <code>sync()</code> is conflict-agnostic</li>
 <p>For most realistic applications, use a custom socket server as the
 single source of truth. See <code>examples/sync-server.ts</code> for a minimal
 Bun WebSocket relay server.</p>
-<h2>API</h2>
+<h2 id="api">API</h2>
 <pre><code>sync(
   transport: SyncTransport,
   options: SyncOptions,
@@ -191,6 +178,7 @@ Bun WebSocket relay server.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -222,20 +210,13 @@ Bun WebSocket relay server.</p>
     </details></li>
     <li><details open><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link current" href="../sync/" aria-current="page">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -247,9 +228,16 @@ Bun WebSocket relay server.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -261,6 +249,6 @@ Bun WebSocket relay server.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

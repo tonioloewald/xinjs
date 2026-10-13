@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>tosijs</title>
   <meta name="description" content="tosijs is a path-based state-management library for web apps. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." />
   <link rel="canonical" href="https://tosijs.net/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>tosijs</h1>
+<h1 id="tosijs">tosijs</h1>
 <!--{ "pin": "top", "order": 1, "description": "tosijs is a path-based state-management library for web apps. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." }-->
 
 <p><a href="https://tosijs.net">tosijs.net</a> | <a href="https://ui.tosijs.net">tosijs-ui</a> | <a href="https://github.com/tonioloewald/tosijs">github</a> | <a href="https://www.npmjs.com/package/tosijs">npm</a> | <a href="https://www.jsdelivr.com/package/npm/tosijs">cdn</a> | <a href="https://react.tosijs.net">react-tosijs</a> | <a href="https://discord.gg/ramJ9rgky5">discord</a></p>
@@ -62,64 +49,31 @@
   </tosi-lottie>
 </div>
 
-<h2>Entry points</h2>
-<table>
-<thead>
-<tr>
-<th>import</th>
-<th>what you get</th>
-<th>gz</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>tosijs</code></td>
-<td>everything, agent surface included — bundlers shake what you don&#39;t import</td>
-<td><!--gz:module.js-->~45 kB<!--/gz--></td>
-</tr>
-<tr>
-<td><code>tosijs/agent</code></td>
-<td>the agent surface, schematic renderer, audit and contract harnesses (<strong>same file</strong>, narrower types) — <strong>EXPERIMENTAL</strong></td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>tosijs/core</code></td>
-<td>no blueprint loader, no <code>share</code>/<code>sync</code>/<code>hotReload</code>, no agent surface</td>
-<td><!--gz:core.js-->~26 kB<!--/gz--></td>
-</tr>
-<tr>
-<td><code>tosijs/state</code></td>
-<td>the <strong>DOM-free</strong> state layer: <code>tosi</code>, <code>xin</code>, <code>observe</code>, paths</td>
-<td><!--gz:state.js-->~17 kB<!--/gz--></td>
-</tr>
-<tr>
-<td><code>&lt;script src=…&gt;</code> (IIFE)</td>
-<td>the library <strong>without</strong> the agent surface — a script tag cannot tree-shake, so it doesn&#39;t pay for what it didn&#39;t ask for</td>
-<td><!--gz:index.js-->~29 kB<!--/gz--></td>
-</tr>
-</tbody></table>
-<p><code>tosijs/agent</code> resolves to the same file as <code>tosijs</code> <strong>on purpose</strong>: a
-separately-bundled agent surface would carry its own copy of the state
-registry and describe an empty app. One runtime copy, always.</p>
-<p><code>tosijs/core</code> is opt-in rather than automatic because blueprints hydrate
-from <em>markup</em>, so no import statement protects them — shaking the
-registration would fail silently. Slim core is present, so it can speak: in
-dev it warns if the page contains blueprint elements it cannot hydrate.</p>
-<h2>Scaffolding</h2>
-<pre><code>bunx tosijs create app my-app              # a runnable app (bun index.html)
-bunx tosijs create component my-widget     # a component — blueprint form (default)
-bunx tosijs create component my-widget --bare  # …plain class form
-bunx tosijs create blueprint my-widget     # a publishable blueprint package
+<p><code>tosijs</code> keeps the state of a web app in plain objects and wires it to real DOM elements.
+Change the state and the elements bound to it update, with no virtual DOM, no JSX and no
+build step. It is small enough to read in an afternoon.</p>
+<pre><code>npm install tosijs      # or: bun add tosijs
 </code></pre>
-<p>Everything scaffolded is <strong>agent-ready</strong>: components are born with a
-<code>contract</code> (description, value schema, parts map, and a declared test), so
-they self-describe on the agent surface and pass <code>exerciseComponent()</code> from
-their first minute. The blueprint form is the default because blueprints
-are consumable <strong>directly from markup</strong> — no build step on the consumer&#39;s
-side:</p>
-<pre><code>&lt;tosi-blueprint tag=&quot;my-widget&quot; src=&quot;https://cdn.jsdelivr.net/npm/my-widget/dist/index.js&quot;&gt;&lt;/tosi-blueprint&gt;
-&lt;my-widget&gt;&lt;/my-widget&gt;
+<pre><code>import { tosi, elements } from &#39;tosijs&#39;
+
+const { app } = tosi({ app: { name: &#39;world&#39; } })
+const { h1, input } = elements
+
+document.body.append(
+  h1(&#39;Hello, &#39;, app.name),
+  input({ bindValue: app.name })
+)
 </code></pre>
-<h2>Better apps with less code</h2>
+<p>No build step at all? The same code runs from a CDN in a module script:</p>
+<pre><code>&lt;script type=&quot;module&quot;&gt;
+  import { tosi, elements } from &#39;https://cdn.jsdelivr.net/npm/tosijs/dist/module.js&#39;
+  // …
+&lt;/script&gt;
+</code></pre>
+<p><strong>New here? <a href="https://tosijs.net/start-here/">Start Here</a></strong> is a ten-minute tutorial on the
+two ideas everything else is built on. <a href="https://tosijs.net/Building-Apps/">Building Apps</a>
+is the full guide.</p>
+<h2 id="better-apps-with-less-code">Better apps with less code</h2>
 <p>Less code to <strong>write, read, run, debug, and maintain</strong> — which, as a bonus in the
 age of AI assistants, also means <strong>fewer tokens</strong> to generate and reason about.
 <code>tosijs</code> gets there by leaning <em>into</em> the browser instead of re-implementing it:</p>
@@ -144,13 +98,8 @@ The agent surface is opt-in and shakes away if you never import it. It costs<!--
 the same ESM bundle built with and without it — including the schematic
 renderer, the accessibility audit and the contract harnesses. (The gap
 between <code>tosijs</code> and <code>tosijs/core</code> is a larger<!--agentgz-->~19.0 kB<!--/agentgz-->, because `core` also drops blueprints,
-share/sync and hotReload.) Both figures are measured by the build.<!-- as-of: 2026-08-08 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
-It does not, however, shake back to 1.7.x: when 1.8.0 shipped, an identical
-consumer app that never touched the agent surface measured <strong>+2.9 kB gzipped
-(+13.7%) against 1.7.9</strong>, because the contract seam, the path-segment guard
-and the binding bookkeeping sit on the ordinary path. That figure is a
-1.8.0-era measurement and has not been re-taken. If size matters more to you
-than the features, <code>tosijs/core</code> is the smaller door.</li>
+share/sync and hotReload.) Both figures are measured by the build.
+<a href="#entry-points">Entry points</a> has the detail.</li>
 </ul>
 <p>On top of that you get the conveniences you&#39;d actually want: most binding code
 eliminated, web-components you can build in pure JS more compactly than JSX, and
@@ -202,6 +151,8 @@ preview.append(
           event.preventDefault()
           readmeTodoDemo.addItem(event.target.value)
           event.target.value = &#39;&#39;
+          // addItem() pushed onto the original array, not through the proxy,
+          // so tell tosijs it changed (a write through the proxy needs no touch)
           touch(readmeTodoDemo)
         }
       },
@@ -273,7 +224,71 @@ error rather than a silent <code>any</code>. <code>static initAttributes</code> 
 <p>The difference is that <code>web-components</code> are drop-in replacements for standard HTML elements
 and interoperate happily with one-another and other libraries, load asynchronously,
 and are natively supported by all modern browsers.</p>
-<h2>An ecosystem with <code>tosijs</code> at its heart</h2>
+<h2 id="entry-points">Entry points</h2>
+<table>
+<thead>
+<tr>
+<th>import</th>
+<th>what you get</th>
+<th>gz</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tosijs</code></td>
+<td>everything, agent surface included — bundlers shake what you don&#39;t import</td>
+<td><!--gz:module.js-->~45 kB<!--/gz--></td>
+</tr>
+<tr>
+<td><code>tosijs/agent</code></td>
+<td>the agent surface, schematic renderer, audit and contract harnesses (<strong>same file</strong>, narrower types) — <strong>EXPERIMENTAL</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>tosijs/core</code></td>
+<td>no blueprint loader, no <code>share</code>/<code>sync</code>/<code>hotReload</code>, no agent surface</td>
+<td><!--gz:core.js-->~26 kB<!--/gz--></td>
+</tr>
+<tr>
+<td><code>tosijs/state</code></td>
+<td>the <strong>DOM-free</strong> state layer: <code>tosi</code>, <code>xin</code>, <code>observe</code>, paths</td>
+<td><!--gz:state.js-->~17 kB<!--/gz--></td>
+</tr>
+<tr>
+<td><code>&lt;script src=…&gt;</code> (IIFE)</td>
+<td>registers <code>&lt;tosi-blueprint&gt;</code> so components load <strong>from markup</strong>; it sets no global, so for the API in a page use a module script (above)</td>
+<td><!--gz:index.js-->~29 kB<!--/gz--></td>
+</tr>
+</tbody></table>
+<p><code>tosijs/agent</code> resolves to the same file as <code>tosijs</code> <strong>on purpose</strong>: a
+separately-bundled agent surface would carry its own copy of the state
+registry and describe an empty app. One runtime copy, always.</p>
+<p><code>tosijs/core</code> is opt-in rather than automatic because blueprints hydrate
+from <em>markup</em>, so no import statement protects them — shaking the
+registration would fail silently. Slim core is present, so it can speak: in
+dev it warns if the page contains blueprint elements it cannot hydrate.</p>
+<!-- as-of: 2026-08-08 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
+<p><strong>The agent surface shakes away, but not back to 1.7.x:</strong> when 1.8.0 shipped, an identical
+consumer app that never touched the agent surface measured <strong>+2.9 kB gzipped
+(+13.7%) against 1.7.9</strong>, because the contract seam, the path-segment guard
+and the binding bookkeeping sit on the ordinary path. That figure is a
+1.8.0-era measurement and has not been re-taken. If size matters more to you
+than the features, <code>tosijs/core</code> is the smaller door.</p>
+<h2 id="scaffolding">Scaffolding</h2>
+<pre><code>bunx tosijs create app my-app              # a runnable app (bun index.html)
+bunx tosijs create component my-widget     # a component — blueprint form (default)
+bunx tosijs create component my-widget --bare  # …plain class form
+bunx tosijs create blueprint my-widget     # a publishable blueprint package
+</code></pre>
+<p>Everything scaffolded is <strong>agent-ready</strong>: components are born with a
+<code>contract</code> (description, value schema, parts map, and a declared test), so
+they self-describe on the agent surface and pass <code>exerciseComponent()</code> from
+their first minute. The blueprint form is the default because blueprints
+are consumable <strong>directly from markup</strong> — no build step on the consumer&#39;s
+side:</p>
+<pre><code>&lt;tosi-blueprint tag=&quot;my-widget&quot; src=&quot;https://cdn.jsdelivr.net/npm/my-widget/dist/index.js&quot;&gt;&lt;/tosi-blueprint&gt;
+&lt;my-widget&gt;&lt;/my-widget&gt;
+</code></pre>
+<h2 id="an-ecosystem-with-tosijs-at-its-heart">An ecosystem with <code>tosijs</code> at its heart</h2>
 <p><code>tosijs</code> is the observable core a whole family of tools is built on. Each is useful
 on its own; together they let you build almost anything without leaving web
 standards behind.</p>
@@ -317,8 +332,8 @@ standards behind.</p>
 <td>Declarative 3D / VR / XR as web components, built on Babylon.js (WIP).</td>
 </tr>
 </tbody></table>
-<h2>What <code>tosijs</code> does</h2>
-<h3>Observe Object State</h3>
+<h2 id="what-tosijs-does">What <code>tosijs</code> does</h2>
+<h3 id="observe-object-state">Observe Object State</h3>
 <p><code>tosijs</code> tracks the state of objects you assign to it using <code>paths</code> allowing economical
 and direct updates to application state.</p>
 <pre><code>import { tosi, observe } from &#39;tosijs&#39;
@@ -347,7 +362,7 @@ observe(&#39;app.docs&#39;, () =&gt; {
 })
 </code></pre>
 <blockquote>
-<h4>What does <code>tosi</code> do, and what is a <code>BoxedProxy</code>?</h4>
+<h4 id="what-does-tosi-do-and-what-is-a-boxedproxy">What does <code>tosi</code> do, and what is a <code>BoxedProxy</code>?</h4>
 <p><code>tosi</code> registers your object into <code>tosijs</code>&#39;s central state tree and hands it
 back to you as a <code>BoxedProxy</code>.</p>
 <p>A <code>BoxedProxy</code> is an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">ES Proxy</a>
@@ -359,7 +374,7 @@ object that allows you to interact with the object normally, but which allows <c
 <strong>observe</strong> changes made to the wrapped object and tell interested parties about the changes.</p>
 <p>If you want the original object back you can use <code>.value</code> on any proxy to unwrap it.</p>
 </blockquote>
-<h3>No Tax, No Packaging</h3>
+<h3 id="no-tax-no-packaging">No Tax, No Packaging</h3>
 <p><code>tosijs</code> does not modify the stuff you hand over to it… it just wraps objects
 with a <code>Proxy</code>, and when you make changes through the returned proxy, <code>tosijs</code>
 notifies any interested observers.</p>
@@ -377,7 +392,7 @@ observe(&#39;foo.bar&#39;, (path) =&gt; {
 foo.bar = 17        // does not trigger the observer
 foo.bar = Math.PI   // triggers the observer
 </code></pre>
-<h3>Paths are like JavaScript</h3>
+<h3 id="paths-are-like-javascript">Paths are like JavaScript</h3>
 <p>A proxy behaves just like the JavaScript <code>Object</code> it wraps — <code>tosijs</code> doesn&#39;t
 copy or replace your object, so what you put in is what you get out (call
 <code>.value</code> to unwrap a scalar):</p>
@@ -397,7 +412,7 @@ original.bar === &#39;lurman&#39; // true
 original.bar = &#39;luhrman&#39;
 foo.bar.value === &#39;luhrman&#39; // true
 </code></pre>
-<h3>…but better!</h3>
+<h3 id="but-better">…but better!</h3>
 <p>It&#39;s very common to deal with arrays of objects that have unique id values,
 so <code>tosijs</code> supports the idea of id-paths</p>
 <pre><code>import { tosi, boxed } from &#39;tosijs&#39;
@@ -421,7 +436,7 @@ console.log(app.list[0].text.value)                     // hello world
 console.log(app.list[&#39;id=5678efgh&#39;].text.value)         // so long, redux
 console.log(boxed[&#39;app.list[id=1234abcd]&#39;].text.value)  // hello world
 </code></pre>
-<h3>Telling <code>tosijs</code> about changes using <code>touch()</code></h3>
+<h3 id="telling-tosijs-about-changes-using-touch">Telling <code>tosijs</code> about changes using <code>touch()</code></h3>
 <p>Sometimes you will modify an object behind <code>tosijs</code>&#39;s back (e.g. for efficiency).
 When you want to trigger updates, simply touch the path.</p>
 <pre><code>import { tosi, boxed, observe, touch } from &#39;tosijs&#39;
@@ -440,7 +455,7 @@ app.items[2].touch()      // force update for a list item
 </code></pre>
 <p>For list items with <code>idPath</code>, <code>.touch()</code> automatically synthesizes the
 equivalent id-path touch, so DOM bindings update correctly.</p>
-<h3>List Operations</h3>
+<h3 id="list-operations">List Operations</h3>
 <p>Proxied arrays have <code>listFind</code>, <code>listUpdate</code>, and <code>listRemove</code> methods
 for common list operations:</p>
 <pre><code>// Find — returns proxied item (mutations trigger observers)
@@ -458,7 +473,7 @@ app.items.listRemove((item) =&gt; item.id, &#39;abc&#39;)
 <p><code>listUpdate</code> preserves object identity — it mutates the existing object
 property by property, so only changed properties fire observers and DOM
 elements are reused (no teardown/recreation).</p>
-<h3>CSS</h3>
+<h3 id="css">CSS</h3>
 <p><code>tosijs</code> includes utilities for working with css.</p>
 <pre><code>import { css, vars } from &#39;tosijs&#39;
 </code></pre>
@@ -481,7 +496,7 @@ elements are reused (no teardown/recreation).</p>
   }
 })
 </code></pre>
-<h2>Color</h2>
+<h2 id="color">Color</h2>
 <p><code>tosijs</code> includes a powerful <code>Color</code> class for manipulating colors.</p>
 <pre><code>import { Color } from &#39;tosijs&#39;
 const translucentBlue = new Color(0, 0, 255, 0.5) // r, g, b, a parameters
@@ -491,7 +506,7 @@ const darkGrey = Color.fromHsl(0, 0, 0.2)
 <p>The color objects have computed properties for rendering the color in different ways,
 making adjustments, blending colors, and so forth.</p>
 <p>Use <code>invertLuminance()</code> to generate dark-mode equivalents of color values.</p>
-<h2>Hot Reload</h2>
+<h2 id="hot-reload">Hot Reload</h2>
 <p>One of the nice things about working with the React toolchain is hot reloading.
 <code>tosijs</code> supports hot reloading (and not just in development!) via the <code>hotReload()</code>
 function:</p>
@@ -511,7 +526,7 @@ simply call <code>hotReload</code> after initializing your app state and you&#39
 <p><code>hotReload</code> accepts a test function (path =&gt; boolean) as a parameter.
 Only top-level properties in your state that pass the test will be persisted.</p>
 <p>To completely reset the app, run <code>localStorage.clear()</code> in the console.</p>
-<h2>Development Notes</h2>
+<h2 id="development-notes">Development Notes</h2>
 <p>You&#39;ll need to install <a href="https://bun.sh/">bun</a> and then run <code>bun install</code>.</p>
 <pre><code>bun start                  # dev server with hot reload (https://localhost:8018)
 bun test                   # run all tests
@@ -519,13 +534,13 @@ bun run build              # production build (runs tests, then bundles + docs)
 bun run format             # lint and format (ESLint + Prettier)
 bun pack                   # create local package tarball
 </code></pre>
-<h2>License</h2>
+<h2 id="license">License</h2>
 <p><a href="./LICENSE">Apache-2.0</a> as of 1.8.0 (BSD-3-Clause through 1.7.x) — the
 change adds an explicit patent grant and a patent-retaliation clause. If you
 <strong>redistribute</strong> a build containing tosijs, Apache-2.0 §4(d) asks you to carry
 the <a href="./NOTICE"><code>NOTICE</code></a> text in your attribution notices; BSD-3 had no such
 requirement. Hosting an app you built with it is unaffected.</p>
-<h2>History &amp; credits</h2>
+<h2 id="history--credits">History &amp; credits</h2>
 <p><code>tosijs</code> descends from <strong>b8rjs → xinjs → tosijs</strong> — see <a href="/history/">tosijs history</a>
 for the full lineage. <strong>Upgrading?</strong> See <a href="/Migration/">Migration</a> — 1.8.0
 removes the deprecations that named it, keeps the rest working with warnings,
@@ -536,6 +551,7 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link current" href="./" aria-current="page">tosijs</a></li>
+    <li><a class="doc-link" href="start-here/">Start Here</a></li>
     <li><a class="doc-link" href="Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="css/">CSS</a></summary>
@@ -567,20 +583,13 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
     </details></li>
     <li><details><summary><a class="doc-link" href="utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="more-math/">more-math</a></li>
-      <li><a class="doc-link" href="schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="share/">share</a></li>
       <li><a class="doc-link" href="sync/">sync</a></li>
       <li><a class="doc-link" href="throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="React/">React and tosijs</a></li>
@@ -592,9 +601,16 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
       <li><a class="doc-link" href="trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -606,6 +622,6 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="iife.js"></script>
+  <script src="iife.js?v=28ab27374864"></script>
 </body>
 </html>

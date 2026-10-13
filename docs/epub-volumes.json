@@ -3,6 +3,8 @@
     "book": "",
     "title": "tosijs",
     "filename": "tosijs.epub",
-    "url": "/tosijs.epub"
+    "url": "/tosijs.epub",
+    "coverFilename": "tosijs-cover.png",
+    "coverUrl": "/tosijs-cover.png"
   }
 ]

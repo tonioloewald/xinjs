@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,36 +12,37 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>Building Apps — tosijs</title>
-  <meta name="description" content="How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. Read this first." />
+  <meta name="description" content="How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." />
   <link rel="canonical" href="https://tosijs.net/Building-Apps/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Building Apps — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Building Apps — tosijs" />
-  <meta property="og:description" content="How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. Read this first." />
+  <meta property="og:description" content="How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." />
   <meta property="og:url" content="https://tosijs.net/Building-Apps/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Building Apps","description":"How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. Read this first.","url":"https://tosijs.net/Building-Apps/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Building Apps","description":"How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first.","url":"https://tosijs.net/Building-Apps/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Building Apps</h1>
-<!--{ "pin": "top", "order": 2, "description": "How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. Read this first." }-->
+<h1 id="building-apps">Building Apps</h1>
+<!--{ "pin": "top", "order": 2, "description": "How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." }-->
 
 <blockquote>
 <p>This guide explains how to think about building applications with tosijs.
 It&#39;s not an API reference — it&#39;s a mental model. If you&#39;re coming from React
-or another reactive framework, this is the most important thing to read first.</p>
+or another reactive framework, this is the most important thing to read.
+New to <code>tosijs</code>? <a href="/start-here/">Start Here</a> is a ten-minute tutorial that
+introduces the proxy and the element creators this guide builds on.</p>
 </blockquote>
-<h2>The Downhill Model</h2>
+<h2 id="the-downhill-model">The Downhill Model</h2>
 <p>In React, data flows &quot;uphill.&quot; A child component needs to tell a parent something
 happened, so you lift state up, pass callbacks down, drill props through layers
 of components, and eventually something re-renders — often much more than needed.
@@ -69,8 +58,8 @@ tosijs thinks in terms of addresses: <code>app.user.name</code> is a path. Bindi
 paths. Mutations fire on paths. Everything in tosijs routes through paths — that&#39;s
 why binding to a specific scalar path is so much more efficient than binding to
 an object and diffing.</p>
-<h2>The Three Steps</h2>
-<h3>1. Put your state in a proxy</h3>
+<h2 id="the-three-steps">The Three Steps</h2>
+<h3 id="1-put-your-state-in-a-proxy">1. Put your state in a proxy</h3>
 <pre><code>const { app } = tosi({
   app: {
     user: { name: &#39;Alice&#39;, email: &#39;alice@example.com&#39; },
@@ -111,7 +100,7 @@ app.user.name.value === &#39;Bob&#39;  // correct
 </code></pre>
 <p>Reach for <code>.value</code> whenever you need the raw primitive — for comparisons,
 assignments, or passing to external APIs.</p>
-<h3>2. Build your UI with bindings</h3>
+<h3 id="2-build-your-ui-with-bindings">2. Build your UI with bindings</h3>
 <pre><code>const { div, h1, input, ul } = elements
 
 const view = div(
@@ -180,7 +169,7 @@ app.showFeature.observe(() =&gt; {
 </code></pre>
 <p>No lazy-loading API, no <code>Suspense</code>, no dynamic imports. A function returns
 an element, you put it in the DOM, bindings activate. That&#39;s it.</p>
-<h3>3. Use list bindings for collections</h3>
+<h3 id="3-use-list-bindings-for-collections">3. Use list bindings for collections</h3>
 <pre><code>ul(
   ...app.messages.listBinding(
     ({li, span}, msg) =&gt; li(
@@ -211,7 +200,7 @@ Without it, the list falls back to index-based paths that break on reorder.</p>
 like <code>[</code>, <code>=</code>, and <code>.</code> are safe. Use numeric ids or UUIDs and you&#39;ll
 never hit this.</p>
 </blockquote>
-<h3>Finding, updating, and removing list items</h3>
+<h3 id="finding-updating-and-removing-list-items">Finding, updating, and removing list items</h3>
 <p>Proxied arrays have <code>listFind</code>, <code>listUpdate</code>, and <code>listRemove</code> methods
 that use the same selector pattern as <code>listBinding</code>:</p>
 <pre><code>// Find an item — returns proxied, so mutations trigger updates
@@ -232,9 +221,9 @@ app.items.listRemove((item) =&gt; item.id, &#39;abc&#39;)
 <p><code>listUpdate</code> is the key one: it mutates the existing object property by
 property through the proxy, so only changed properties fire observers and
 the DOM element is reused. If the item doesn&#39;t exist, it pushes a new one.</p>
-<h2>Proxied vs. Raw</h2>
+<h2 id="proxied-vs-raw">Proxied vs. Raw</h2>
 <p>The proxy is the core of tosijs, so understanding where it applies matters.</p>
-<h3><code>for...of</code> gives proxied items; callbacks give raw items</h3>
+<h3 id="forof-gives-proxied-items-callbacks-give-raw-items"><code>for...of</code> gives proxied items; callbacks give raw items</h3>
 <p><code>for...of</code> on a proxied array yields proxied items — mutations trigger
 observers. But <code>forEach</code>, <code>map</code>, and <code>filter</code> pass <em>raw</em> items to callbacks.
 Mutations inside these are invisible to tosijs.</p>
@@ -249,7 +238,7 @@ app.items.forEach(item =&gt; {
 })
 touch(app.items)  // manual touch needed after raw mutations
 </code></pre>
-<h3><code>this</code> in proxied methods</h3>
+<h3 id="this-in-proxied-methods"><code>this</code> in proxied methods</h3>
 <p>Methods on proxied objects receive the proxy as <code>this</code>, which means
 property access goes through the proxy. This is usually what you want —
 mutations trigger observers automatically. But be aware that <code>this.items</code>
@@ -264,13 +253,13 @@ returns a proxied array, not a raw one:</p>
 </code></pre>
 <p>If you need the raw value (e.g. for serialization), use
 <code>this.items.value</code> (or the <code>tosiValue(this.items)</code> function).</p>
-<h2>Why This Works</h2>
-<h3>No component tree means no prop drilling</h3>
+<h2 id="why-this-works">Why This Works</h2>
+<h3 id="no-component-tree-means-no-prop-drilling">No component tree means no prop drilling</h3>
 <p>State lives in the <code>tosi()</code> proxy. Any element anywhere can bind to any path. You don&#39;t
 need wrapper components to shuttle data through the hierarchy. A deeply
 nested <code>&lt;span&gt;</code> can bind directly to <code>app.user.name</code> without any of its
 ancestors knowing or caring.</p>
-<h3>Business logic stays clean</h3>
+<h3 id="business-logic-stays-clean">Business logic stays clean</h3>
 <p>Your data objects are just objects. They can have methods:</p>
 <pre><code>const todo = {
   items: [],
@@ -292,12 +281,12 @@ const { app } = tosi({ app: todo })
 <p>Note the <code>toggle</code> method uses <code>for...of</code> (which yields proxied items) and
 <code>.value</code> for reads and writes. This ensures mutations trigger observers.
 Array callbacks like <code>find</code> and <code>forEach</code> pass raw items — see
-&quot;Proxied vs. Raw&quot; below.</p>
+&quot;Proxied vs. Raw&quot; above.</p>
 <p>No imports from tosijs needed in your business logic — though methods
 called through the proxy receive proxied <code>this</code>, so your code does need
 to be proxy-aware (using <code>.value</code> and <code>for...of</code>). You can test
 <code>todo.add()</code> and <code>todo.toggle()</code> with plain unit tests.</p>
-<h3>Deeply async by default</h3>
+<h3 id="deeply-async-by-default">Deeply async by default</h3>
 <p>You can set up bindings before data exists. When data arrives — from a fetch,
 a websocket, user input — the bindings just start working:</p>
 <pre><code>const { app } = tosi({ app: { posts: [] } })
@@ -323,7 +312,7 @@ No <code>bind: { value, binding }</code> needed for simple property mappings.</p
 until data arrives. No <code>TypeError: cannot read property of undefined</code>.
 The proxy intercepts the access; tosijs simply waits for the path to
 materialize before firing the first update.</p>
-<h3><code>observe()</code> is for side effects, not rendering</h3>
+<h3 id="observe-is-for-side-effects-not-rendering"><code>observe()</code> is for side effects, not rendering</h3>
 <p>In React you&#39;d use <code>useEffect</code> for everything. In tosijs, DOM rendering
 is handled by bindings. <code>observe()</code> is for <em>side effects</em> — things that
 aren&#39;t directly binding a value to a DOM property:</p>
@@ -338,10 +327,10 @@ observe(/app\.user\./, path =&gt; { /* any user field changed */ })
 </code></pre>
 <p>Toggle a body class. Fire an analytics event. Persist to localStorage.
 That&#39;s what <code>observe()</code> is for.</p>
-<h2>Components</h2>
+<h2 id="components">Components</h2>
 <p>tosijs includes a <code>Component</code> base class for web components. A few things
 to know:</p>
-<h3><code>content()</code> vs <code>render()</code></h3>
+<h3 id="content-vs-render"><code>content()</code> vs <code>render()</code></h3>
 <ul>
 <li><p><strong><code>content()</code> runs once.</strong> It builds the DOM during hydration and never
 re-runs. Set up bindings here — they handle all data-driven updates
@@ -382,7 +371,7 @@ should be bindings set up in <code>content()</code>.</p>
 variables, bindings can reach it directly. A component that stores
 <code>this.isExpanded = true</code> and manually propagates that to the DOM is
 doing extra work — store it in the proxy and let bindings handle it.</p>
-<h3>Light DOM is where the action is</h3>
+<h3 id="light-dom-is-where-the-action-is">Light DOM is where the action is</h3>
 <p>From reading most web component documentation, you&#39;d think shadow DOM was
 the only option. It isn&#39;t. tosijs components use <strong>light DOM by default</strong>,
 and this is a deliberate choice, not a limitation.</p>
@@ -398,7 +387,7 @@ external styling, and the usual DOM query APIs.</p>
 <li><strong>Lighter weight.</strong> No shadow root overhead per instance.</li>
 <li><strong>Slot composition.</strong> tosijs rewrites <code>&lt;slot&gt;</code> elements in light DOM components.</li>
 </ul>
-<h4>How <code>&lt;tosi-slot&gt;</code> works</h4>
+<h4 id="how-tosi-slot-works">How <code>&lt;tosi-slot&gt;</code> works</h4>
 <p>Native <code>&lt;slot&gt;</code> elements only work inside a shadow root. tosijs solves this
 by automatically replacing any <code>&lt;slot&gt;</code> in a light DOM component with an
 <code>&lt;tosi-slot&gt;</code> custom element that provides the same composition behavior:
@@ -465,7 +454,7 @@ and the dispatcher resolves the true origin via <code>composedPath()</code>).</p
 HTML body (CSS isolation from untrusted email styles) but keep
 everything else — sender, subject, timestamps — in Light DOM with
 normal bindings.</p>
-<h4>A shadow value-widget, bound like an <code>&lt;input&gt;</code></h4>
+<h4 id="a-shadow-value-widget-bound-like-an-input">A shadow value-widget, bound like an <code>&lt;input&gt;</code></h4>
 <p>Here&#39;s the canonical shape: a <code>shadowStyleSpec</code> component whose <code>value</code> is the
 binding surface. <code>render()</code> reflects <code>value</code> into the shadow DOM; a control
 inside the shadow root writes back to <code>this.value</code> (which emits <code>change</code>). From
@@ -561,8 +550,8 @@ test(&#39;a shadow value-widget round-trips through its value like an input&#39;
   expect(xin[&#39;knobDemo.level&#39;]).toBe(3)
 })
 </code></pre>
-<h2>Gotchas</h2>
-<h3>Observer callbacks receive paths, not values</h3>
+<h2 id="gotchas">Gotchas</h2>
+<h3 id="observer-callbacks-receive-paths-not-values">Observer callbacks receive paths, not values</h3>
 <p>Observer callbacks are called with the <em>path</em> that changed, not the new value:</p>
 <pre><code>app.prefs.darkMode.observe((path) =&gt; {
   // path is a string like &#39;app.prefs.darkMode&#39;
@@ -572,7 +561,7 @@ test(&#39;a shadow value-widget round-trips through its value like an input&#39;
 })
 </code></pre>
 <p>This is true for both the <code>.observe()</code> method and the standalone <code>observe()</code> function.</p>
-<h3>Boxed proxies are minted fresh per access — never key on their identity</h3>
+<h3 id="boxed-proxies-are-minted-fresh-per-access--never-key-on-their-identity">Boxed proxies are minted fresh per access — never key on their identity</h3>
 <p>Every time you read a proxied value out of state you get a <strong>new</strong> proxy object over
 the same underlying data. So identity comparisons and identity-keyed memoization do not
 work the way you might expect:</p>
@@ -586,7 +575,7 @@ example, <code>share()</code>&#39;s <code>restored</code> list is compared by pa
 <code>restored.includes(app.user)</code>. Relatedly, <code>.map()</code>/<code>.filter()</code>/<code>.forEach()</code> over an
 observed array hand you the <strong>raw</strong>, identity-stable items (mutating them is silent —
 <code>touch()</code> after); <code>for…of</code> and <code>.find()</code> give you proxies.</p>
-<h3><code>touch()</code> is the escape hatch</h3>
+<h3 id="touch-is-the-escape-hatch"><code>touch()</code> is the escape hatch</h3>
 <p>When you mutate state behind the proxy&#39;s back — from a raw reference,
 inside a <code>forEach</code>, after a bulk operation — call <code>touch()</code> to
 tell tosijs to propagate updates. Most of the time the proxy handles
@@ -610,7 +599,7 @@ for (let i = 0; i &lt; raw.length; i++) {
 }
 touch(app.items)  // single update for all mutations
 </code></pre>
-<h2>The React Comparison, In Short</h2>
+<h2 id="the-react-comparison-in-short">The React Comparison, In Short</h2>
 <table>
 <thead>
 <tr>
@@ -651,8 +640,8 @@ touch(app.items)  // single update for all mutations
 <td>individual binding updates</td>
 </tr>
 <tr>
-<td>~45kB gzipped</td>
-<td>~24kB gzipped (<code>tosijs/core</code>)</td>
+<td>a runtime plus a renderer</td>
+<td>one small library (<a href="/#entry-points">sizes</a>)</td>
 </tr>
 </tbody></table>
 <p>The fundamental difference: React asks &quot;what changed?&quot; after every state update
@@ -664,6 +653,7 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link current" href="../Building-Apps/" aria-current="page">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -695,20 +685,13 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -720,9 +703,16 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -734,6 +724,6 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

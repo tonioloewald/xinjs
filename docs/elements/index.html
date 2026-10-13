@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>Creating Elements — tosijs</title>
   <meta name="description" content="The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required." />
   <link rel="canonical" href="https://tosijs.net/elements/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Creating Elements — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Creating Elements — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Creating Elements</h1>
+<h1 id="creating-elements">Creating Elements</h1>
 <p><code>tosijs</code> provides <code>elements</code> for easily and efficiently generating DOM elements
 without using <code>innerHTML</code> or other unsafe methods.</p>
 <blockquote>
@@ -87,13 +74,13 @@ preview.append(
   )
 )
 </code></pre>
-<h2><code>ElementCreator</code> functions</h2>
+<h2 id="elementcreator-functions"><code>ElementCreator</code> functions</h2>
 <p><code>elements</code> is a proxy whose properties are element factory functions,
 referred to throughout this documentation as <code>elementCreator</code>s, functions
 of type <code>ElementCreator</code>. So <code>elements.div</code> is a function that returns a <code>&lt;div&gt;</code>
 element, <code>elements.foo</code> creates <foo> elements, and elements.fooBar creates
 <code>&lt;foo-bar&gt;</code> elements.</p>
-<h3>What a positional argument means</h3>
+<h3 id="what-a-positional-argument-means">What a positional argument means</h3>
 <p>Every argument is classified by what it <em>is</em>, and there is exactly one rule per
 kind:</p>
 <table>
@@ -187,12 +174,12 @@ preview.append(
   )
 )
 </code></pre>
-<h2>camelCase conversion</h2>
+<h2 id="camelcase-conversion">camelCase conversion</h2>
 <p>Attributes in camelCase, e.g. <code>dataInfo</code>, will be converted to kebab-case,
 so:</p>
 <pre><code>span({dataInfo: &#39;foo&#39;})        // produces &lt;span data-info=&quot;foo&quot;&gt;&lt;/span&gt;
 </code></pre>
-<h2>style properties</h2>
+<h2 id="style-properties">style properties</h2>
 <p><code>style</code> properties can be objects, and these are used to modify the
 element&#39;s <code>style</code> object (while a string property will just change the
 element&#39;s <code>style</code> attribute, eliminating previous changes).</p>
@@ -202,9 +189,9 @@ element&#39;s <code>style</code> attribute, eliminating previous changes).</p>
 not what was wanted.</p>
 <pre><code>span({style: {border: &#39;1px solid red&#39;}, {style: {fontSize: &#39;15px&#39;}}})
 </code></pre>
-<p>…produces <code>&lt;span style=&quot;border: 1px solid red; fon-size: 15px&gt;&lt;/span&gt;</code>
+<p>…produces <code>&lt;span style=&quot;border: 1px solid red; font-size: 15px&quot;&gt;&lt;/span&gt;</code>
 which is probably what was wanted.</p>
-<h2>class property</h2>
+<h2 id="class-property">class property</h2>
 <p>The <code>class</code> property accepts three forms:</p>
 <ul>
 <li><p><strong>a string</strong> — one or more space-separated class names are added:</p>
@@ -227,11 +214,11 @@ can add and remove classes conditionally in one place:</p>
 <code>false</code> (e.g. from <code>cond ? &#39;active&#39; : undefined</code> or <code>cond &amp;&amp; &#39;active&#39;</code>) — add no
 class, so conditional class expressions work without special-casing. Array
 entries are treated the same way (falsy entries are skipped).</p>
-<h2>event handlers</h2>
+<h2 id="event-handlers">event handlers</h2>
 <p>Properties starting with <code>on</code> (followed by an uppercase letter)
 will be converted into event-handlers, so <code>onMouseup</code> will be
 turned into a <code>mouseup</code> listener.</p>
-<h2>binding</h2>
+<h2 id="binding">binding</h2>
 <p>You can <a href="/bind/">bind</a> an element to state using <a href="/bindings/">bindings</a>
 using convenient properties, e.g.</p>
 <pre><code>import { elements } from &#39;tosijs&#39;
@@ -254,7 +241,7 @@ div({ apply(elt){
   bind(elt, &#39;app.prefs.isVisible&#39;, visibleBinding})
 } })
 </code></pre>
-<h2>event-handlers</h2>
+<h2 id="event-handlers-1">event-handlers</h2>
 <p>You can attach event handlers to elements using <code>on&lt;EventType&gt;</code>
 as syntax sugar, e.g.</p>
 <pre><code>import { elements } from &#39;tosijs&#39;
@@ -272,14 +259,21 @@ const aButton = button(&#39;click me&#39;)
 on(aButton, &#39;click&#39;, () =&gt; {
   alert(&#39;clicked!&#39;)
 })
-document.body.append(
-  aButton
-)
 </code></pre>
+<p>A handler can also be a <strong>proxy</strong> (or a path string) for a function in state:</p>
+<pre><code>const { app } = tosi({ app: { save() { … } } })
+button(&#39;Save&#39;, { onClick: app.save })
+</code></pre>
+<p>The element is given the <em>path</em> <code>app.save</code>, not the function, and the handler is
+looked up when the event fires. Replace <code>app.save</code> later and the button runs the
+new function.
+    document.body.append(
+      aButton
+    )</p>
 <p>There are some subtle but important differences between <code>on()</code> and
 <code>addEventListener</code> which are discussed in detail in the section on
 <a href="/bind/">bind</a>.</p>
-<h2>apply</h2>
+<h2 id="apply">apply</h2>
 <p>A property named <code>apply</code> is assumed to be a function that will be called
 on the element.</p>
 <pre><code>span({
@@ -287,10 +281,10 @@ on the element.</p>
 })
 </code></pre>
 <p>…produces <code>&lt;span&gt;foobar&lt;/span&gt;</code>.</p>
-<h2>fragment</h2>
+<h2 id="fragment">fragment</h2>
 <p><code>elements.fragment</code> is produces <code>DocumentFragment</code>s, but is otherwise
 just like other element factory functions.</p>
-<h2>svgElements</h2>
+<h2 id="svgelements">svgElements</h2>
 <p><code>svgElements</code> is a proxy just like <code>elements</code> but it produces <strong>SVG</strong> elements in
 the appropriate namespace.</p>
 <pre><code class="language-js">import { svgElements, tosi, xin } from &#39;tosijs&#39;
@@ -392,11 +386,11 @@ setInterval(() =&gt; {
   xin.hostiles = h
 }, 50)
 </code></pre>
-<h2>mathML</h2>
+<h2 id="mathml">mathML</h2>
 <p><code>mathML</code> is a proxy just like <code>elements</code> but it products <strong>MathML</strong> elements in
 the appropriate namespace.</p>
 <blockquote>
-<h3>Caution</h3>
+<h3 id="caution">Caution</h3>
 <p>Both <code>svgElements</code> and <code>mathML</code> are experimental and do not have anything like  the
 degree of testing behind them as <code>elements</code>. In particular, the properties of
 SVG elements (and possible MathML elements) are quite different from ordinary
@@ -407,7 +401,7 @@ not set the property directly, because the <code>viewBox</code> property is… w
 setting the attribute works.</p>
 <p>Again, use with caution!</p>
 </blockquote>
-<h2><code>bindParts()</code></h2>
+<h2 id="bindparts"><code>bindParts()</code></h2>
 <pre><code>bindParts(
   root: Element,
   bindingMap: Record&lt;string, ElementProps&gt;,
@@ -437,7 +431,7 @@ treatment — the same logic used by element creators — so <code>bind</code>, 
 <code>on*</code> handlers, <code>style</code>, <code>class</code>, <code>apply</code>, and proxy values all work.</p>
 <p>Elements are tracked via a <code>WeakSet</code> so calling <code>bindParts()</code> again on the same
 root is safe — already-bound elements are skipped.</p>
-<h3>Custom data attribute</h3>
+<h3 id="custom-data-attribute">Custom data attribute</h3>
 <p>Pass a third argument to use a different attribute name:</p>
 <pre><code>bindParts(root, map, &#39;role&#39;)  // matches data-role=&quot;...&quot;
 </code></pre>
@@ -446,6 +440,7 @@ root is safe — already-bound elements are skipped.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link current" href="../elements/" aria-current="page">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -477,20 +472,13 @@ root is safe — already-bound elements are skipped.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -502,9 +490,16 @@ root is safe — already-bound elements are skipped.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -516,6 +511,6 @@ root is safe — already-bound elements are skipped.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

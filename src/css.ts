@@ -212,7 +212,7 @@ on css (dimensional) variables by a percentage:
 
 > #### Notes
 >
-> `color()` and `color-mix()` are [now enjoy 91% support](https://caniuse.com/?search=color-mix) as of writing.
+> `color()` and `color-mix()` are [widely supported](https://caniuse.com/?search=color-mix) (Baseline since 2023).
 > See [color-mix()](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix) documentation.
 > Where they meet your needs, I'd suggest using them.
 >
@@ -226,7 +226,7 @@ on css (dimensional) variables by a percentage:
 >
 > **They ARE recomputed on theme change** — every registered computed color is
 > recalculated whenever an observant stylesheet regenerates (see
-> [StyleSheet](#stylesheetid-string-stylespec-xinstylesheet)), so a derived shade
+> [StyleSheet](#stylesheetid-string-stylespec-tosistylesheet-htmlstyleelement)), so a derived shade
 > tracks its source variable automatically. (This documentation previously said
 > the opposite; it was out of date.) Verified in-browser: changing `--brand`
 > from `#3366cc` to `#cc3366` moves `--brand_20b` from `rgba(41,82,163,1)` to

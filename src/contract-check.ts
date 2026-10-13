@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "shared zero-dependency contract validation: the structural JSON-Schema subset (type/enum/const) plus the pluggable full-schema validator, used by component value contracts and inline element contracts alike." }*/
+/*{ "parent": "One User Interface", "description": "shared zero-dependency contract validation: the structural JSON-Schema subset (type/enum/const) plus the pluggable full-schema validator, used by component value contracts and inline element contracts alike." }*/
 /*#
 # contract validation
 

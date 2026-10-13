@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>binding arrays — tosijs</title>
   <meta name="description" content="Reactive list bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
   <link rel="canonical" href="https://tosijs.net/list-binding/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="binding arrays — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="binding arrays — tosijs" />
@@ -43,13 +30,13 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>binding arrays</h1>
+<h1 id="binding-arrays">binding arrays</h1>
 <p>The most likely source of complexity and performance issues in applications is
 displaying large lists or grids of objects. <code>tosijs</code> provides robust support
 for handling this efficiently.</p>
-<h2><code>.tosi.listBinding()</code></h2>
+<h2 id="tosilistbinding"><code>.tosi.listBinding()</code></h2>
 <p>The simplest way to bind an array is with <code>.tosi.listBinding()</code> (or <code>.listBinding()</code>
 directly on a BoxedProxy). It takes a template builder function that receives
 the <code>elements</code> proxy and a placeholder item for bindings:</p>
@@ -69,7 +56,7 @@ preview.append(
   )
 )
 </code></pre>
-<h3>listBinding(templateBuilder, options?) =&gt; [ElementProps, HTMLTemplateElement]</h3>
+<h3 id="listbindingtemplatebuilder-options--elementprops-htmltemplateelement">listBinding(templateBuilder, options?) =&gt; [ElementProps, HTMLTemplateElement]</h3>
 <pre><code>type ListTemplateBuilder&lt;U = any&gt; = (elements: ElementsProxy, item: U) =&gt; HTMLElement
 </code></pre>
 <p>The template builder receives two arguments: the <code>elements</code> proxy (destructure
@@ -81,14 +68,14 @@ tuple. The props (containing <code>bindList</code>) are applied to the container
 <code>&lt;template&gt;</code> becomes a child; the <code>ListBinding</code> constructor then finds and removes
 the <code>&lt;template&gt;</code>, extracting its children as stamp templates. <strong>The <code>&lt;template&gt;</code>
 element never appears in the live DOM</strong> — it&#39;s consumed during initialization.</p>
-<h3>Options</h3>
+<h3 id="options">Options</h3>
 <p>Pass options as the second argument:</p>
 <pre><code>...items.tosi.listBinding(({div}, item) =&gt; div(item.name), {
   idPath: &#39;id&#39;,           // unique id field for surgical updates
   virtual: { height: 30 } // virtualize for large lists
 })
 </code></pre>
-<h3><code>bindList</code> + <code>template</code> — the low-level form</h3>
+<h3 id="bindlist--template--the-low-level-form"><code>bindList</code> + <code>template</code> — the low-level form</h3>
 <p><code>.tosi.listBinding()</code> is <strong>sugar over <code>bindList</code></strong>, and <strong>no <code>bind*</code> shortcut is
 deprecated</strong> — 1.9.0 deprecated some and 1.9.1 reversed it, because the shortcut
 is the only form that takes a path STRING (<code>disabled: &#39;app.busy&#39;</code> sets an
@@ -117,7 +104,7 @@ sibling and options, the other is two-way), so both stay.</p>
 <p>You rarely need this form — <code>.listBinding()</code> is more concise and type-safe.</p>
 <p>Even better, <code>templateBuilder()</code> is passed the <code>elements</code> proxy and a placeholder <code>BoxedProxy</code> of
 the array&#39;s type, supporting autocompletion of property names within the template.</p>
-<h3>id-paths</h3>
+<h3 id="id-paths">id-paths</h3>
 <p><strong>id-paths</strong> are a wrinkle in <code>xin</code>&#39;s paths specifically there to make list-binding more efficient.
 This is because in many cases you will encounter large arrays of objects, each with a unique id somewhere, e.g. it might be <code>id</code> or <code>uid</code>
 or even buried deeper…</p>
@@ -135,7 +122,7 @@ as <code>messages[id=1234abcd]</code>, and this will retrieve the item regardles
 <p>Specifying an <code>idPath</code> in a list-binding will allow the list to be more efficiently updated.
 It&#39;s the equivalent of a <code>key</code> in React, the difference being that it&#39;s optional and
 specifically intended to leverage pre-existing keys where available.</p>
-<h3>When to use idPath</h3>
+<h3 id="when-to-use-idpath">When to use idPath</h3>
 <p><strong>Always use <code>idPath</code> for arrays of objects</strong> unless you have a very simple case.</p>
 <p>Without <code>idPath</code>:</p>
 <ul>
@@ -156,7 +143,7 @@ specifically intended to leverage pre-existing keys where available.</p>
 path parser. Characters like <code>[</code>, <code>=</code>, and <code>.</code> are fine. If your ids
 could contain <code>]</code>, use a sanitized field or a separate numeric id.</p>
 </blockquote>
-<h3>Surgical Updates with id-paths</h3>
+<h3 id="surgical-updates-with-id-paths">Surgical Updates with id-paths</h3>
 <p>When you specify an <code>idPath</code>, something remarkable happens: changes to individual
 item properties trigger surgical DOM updates without re-rendering the entire list.</p>
 <p>Here&#39;s how it works:</p>
@@ -173,7 +160,7 @@ just direct, surgical updates.</p>
 <p><strong>To see this in action:</strong> Open your browser&#39;s DevTools, enable &quot;Paint flashing&quot;
 (in Chrome: DevTools → More tools → Rendering → Paint flashing), and watch the
 virtualized grid example below. Only the cells whose values actually change will flash.</p>
-<h2>Nested lists</h2>
+<h2 id="nested-lists">Nested lists</h2>
 <p>A list binding can live inside another list&#39;s item template — the inner list&#39;s
 relative path (<code>^.subs</code>) resolves against each outer item. This depends on
 cloning a <code>&lt;template&gt;</code> that itself contains a <code>&lt;template&gt;</code>, which only behaves
@@ -217,7 +204,7 @@ test(&#39;a nested list binding renders each inner item&#39;, async () =&gt; {
   expect(labels).toEqual([&#39;one&#39;, &#39;two&#39;, &#39;three&#39;])
 })
 </code></pre>
-<h2>Iterating and Searching Arrays</h2>
+<h2 id="iterating-and-searching-arrays">Iterating and Searching Arrays</h2>
 <p>Proxied arrays have specific semantics around which iteration patterns
 yield proxied vs. raw items — <code>for...of</code> and <code>find()</code> give you proxies
 (mutations are observed), while <code>forEach()</code>/<code>map()</code>/<code>filter()</code> pass raw
@@ -238,7 +225,7 @@ touch(&#39;path.to.list&#39;)
 of mutations the batched-touch form is dramatically cheaper. The path
 string is used here deliberately: you&#39;ve already bypassed the proxy, so
 you notify the registry by path rather than reaching for a proxy reference.</p>
-<h2>Virtualized Lists</h2>
+<h2 id="virtualized-lists">Virtualized Lists</h2>
 <p>The real power of list bindings comes from their support for virtualizing lists.</p>
 <p><strong>A list of more than 10 items must virtualize or say why.</strong> Without <code>virtual</code>
 or a <code>nonVirtualReason</code> (e.g. <code>{ nonVirtualReason: &#39;fixed list of 12 months&#39; }</code>)
@@ -349,7 +336,7 @@ preview.append(
   text-overflow: ellipsis;
 }
 </code></pre>
-<h3>Virtualized Grids</h3>
+<h3 id="virtualized-grids">Virtualized Grids</h3>
 <p>You can virtualize a grid by styling the padding elements (with class <code>.virtual-list-padding</code>)
 to have the correct column span. (You can also just specify a fixed <code>width</code> for your list.)</p>
 <p>This example creates 2000 cells with random text colors, then updates 10% of them
@@ -469,7 +456,7 @@ preview.append(
   background: #0001;
 }
 </code></pre>
-<h2>Multi-Column Grids with <code>itemsPerRow</code></h2>
+<h2 id="multi-column-grids-with-itemsperrow">Multi-Column Grids with <code>itemsPerRow</code></h2>
 <p>When <code>itemsPerRow</code> is set, the template builder is called N times per array item,
 with a <code>columnIndex</code> argument (0..N-1). This produces a flat CSS grid where every
 cell is a direct child of the container — which means <code>position: sticky</code> works
@@ -481,7 +468,7 @@ naturally for pinned rows and columns.</p>
 <li><code>display: grid</code> with <code>grid-template-columns: repeat(var(--tosi-columns), 1fr)</code></li>
 </ul>
 <p>Override <code>grid-template-columns</code> in your own CSS to set custom column widths.</p>
-<h3>Pinned Header and Footer Rows</h3>
+<h3 id="pinned-header-and-footer-rows">Pinned Header and Footer Rows</h3>
 <p>Any elements before the template in the container are treated as headers;
 any after it are footers. Both are preserved across list updates, and
 because they&#39;re siblings of the data cells in the same grid container,
@@ -629,7 +616,7 @@ preview.append(grid)
 .sg-edge-right { border-right: 2px solid #ccc; }
 .sg-edge-left  { border-left: 2px solid #ccc; }
 </code></pre>
-<h2>Variable-Height Items</h2>
+<h2 id="variable-height-items">Variable-Height Items</h2>
 <p>If your list items have varying heights, you can use <code>minHeight</code> instead of
 relying solely on <code>height</code>. When <code>minHeight</code> is specified, the list uses
 scroll-fraction interpolation: the total scroll area is estimated from
@@ -740,14 +727,14 @@ preview.append(
   display: none;
 }
 </code></pre>
-<h2>Filtered Lists</h2>
+<h2 id="filtered-lists">Filtered Lists</h2>
 <p>It&#39;s also extremely common to want to filter a rendered list, and <code>tosijs</code>
 provides both simple and powerful methods for doing this.</p>
-<h3><code>hiddenProp</code> and <code>visibleProp</code></h3>
+<h3 id="hiddenprop-and-visibleprop"><code>hiddenProp</code> and <code>visibleProp</code></h3>
 <p><code>hiddenProp</code> and <code>visibleProp</code> allow you to use a property to hide or show array
 elements (and they can be <code>symbol</code> values if you want to avoid &quot;polluting&quot;
 your data, e.g. for round-tripping to a database.)</p>
-<h3><code>filter</code> and <code>needle</code></h3>
+<h3 id="filter-and-needle"><code>filter</code> and <code>needle</code></h3>
 <pre><code>...filterListExample.array.tosi.listBinding(({ div }, item) =&gt; div(item.name), {
   idPath: &#39;name&#39;,
   virtual: {
@@ -859,7 +846,7 @@ preview.append(
   )
 )
 </code></pre>
-<h2>List Utilities</h2>
+<h2 id="list-utilities">List Utilities</h2>
 <p>Suppose you have used a list binding to bind an array of objects
 to a <code>&lt;ul&gt;</code>. So the DOM hierarchy looks something like this:</p>
 <pre><code>&lt;ul&gt;  &lt;-- array is bound to this element
@@ -877,18 +864,18 @@ to a <code>&lt;ul&gt;</code>. So the DOM hierarchy looks something like this:</p
   ...
 &lt;/ul&gt;
 </code></pre>
-<h3><code>getListBinding(element: Element): ListBinding | undefined</code></h3>
+<h3 id="getlistbindingelement-element-listbinding--undefined"><code>getListBinding(element: Element): ListBinding | undefined</code></h3>
 <p>This gets the ListBinding object managing the bound list contained on the provided
 element (if any). In the example above, you could call it on the <code>&lt;ul&gt;</code> and you&#39;d
 get back a <code>ListBinding</code> instance that contains all kinds of juicy information.</p>
-<h3><code>getListItem(element: Element): any</code></h3>
+<h3 id="getlistitemelement-element-any"><code>getListItem(element: Element): any</code></h3>
 <p>Gets you the array item bound to the list instance containing the element (if any).</p>
 <p>You could call this on an <code>&lt;li&gt;</code> element or a any element inside it and get back
 the array item bound to the <code>&lt;li&gt;</code>.</p>
-<h3><code>getListInstance(element: Element): { element: Element, item: any } | undefined</code></h3>
+<h3 id="getlistinstanceelement-element--element-element-item-any---undefined"><code>getListInstance(element: Element): { element: Element, item: any } | undefined</code></h3>
 <p>This returns both the root element bound to the array item, and the array item itself.</p>
 <p>Again, you could call this on an <code>&lt;li&gt;</code> or its contents.</p>
-<h3><code>deleteListItem(element: Element): boolean</code></h3>
+<h3 id="deletelistitemelement-element-boolean"><code>deleteListItem(element: Element): boolean</code></h3>
 <p>If the element is part of a list instance bound to an array, this splices bound item out of the array
 (and updates the rendered list).</p>
 <p>If you call this on an <code>&lt;li&gt;</code> or something inside it, this will splice the bound
@@ -897,7 +884,7 @@ array item out of the array and then triggers an update the bound list.</p>
 <p><code>deleteListItem()</code> requires that the list binding specifies
 a valid <code>idPath</code>, or it will throw an error (and fail).</p>
 </blockquote>
-<h3><code>scrollListItemIntoView(element: Element, item: any, options?): boolean</code></h3>
+<h3 id="scrolllistitemintoviewelement-element-item-any-options-boolean"><code>scrollListItemIntoView(element: Element, item: any, options?): boolean</code></h3>
 <p>Scrolls a bound array item into view within its list container. This is
 especially useful for virtualized lists where the item&#39;s DOM element may
 not exist yet.</p>
@@ -918,7 +905,7 @@ For <strong>non-virtual lists</strong>, the item&#39;s DOM element is found and
 <p><strong>Future:</strong> a promise-based API using the <code>scrollend</code> event could notify
 callers when the scroll completes and the target item is rendered.</p>
 </blockquote>
-<h2>List Operations on Proxied Arrays</h2>
+<h2 id="list-operations-on-proxied-arrays">List Operations on Proxied Arrays</h2>
 <p>In addition to the utility functions above, proxied arrays have <code>listFind</code>,
 <code>listUpdate</code>, and <code>listRemove</code> methods that use the same selector pattern
 as <code>listBinding</code>. These are documented in detail under <a href="/xin/">tosi</a>, but
@@ -940,7 +927,7 @@ the existing object property by property through the proxy, so the
 <code>itemToElement</code> WeakMap still points to the same DOM element. Only changed
 properties fire observers, producing surgical DOM updates with no element
 teardown or recreation.</p>
-<h2>Window Scroll Container (Experimental)</h2>
+<h2 id="window-scroll-container-experimental">Window Scroll Container (Experimental)</h2>
 <p>By default, virtualized lists scroll within their container element. For infinite-scroll
 feeds or full-page lists, you can use the window as the scroll container instead by
 setting <code>scrollContainer: &#39;window&#39;</code> in the virtual options:</p>
@@ -965,7 +952,7 @@ calculates which items are visible by comparing the element&#39;s position (via
 <p><strong>Important</strong>: The list element should not be inside a separately scrollable container
 when using window scroll. The element can be positioned anywhere on the page - the
 virtualization will correctly account for content above the list.</p>
-<h2>Templates and Namespaced Elements</h2>
+<h2 id="templates-and-namespaced-elements">Templates and Namespaced Elements</h2>
 <p>List bindings use a <strong>template</strong> — the first child of the bound container — to stamp out
 repeated items. The template can be either:</p>
 <ul>
@@ -975,7 +962,7 @@ trigger premature bindings.</li>
 This is necessary for <strong>SVG</strong> and <strong>MathML</strong> containers, since <code>&lt;template&gt;</code> is an
 HTML element and invalid inside namespaced contexts.</li>
 </ul>
-<h3>Relative bindings on templates</h3>
+<h3 id="relative-bindings-on-templates">Relative bindings on templates</h3>
 <p>Bindings that start with <code>^</code> (relative to the list item) cannot resolve until the
 template is cloned into a list instance. If <code>touchElement</code> encounters an unresolved
 <code>^</code> binding:</p>
@@ -992,6 +979,7 @@ in a list instance.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -1023,20 +1011,13 @@ in a list instance.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -1048,9 +1029,16 @@ in a list instance.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -1062,6 +1050,6 @@ in a list instance.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

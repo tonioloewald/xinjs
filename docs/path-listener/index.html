@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>path-listener — tosijs</title>
   <meta name="description" content="The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system." />
   <link rel="canonical" href="https://tosijs.net/path-listener/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="path-listener — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="path-listener — tosijs" />
@@ -43,13 +30,13 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>path-listener</h1>
+<h1 id="path-listener">path-listener</h1>
 <p><code>path-listener</code> implements the <code>tosijs</code> observer model. Although these events
 are exported from <code>tosijs</code> they shouldn&#39;t need to be used very often. Mostly
 they&#39;re used to manage state.</p>
-<h2><code>touch(path: string)</code> and <code>.touch()</code></h2>
+<h2 id="touchpath-string-and-touch"><code>touch(path: string)</code> and <code>.touch()</code></h2>
 <p>This is used to inform <code>xin</code> that a value at a path has changed. Remember that
 xin simply wraps an object, and if you change the object directly, <code>xin</code> won&#39;t
 necessarily know about it.</p>
@@ -68,13 +55,13 @@ on any proxied value:</p>
 app.user.touch()        // force update for the whole object
 app.items[2].touch()    // force update for a list item
 </code></pre>
-<h3>Id-path synthesis</h3>
+<h3 id="id-path-synthesis">Id-path synthesis</h3>
 <p>When you touch a path that contains an array index (e.g. <code>items[2]</code> or
 <code>items[2].name</code>), <code>touch()</code> automatically synthesizes the equivalent id-path
 touches (e.g. <code>items[id=abc]</code> or <code>items[id=abc].name</code>). This means that
 <code>.touch()</code> on list items correctly updates DOM elements bound via <code>idPath</code>,
 even when you&#39;ve mutated the underlying data behind the proxy&#39;s back.</p>
-<h2><code>observe()</code> and <code>unobserve()</code></h2>
+<h2 id="observe-and-unobserve"><code>observe()</code> and <code>unobserve()</code></h2>
 <pre><code>const listener = observe(
   path: string | RegExp | (path: string) =&gt; boolean,
   (changedPath: string) =&gt; {
@@ -89,7 +76,7 @@ unobserve(listener);
 be passed the path that changed and you can do whatever you like. It returns
 a reference to the listener to allow you to dispose of it later.</p>
 <p><code>unobserve(listener)</code> removes the listener.</p>
-<h3>If the callback updates the DOM, you almost certainly want <code>bind</code> instead</h3>
+<h3 id="if-the-callback-updates-the-dom-you-almost-certainly-want-bind-instead">If the callback updates the DOM, you almost certainly want <code>bind</code> instead</h3>
 <p>This is the single commonest way to write more code than you need in tosijs,
 and the cost is not the extra lines — it is that <strong>the element becomes
 invisible to the agent surface.</strong></p>
@@ -113,7 +100,7 @@ storage, sending an analytics event, kicking off a fetch, driving a canvas or a
 WebGL scene. Reach for it there, and for anything the DOM is not the output of.</p>
 <p>If you are calling <code>touch()</code> often, that is usually the same signal from the
 other end: bindings would be doing that work.</p>
-<h3>Which path does the callback receive?</h3>
+<h3 id="which-path-does-the-callback-receive">Which path does the callback receive?</h3>
 <p><strong>The path that was TOUCHED — as specific as the write was — not the path you
 observed.</strong> An observer on a root therefore sees different spellings depending
 on what happened, and that is the rule rather than an inconsistency:</p>
@@ -139,14 +126,14 @@ binding is &quot;two-way&quot; (i.e. provides a <code>fromDOM</code> callback) t
 <code>change</code> event that hits that element will update the value at the bound
 path.</p>
 </blockquote>
-<h2><code>async updates()</code></h2>
+<h2 id="async-updates"><code>async updates()</code></h2>
 <p>You can <code>await updates()</code> or use <code>updates().then(…)</code> to execute code
 after any changes have been rendered to the DOM. Typically, you shouldn&#39;t
 have to mess with this, but sometimes—for example—you might need to know
 how large a rendered UI element is to adjust something else.</p>
 <p>It&#39;s also used a lot in unit tests. After you perform some logic, does
 it appear correctly in the UI?</p>
-<h3>⚠️ Drain after <code>tosi()</code> before you observe</h3>
+<h3 id="️-drain-after-tosi-before-you-observe">⚠️ Drain after <code>tosi()</code> before you observe</h3>
 <p>Registering state <strong>queues a touch on the root path</strong>, and <code>touch()</code> is
 async-batched — so if you observe immediately after <code>tosi()</code>, that pending
 notification is still in flight and lands on your callback:</p>
@@ -173,6 +160,7 @@ specific and stable enough to look like a real finding.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -204,20 +192,13 @@ specific and stable enough to look like a real finding.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -229,9 +210,16 @@ specific and stable enough to look like a real finding.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -243,6 +231,6 @@ specific and stable enough to look like a real finding.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

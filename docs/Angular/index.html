@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>Angular and tosijs</title>
   <meta name="description" content="Use tosijs state in Angular with tosiSignal — a real, writable Angular signal bound to a path, zoneless-first, no NgRx/RxJS boilerplate — and treat Angular as an off-ramp." />
   <link rel="canonical" href="https://tosijs.net/Angular/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Angular and tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Angular and tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Angular and tosijs</h1>
+<h1 id="angular-and-tosijs">Angular and tosijs</h1>
 <!--{ "pin": "bottom", "order": 310, "description": "Use tosijs state in Angular with tosiSignal — a real, writable Angular signal bound to a path, zoneless-first, no NgRx/RxJS boilerplate — and treat Angular as an off-ramp." }-->
 
 <p><code>tosijs</code> is just as relevant to Angular developers. The tiny
@@ -56,27 +43,27 @@ zones, no <code>NgZone.run</code>, no RxJS plumbing, no NgRx boilerplate — and
 from <em>outside</em> the Angular tree: a timer, a socket handler, the browser console, code
 that&#39;s never heard of Angular. If you want the off-ramp, your state and logic live in
 <a href="/">tosijs</a> as plain observable objects, and Angular becomes just one way of viewing them.</p>
-<h2><code>tosiSignal</code> — a real Angular signal bound to a path</h2>
-<pre><code class="language-typescript">import { Component } from &#39;@angular/core&#39;
-import { tosi } from &#39;tosijs&#39;
-import { tosiSignal } from &#39;ngx-tosijs&#39;
+<h2 id="tosisignal--a-real-angular-signal-bound-to-a-path"><code>tosiSignal</code> — a real Angular signal bound to a path</h2>
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span> Component <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/core'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> tosi <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tosijs'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> tosiSignal <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'ngx-tosijs'</span>
 
-const { clock } = tosi({
-  clock: { time: new Date().toLocaleTimeString() },
-})
+<span class="token keyword">const</span> <span class="token punctuation">{</span> clock <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">tosi</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  clock<span class="token operator">:</span> <span class="token punctuation">{</span> time<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toLocaleTimeString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
 
-setInterval(() =&gt; {
-  clock.time = new Date().toLocaleTimeString()
-}, 1000)
+<span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  clock<span class="token punctuation">.</span>time <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toLocaleTimeString</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span>
 
-@Component({
-  selector: &#39;app-clock&#39;,
-  standalone: true,
-  template: `&lt;div&gt;{{ time() }}&lt;/div&gt;`,
-})
-export class ClockComponent {
-  time = tosiSignal&lt;string&gt;(&#39;clock.time&#39;)
-}
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Component</span></span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token operator">:</span> <span class="token string">'app-clock'</span><span class="token punctuation">,</span>
+  standalone<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  template<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">&lt;div>{{ time() }}&lt;/div></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ClockComponent</span> <span class="token punctuation">{</span>
+  time <span class="token operator">=</span> <span class="token generic-function"><span class="token function">tosiSignal</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token string">'clock.time'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
 </code></pre>
 <p>The interval updates state <em>outside</em> Angular — no zone, no <code>markForCheck</code>, no
 <code>ChangeDetectorRef</code> — and the view follows, because <code>tosiSignal</code> <strong>is</strong> a real Angular
@@ -86,38 +73,38 @@ via <code>DestroyRef</code> (or pass <code>{ injector }</code>, or <code>{ manua
 <code>.destroy()</code> yourself).</p>
 <p>It works <strong>zoneless</strong> (recommended — signals notify Angular&#39;s scheduler directly) and in
 Zone.js apps alike.</p>
-<h2>Zone.js apps: <code>provideTosi()</code></h2>
+<h2 id="zonejs-apps-providetosi">Zone.js apps: <code>provideTosi()</code></h2>
 <p>For zoned apps that read tosijs proxies <em>directly</em> in templates (dirty checking re-reads
 them every pass), <code>provideTosi()</code> bridges tosijs flushes into the zone so outside-Angular
 mutations trigger change detection — coalesced to one zone entry per flush. It&#39;s
 unnecessary (and harmless) in zoneless apps using <code>tosiSignal</code>.</p>
-<pre><code class="language-typescript">import { bootstrapApplication } from &#39;@angular/platform-browser&#39;
-import { provideTosi } from &#39;ngx-tosijs&#39;
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span> bootstrapApplication <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/platform-browser'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> provideTosi <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'ngx-tosijs'</span>
 
-bootstrapApplication(AppComponent, {
-  providers: [provideTosi()],
-})
+<span class="token function">bootstrapApplication</span><span class="token punctuation">(</span>AppComponent<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  providers<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token function">provideTosi</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
 </code></pre>
-<h2>Web components in Angular templates</h2>
+<h2 id="web-components-in-angular-templates">Web components in Angular templates</h2>
 <p>Angular hosts custom elements natively — add <code>CUSTOM_ELEMENTS_SCHEMA</code> and drop in web
 components (<a href="https://ui.tosijs.net">tosijs-ui</a>, or your own via tosijs <code>Component</code>), no
 wrappers. They bind to the same paths as your Angular views, and both stay in sync
 automatically because neither owns the state.</p>
-<h2>Typed paths, persistence, DevTools</h2>
+<h2 id="typed-paths-persistence-devtools">Typed paths, persistence, DevTools</h2>
 <p>Framework-free — identical to react-tosijs:</p>
-<pre><code class="language-typescript">import { typedTosi, persist, connectDevTools } from &#39;ngx-tosijs&#39;
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span> typedTosi<span class="token punctuation">,</span> persist<span class="token punctuation">,</span> connectDevTools <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'ngx-tosijs'</span>
 
-type AppState = {
-  app: { count: number; todos: { id: string; text: string }[] }
-}
-const { tosiSignal } = typedTosi&lt;AppState&gt;()
-const text = tosiSignal(&#39;app.todos[0].text&#39;) // TosiSignal&lt;string | undefined&gt;
-const oops = tosiSignal(&#39;app.cuont&#39;) // compile error
+<span class="token keyword">type</span> <span class="token class-name">AppState</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  app<span class="token operator">:</span> <span class="token punctuation">{</span> count<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span> todos<span class="token operator">:</span> <span class="token punctuation">{</span> id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span> text<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">}</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> tosiSignal <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token generic-function"><span class="token function">typedTosi</span><span class="token generic class-name"><span class="token operator">&lt;</span>AppState<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> text <span class="token operator">=</span> <span class="token function">tosiSignal</span><span class="token punctuation">(</span><span class="token string">'app.todos[0].text'</span><span class="token punctuation">)</span> <span class="token comment">// TosiSignal&lt;string | undefined></span>
+<span class="token keyword">const</span> oops <span class="token operator">=</span> <span class="token function">tosiSignal</span><span class="token punctuation">(</span><span class="token string">'app.cuont'</span><span class="token punctuation">)</span> <span class="token comment">// compile error</span>
 
-persist(&#39;app.todos&#39;) // localStorage, coalesced writes
-connectDevTools({ roots: [&#39;app&#39;] }) // Redux DevTools tap
+<span class="token function">persist</span><span class="token punctuation">(</span><span class="token string">'app.todos'</span><span class="token punctuation">)</span> <span class="token comment">// localStorage, coalesced writes</span>
+<span class="token function">connectDevTools</span><span class="token punctuation">(</span><span class="token punctuation">{</span> roots<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'app'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token comment">// Redux DevTools tap</span>
 </code></pre>
-<h2>The off-ramp, step by step</h2>
+<h2 id="the-off-ramp-step-by-step">The off-ramp, step by step</h2>
 <p>Because your state lives in tosijs, moving off Angular is incremental, never a big-bang
 rewrite:</p>
 <ol>
@@ -139,6 +126,7 @@ by side, bound to the same state, neither framework aware of the other.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -170,20 +158,13 @@ by side, bound to the same state, neither framework aware of the other.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -195,9 +176,16 @@ by side, bound to the same state, neither framework aware of the other.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -209,6 +197,6 @@ by side, bound to the same state, neither framework aware of the other.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

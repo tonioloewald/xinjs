@@ -21,9 +21,14 @@ own [Custom Elements](/component/).
 
 ## value
 
-The `value` binding syncs state from `xin` to the bound element's `value` property. In
-general this should only be used for binding simple things, like `<input>` and `<textarea>`
-elements.
+The `value` binding syncs state with the bound element's value, in both directions. It is
+what `bindValue` uses. It is meant for form controls: `<input>`, `<textarea>`, `<select>`
+and components that implement `value`.
+
+It reads and writes the property that carries the control's value, which is not always
+`value`: a **checkbox** is bound through `checked` (a boolean), and a **radio** group
+through whichever radio is checked (its `value`). So `input({ type: 'checkbox',
+bindValue: app.done })` binds a boolean.
 
 ## text
 

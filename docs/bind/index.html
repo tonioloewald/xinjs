@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>Binding — tosijs</title>
   <meta name="description" content="bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates." />
   <link rel="canonical" href="https://tosijs.net/bind/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Binding — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Binding — tosijs" />
@@ -43,16 +30,16 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Binding</h1>
+<h1 id="binding">Binding</h1>
 <p><code>bind()</code> lets you synchronize data / application state to the user-interface reliably,
 efficiently, and with a minimum of code.</p>
 <blockquote>
 <p>The design goal of <code>bind</code> is to eliminate most of the code used to sync state to and
 from the UI (DOM elements) making code simpler, faster, and more reliable.</p>
 </blockquote>
-<h2>An Aside on Reactive Programming vs. the Observer Model</h2>
+<h2 id="an-aside-on-reactive-programming-vs-the-observer-model">An Aside on Reactive Programming vs. the Observer Model</h2>
 <p>A good deal of front-end code deals with keeping the application&#39;s
 state synchronized with the user-interface. One approach to this problem
 is <a href="https://en.wikipedia.org/wiki/Reactive_programming">Reactive Programming</a>
@@ -66,7 +53,7 @@ where <strong>path strings</strong> serve as a level of <em>indirection</em> to 
 This allows data to be &quot;observed&quot; before it exists, which in particular <em>decouples</em> the setup
 of the user interface from the initialization of data and allows user interfaces
 built with <code>tosijs</code> to be <em>deeply asynchronous</em>.</p>
-<h2><code>bind()</code></h2>
+<h2 id="bind"><code>bind()</code></h2>
 <pre><code>bind&lt;T = Element&gt;(
   element: T,
   what: TosiTouchableType,
@@ -171,7 +158,7 @@ based on whether the bound value is neither &quot;falsy&quot; nor an empty <code
 }
 bind(listElement, &#39;app.bigList&#39;, visibility)
 </code></pre>
-<h2><code>on()</code></h2>
+<h2 id="on"><code>on()</code></h2>
 <pre><code>on(element: Element, eventType: string, handler: TosiEventHandler): VoidFunction
 
 export type TosiEventHandler&lt;T extends Event = Event, E extends Element = Element&gt; =
@@ -264,14 +251,14 @@ test(&#39;delegation crosses the shadow boundary to a light-DOM ancestor&#39;, (
   expect(heard).toBe(1)
 })
 </code></pre>
-<h2><code>touchElement()</code></h2>
+<h2 id="touchelement"><code>touchElement()</code></h2>
 <pre><code>touchElement(element: Element, changedPath?: string)
 </code></pre>
 <p>This is a low-level function for <em>immediately</em> updating a bound element. If you specifically
 want to force a render of an element (versus anything bound to a path), simply call
 <code>touchElement(element)</code>. Specifying a <code>changedPath</code> will only trigger bindings bound
 to paths staring with the provided path.</p>
-<h2>Binding before insertion</h2>
+<h2 id="binding-before-insertion">Binding before insertion</h2>
 <p>You can bind an element that isn&#39;t in the document yet — build a view offscreen,
 cache a dialog, detach and re-attach a panel — and it hydrates when it lands. A
 <code>MutationObserver</code> on <code>document.body</code> catches the insertion and renders every
@@ -302,6 +289,7 @@ test(&#39;an element bound while detached hydrates when it is inserted&#39;, asy
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -333,20 +321,13 @@ test(&#39;an element bound while detached hydrates when it is inserted&#39;, asy
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -358,9 +339,16 @@ test(&#39;an element bound while detached hydrates when it is inserted&#39;, asy
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -372,6 +360,6 @@ test(&#39;an element bound while detached hydrates when it is inserted&#39;, asy
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

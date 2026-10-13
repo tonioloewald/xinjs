@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,28 +12,27 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
-  <title>Migrating from xinjs to tosijs</title>
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
+  <title>Upgrading and Migration — tosijs</title>
   <meta name="description" content="Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." />
   <link rel="canonical" href="https://tosijs.net/Migration/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Upgrading and Migration — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
-  <meta property="og:title" content="Migrating from xinjs to tosijs" />
+  <meta property="og:title" content="Upgrading and Migration — tosijs" />
   <meta property="og:description" content="Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." />
   <meta property="og:url" content="https://tosijs.net/Migration/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Migrating from xinjs to tosijs","description":"Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.","url":"https://tosijs.net/Migration/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Upgrading and Migration","description":"Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.","url":"https://tosijs.net/Migration/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Migrating from <code>xinjs</code> to <code>tosijs</code></h1>
+<h1 id="upgrading-and-migration">Upgrading and Migration</h1>
 <!--{ "pin": "bottom", "description": "Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." }-->
 
 <p>In a nutshell:</p>
@@ -59,11 +46,11 @@ should be the module names.</p>
 <blockquote>
 <p>Please <a href="https://discord.gg/ramJ9rgky5">let me know</a> if there are any issues.</p>
 </blockquote>
-<h1>Upgrading to 1.10.2</h1>
+<h1 id="upgrading-to-1102">Upgrading to 1.10.2</h1>
 <p><strong>Nothing you wrote needs to change.</strong> No API is removed or renamed. Two
 behaviours move, both narrowing what the <em>agent surface</em> discloses, and one is
 worth acting on outside your code.</p>
-<h2>If you use the agent surface: rotate tokens in links</h2>
+<h2 id="if-you-use-the-agent-surface-rotate-tokens-in-links">If you use the agent surface: rotate tokens in links</h2>
 <p><code>describe()</code> published an element&#39;s <code>href</code>, <code>placeholder</code>, <code>title</code>-derived name
 and a checkbox&#39;s <code>checked</code> state <strong>past <code>data-tosi-secret</code></strong> — in cleartext,
 beside a record already stamped <code>secret: true</code>. This affects <strong>1.8.0 through
@@ -74,23 +61,23 @@ protect the destination.</p>
 posture, so if you enabled the surface on a page with token-bearing links
 (password reset, magic links), treat those tokens as disclosed to anything that
 called <code>describe()</code> and rotate them. <code>read()</code> was never affected.</p>
-<h2>If you audit: five verdicts changed</h2>
+<h2 id="if-you-audit-five-verdicts-changed">If you audit: five verdicts changed</h2>
 <p><code>auditAccessibility()</code> reports differently for the same input — stricter on
 icon-only and square links (an <code>aria-label</code> never sized a box), looser where
 evidence was forged or absent. The full list is in the CHANGELOG. If you
 snapshot audit output, re-baseline it.</p>
-<h2>If you rely on <code>describe()</code> output shape</h2>
+<h2 id="if-you-rely-on-describe-output-shape">If you rely on <code>describe()</code> output shape</h2>
 <p>Records for secret-marked elements no longer carry <code>href</code>, <code>placeholder</code>,
 <code>title</code>-as-<code>label</code>, <code>aria-description</code> or <code>checked</code>. <code>aria-label</code> survives —
 names survive secrecy, content and live state do not. A consumer that read
 <code>record.href</code> unconditionally should now expect it to be absent on those
 records.</p>
-<h2>Nice surprise: the package is 44% smaller, and ships its source</h2>
+<h2 id="nice-surprise-the-package-is-44-smaller-and-ships-its-source">Nice surprise: the package is 44% smaller, and ships its source</h2>
 <p>4.51 MB → 2.51 MB unpacked. Source maps stopped inlining <code>sourcesContent</code> and
 <code>src/</code> ships once instead, so devtools now opens the real <code>src/*.ts</code> from
 <code>node_modules</code> — comments and design rationale included — rather than a copy
 embedded in a map file. Nothing to do; maps keep working.</p>
-<h2>Known limitation</h2>
+<h2 id="known-limitation">Known limitation</h2>
 <p>Secrecy is discovered by finding a secret control and locating the binding that
 feeds it. Three shapes are not yet discovered — a custom element carrying
 <code>data-tosi-secret</code> inside a bound <code>&lt;form&gt;</code>, a shadow component holding a
@@ -98,68 +85,68 @@ password inside a bound <code>&lt;form&gt;</code>, and a light-DOM container two
 up with no <code>&lt;form&gt;</code> between. <strong>Marking the control itself, or its immediate
 wrapper, works in all of them</strong> and is the reliable form. Tracked as
 <a href="https://github.com/tonioloewald/tosijs/issues/41">tosijs#41</a>.</p>
-<h1>Upgrading to 1.10.0</h1>
+<h1 id="upgrading-to-1100">Upgrading to 1.10.0</h1>
 <p><strong>Type-only. Nothing changes at runtime</strong>, and if you do not write components
 in TypeScript there is nothing to do.</p>
 <p><code>Component</code> declared <code>[key: string]: any</code>. An index signature on a class
 propagates to every subclass, so TypeScript accepted <strong>any property or method
 name at all</strong> on every component anyone has ever written:</p>
-<pre><code class="language-typescript">class Thing extends Component {
-  greet() {
-    this.definitelyNotAMethod() // compiled clean
-    const n: number = this.alsoNotAThing // compiled clean, typed as number
-  }
-}
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">class</span> <span class="token class-name">Thing</span> <span class="token keyword">extends</span> <span class="token class-name">Component</span> <span class="token punctuation">{</span>
+  <span class="token function">greet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">definitelyNotAMethod</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// compiled clean</span>
+    <span class="token keyword">const</span> n<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>alsoNotAThing <span class="token comment">// compiled clean, typed as number</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
 <p>Removing it means <code>tsc</code> now reports real errors in your components. Expect
 them; they were always there.</p>
-<h2>The migration: move <code>initAttributes</code> into the class header</h2>
+<h2 id="the-migration-move-initattributes-into-the-class-header">The migration: move <code>initAttributes</code> into the class header</h2>
 <p>Attribute keys become <em>instance</em> properties at hydration, and TypeScript cannot
 derive an instance type from a static declared in the same class — which is why
 the index signature existed. Passing the map as a <strong>value</strong> lets inference do
 the work:</p>
-<pre><code class="language-typescript">// before — `this.month` was `any`
-export class TosiMonth extends Component&lt;MonthParts&gt; {
-  static initAttributes = { month: NaN, year: NaN, selectable: false }
-  render() {
-    this.month + 1
-  }
-}
+<pre><code class="language-typescript" data-highlighted><span class="token comment">// before — `this.month` was `any`</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TosiMonth</span> <span class="token keyword">extends</span> <span class="token class-name">Component<span class="token operator">&lt;</span>MonthParts<span class="token operator">></span></span> <span class="token punctuation">{</span>
+  <span class="token keyword">static</span> initAttributes <span class="token operator">=</span> <span class="token punctuation">{</span> month<span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span> year<span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span> selectable<span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span>
+  <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>month <span class="token operator">+</span> <span class="token number">1</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 
-// after — `this.month` is a number
-import { withAttributes } from &#39;tosijs&#39;
+<span class="token comment">// after — `this.month` is a number</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> withAttributes <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tosijs'</span>
 
-export class TosiMonth extends withAttributes({
-  month: NaN,
-  year: NaN,
-  selectable: false,
-})&lt;MonthParts&gt; {
-  render() {
-    this.month + 1
-  }
-}
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TosiMonth</span> <span class="token keyword">extends</span> <span class="token class-name">withAttributes</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  month<span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span>
+  year<span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span>
+  selectable<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token operator">&lt;</span>MonthParts<span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token function">render</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>month <span class="token operator">+</span> <span class="token number">1</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
 <p>It is a <strong>move</strong>, not an addition — the attribute map is the same object, just
 declared where inference can reach it. In tosijs-ui this took one component
 from 44 errors to 0, and 413 of that project&#39;s 415 errors are this one pattern.</p>
 <p><strong>If you cannot restructure the class</strong>, declare the same thing in one line:</p>
-<pre><code class="language-typescript">import type { ComponentAttrs } from &#39;tosijs&#39;
-export interface Widget extends ComponentAttrs&lt;typeof Widget.initAttributes&gt; {}
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{</span> ComponentAttrs <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tosijs'</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Widget</span> <span class="token keyword">extends</span> <span class="token class-name">ComponentAttrs<span class="token operator">&lt;</span><span class="token keyword">typeof</span> Widget<span class="token punctuation">.</span>initAttributes<span class="token operator">></span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 </code></pre>
-<h2><code>Component</code> no longer declares <code>value</code></h2>
+<h2 id="component-no-longer-declares-value"><code>Component</code> no longer declares <code>value</code></h2>
 <p>Along with the index signature went the type for <code>value</code> (and <code>defaultValue</code>).
 If your component has a value, <strong>declare it</strong> — which is almost certainly what
 you already do:</p>
-<pre><code class="language-typescript">class Stepper extends Component {
-  value = 0                    // a field
-}
-class Picker extends Component {
-  declare value: Thing[]       // or just the type
-}
-class Editor extends Component {
-  get value(): string { … }    // or an accessor
-  set value(v: string) { … }
-}
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">class</span> <span class="token class-name">Stepper</span> <span class="token keyword">extends</span> <span class="token class-name">Component</span> <span class="token punctuation">{</span>
+  value <span class="token operator">=</span> <span class="token number">0</span>                    <span class="token comment">// a field</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">class</span> <span class="token class-name">Picker</span> <span class="token keyword">extends</span> <span class="token class-name">Component</span> <span class="token punctuation">{</span>
+  <span class="token keyword">declare</span> value<span class="token operator">:</span> Thing<span class="token punctuation">[</span><span class="token punctuation">]</span>       <span class="token comment">// or just the type</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">class</span> <span class="token class-name">Editor</span> <span class="token keyword">extends</span> <span class="token class-name">Component</span> <span class="token punctuation">{</span>
+  <span class="token keyword">get</span> <span class="token function">value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{</span> … <span class="token punctuation">}</span>    <span class="token comment">// or an accessor</span>
+  <span class="token keyword">set</span> <span class="token function">value</span><span class="token punctuation">(</span>v<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> … <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
 <p>All three shapes are legal, which is exactly why <code>Component</code> cannot declare it
 for you: a base <em>property</em> makes <code>get value()</code> a TS2611, and a base <em>accessor</em>
@@ -169,7 +156,7 @@ instance has its own <code>value</code> descriptor or the contract declares one.
 case that now needs a line it did not before is a component that declares
 <code>static contract = { value: … }</code> and no <code>value</code> member: it gets a working
 accessor at runtime, so add <code>declare value: T</code> to match.</p>
-<h2>You depend on a library that hasn&#39;t migrated yet</h2>
+<h2 id="you-depend-on-a-library-that-hasnt-migrated-yet">You depend on a library that hasn&#39;t migrated yet</h2>
 <p>Removing <code>Component</code>&#39;s index signature is a <strong>compile-time</strong> change, and it
 reaches past your own components: a library built against 1.9.x declares its
 attributes as <code>static initAttributes</code> only, with no instance property. Under
@@ -194,13 +181,13 @@ side (see above), and nothing about your code is wrong.</p>
 </li>
 <li><p><strong>Declare the attributes yourself</strong>, in your own project, without touching
 theirs:</p>
-<pre><code class="language-typescript">import type { ComponentAttrs } from &#39;tosijs&#39;
-import type { TosiMonth } from &#39;their-library&#39;
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{</span> ComponentAttrs <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tosijs'</span>
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{</span> TosiMonth <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'their-library'</span>
 
-declare module &#39;their-library&#39; {
-  interface TosiMonth
-    extends ComponentAttrs&lt;{ month: number; year: number }&gt; {}
-}
+<span class="token keyword">declare</span> <span class="token keyword">module</span> <span class="token string">'their-library'</span> <span class="token punctuation">{</span>
+  <span class="token keyword">interface</span> <span class="token class-name">TosiMonth</span>
+    <span class="token keyword">extends</span> <span class="token class-name">ComponentAttrs<span class="token operator">&lt;</span><span class="token punctuation">{</span> month<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span> year<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token punctuation">}</span><span class="token operator">></span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
 </li>
 <li><p><strong>Cast at the call site</strong> — <code>(el as any).month</code> — which is what the index
@@ -210,21 +197,21 @@ it.</p>
 </ol>
 <p>Option 2 is the one to prefer: it is checked, it is local to you, and it
 disappears when the library migrates.</p>
-<h2>What does NOT change</h2>
+<h2 id="what-does-not-change">What does NOT change</h2>
 <ul>
 <li><p><strong><code>static initAttributes</code> still works and is not deprecated.</strong>
 <code>withAttributes()</code> sets it, and it is still the only way to add attributes to
 an <strong>existing</strong> component class. Build a base with <code>withAttributes</code>, extend
 it and add more with <code>static initAttributes</code> — they compose, with the
 subclass winning per key:</p>
-<pre><code class="language-typescript">class Base extends withAttributes({ label: &#39;base&#39; }) {
-  /* … */
-}
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token keyword">extends</span> <span class="token class-name">withAttributes</span><span class="token punctuation">(</span><span class="token punctuation">{</span> label<span class="token operator">:</span> <span class="token string">'base'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">/* … */</span>
+<span class="token punctuation">}</span>
 
-class Sub extends Base {
-  static initAttributes = { extra: 7 } // declare ONLY what you add
-}
-export interface Sub extends ComponentAttrs&lt;typeof Sub.initAttributes&gt; {}
+<span class="token keyword">class</span> <span class="token class-name">Sub</span> <span class="token keyword">extends</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+  <span class="token keyword">static</span> initAttributes <span class="token operator">=</span> <span class="token punctuation">{</span> extra<span class="token operator">:</span> <span class="token number">7</span> <span class="token punctuation">}</span> <span class="token comment">// declare ONLY what you add</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Sub</span> <span class="token keyword">extends</span> <span class="token class-name">ComponentAttrs<span class="token operator">&lt;</span><span class="token keyword">typeof</span> Sub<span class="token punctuation">.</span>initAttributes<span class="token operator">></span></span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 </code></pre>
 <p>Two things that are easy to get wrong, and were wrong here before 1.10.0:</p>
 <ul>
@@ -248,14 +235,14 @@ call <code>this.queueRender()</code>.</p>
 the same way, and trigger renders the same way, whichever form you use.</p>
 </li>
 </ul>
-<h2>Also worth knowing</h2>
+<h2 id="also-worth-knowing">Also worth knowing</h2>
 <p><code>TosiComponentSpec.type</code> and <code>TosiPackagedComponent.type</code> are now typed as a
 class (<code>ComponentClass&lt;T&gt;</code>) rather than <code>Component&lt;T&gt;</code>. They always held a
 constructor — the instance-type declaration was simply wrong, and invisible
 because the index signature made any object assignable to <code>Component</code>. If you
 author blueprints you should see no change; if you were relying on that field
 accepting arbitrary objects, you will now get an error.</p>
-<h1>Upgrading to 1.9.0</h1>
+<h1 id="upgrading-to-190">Upgrading to 1.9.0</h1>
 <p><strong>One break, and only if you call <code>enableAgentInterface()</code>.</strong> Nothing else
 changes; apps that never touch the agent surface upgrade with no action.</p>
 <p><strong><code>enableAgentInterface()</code> with no manifest now exposes NOTHING.</strong> It used to
@@ -291,7 +278,7 @@ to it never appear in <code>wiring</code>.</p>
 <p><strong>Also renamed:</strong> <code>describe().exposure</code> values — <code>&#39;read-only&#39;</code> → <code>&#39;closed&#39;</code>,
 <code>&#39;introspection&#39;</code> → <code>&#39;all&#39;</code>. If you branched on those strings, update them;
 <code>&#39;read-only&#39;</code> in particular now describes a posture that no longer exists.</p>
-<h1>Upgrading to 1.8.0</h1>
+<h1 id="upgrading-to-180">Upgrading to 1.8.0</h1>
 <p><strong>Removed.</strong> Only one deprecation named 1.8.0 in its 1.7 warning, and it is
 the only thing actually removed:</p>
 <table>
@@ -368,12 +355,12 @@ attribution notices — a THIRD-PARTY-NOTICES file, an about screen, or
 alongside your own licence text. BSD-3-Clause imposed no equivalent duty, so
 this is genuinely new for existing users, and it applies to <em>redistribution</em>
 — using tosijs to build something you host yourself is unaffected.</p>
-<h1>Upgrading to 1.7.0</h1>
+<h1 id="upgrading-to-170">Upgrading to 1.7.0</h1>
 <p>1.7.0 is the <strong>correctness release</strong> — a large batch of bug fixes. Most are pure
 fixes (things that were broken now work), but a few are <strong>observable behavior
 changes</strong>. If your code depended on the old (buggy) behavior, these are the ones
 to check. No API was removed or renamed.</p>
-<h2>Observer/touch matching is now segment-exact</h2>
+<h2 id="observertouch-matching-is-now-segment-exact">Observer/touch matching is now segment-exact</h2>
 <p>Before 1.7, path matching used a raw prefix test, so an observer or binding on
 <code>foo</code> also heard <code>foobar</code>, and <code>touch(&#39;foo&#39;)</code> swallowed a later <code>touch(&#39;foobar&#39;)</code>.
 Now matching respects path segment boundaries.</p>
@@ -386,7 +373,7 @@ observe(&#39;app.user&#39;, cb)
 versa). <strong>If you relied on the sloppy prefix match</strong> — e.g. an observer on <code>item</code>
 that you expected to also fire for <code>items</code> — give it the exact path, a RegExp, or
 a filter function.</p>
-<h2><code>getValue()</code> returns typed values for typed inputs</h2>
+<h2 id="getvalue-returns-typed-values-for-typed-inputs"><code>getValue()</code> returns typed values for typed inputs</h2>
 <p><code>getValue(element)</code> (and therefore <code>bindings.value</code>&#39;s <code>fromDOM</code>) now returns the
 control&#39;s native type instead of a string:</p>
 <ul>
@@ -402,7 +389,7 @@ read <code>el.value</code>. If you bound a <code>type=date</code> input and stor
 the stored value is now a <code>Date</code> — bind to string state and it keeps the control&#39;s
 ISO string (the H-6 two-layer coercion, in <code>src/dom.ts</code> — <code>getValue</code>
 reads typed controls natively, and <code>handleChange</code> coerces on the way back).</p>
-<h2><code>Component</code> <code>change</code> events now bubble (and compose)</h2>
+<h2 id="component-change-events-now-bubble-and-compose"><code>Component</code> <code>change</code> events now bubble (and compose)</h2>
 <p>A component&#39;s <code>change</code> event (fired when its <code>value</code> changes) now bubbles and
 crosses shadow boundaries — matching how native <code>&lt;input&gt;</code> <code>change</code> events behave.
 This makes a shadow-DOM component bindable <strong>like an <code>&lt;input&gt;</code></strong> (bind its
@@ -411,7 +398,7 @@ This makes a shadow-DOM component bindable <strong>like an <code>&lt;input&gt;</
 now fire for the component&#39;s changes where before it did not. If that causes
 double-handling, scope the listener (check <code>event.target</code>) or use capture-phase
 delegation.</p>
-<h2>Other fixes worth a glance (not breaks, but visible)</h2>
+<h2 id="other-fixes-worth-a-glance-not-breaks-but-visible">Other fixes worth a glance (not breaks, but visible)</h2>
 <ul>
 <li>Reactive <code>class</code> bindings now <strong>replace</strong> instead of accumulating.</li>
 <li><code>on()</code> handlers now fire inside <strong>open shadow roots</strong>.</li>
@@ -425,6 +412,7 @@ never operated there — bind the component by its <code>value</code> instead).<
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -456,20 +444,13 @@ never operated there — bind the component by its <code>value</code> instead).<
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -481,9 +462,16 @@ never operated there — bind the component by its <code>value</code> instead).<
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link current" href="../Migration/" aria-current="page">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link current" href="../Migration/" aria-current="page">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -495,6 +483,6 @@ never operated there — bind the component by its <code>value</code> instead).<
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

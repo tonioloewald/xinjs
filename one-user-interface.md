@@ -202,4 +202,11 @@ Neither needs a special interface, because there is only one._
 - [Trust & Transports](/trust-and-transports/)
 - [Headless Embodiment](/headless-embodiment/)
 - [Plan & Prior Art](/plan-and-prior-art/)
+- [Agent API reference (EXPERIMENTAL)](/agent/)
+- [audit (EXPERIMENTAL)](/audit/)
+- [contract harness (EXPERIMENTAL)](/contract/)
+- [contract validation](/contract-check/)
+- [schematic (EXPERIMENTAL)](/schematic/)
+- [tosijs/agent](/index-agent/)
+- [webmcp (EXPERIMENTAL)](/webmcp/)
 <!-- /toc -->

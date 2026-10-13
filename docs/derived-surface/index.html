@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>The Derived Surface — tosijs</title>
   <meta name="description" content="The wiring diagram tosijs already records, the metadata harvest from element sugar, and describe() assembling the affordance graph — live." />
   <link rel="canonical" href="https://tosijs.net/derived-surface/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="The Derived Surface — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="The Derived Surface — tosijs" />
@@ -43,16 +30,16 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>The Derived Surface</h1>
+<h1 id="the-derived-surface">The Derived Surface</h1>
 <!--{ "parent": "One User Interface", "order": 1, "description": "The wiring diagram tosijs already records, the metadata harvest from element sugar, and describe() assembling the affordance graph — live." }-->
 
 <p><em>Part of <a href="/one-user-interface/">One User Interface</a> — why the agent surface derives from what tosijs already knows.</em></p>
 <p>Your app already wrote its own agent map — every binding and handler tosijs
 records is a line in it. Below: a todo list built the ordinary way, and the
 <strong>schematic</strong> — the map, drawn — growing as you add items.</p>
-<h2>The map, drawn: a schematic embodiment (live)</h2>
+<h2 id="the-map-drawn-a-schematic-embodiment-live">The map, drawn: a schematic embodiment (live)</h2>
 <pre><code class="language-css">.preview.split-view {
   display: grid;
   grid-template-columns: 50% 50%;
@@ -333,7 +320,7 @@ bold: a disabled button is not an affordance) · plain solid = display ·
 faint dotted = structure, including list <em>containers</em> (subtle on purpose —
 the ground, not the figure: a list&#39;s items are the affordances; the
 container is where they live, and its wiring stays in the JSON record).</p>
-<h2>The audit: findings, not vibes</h2>
+<h2 id="the-audit-findings-not-vibes">The audit: findings, not vibes</h2>
 <p>Every rule below is one the map makes obvious — <em>every element with handlers
 should have a name, a role, and enough contrast and size to use</em> — and
 because the map is the framework&#39;s own record of its wiring, a finding is a
@@ -405,7 +392,7 @@ test(&#39;the audit finds real defects in a real page&#39;, () =&gt; {
   ).toBe(true)
 })
 </code></pre>
-<h2>Kitchen sink: the truth test</h2>
+<h2 id="kitchen-sink-the-truth-test">Kitchen sink: the truth test</h2>
 <p>Every &quot;obvious&quot; rendering claim, verifiable at a glance — one of everything,
 drawn live (250ms) with <code>index: true</code>, so each box wears its wiring index and
 the legend below maps numbers to records (the raster form of
@@ -665,7 +652,7 @@ any page it&#39;s driving has a map view humans can check at a glance and a
 compressed overview a vision model can ingest — the natural shared artifact
 between the agent surface and the test harness (they are, after all, the same
 interface).</p>
-<h2>Proof: the harvest, assembled live</h2>
+<h2 id="proof-the-harvest-assembled-live">Proof: the harvest, assembled live</h2>
 <p>The UI below is built with ordinary element sugar — a labeled filter input
 (two-way bound), a read-only total (one-way prop binding), and a button whose
 handler is attached <em>by path</em>. There is not one agent-specific declaration in
@@ -756,7 +743,7 @@ static). The restock button&#39;s handler is not an anonymous <code>ƒ</code> bu
 <code>on: { click: &quot;harvest.restock&quot; }</code> — and the same path appears under
 <code>actions</code>. That is the affordance descriptor from the table above: harvested,
 joined, and serialized, authored by nobody.</p>
-<h2>The part nobody else can offer: the wiring diagram is already recorded</h2>
+<h2 id="the-part-nobody-else-can-offer-the-wiring-diagram-is-already-recorded">The part nobody else can offer: the wiring diagram is already recorded</h2>
 <p>Here is the b8r inheritance paying off. In b8r it was the norm to put state
 <em>and</em> event handlers in the registry. tosijs kept that affordance
 (<code>onClick: &#39;app.doThing&#39;</code> binds a handler <strong>by path</strong>) but also allows the
@@ -820,7 +807,7 @@ component is bound like an <code>&lt;input&gt;</code> — its <code>value</code>
 internals are private by design. That&#39;s precisely the affordance/implementation
 split an agent needs: it should set the date-picker&#39;s <em>value</em>, not fumble with
 its internal buttons. (Closed shadow roots stay closed — for agents too.)</p>
-<h2>The opportunistic harvest</h2>
+<h2 id="the-opportunistic-harvest">The opportunistic harvest</h2>
 <p>The wiring table above is what tosijs records <em>deliberately</em>. There is a second,
 larger layer it can harvest <em>opportunistically</em> — metadata that exists only
 because developers use elementCreators and their syntax sugar. Every prop passed
@@ -932,6 +919,7 @@ ergonomics; it turns out to have been designing an agent interface all along.</p
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -963,20 +951,13 @@ ergonomics; it turns out to have been designing an agent interface all along.</p
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -988,9 +969,16 @@ ergonomics; it turns out to have been designing an agent interface all along.</p
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -1002,6 +990,6 @@ ergonomics; it turns out to have been designing an agent interface all along.</p
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

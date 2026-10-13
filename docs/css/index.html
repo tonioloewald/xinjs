@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>CSS — tosijs</title>
   <meta name="description" content="Utilities for writing CSS as JS objects, generating stylesheets, and working with CSS variables and themes via css(), vars, and varDefault()." />
   <link rel="canonical" href="https://tosijs.net/css/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="CSS — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="CSS — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>CSS</h1>
+<h1 id="css">CSS</h1>
 <p><code>tosijs</code> provides a collection of utilities for working with CSS rules that
 help leverage CSS variables to produce highly maintainable and lightweight
 code that is nonetheless easy to customize.</p>
@@ -66,7 +53,7 @@ and bad in CSS. In Javascript it&#39;s simply an error!</li>
 <p>The <code>css</code> module attempts to implement all this the simplest and most obvious way possible,
 providing syntax sugar to help with best-practices such as <code>css-variables</code> and the use of
 <code>@media</code> queries to drive consistency, themes, and accessibility.</p>
-<h2>css(styleMap: TosiStyleMap): string</h2>
+<h2 id="cssstylemap-tosistylemap-string">css(styleMap: TosiStyleMap): string</h2>
 <p>A function that, given a <code>TosiStyleMap</code> renders CSS code. What is a TosiStyleMap?
 It&#39;s kind of what you&#39;d expect if you wanted to represent CSS as Javascript in
 the most straightforward way possible. It allows for things like <code>@import</code>,
@@ -114,7 +101,7 @@ to it automatically. There are <em>no bare numeric</em>ele properties in CSS exc
 <p>Why <code>px</code>? Well the other obvious options would be <code>rem</code> and <code>em</code> but <code>px</code> seems the
 least surprising option.</p>
 <p><code>css</code> should render nested rules, such as <code>@keyframes</code> and <code>@media</code> correctly.</p>
-<h2>Initializing CSS Variables</h2>
+<h2 id="initializing-css-variables">Initializing CSS Variables</h2>
 <p>You can initialize CSS variables using <code>_</code> or <code>__</code> prefixes on property names.
 One bar, turns the camelCase property-name into a --snake-case CSS variable
 name, while two creates a default that can be overridden.</p>
@@ -173,7 +160,7 @@ preview.append(
 )
 </code></pre>
 <blockquote>
-<h3>@property and CSS.registerProperty() considered harmful</h3>
+<h3 id="property-and-cssregisterproperty-considered-harmful">@property and CSS.registerProperty() considered harmful</h3>
 <p>This [new CSS feature}(<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@property">https://developer.mozilla.org/en-US/docs/Web/CSS/@property</a>)
 is well-intentioned but ill-considered. I advise
 against using it yourself until its serious flaws are addressed. The problem
@@ -188,7 +175,7 @@ difficult to solve. It is impossible to tell if a given instance of
 a given variable name is an intentional reuse or a new separate variable.
 No-one intentionally defines two different components with the same tag.</p>
 </blockquote>
-<h2>invertLuminance({[key: string]: any}) =&gt; {[key: string]: string}</h2>
+<h2 id="invertluminancekey-string-any--key-string-string">invertLuminance({[key: string]: any}) =&gt; {[key: string]: string}</h2>
 <p>Given a map of CSS properties (in camelCase) emit a map of those properties that
 has color values with their luminance inverted.</p>
 <pre><code>const myStyleMap = {
@@ -198,7 +185,7 @@ has color values with their luminance inverted.</p>
   },
 }
 </code></pre>
-<h2>vars</h2>
+<h2 id="vars">vars</h2>
 <p><code>vars</code> is a proxy object that will return a css variable string from
 a camelCase property, e.g.</p>
 <pre><code>vars.camelCase // &#39;var(--camel-case)&#39;
@@ -206,26 +193,26 @@ a camelCase property, e.g.</p>
 <blockquote>
 <p><strong>it isn&#39;t called <code>var</code></strong> because that&#39;s a reserved word!</p>
 </blockquote>
-<h3>varDefault</h3>
+<h3 id="vardefault">varDefault</h3>
 <p><code>varDefault</code> is a proxy object just like <code>vars</code> except that it returns a
 <code>function</code> that takes a property and renders it as a css variable reference
 with a default, e.g</p>
 <pre><code>varDefault.borderColor(&#39;red&#39;) // `var(--border-color, red)`
 </code></pre>
-<h2><code>getCssVar(variable: string, atElement = document.body): string</code></h2>
+<h2 id="getcssvarvariable-string-atelement--documentbody-string"><code>getCssVar(variable: string, atElement = document.body): string</code></h2>
 <p><code>getCssVar()</code> obtains the css variable evaluated at the specified element
 (an element defined at <code>:root</code> can be evaluated at <code>document.body</code>). You
 can provide the name, e.g. <code>--foo-bar</code>, or &quot;wrapped&quot;, e.g. <code>var(--foo-bar)</code>.</p>
-<h3>Syntax Sugar for <code>calc(...)</code></h3>
+<h3 id="syntax-sugar-for-calc">Syntax Sugar for <code>calc(...)</code></h3>
 <p>More importantly, <code>vars</code> allows you to conveniently perform calculations
 on css (dimensional) variables by a percentage:</p>
 <pre><code>vars.camelSize50    // &#39;calc(var(--camel-size) * 0.5)&#39;
 vars.camelSize_50   // &#39;calc(var(--camel-size) * -0.5)&#39;
 </code></pre>
-<h3>Computed Colors</h3>
+<h3 id="computed-colors">Computed Colors</h3>
 <blockquote>
-<h4>Notes</h4>
-<p><code>color()</code> and <code>color-mix()</code> are <a href="https://caniuse.com/?search=color-mix">now enjoy 91% support</a> as of writing.
+<h4 id="notes">Notes</h4>
+<p><code>color()</code> and <code>color-mix()</code> are <a href="https://caniuse.com/?search=color-mix">widely supported</a> (Baseline since 2023).
 See <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/color-mix">color-mix()</a> documentation.
 Where they meet your needs, I&#39;d suggest using them.</p>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/contrast-color">contrast-color()</a> is coming in Safari 26,
@@ -236,7 +223,7 @@ performed on colors <em>evaluated</em> on <code>document.body</code>, emitted in
 <code>tosijs-computed-colors</code> stylesheet.</p>
 <p><strong>They ARE recomputed on theme change</strong> — every registered computed color is
 recalculated whenever an observant stylesheet regenerates (see
-<a href="#stylesheetid-string-stylespec-xinstylesheet">StyleSheet</a>), so a derived shade
+<a href="#stylesheetid-string-stylespec-tosistylesheet-htmlstyleelement">StyleSheet</a>), so a derived shade
 tracks its source variable automatically. (This documentation previously said
 the opposite; it was out of date.) Verified in-browser: changing <code>--brand</code>
 from <code>#3366cc</code> to <code>#cc3366</code> moves <code>--brand_20b</code> from <code>rgba(41,82,163,1)</code> to
@@ -276,28 +263,28 @@ such as <code>black</code>, <code>red</code>, and <code>aliceblue</code>.</p>
 </blockquote>
 <p><code>vars</code> also allows you to perform color calculations on css (color)
 variables:</p>
-<h4>Change luminance with <code>b</code> (for brighten) suffix</h4>
+<h4 id="change-luminance-with-b-for-brighten-suffix">Change luminance with <code>b</code> (for brighten) suffix</h4>
 <p>The scale value is treated as a percentage and moves the brightness
 that far from its current value to 100% (if positive) or 0% (if negattive).</p>
 <pre><code>vars.textColor50b   // increases the luminance of textColor
 vars.textColor_50b  // halves the luminance of textColor
 </code></pre>
-<h4>Change saturation with <code>s</code> suffix</h4>
+<h4 id="change-saturation-with-s-suffix">Change saturation with <code>s</code> suffix</h4>
 <p>The scale value is treated as a percentage and moves the saturation
 that far from its current value to 100% (if positive) or 0% (if negattive).</p>
 <pre><code>vars.textColor50s   // increases the saturation of textColor
 vars.textColor_50s  // halves the saturation of textColor
 </code></pre>
-<h4>Rotate hue with <code>h</code> suffix</h4>
+<h4 id="rotate-hue-with-h-suffix">Rotate hue with <code>h</code> suffix</h4>
 <pre><code>vars.textColor30h   // rotates the hue of textColor by 30°
 vars.textColor_90h  // rotates the hue of textColor by -90°
 </code></pre>
-<h4>Set Opacity with <code>o</code> suffix</h4>
+<h4 id="set-opacity-with-o-suffix">Set Opacity with <code>o</code> suffix</h4>
 <p>Unlike the other modifiers, <code>o</code> simply sets the opacity of the
 resulting color to the value provided.</p>
 <pre><code>vars.textColor50o   // textColor with opacity set to 0.5
 </code></pre>
-<h2>More to follow?</h2>
+<h2 id="more-to-follow">More to follow?</h2>
 <p>The more I use the <code>css</code> module, the more I like it and the more ideas I have
 to make it even better, but I have a very tight size/complexity target
 for <code>tosijs</code> so these new ideas really have to earn a spot. Perhaps the
@@ -318,7 +305,7 @@ syntax-sugar for classs so that:</p>
 declarations are not just bare classes. This doesn&#39;t help with declarations
 for <code>input.foo</code> or <code>.foo::after</code> or <code>.foo &gt; *</code> and now there&#39;d be things that
 look different which violates the &quot;principle of least surprise&quot;. So, no.</p>
-<h3>Something to Declare</h3>
+<h3 id="something-to-declare">Something to Declare</h3>
 <p>Where I am always looking to improve this module (and all of <code>tosijs</code>) is to
 do a better job of <strong>declaring</strong> things to improve autocomplete behavior and
 minimize casting and other Typescript antipatterns. E.g. adding a ton of
@@ -326,7 +313,7 @@ declarations to <code>elements</code> and <code>css</code> has done wonders to r
 stuff like <code>const nameElement = this.parts.nameField as unknown as HTMLInputElement</code>
 and prevent css property typos without adding a single byte to the size of
 the javascript payload.</p>
-<h2>StyleSheet(id: string, styleSpec: TosiStyleSheet): HTMLStyleElement</h2>
+<h2 id="stylesheetid-string-stylespec-tosistylesheet-htmlstyleelement">StyleSheet(id: string, styleSpec: TosiStyleSheet): HTMLStyleElement</h2>
 <p>Creates a <code>&lt;style&gt;</code> element (with the given <code>id</code>) in <code>document.head</code> and returns
 it, so you can remove or otherwise manage it later.</p>
 <p><strong>If you pass a <code>tosi</code> proxy, the stylesheet is <em>observant</em>:</strong> change the proxy and
@@ -346,7 +333,7 @@ StyleSheet(&#39;theme&#39;, theme)
 // later — every rule derived from these variables updates immediately
 theme.body._brandColor = &#39;#cc3366&#39;
 </code></pre>
-<h3>Computed colors recompute too</h3>
+<h3 id="computed-colors-recompute-too">Computed colors recompute too</h3>
 <p>Derived colors created through the <a href="#vars"><code>vars</code></a> sugar (<code>vars.brandColor50b</code>
 and friends) are <strong>registered</strong> when first referenced, and <strong>recomputed whenever
 an observant stylesheet changes</strong>. So a derived shade tracks its source variable
@@ -453,7 +440,7 @@ test(&#39;changing a themed variable updates derived colors in the live DOM&#39;
   lighter.remove()
 })
 </code></pre>
-<h2>onStylesheetChange(callback: () =&gt; void): () =&gt; void</h2>
+<h2 id="onstylesheetchangecallback---void---void">onStylesheetChange(callback: () =&gt; void): () =&gt; void</h2>
 <p>Registers a callback that fires whenever any observant stylesheet regenerates
 (i.e., when a proxy-backed <code>StyleSheet</code> detects a change and rewrites its CSS).
 Returns an unsubscribe function.</p>
@@ -469,6 +456,7 @@ unsub()
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details open><summary><a class="doc-link current" href="../css/" aria-current="page">CSS</a></summary>
@@ -500,20 +488,13 @@ unsub()
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -525,9 +506,16 @@ unsub()
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -539,6 +527,6 @@ unsub()
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

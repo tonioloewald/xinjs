@@ -1,10 +1,12 @@
 # Building Apps
 
-<!--{ "pin": "top", "order": 2, "description": "How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. Read this first." }-->
+<!--{ "pin": "top", "order": 2, "description": "How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." }-->
 
 > This guide explains how to think about building applications with tosijs.
 > It's not an API reference — it's a mental model. If you're coming from React
-> or another reactive framework, this is the most important thing to read first.
+> or another reactive framework, this is the most important thing to read.
+> New to `tosijs`? [Start Here](/start-here/) is a ten-minute tutorial that
+> introduces the proxy and the element creators this guide builds on.
 
 ## The Downhill Model
 
@@ -288,7 +290,7 @@ Your data objects are just objects. They can have methods:
 Note the `toggle` method uses `for...of` (which yields proxied items) and
 `.value` for reads and writes. This ensures mutations trigger observers.
 Array callbacks like `find` and `forEach` pass raw items — see
-"Proxied vs. Raw" below.
+"Proxied vs. Raw" above.
 
 No imports from tosijs needed in your business logic — though methods
 called through the proxy receive proxied `this`, so your code does need
@@ -661,7 +663,7 @@ and call `touch()` once at the end — one notification instead of N:
 | `key` prop on lists       | `idPath` on list bindings           |
 | Virtual DOM diffing       | path-based direct DOM updates       |
 | Component re-render       | individual binding updates          |
-| ~45kB gzipped             | ~24kB gzipped (`tosijs/core`)       |
+| a runtime plus a renderer | one small library ([sizes](/#entry-points)) |
 
 The fundamental difference: React asks "what changed?" after every state update
 and works backwards to figure out the minimum DOM update. tosijs knows exactly

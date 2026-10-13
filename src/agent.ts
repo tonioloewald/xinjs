@@ -1,6 +1,6 @@
-/*{ "parent": "utilities", "description": "EXPERIMENTAL agent interface: expose a tosijs app's state, wiring, and actions to AI agents (and test harnesses) as a described, observable, path-addressed surface." }*/
+/*{ "parent": "One User Interface", "description": "EXPERIMENTAL agent interface: expose a tosijs app's state, wiring, and actions to AI agents (and test harnesses) as a described, observable, path-addressed surface." }*/
 /*#
-# agent (EXPERIMENTAL)
+# Agent API reference (EXPERIMENTAL)
 
 `enableAgentInterface()` turns a tosijs app's existing records — the state
 registry, the binding wiring, the event handlers — into a described,

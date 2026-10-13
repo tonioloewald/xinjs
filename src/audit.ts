@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "EXPERIMENTAL accessibility audit over the agent surface's own map — anonymous affordances, unnameable actions, missing roles, WCAG contrast, target size." }*/
+/*{ "parent": "One User Interface", "description": "EXPERIMENTAL accessibility audit over the agent surface's own map — anonymous affordances, unnameable actions, missing roles, WCAG contrast, target size." }*/
 /*#
 # audit (EXPERIMENTAL)
 

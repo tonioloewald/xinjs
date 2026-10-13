@@ -89,7 +89,7 @@
     "tosijs": "file:.",
     "tosijs-floorplan": "0.5.2",
     "tosijs-schema": "^1.6.0",
-    "tosijs-ui": "1.12.0",
+    "tosijs-ui": "1.16.13",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.65.0"
   },

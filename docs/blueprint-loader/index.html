@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>blueprints — tosijs</title>
   <meta name="description" content="Dynamically load tosijs components as zero-dependency blueprints from CDN URLs, letting consumers choose tag names and avoid name collisions." />
   <link rel="canonical" href="https://tosijs.net/blueprint-loader/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="blueprints — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="blueprints — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>blueprints</h1>
+<h1 id="blueprints">blueprints</h1>
 <p>One issue with standard web-components built with tosijs is that building them
 &quot;sucks in&quot; the version of <code>tosijs</code> you&#39;re working with. This isn&#39;t a huge problem
 with monolithic code-bases, but it does prevent components from being loaded
@@ -74,7 +61,7 @@ giving each one its own tag.)</p>
 <p>To address these issues, <code>tosijs</code> provides a <code>&lt;tosi-loader&gt;</code> loader component and
 a function <code>makeComponent</code> that can define a component given a blueprint
 function.</p>
-<h2><code>&lt;tosi-loader&gt;</code>—the blueprint loader</h2>
+<h2 id="tosi-loaderthe-blueprint-loader"><code>&lt;tosi-loader&gt;</code>—the blueprint loader</h2>
 <p><code>&lt;tosi-loader&gt;</code> is a simple custom-element provided by <code>tosijs</code> for the dynamic loading
 of component <strong>blueprints</strong>. It will load its <code>&lt;tosi-blueprint&gt;</code>s in parallel.</p>
 <pre><code>&lt;tosi-loader&gt;
@@ -88,7 +75,7 @@ of component <strong>blueprints</strong>. It will load its <code>&lt;tosi-bluepr
 <p>The legacy names <code>&lt;xin-blueprint&gt;</code> and <code>&lt;xin-loader&gt;</code> were removed in 1.8.0 —
 use <code>&lt;tosi-blueprint&gt;</code> and <code>&lt;tosi-loader&gt;</code>.</p>
 </blockquote>
-<h3>⚠️ These tags execute code</h3>
+<h3 id="️-these-tags-execute-code">⚠️ These tags execute code</h3>
 <p><code>&lt;tosi-blueprint src=&quot;…&quot;&gt;</code> <strong>runs the module it names</strong>. That is the whole
 feature — but it means the tag is an arbitrary-script-execution sink, and a
 custom element can arrive through <code>innerHTML</code> like any other markup. So:</p>
@@ -115,7 +102,7 @@ settings.blueprintSrcCheck = (src, el) =&gt;
 <p>The default may become same-origin in 2.0. Setting the hook now is
 forward-compatible either way.</p>
 </blockquote>
-<h3><code>&lt;tosi-blueprint&gt;</code> Attributes</h3>
+<h3 id="tosi-blueprint-attributes"><code>&lt;tosi-blueprint&gt;</code> Attributes</h3>
 <ul>
 <li><code>src</code> is the url of the <code>blueprint</code> javascript module (required)</li>
 <li><code>tag</code> is the tagName you wish to use. This defaults to the name of the source file if suitable.</li>
@@ -123,15 +110,15 @@ forward-compatible either way.</p>
 (allowing one blueprint to export multiple blueprints). By default, it&#39;s <code>default</code>.</li>
 <li><code>loaded</code> is the <code>TosiPackagedComponent</code> after loading</li>
 </ul>
-<h4><code>&lt;tosi-blueprint&gt;</code> Properties</h4>
+<h4 id="tosi-blueprint-properties"><code>&lt;tosi-blueprint&gt;</code> Properties</h4>
 <ul>
 <li><code>blueprintLoaded(package: TosiPackagedComponent)</code> <code>&lt;tosi-blueprint&gt;</code> when its blueprint is loaded.</li>
 </ul>
-<h4><code>&lt;tosi-loader&gt;</code> Properties</h4>
+<h4 id="tosi-loader-properties"><code>&lt;tosi-loader&gt;</code> Properties</h4>
 <ul>
 <li><code>allLoaded()</code> is called when all the blueprints have loaded.</li>
 </ul>
-<h2><code>makeComponent(tag: string, blueprint: TosiBlueprint): Promise&lt;TosiPackagedComponent&gt;</code></h2>
+<h2 id="makecomponenttag-string-blueprint-tosiblueprint-promisetosipackagedcomponent"><code>makeComponent(tag: string, blueprint: TosiBlueprint): Promise&lt;TosiPackagedComponent&gt;</code></h2>
 <p><code>makeComponent</code> takes a <code>tag</code> of your choice and a <code>blueprint</code> and generates
 the custom-element&#39;s <code>class</code> and <code>elementCreator</code> as its <code>type</code> and <code>creator</code>
 properties.</p>
@@ -187,7 +174,7 @@ preview.append(
   )
 )
 </code></pre>
-<h2><code>TosiBlueprint</code></h2>
+<h2 id="tosiblueprint"><code>TosiBlueprint</code></h2>
 <pre><code>export interface TosiFactory {
   Color: typeof Color
   Component: typeof Component
@@ -288,6 +275,7 @@ E.g. you could maintain a list of all the instances of any version of the bluepr
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -319,20 +307,13 @@ E.g. you could maintain a list of all the instances of any version of the bluepr
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -344,9 +325,16 @@ E.g. you could maintain a list of all the instances of any version of the bluepr
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -358,6 +346,6 @@ E.g. you could maintain a list of all the instances of any version of the bluepr
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

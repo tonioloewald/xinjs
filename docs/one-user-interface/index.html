@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>One User Interface — tosijs</title>
   <meta name="description" content="One source of truth for state, UI — and AI. tosijs apps expose a described, observable, path-addressed surface to agents and test harnesses: the same interface humans use, minus the pixels." />
   <link rel="canonical" href="https://tosijs.net/one-user-interface/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="One User Interface — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="One User Interface — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>One User Interface</h1>
+<h1 id="one-user-interface">One User Interface</h1>
 <!--{ "pin": "bottom", "order": 320, "description": "One source of truth for state, UI — and AI. tosijs apps expose a described, observable, path-addressed surface to agents and test harnesses: the same interface humans use, minus the pixels." }-->
 
 <p><em>One source of truth for state, UI — and AI.</em></p>
@@ -63,7 +50,7 @@ nine-lens review, but this is a first release and names may still move.
 declare what an agent may see. See
 <a href="/trust-and-transports/">Trust &amp; Transports</a> for the exposure ladder.</p>
 </blockquote>
-<h2>The thesis, in five claims</h2>
+<h2 id="the-thesis-in-five-claims">The thesis, in five claims</h2>
 <p>Every app now has three kinds of user — <strong>humans</strong> (rendered DOM), <strong>code</strong>
 (state), and <strong>agents</strong>, who today are forced to <em>impersonate humans</em>:
 screenshot, guess, forge clicks. tosijs never needed the workaround:</p>
@@ -92,7 +79,7 @@ hours of the map looking slightly off), and a coding pattern that needed
 writing down. An integration absorbs discrepancies; an intrinsic surface
 prosecutes them. The curb cut doesn&#39;t just serve the new users — <em>building
 it audits the sidewalk.</em></p>
-<h2>Proof: two users, one interface (live)</h2>
+<h2 id="proof-two-users-one-interface-live">Proof: two users, one interface (live)</h2>
 <p>The human side is ordinary bound UI. The agent side never touches the DOM —
 paths, actions, and push observation only. Add items from either side: both
 stay in sync because <strong>there is nothing to sync</strong>, and the log shows the agent
@@ -205,7 +192,7 @@ test(&#39;the manifesto demo posture can actually do what the demo does&#39;, ()
 <p><strong>Open the console — you are the second user</strong>: <code>tosiAgent.describe()</code>,
 <code>tosiAgent.call(&#39;oneUI.addItem&#39;, &#39;from the console&#39;)</code>, <code>tosiAgent.changes()</code>.
 An agentic browser gets the same deal: no extension, no vision, no selectors.</p>
-<h2>The full argument, in five parts</h2>
+<h2 id="the-full-argument-in-five-parts">The full argument, in five parts</h2>
 <p>This page is the thesis and its live proof. The detail lives in five child
 documents:</p>
 <ol>
@@ -237,6 +224,13 @@ Neither needs a special interface, because there is only one.</em></p>
 <li><a href="/trust-and-transports/">Trust &amp; Transports</a></li>
 <li><a href="/headless-embodiment/">Headless Embodiment</a></li>
 <li><a href="/plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+<li><a href="/agent/">Agent API reference (EXPERIMENTAL)</a></li>
+<li><a href="/audit/">audit (EXPERIMENTAL)</a></li>
+<li><a href="/contract/">contract harness (EXPERIMENTAL)</a></li>
+<li><a href="/contract-check/">contract validation</a></li>
+<li><a href="/schematic/">schematic (EXPERIMENTAL)</a></li>
+<li><a href="/index-agent/">tosijs/agent</a></li>
+<li><a href="/webmcp/">webmcp (EXPERIMENTAL)</a></li>
 </ul>
 <!-- /toc -->
 
@@ -244,6 +238,7 @@ Neither needs a special interface, because there is only one.</em></p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -275,20 +270,13 @@ Neither needs a special interface, because there is only one.</em></p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -300,9 +288,16 @@ Neither needs a special interface, because there is only one.</em></p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -314,6 +309,6 @@ Neither needs a special interface, because there is only one.</em></p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

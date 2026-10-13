@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>tosijs history</title>
   <meta name="description" content="The lineage behind tosijs — b8rjs → xinjs → tosijs: what changed, why, and how to migrate." />
   <link rel="canonical" href="https://tosijs.net/history/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="tosijs history (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="tosijs history" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>tosijs history</h1>
+<h1 id="tosijs-history">tosijs history</h1>
 <!--{ "pin": "bottom", "order": 900, "description": "The lineage behind tosijs — b8rjs → xinjs → tosijs: what changed, why, and how to migrate." }-->
 
 <div style="text-align: center; margin: 20px">
@@ -66,17 +53,17 @@ proven out in multiple contexts:</p>
 <li>store data in dictionaries (e.g. before JavaScript objects, NewtonScript had &quot;soups&quot;)</li>
 <li>propagate events using a simple, consistent approach (HyperCard)</li>
 </ul>
-<h2>bindomatic.js (2013)</h2>
+<h2 id="bindomaticjs-2013">bindomatic.js (2013)</h2>
 <p>Originally developed for the <a href="https://www.uspto.gov/">USPTO</a> but, despite assurances,
 never open-sourced. This was based on jQuery before browsers adopted the best
 bits of the jQuery API natively.</p>
-<h2>b8rjs (2015)</h2>
+<h2 id="b8rjs-2015">b8rjs (2015)</h2>
 <p>The first open-source incarnation. <code>b8rjs</code> established the &quot;bind to the registry&quot;
 model: application state lives in one place, the DOM is wired to it by path, and
 changes propagate without hand-written glue.</p>
 <p>b8rjs also implemented literate programming concepts in its development/demo site
 and provided a powerful serializable type system (similar to JSON-Schema).</p>
-<h2>xinjs (2021)</h2>
+<h2 id="xinjs-2021">xinjs (2021)</h2>
 <p>A ground-up successor to <code>b8rjs</code>, rebuilt around modern ES <code>Proxy</code> objects — this
 is where the boxed-proxy / path-observer design <code>tosijs</code> uses today took shape.
 Its chief changes:</p>
@@ -96,7 +83,7 @@ than HTML/JSX or CSS/Tailwind. Compare <code>vars.padding50</code> with
 <code>calc(var(--padding) * 0.5)</code>, or <code>customElement()</code> with
 <code>&lt;custom-element&gt;&lt;/custom-element&gt;</code>.</li>
 </ul>
-<h2>tosijs (2023)</h2>
+<h2 id="tosijs-2023">tosijs (2023)</h2>
 <p>The current name — <code>xinjs</code> renamed, with the API stable across the rename. Taken
 as a whole, the line since <code>b8rjs</code> is a highly incompatible evolution: removing
 cruft, supporting more use-cases, and eliminating functionality made redundant by
@@ -104,7 +91,7 @@ improvements to the JavaScript language and DOM APIs. It is also the heart of a
 broader ecosystem — see the <a href="/">home page</a> for the full family (tosijs-ui,
 tjs-lang, the React and Angular bridges, and more).</p>
 <blockquote>
-<h3>Migrating from xinjs</h3>
+<h3 id="migrating-from-xinjs">Migrating from xinjs</h3>
 <p><code>tosijs</code> was formerly published as <code>xinjs</code>. The rename is complete, though some
 older links and articles still say &quot;xinjs&quot;. The API is stable across the rename —
 most old names continue to work with one-time deprecation warnings (1.8.0
@@ -112,7 +99,7 @@ removed the few whose warnings named it — see <a href="/Migration/">Migration<
 If you&#39;re coming
 from <code>xinjs</code>, see the <a href="/Migration/">migration guide</a>.</p>
 </blockquote>
-<h2>Credits</h2>
+<h2 id="credits">Credits</h2>
 <p><code>tosijs</code> is developed with <a href="https://bun.sh/">bun</a> — crazy fast (WebKit&#39;s
 JavaScriptCore engine, not V8), does a lot natively, and runs TypeScript directly.</p>
 <p>Logo animation by <a href="https://pro.fiverr.com/freelancers/anicoremotion">@anicoremotion</a>.</p>
@@ -121,6 +108,7 @@ JavaScriptCore engine, not V8), does a lot natively, and runs TypeScript directl
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -152,20 +140,13 @@ JavaScriptCore engine, not V8), does a lot natively, and runs TypeScript directl
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -177,9 +158,16 @@ JavaScriptCore engine, not V8), does a lot natively, and runs TypeScript directl
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link current" href="../history/" aria-current="page">tosijs history</a></li>
   </ul>
   </nav>
@@ -191,6 +179,6 @@ JavaScriptCore engine, not V8), does a lot natively, and runs TypeScript directl
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

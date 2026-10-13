@@ -1,4 +1,4 @@
-# Migrating from `xinjs` to `tosijs`
+# Upgrading and Migration
 
 <!--{ "pin": "bottom", "description": "Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename." }-->
 

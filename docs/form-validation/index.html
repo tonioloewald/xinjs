@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>Validation — tosijs</title>
   <meta name="description" content="Form validation for tosijs form-associated custom elements via ElementInternals: validity, validation messages, and constraint helpers." />
   <link rel="canonical" href="https://tosijs.net/form-validation/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Validation — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Validation — tosijs" />
@@ -43,11 +30,11 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Validation</h1>
+<h1 id="validation">Validation</h1>
 <p>Form validation for custom elements using <code>ElementInternals</code>.</p>
-<h2>Overview</h2>
+<h2 id="overview">Overview</h2>
 <p>When building form-associated custom elements, you want them to behave like native
 <code>&lt;input&gt;</code> elements - participating in form submission, validation, and lifecycle events.</p>
 <p>With <code>static formAssociated = true</code> and a <code>value</code> property, your Component subclass
@@ -59,7 +46,7 @@ automatically gets:</p>
 <li>Form lifecycle callbacks (reset, disabled state, browser restore)</li>
 <li>Focusability for validation UI</li>
 </ul>
-<h2>Quick Start</h2>
+<h2 id="quick-start">Quick Start</h2>
 <p>Here&#39;s a minimal form-associated component:</p>
 <pre><code class="language-js">import { Component, elements } from &#39;tosijs&#39;
 
@@ -104,15 +91,15 @@ preview.append(myForm, output)
 <pre><code class="language-css">.preview form { display: flex; gap: 8px; align-items: center; }
 .preview simple-input { display: inline-block; }
 </code></pre>
-<h2>Validation API</h2>
+<h2 id="validation-api">Validation API</h2>
 <p>Form-associated components expose the standard validation API:</p>
-<h3>Properties</h3>
+<h3 id="properties">Properties</h3>
 <ul>
 <li><code>validity: ValidityState</code> - Current validity state (readonly)</li>
 <li><code>validationMessage: string</code> - Current validation message (readonly)</li>
 <li><code>willValidate: boolean</code> - Whether element will be validated (readonly)</li>
 </ul>
-<h3>Methods</h3>
+<h3 id="methods">Methods</h3>
 <ul>
 <li><code>checkValidity()</code> - Returns <code>true</code> if valid; fires <code>invalid</code> event if not</li>
 <li><code>reportValidity()</code> - Like <code>checkValidity()</code> but shows browser validation UI</li>
@@ -121,7 +108,7 @@ preview.append(myForm, output)
 <li><code>setFormValue(value, state?)</code> - Explicitly set form value</li>
 <li><code>validateValue()</code> - Run constraint validation (called automatically)</li>
 </ul>
-<h3>ValidityStateFlags</h3>
+<h3 id="validitystateflags">ValidityStateFlags</h3>
 <p>When calling <code>setValidity()</code>, you can set these flags:</p>
 <ul>
 <li><code>valueMissing</code> - required but empty</li>
@@ -134,7 +121,7 @@ preview.append(myForm, output)
 <li><code>badInput</code> - browser can&#39;t parse input</li>
 <li><code>customError</code> - custom error via setCustomValidity</li>
 </ul>
-<h2>Automatic Validation</h2>
+<h2 id="automatic-validation">Automatic Validation</h2>
 <p>Component automatically validates against standard HTML constraint attributes
 when <code>value</code> changes:</p>
 <ul>
@@ -191,7 +178,7 @@ preview.append(div(&#39;Enter 3-10 lowercase letters:&#39;), myForm, output)
 <pre><code class="language-css">.preview form { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
 .preview validated-input { display: inline-block; }
 </code></pre>
-<h3>Custom Validation</h3>
+<h3 id="custom-validation">Custom Validation</h3>
 <p>Override <code>validateValue()</code> for custom logic. Call <code>super.validateValue()</code> first
 to include standard constraint validation:</p>
 <pre><code>validateValue() {
@@ -207,18 +194,18 @@ to include standard constraint validation:</p>
   }
 }
 </code></pre>
-<h2>Form Lifecycle Callbacks</h2>
+<h2 id="form-lifecycle-callbacks">Form Lifecycle Callbacks</h2>
 <p>Component provides default implementations for form lifecycle callbacks:</p>
-<h3>formResetCallback()</h3>
+<h3 id="formresetcallback">formResetCallback()</h3>
 <p>Called when the containing <code>&lt;form&gt;</code> is reset. Default resets <code>value</code> to
 <code>defaultValue</code> or empty string.</p>
-<h3>formDisabledCallback(disabled: boolean)</h3>
+<h3 id="formdisabledcallbackdisabled-boolean">formDisabledCallback(disabled: boolean)</h3>
 <p>Called when the form or a parent <code>&lt;fieldset&gt;</code> is disabled/enabled.
 Default syncs the <code>disabled</code> attribute.</p>
-<h3>formStateRestoreCallback(state)</h3>
+<h3 id="formstaterestorecallbackstate">formStateRestoreCallback(state)</h3>
 <p>Called when browser restores form state (back/forward navigation).
 Default restores string values.</p>
-<h2>Custom States</h2>
+<h2 id="custom-states">Custom States</h2>
 <p>Use <code>this.internals.states</code> to expose component state to CSS via <code>:state()</code>:</p>
 <pre><code class="language-js">import { Component, elements } from &#39;tosijs&#39;
 
@@ -272,14 +259,14 @@ preview.append(
 .preview stateful-input:state(focused) input { border-color: #007bff !important; outline: none; }
 .preview stateful-input:state(invalid) input { border-color: #dc3545 !important; }
 </code></pre>
-<h2>Browser Support</h2>
+<h2 id="browser-support">Browser Support</h2>
 <p><code>ElementInternals</code> is supported in all modern browsers:</p>
 <ul>
 <li>Chrome 77+, Firefox 93+, Safari 16.4+, Edge 79+</li>
 </ul>
 <p>For older browsers, form-associated features gracefully degrade - the component
 still works but won&#39;t participate in form submission or validation.</p>
-<h2>See Also</h2>
+<h2 id="see-also">See Also</h2>
 <ul>
 <li><a href="/component/">web-components</a> - Component class documentation</li>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals">MDN: ElementInternals</a></li>
@@ -290,6 +277,7 @@ still works but won&#39;t participate in form submission or validation.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -321,20 +309,13 @@ still works but won&#39;t participate in form submission or validation.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -346,9 +327,16 @@ still works but won&#39;t participate in form submission or validation.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -360,6 +348,6 @@ still works but won&#39;t participate in form submission or validation.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

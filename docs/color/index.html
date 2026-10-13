@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>color — tosijs</title>
   <meta name="description" content="The Color class: parse CSS colors, do color math (brighten, saturate, blend, mix), convert between HSL and RGB, generate contrasting colors." />
   <link rel="canonical" href="https://tosijs.net/color/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="color — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="color — tosijs" />
@@ -43,14 +30,14 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>color</h1>
+<h1 id="color">color</h1>
 <p><code>tosijs</code> includes a lightweight, powerful <code>Color</code> class for manipulating colors.
 I hope at some point CSS will provide sufficiently capable native color calculations
 so that this will no longer be needed. Some of these methods have begun to appear,
 and are approaching wide implementation.</p>
-<h2>Color</h2>
+<h2 id="color-1">Color</h2>
 <p>The most straightforward methods for creating a <code>Color</code> instance are to use the
 <code>Color()</code> constructor to create an <code>rgb</code> or <code>rgba</code> representation, or using the
 <code>Color.fromCss()</code> to create a <code>Color</code> from any CSS (s)rgb representation,
@@ -65,7 +52,7 @@ Color.fromCss(&#39;color(srgb 1 0 0.5))  // purple
 color functions produce color specifications of the form <code>color(&lt;space&gt; ....)</code> and
 <code>Color.fromCSS()</code> will handle <code>color(srgb ...)</code> correctly (this is so it can parse the
 output of <code>color-mix(in hsl ...)</code> but not other <a href="https://developer.mozilla.org/en-US/blog/css-color-module-level-4/#whats_new_in_css_colors_module_level_4">color spaces</a>.</p>
-<h2>Manipulating Colors</h2>
+<h2 id="manipulating-colors">Manipulating Colors</h2>
 <pre><code class="language-js">import { elements, Color } from &#39;tosijs&#39;
 
 const { label, span, div, input, button } = elements
@@ -209,7 +196,7 @@ results since it&#39;s the blended color you need to worry about.</p>
 HSL space is not great! For example, <code>desaturate</code> essentially blends you with medium gray (<code>#888</code>)
 rather than a BT.601 <code>brightness</code> value where &quot;yellow&quot; is really bright and &quot;blue&quot; is really dark.</p>
 <p>If you want to desaturate colors more nicely, you can try blending them with their own <code>mono</code>.</p>
-<h2>Static Methods</h2>
+<h2 id="static-methods">Static Methods</h2>
 <p>These are alternatives to the standard <code>Color(r, g, b, a = 1)</code> constructor.</p>
 <p><code>Color.fromVar(cssVariableName: string, element = document.body): Color</code> evaluates
 the color at the specified element and then returns a <code>Color</code> instance with that
@@ -222,16 +209,16 @@ used for internal calculations to reduce precision problems that occur
 when converting HSL to RGB and back. It&#39;s nowhere near as sophisticated as
 the models used by (say) Adobe or Apple, but it&#39;s less bad than doing all
 computations in rgb.</p>
-<h2>Static Properties</h2>
+<h2 id="static-properties">Static Properties</h2>
 <ul>
 <li><code>black</code>, <code>white</code> — handy constants</li>
 </ul>
-<h2>Properties</h2>
+<h2 id="properties">Properties</h2>
 <ul>
 <li><code>r</code>, <code>g</code>, <code>b</code> are numbers from 0 to 255.</li>
 <li><code>a</code> is a number from 0 to 1</li>
 </ul>
-<h2>Properties (read-only)</h2>
+<h2 id="properties-read-only">Properties (read-only)</h2>
 <ul>
 <li><code>html</code> — the color in HTML <code>#rrggbb[aa]</code> format</li>
 <li><code>inverse</code> — the photonegative of the color (light is dark, orange is blue)</li>
@@ -244,7 +231,7 @@ computations in rgb.</p>
 <li><code>brightness</code> — this is the brightness of the color based on <a href="https://www.itu.int/rec/R-REC-BT.601">BT.601</a></li>
 <li><code>mono</code> — this produces a <code>Color</code> instance that a greyscale version (based on <code>brightness</code>)</li>
 </ul>
-<h2>Utilities</h2>
+<h2 id="utilities">Utilities</h2>
 <ul>
 <li><code>swatch()</code> emits the color into the console with a swatch and returns the color for chaining.</li>
 <li><code>toString()</code> emits the <code>html</code> property</li>
@@ -254,6 +241,7 @@ computations in rgb.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details open><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -285,20 +273,13 @@ computations in rgb.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -310,9 +291,16 @@ computations in rgb.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -324,6 +312,6 @@ computations in rgb.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

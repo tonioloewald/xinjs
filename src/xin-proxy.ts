@@ -14,7 +14,7 @@ If you assign a value to a proxy, things that are bound to that proxy will be up
 ```
 import { elements, tosi } from 'tosijs'
 
-consy myProxy = tosi({
+const { myProxy } = tosi({
   myProxy: {
     foo: 'bar'
   }
@@ -65,9 +65,10 @@ leverage autocomplete even for non-object properties?
 
 This gets us to:
 
-    const { myThing } = boxedProxy({ myThing: ... })
+    const { myThing } = tosi({ myThing: ... })
 
-…(and also `boxed`).
+…(and also `boxed`). `boxedProxy()` is the old name for `tosi()`; it still
+works and warns.
 
 `boxed` and `boxedProxy` deliver a proxy wrapped around an object wrapped around
 the original `string`, `boolean`, or `number`. This gets you autocomplete and
@@ -84,9 +85,9 @@ off an `xinProxy` result is the raw value: `foo.value`, `foo.path`,
 
 Prefer `tosi()` unless you specifically want unboxed scalars.
 
-    import { xinProxy } from 'tosijs'
+    import { tosi } from 'tosijs'
 
-    const { foo, bar } = boxedProxy({
+    const { foo, bar } = tosi({
       foo: 'bar',
       bar: {
         director: 'luhrmann'
@@ -111,7 +112,7 @@ This is syntax sugar for:
 
 So, Typescript will know that `foo` is a `string` and `bar` is a `TosiProxy<typeof stuff.bar>`.
 
-Now, `boxedProxy` is the same except replace `TosiProxy` with `BoxedProxy` and
+Now, `tosi()` is the same except replace `TosiProxy` with `BoxedProxy` and
 now Typescript will know that `foo` is a `BoxedProxy<string>`, `bar` is a `BoxedProxy<typeof stuff.bar>`
 and `bar.born` is a `BoxedProxy<number>`.
 

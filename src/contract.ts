@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "EXPERIMENTAL contract harness: exercise an agent surface's declared contract — schema examples must be accepted, counterexamples refused — through the real surface." }*/
+/*{ "parent": "One User Interface", "description": "EXPERIMENTAL contract harness: exercise an agent surface's declared contract — schema examples must be accepted, counterexamples refused — through the real surface." }*/
 /*#
 # contract harness (EXPERIMENTAL)
 

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    try {
+      var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
+      var t = p.theme || 'system'
+      if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.classList.add('darkmode')
+      if (p.highContrast) document.documentElement.classList.add('high-contrast')
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
+  <title>Start Here — tosijs</title>
+  <meta name="description" content="A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does." />
+  <link rel="canonical" href="https://tosijs.net/start-here/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Start Here — tosijs (markdown)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs" />
+  <meta property="og:title" content="Start Here — tosijs" />
+  <meta property="og:description" content="A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does." />
+  <meta property="og:url" content="https://tosijs.net/start-here/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Start Here","description":"A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does.","url":"https://tosijs.net/start-here/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <link rel="icon" href="../favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <article class="doc-content">
+<h1 id="start-here">Start Here</h1>
+<!--{ "pin": "top", "order": 1.5, "description": "A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does." }-->
+
+<p>Two things in <code>tosijs</code> carry everything else: the <strong>observer proxy</strong> you get from
+<code>tosi()</code>, and the <strong>element creators</strong> you get from <code>elements</code>. This page is one small
+example that uses both, followed by what each part does. It takes about ten minutes, and
+every example on it is live: edit the code and it re-runs.</p>
+<h2 id="the-whole-thing">The whole thing</h2>
+<pre data-example-options="{&quot;view&quot;:&quot;code&quot;}"><code class="language-js">import { tosi, elements } from &#39;tosijs&#39;
+
+const { myApp } = tosi({
+  myApp: {
+    greeting: &#39;hello world&#39;,
+    action() {
+      alert(myApp.greeting)
+    },
+  },
+})
+
+const { input, button } = elements
+
+// input and button are element creators: functions that return real DOM elements
+preview.append(
+  input({
+    // a live two-way binding: the field shows the state, typing changes it
+    bindValue: myApp.greeting,
+  }),
+  button(&#39;Do something&#39;, {
+    // the handler is looked up in the state when the click happens
+    onClick: myApp.action,
+  })
+)
+
+// so you can also reach it from your browser&#39;s own console
+window.myApp = myApp
+</code></pre>
+<pre><code class="language-test">import { boxed, updates } from &#39;tosijs&#39;
+
+// a test does not share the example&#39;s variables; `boxed` reaches any registered state
+const { myApp } = boxed
+
+test(&#39;the field shows the state, and follows it&#39;, async () =&gt; {
+  const field = preview.querySelector(&#39;input&#39;)
+  await updates()
+  expect(field.value).toBe(myApp.greeting.value)
+  const before = myApp.greeting.value
+  myApp.greeting = &#39;changed by the test&#39;
+  await updates()
+  expect(field.value).toBe(&#39;changed by the test&#39;)
+  myApp.greeting = before
+})
+</code></pre>
+<p>Type in the field, then click the button: the alert shows what you typed. Nothing in the
+code above copies the text from the field to the state, or listens for a change. The
+binding did that.</p>
+<p><code>preview</code> is the only thing here that belongs to this page: it is the box each live
+example renders into. In your own page it would be <code>document.body</code>, or any element you
+like. To run this yourself, <code>npm install tosijs</code> and use it from your bundler, or paste it
+into a <code>&lt;script type=&quot;module&quot;&gt;</code> and import from
+<code>https://cdn.jsdelivr.net/npm/tosijs/dist/module.js</code>.</p>
+<h2 id="poke-at-it">Poke at it</h2>
+<p>Open the example&#39;s <strong>Console</strong> tab. It evaluates what you type inside the example, so
+<code>myApp</code> is there. (The last line of the example also put it on <code>window</code>, so your browser&#39;s
+own console works too.) Try these, one at a time:</p>
+<pre><code>myApp.greeting
+typeof myApp.greeting
+</code></pre>
+<p>It prints like the string, but <code>typeof</code> says <code>object</code>. What you have is the observer
+proxy: every property you reach through <code>myApp</code> is wrapped, so <code>tosijs</code> can see what you
+do with it. Your browser&#39;s console shows it for what it is, a <code>Proxy</code>.</p>
+<pre><code>myApp.greeting.value
+myApp.greeting.path
+</code></pre>
+<p><code>.value</code> is the plain string, and <code>.path</code> is <code>&#39;myApp.greeting&#39;</code>: the name <code>tosijs</code> knows
+this piece of state by. Paths are how state is wired to the page.</p>
+<pre><code>myApp.greeting = &#39;I changed&#39;
+</code></pre>
+<p>Look at the field: it changed. You wrote to the state and the bound element was updated.
+(<code>myApp.greeting.value = &#39;I changed&#39;</code> does exactly the same thing, and is the spelling
+TypeScript accepts.)</p>
+<pre><code>myApp.action = () =&gt; alert(&#39;hijacked!&#39;)
+</code></pre>
+<p>Click the button again. It now runs the new function, although the button was built
+before the function existed. <code>onClick: myApp.action</code> did not hand the button a function;
+it handed it the path <code>myApp.action</code>, and the click looks up whatever is there now.</p>
+<h2 id="what-tosi-gave-you">What <code>tosi()</code> gave you</h2>
+<p><code>tosi({ myApp: {...} })</code> does two things. It <strong>registers</strong> your object as state, under the
+name <code>myApp</code>, and it <strong>returns an observer proxy</strong> for it. From then on:</p>
+<ul>
+<li><strong>Reading through the proxy gives you more proxies.</strong> <code>myApp.greeting</code> is a proxy that
+knows its own path. It behaves like the string in most places (<code>myApp.greeting + &#39;!&#39;</code>,
+<code>`${myApp.greeting}`</code> and <code>myApp.greeting.length</code> all work), but it is an object,
+so <code>myApp.greeting === &#39;hello world&#39;</code> is <code>false</code>. When you need the value itself,
+compare or pass <code>myApp.greeting.value</code>.</li>
+<li><strong>Writing through the proxy tells everyone who cares.</strong> Every element bound to
+<code>myApp.greeting</code> is updated, and nothing else on the page is touched. There is no
+re-render and nothing is compared: the update goes straight to the bound elements.</li>
+<li><strong>Your object is still your object.</strong> There are no setters to call and no actions to
+dispatch. <code>action()</code> is an ordinary method, and it can read and write the state the
+same way you just did in the console.</li>
+</ul>
+<p>Updates are batched: after a write, bound elements catch up a moment later, not on the
+same line. In a test, or anywhere you need to wait for the page, <code>await updates()</code>.</p>
+<h2 id="what-elements-gave-you">What <code>elements</code> gave you</h2>
+<p><code>elements</code> is a collection of <strong>element creators</strong>, one for every HTML tag:
+<code>elements.div</code>, <code>elements.input</code>, <code>elements.button</code>, and so on. Each is a function that
+returns a real DOM element, which is why the example can hand its results straight to
+<code>preview.append()</code>. There is no template language and nothing to compile.</p>
+<p>A creator takes any number of arguments, in any order:</p>
+<ul>
+<li><strong>A string or a number</strong> becomes text inside the element.</li>
+<li><strong>Another element</strong> becomes a child.</li>
+<li><strong>A plain object</strong> sets things on the element: attributes and properties
+(<code>{ type: &#39;checkbox&#39;, title: &#39;hello&#39; }</code>), styles (<code>{ style: { color: &#39;red&#39; } }</code>),
+event handlers (<code>{ onClick: fn }</code>), and bindings (<code>{ bindValue: myApp.greeting }</code>).</li>
+<li><strong>A proxy</strong> becomes text that stays up to date.</li>
+</ul>
+<p>That last one is the shortest binding there is:</p>
+<pre data-example-options="{&quot;view&quot;:&quot;code&quot;}"><code class="language-js">import { tosi, elements } from &#39;tosijs&#39;
+
+const { startHere } = tosi({
+  startHere: { name: &#39;world&#39;, hide: false },
+})
+
+const { div, h3, label, input } = elements
+
+preview.append(
+  // startHere.name as a child: live text
+  h3(&#39;Hello, &#39;, startHere.name, &#39;!&#39;, {
+    // a proxy as a property value: a live property
+    hidden: startHere.hide,
+  }),
+  div(
+    label(&#39;Name &#39;, input({ bindValue: startHere.name })),
+    label(
+      input({ type: &#39;checkbox&#39;, bindValue: startHere.hide }),
+      &#39; hide the heading&#39;
+    )
+  )
+)
+</code></pre>
+<pre><code class="language-test">import { boxed, updates } from &#39;tosijs&#39;
+
+const { startHere } = boxed
+
+test(&#39;a proxy child is live text, a proxy property is a live property&#39;, async () =&gt; {
+  const heading = preview.querySelector(&#39;h3&#39;)
+  await updates()
+  expect(heading.textContent).toBe(`Hello, ${startHere.name.value}!`)
+  startHere.hide = true
+  await updates()
+  expect(heading.hidden).toBe(true)
+  startHere.hide = false
+  await updates()
+  expect(heading.hidden).toBe(false)
+})
+</code></pre>
+<p>The heading is three children: the text <code>Hello, </code>, a piece of text bound to
+<code>startHere.name</code>, and <code>!</code>. Typing in the field writes to <code>startHere.name</code>, which updates
+that one piece of text. The checkbox writes a boolean to <code>startHere.hide</code>, which sets
+the heading&#39;s <code>hidden</code> property.</p>
+<h2 id="the-model-in-one-paragraph">The model, in one paragraph</h2>
+<p>State lives in plain objects that you register with <code>tosi()</code>. You build the page once,
+out of real DOM elements, and say which pieces of state each element cares about. When
+state changes, <code>tosijs</code> updates the elements bound to it. The page is not a function of
+state that gets run again; it is a set of elements <strong>wired</strong> to paths. That is why there
+is so little code: once the wiring is declared, there is nothing left to write.</p>
+<h2 id="where-next">Where next</h2>
+<p><strong>Next: lists.</strong> Almost every app has one, and <a href="/list-binding/">binding arrays</a> is where
+<code>tosijs</code> differs most from what you may be used to: a list is bound once, and rows are
+added, removed and updated individually, including in lists of 100,000 rows.</p>
+<p>Then:</p>
+<ul>
+<li><a href="/Building-Apps/">Building Apps</a> is the full guide: how to think about state, lists,
+components and styling, and the patterns that keep an app small.</li>
+<li><a href="/xin/">The tosi proxy</a> covers the proxy in depth: paths, arrays, and observing changes
+from code that is not a DOM element.</li>
+<li><a href="/elements/">Creating Elements</a> covers everything a creator accepts.</li>
+<li><a href="/bind/">Binding</a> covers what <code>bindValue</code> was shorthand for.</li>
+<li><a href="/component/">Web-Components</a> is for when a piece of your page deserves its own tag.</li>
+</ul>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link current" href="../start-here/" aria-current="page">Start Here</a></li>
+    <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
+    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
+    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../color/">color</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../xin/">The tosi proxy</a></li>
+      <li><a class="doc-link" href="../metadata/">metadata</a></li>
+      <li><a class="doc-link" href="../path-listener/">path-listener</a></li>
+      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
+      <li><a class="doc-link" href="../list-binding/">binding arrays</a></li>
+      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../component/">Web-Components</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
+      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
+      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
+      <li><a class="doc-link" href="../more-math/">more-math</a></li>
+      <li><a class="doc-link" href="../share/">share</a></li>
+      <li><a class="doc-link" href="../sync/">sync</a></li>
+      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../React/">React and tosijs</a></li>
+    <li><a class="doc-link" href="../Angular/">Angular and tosijs</a></li>
+    <li><details><summary><a class="doc-link" href="../one-user-interface/">One User Interface</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../derived-surface/">The Derived Surface</a></li>
+      <li><a class="doc-link" href="../agent-surface/">The Agent Surface</a></li>
+      <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
+      <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
+      <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../history/">tosijs history</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://discord.com/invite/ramJ9rgky5" data-icon="discord">discord</a></li>
+    <li><a href="https://loewald.com" data-icon="blog">blog</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="../iife.js?v=28ab27374864"></script>
+</body>
+</html>

@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>React and tosijs</title>
   <meta name="description" content="Use tosijs state in React with the useTosi hook (useState-shaped, works outside React), render web components via reactWebComponents, and treat React as an off-ramp." />
   <link rel="canonical" href="https://tosijs.net/React/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="React and tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="React and tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>React and tosijs</h1>
+<h1 id="react-and-tosijs">React and tosijs</h1>
 <!--{ "pin": "bottom", "order": 300, "description": "Use tosijs state in React with the useTosi hook (useState-shaped, works outside React), render web components via reactWebComponents, and treat React as an off-ramp." }-->
 
 <p>A lot of developers are using React — and <code>tosijs</code> is very much relevant to them. The
@@ -57,24 +44,24 @@ it from <em>outside</em> React — a timer, a socket handler, the browser consol
 follow. No reducers, no providers, no prop-drilling. If you want the off-ramp, your state
 lives in <a href="/">tosijs</a> as plain observable objects with no framework attached, and React
 becomes just one way of looking at it.</p>
-<h2><code>useTosi</code> — a <code>useState</code>-shaped hook</h2>
+<h2 id="usetosi--a-usestate-shaped-hook"><code>useTosi</code> — a <code>useState</code>-shaped hook</h2>
 <p>Put any object in a <code>tosi</code> proxy, then read it like <code>useState</code> via its path. It&#39;s built
 on <code>useSyncExternalStore</code>, so it&#39;s concurrent-rendering safe.</p>
-<pre><code class="language-jsx">import { tosi } from &#39;tosijs&#39;
-import { useTosi } from &#39;react-tosijs&#39;
+<pre><code class="language-jsx" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span> tosi <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'tosijs'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> useTosi <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-tosijs'</span>
 
-const { clock } = tosi({
-  clock: { time: new Date().toLocaleTimeString() },
-})
+<span class="token keyword">const</span> <span class="token punctuation">{</span> clock <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">tosi</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">clock</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">time</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toLocaleTimeString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
 
-setInterval(() =&gt; {
-  clock.time = new Date().toLocaleTimeString()
-}, 1000)
+<span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  clock<span class="token punctuation">.</span>time <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toLocaleTimeString</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span>
 
-const Clock = () =&gt; {
-  const [time] = useTosi(&#39;clock.time&#39;)
-  return &lt;div&gt;{time}&lt;/div&gt;
-}
+<span class="token keyword">const</span> <span class="token function-variable function">Clock</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>time<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useTosi</span><span class="token punctuation">(</span><span class="token string">'clock.time'</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span><span class="token punctuation">{</span>time<span class="token punctuation">}</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token punctuation">}</span>
 </code></pre>
 <p><code>useTosi</code> returns <code>[value, setValue]</code> just like <code>useState</code>, but the state is updated
 <em>outside</em> React and it just works. One difference: <code>setValue</code> takes the next <strong>value</strong>,
@@ -83,35 +70,35 @@ state legitimately holds functions, so they are never auto-invoked).</p>
 <p>Because the state is a plain observable object, your logic is testable without rendering
 anything, the console can poke it directly, and swapping a React view for a web component
 later doesn&#39;t touch it at all. That&#39;s the off-ramp.</p>
-<h2><code>reactWebComponents</code> — web components as React components</h2>
+<h2 id="reactwebcomponents--web-components-as-react-components"><code>reactWebComponents</code> — web components as React components</h2>
 <p><code>reactWebComponents.fooBar</code> gives you a React component that renders a <code>&lt;foo-bar&gt;</code> custom
 element, so web components (e.g. from <a href="https://ui.tosijs.net">tosijs-ui</a>) drop into React
 with no wrappers — bound to the same state as your React views.</p>
-<pre><code class="language-jsx">import &#39;tosijs-ui&#39;
-import { reactWebComponents } from &#39;react-tosijs&#39;
+<pre><code class="language-jsx" data-highlighted><span class="token keyword">import</span> <span class="token string">'tosijs-ui'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> reactWebComponents <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-tosijs'</span>
 
-const Markdown = reactWebComponents.tosiMd
+<span class="token keyword">const</span> Markdown <span class="token operator">=</span> reactWebComponents<span class="token punctuation">.</span>tosiMd
 
-const Doc = () =&gt; &lt;Markdown class=&quot;doc&quot; src=&quot;/README.md&quot; /&gt;
+<span class="token keyword">const</span> <span class="token function-variable function">Doc</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span><span class="token class-name">Markdown</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>doc<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>/README.md<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
 </code></pre>
 <p>On React 18 pass <code>class</code> (not <code>className</code>) to custom elements — React 18 sets props on
 them as attributes verbatim; React 19 handles <code>className</code> on custom elements natively.</p>
-<h2>Typed paths, persistence, DevTools</h2>
+<h2 id="typed-paths-persistence-devtools">Typed paths, persistence, DevTools</h2>
 <p>All framework-free — they work whether a path is rendered by React, a web component, or
 nothing at all:</p>
-<pre><code class="language-typescript">import { typedTosi, persist, connectDevTools } from &#39;react-tosijs&#39;
+<pre><code class="language-typescript" data-highlighted><span class="token keyword">import</span> <span class="token punctuation">{</span> typedTosi<span class="token punctuation">,</span> persist<span class="token punctuation">,</span> connectDevTools <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react-tosijs'</span>
 
-type AppState = {
-  app: { count: number; todos: { id: string; text: string }[] }
-}
-const { useTosi } = typedTosi&lt;AppState&gt;()
-const [text] = useTosi(&#39;app.todos[0].text&#39;) // string
-const [oops] = useTosi(&#39;app.cuont&#39;) // compile error
+<span class="token keyword">type</span> <span class="token class-name">AppState</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+  app<span class="token operator">:</span> <span class="token punctuation">{</span> count<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span> todos<span class="token operator">:</span> <span class="token punctuation">{</span> id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span> text<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">}</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> useTosi <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token generic-function"><span class="token function">typedTosi</span><span class="token generic class-name"><span class="token operator">&lt;</span>AppState<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">[</span>text<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useTosi</span><span class="token punctuation">(</span><span class="token string">'app.todos[0].text'</span><span class="token punctuation">)</span> <span class="token comment">// string</span>
+<span class="token keyword">const</span> <span class="token punctuation">[</span>oops<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">useTosi</span><span class="token punctuation">(</span><span class="token string">'app.cuont'</span><span class="token punctuation">)</span> <span class="token comment">// compile error</span>
 
-persist(&#39;app.todos&#39;) // localStorage, coalesced writes
-connectDevTools({ roots: [&#39;app&#39;] }) // Redux DevTools tap
+<span class="token function">persist</span><span class="token punctuation">(</span><span class="token string">'app.todos'</span><span class="token punctuation">)</span> <span class="token comment">// localStorage, coalesced writes</span>
+<span class="token function">connectDevTools</span><span class="token punctuation">(</span><span class="token punctuation">{</span> roots<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'app'</span><span class="token punctuation">]</span> <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token comment">// Redux DevTools tap</span>
 </code></pre>
-<h2>Observant, not reactive</h2>
+<h2 id="observant-not-reactive">Observant, not reactive</h2>
 <p>React answers <em>&quot;did it change?&quot;</em> at the subscription source and re-renders from there;
 <code>tosijs</code> does change detection at the DOM-update seam — an unchanged bound value is a
 no-op at write time. <code>react-tosijs</code>&#39;s internal machinery exists to pay React&#39;s toll on
@@ -126,6 +113,7 @@ guide — and <a href="https://angular.tosijs.net">angular.tosijs.net</a> runs t
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -157,20 +145,13 @@ guide — and <a href="https://angular.tosijs.net">angular.tosijs.net</a> runs t
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link current" href="../React/" aria-current="page">React and tosijs</a></li>
@@ -182,9 +163,16 @@ guide — and <a href="https://angular.tosijs.net">angular.tosijs.net</a> runs t
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -196,6 +184,6 @@ guide — and <a href="https://angular.tosijs.net">angular.tosijs.net</a> runs t
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

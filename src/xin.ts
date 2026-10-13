@@ -3,7 +3,8 @@
 # The tosi proxy
 
 `tosi()` assigns an object passed to it to a global state object,
-and returns an observer proxy (`BoxedProxy`) wrapped around the global state object.
+and returns an observer proxy (`BoxedProxy`, a JavaScript
+[`Proxy`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)) wrapped around the global state object.
 
 BoxedProxy wraps any object you pull out of it in an observer
 proxy. It boxes booleans, numbers, and strings in lightweight proxies
@@ -528,8 +529,9 @@ proxy.foo.tosi.listUpdate(selector, newValue)
 proxy.foo.tosi.listRemove(selector, value)
 ```
 
-This is the recommended API. The only reserved name is `tosi` itself — don't
-use it as a property name in your data.
+Use it wherever your data might have a property with one of those names. The
+only reserved name is `tosi` itself — don't use it as a property name in your
+data.
 
 If you do have data with a `tosi` property, use `tosiAccessor(proxy)` or
 the `TOSI_ACCESSOR` symbol directly — these are guaranteed collision-free:
@@ -543,11 +545,13 @@ acc.value  // underlying value
 acc.path   // path string
 ```
 
-## Direct helper properties (deprecated)
+## Direct helper properties
 
-The following properties are also available directly on boxed proxies, but
-they can be shadowed by actual properties on the target object. Prefer
-`.tosi.*` instead:
+The same API is available directly on a boxed proxy, and this is the everyday
+spelling: `app.user.name.value`, `app.user.name.observe(…)`. **These are not
+deprecated.** Their one hazard is shadowing: if your data has its own property
+called `value`, `path`, `observe` and so on, that property wins, and `.tosi.*`
+(above) is how you reach the proxy's.
 
 - `.value` gets or sets the underlying value
 - `.path` gets the string path

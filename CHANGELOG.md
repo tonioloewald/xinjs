@@ -17,6 +17,35 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
   out and back has a new one. 1.10.7's agent docs said this in a way that read
   as rows being rebuilt needlessly; now stated precisely, and pinned by a test
   that scrolls a real virtual list.
+- **Start Here**, a ten-minute tutorial on the observer proxy and the element
+  creators, built around one small example with the code, a console and its
+  test in the page.
+- **A documentation pass**, from three cold reads of the published docs
+  (newcomer, coding agent, expert lookup). The README now opens with what
+  tosijs is, an install line and a first example, and moves entry points and
+  scaffolding below the pitch. The agent reference pages moved from Utilities
+  to One User Interface. "Migrating from xinjs to tosijs" is now "Upgrading
+  and Migration", which is what it has been for five releases.
+- **`.value`, `.path`, `.observe()` and friends on a proxy are not
+  deprecated.** The proxy page headed them "(deprecated)" while every guide
+  taught them. They are the everyday spelling; `.tosi.*` is for data whose own
+  properties would shadow them.
+- **The script-tag build (`dist/index.js`) sets no global.** The README said a
+  script tag gives you "the library". It registers `<tosi-blueprint>` so
+  components load from markup; for the API without a build step, import
+  `dist/module.js` in a module script. The README now says so.
+- Checkbox and radio binding through `bindValue`, and proxies as event
+  handlers (`onClick: app.save` binds the path, not the function), are now
+  documented on the pages where you would look for them.
+
+### Fixed (docs site only; nothing published changes)
+
+- The site is built with tosijs-ui 1.16.13 (was 1.12.0): examples can open
+  with their code or a console beside the preview, headings have ids, and
+  every page is also served as markdown at `/<page>/index.md`.
+- The docs bundle's cache stamp now comes from the bundle the pages load. It
+  was taken from tosijs-ui's own bundle, so it changed only when tosijs-ui
+  did and a returning visitor could run the previous release's library.
 
 ## [1.10.7] - 2026-10-03
 

@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>Why bind, and when to use observe — tosijs</title>
   <meta name="description" content="Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." />
   <link rel="canonical" href="https://tosijs.net/bind-vs-observe/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Why bind, and when to use observe — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Why bind, and when to use observe — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>Why <code>bind</code>, and when to use <code>observe</code></h1>
+<h1 id="why-bind-and-when-to-use-observe">Why <code>bind</code>, and when to use <code>observe</code></h1>
 <!--{ "parent": "bind", "order": 1, "description": "Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." }-->
 
 <p>There is one rule, and it decides almost every case:</p>
@@ -55,7 +42,7 @@ and then shove something into the DOM, you are almost certainly adding code
 and bugs for no good reason.</strong></p>
 </blockquote>
 <p><code>observe</code> is for reactions that touch <strong>no DOM</strong>. Everything else is <code>bind</code>.</p>
-<h2>The mistake, and why it does not look like one</h2>
+<h2 id="the-mistake-and-why-it-does-not-look-like-one">The mistake, and why it does not look like one</h2>
 <pre><code>// DON&#39;T — this works, which is the problem
 app.user.name.observe(() =&gt; {
   nameField.value = app.user.name.value
@@ -69,7 +56,7 @@ input({ bindValue: app.user.name })
 </code></pre>
 <p>The first version runs. The page updates. Nothing throws. It is also a second
 implementation of two-way binding, and you now own it.</p>
-<h2>What you gave up</h2>
+<h2 id="what-you-gave-up">What you gave up</h2>
 <p><strong>The element becomes invisible to your own app.</strong> An element is <em>wired</em> by
 being bound and by nothing else, so <code>describe()</code> — the agent surface, the
 accessibility audit, the schematic — cannot see it. Two divs both driven by
@@ -89,7 +76,7 @@ you.</p>
 accumulate-don&#39;t-clobber when several bindings share an element,
 <code>take()</code> memoisation, shadow-boundary handling, per-element error isolation so
 one failure cannot strand the rest of the page.</p>
-<h2>The real argument</h2>
+<h2 id="the-real-argument">The real argument</h2>
 <p>The list above is not the point, because a determined author can reimplement
 any of it. The point is that they would have to:</p>
 <blockquote>
@@ -102,7 +89,7 @@ silent.</strong></p>
 <p>And fixes do not propagate. Fix a shadow-DOM edge case in <code>bind</code> and every
 binding in every app gets it. Fix it in your observer and you have fixed one
 observer.</p>
-<h2>When <code>observe</code> is right</h2>
+<h2 id="when-observe-is-right">When <code>observe</code> is right</h2>
 <p>When the reaction touches no DOM at all:</p>
 <table>
 <thead>
@@ -129,7 +116,7 @@ observer.</p>
 </tr>
 <tr>
 <td><strong>derived state</strong></td>
-<td>compute <em>other state</em> — though <a href="#take"><code>take</code></a> is usually better</td>
+<td>compute <em>other state</em> — though <a href="/xin/#take--reactive-binding-transforms"><code>take</code></a> is usually better</td>
 </tr>
 </tbody></table>
 <pre><code>// legitimate: nothing here touches the DOM
@@ -137,7 +124,7 @@ app.preferences.observe(() =&gt; {
   localStorage.setItem(&#39;prefs&#39;, JSON.stringify(app.preferences.value))
 })
 </code></pre>
-<h2>&quot;But <code>bind</code> can&#39;t do what I need&quot;</h2>
+<h2 id="but-bind-cant-do-what-i-need">&quot;But <code>bind</code> can&#39;t do what I need&quot;</h2>
 <p>It probably can, because <code>toDOM</code> is an arbitrary function and <strong>the side effect
 does not have to land on the element you bind to</strong>:</p>
 <pre><code>// a global effect — bind the element that owns it
@@ -154,7 +141,7 @@ bind(canvas, &#39;scene.time&#39;, { toDOM: (el, t) =&gt; renderFrame(el, t) })
 <p>All three keep the element in the map, apply on setup, and stop when the
 element goes away. The canvas one also stops redrawing when the value has not
 changed — see below.</p>
-<h2>Two things worth knowing either way</h2>
+<h2 id="two-things-worth-knowing-either-way">Two things worth knowing either way</h2>
 <p><strong>An unchanged scalar notifies nobody.</strong> <code>touch()</code> is only called when the new
 value <code>!==</code> the existing one — so assigning a value <strong>equal</strong> to the current one
 does nothing at all: no binding runs, no observer fires, and the DOM is never
@@ -193,6 +180,7 @@ trustworthy in a DOM shim.</em></p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -224,20 +212,13 @@ trustworthy in a DOM shim.</em></p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -249,9 +230,16 @@ trustworthy in a DOM shim.</em></p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -263,6 +251,6 @@ trustworthy in a DOM shim.</em></p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

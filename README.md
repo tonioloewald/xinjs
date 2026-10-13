@@ -18,45 +18,38 @@
   </tosi-lottie>
 </div>
 
-## Entry points
-
-| import                  | what you get                                                                                                             | gz                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
-| `tosijs`                | everything, agent surface included — bundlers shake what you don't import                                                | <!--gz:module.js-->~45 kB<!--/gz--> |
-| `tosijs/agent`          | the agent surface, schematic renderer, audit and contract harnesses (**same file**, narrower types) — **EXPERIMENTAL**   | —                                   |
-| `tosijs/core`           | no blueprint loader, no `share`/`sync`/`hotReload`, no agent surface                                                     | <!--gz:core.js-->~26 kB<!--/gz-->   |
-| `tosijs/state`          | the **DOM-free** state layer: `tosi`, `xin`, `observe`, paths                                                            | <!--gz:state.js-->~17 kB<!--/gz-->  |
-| `<script src=…>` (IIFE) | the library **without** the agent surface — a script tag cannot tree-shake, so it doesn't pay for what it didn't ask for | <!--gz:index.js-->~29 kB<!--/gz-->  |
-
-`tosijs/agent` resolves to the same file as `tosijs` **on purpose**: a
-separately-bundled agent surface would carry its own copy of the state
-registry and describe an empty app. One runtime copy, always.
-
-`tosijs/core` is opt-in rather than automatic because blueprints hydrate
-from _markup_, so no import statement protects them — shaking the
-registration would fail silently. Slim core is present, so it can speak: in
-dev it warns if the page contains blueprint elements it cannot hydrate.
-
-## Scaffolding
+`tosijs` keeps the state of a web app in plain objects and wires it to real DOM elements.
+Change the state and the elements bound to it update, with no virtual DOM, no JSX and no
+build step. It is small enough to read in an afternoon.
 
 ```
-bunx tosijs create app my-app              # a runnable app (bun index.html)
-bunx tosijs create component my-widget     # a component — blueprint form (default)
-bunx tosijs create component my-widget --bare  # …plain class form
-bunx tosijs create blueprint my-widget     # a publishable blueprint package
+npm install tosijs      # or: bun add tosijs
 ```
 
-Everything scaffolded is **agent-ready**: components are born with a
-`contract` (description, value schema, parts map, and a declared test), so
-they self-describe on the agent surface and pass `exerciseComponent()` from
-their first minute. The blueprint form is the default because blueprints
-are consumable **directly from markup** — no build step on the consumer's
-side:
+```
+import { tosi, elements } from 'tosijs'
+
+const { app } = tosi({ app: { name: 'world' } })
+const { h1, input } = elements
+
+document.body.append(
+  h1('Hello, ', app.name),
+  input({ bindValue: app.name })
+)
+```
+
+No build step at all? The same code runs from a CDN in a module script:
 
 ```
-<tosi-blueprint tag="my-widget" src="https://cdn.jsdelivr.net/npm/my-widget/dist/index.js"></tosi-blueprint>
-<my-widget></my-widget>
+<script type="module">
+  import { tosi, elements } from 'https://cdn.jsdelivr.net/npm/tosijs/dist/module.js'
+  // …
+</script>
 ```
+
+**New here? [Start Here](https://tosijs.net/start-here/)** is a ten-minute tutorial on the
+two ideas everything else is built on. [Building Apps](https://tosijs.net/Building-Apps/)
+is the full guide.
 
 ## Better apps with less code
 
@@ -89,13 +82,7 @@ age of AI assistants, also means **fewer tokens** to generate and reason about.
   between `tosijs` and `tosijs/core` is a larger
   <!--agentgz-->~19.0 kB<!--/agentgz-->, because `core` also drops blueprints,
   share/sync and hotReload.) Both figures are measured by the build.
-  <!-- as-of: 2026-08-08 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
-  It does not, however, shake back to 1.7.x: when 1.8.0 shipped, an identical
-  consumer app that never touched the agent surface measured **+2.9 kB gzipped
-  (+13.7%) against 1.7.9**, because the contract seam, the path-segment guard
-  and the binding bookkeeping sit on the ordinary path. That figure is a
-  1.8.0-era measurement and has not been re-taken. If size matters more to you
-  than the features, `tosijs/core` is the smaller door.
+  [Entry points](#entry-points) has the detail.
 
 On top of that you get the conveniences you'd actually want: most binding code
 eliminated, web-components you can build in pure JS more compactly than JSX, and
@@ -149,6 +136,8 @@ preview.append(
           event.preventDefault()
           readmeTodoDemo.addItem(event.target.value)
           event.target.value = ''
+          // addItem() pushed onto the original array, not through the proxy,
+          // so tell tosijs it changed (a write through the proxy needs no touch)
           touch(readmeTodoDemo)
         }
       },
@@ -229,6 +218,54 @@ error rather than a silent `any`. `static initAttributes` is not deprecated; see
 The difference is that `web-components` are drop-in replacements for standard HTML elements
 and interoperate happily with one-another and other libraries, load asynchronously,
 and are natively supported by all modern browsers.
+
+## Entry points
+
+| import                  | what you get                                                                                                             | gz                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `tosijs`                | everything, agent surface included — bundlers shake what you don't import                                                | <!--gz:module.js-->~45 kB<!--/gz--> |
+| `tosijs/agent`          | the agent surface, schematic renderer, audit and contract harnesses (**same file**, narrower types) — **EXPERIMENTAL**   | —                                   |
+| `tosijs/core`           | no blueprint loader, no `share`/`sync`/`hotReload`, no agent surface                                                     | <!--gz:core.js-->~26 kB<!--/gz-->   |
+| `tosijs/state`          | the **DOM-free** state layer: `tosi`, `xin`, `observe`, paths                                                            | <!--gz:state.js-->~17 kB<!--/gz-->  |
+| `<script src=…>` (IIFE) | registers `<tosi-blueprint>` so components load **from markup**; it sets no global, so for the API in a page use a module script (above) | <!--gz:index.js-->~29 kB<!--/gz-->  |
+
+`tosijs/agent` resolves to the same file as `tosijs` **on purpose**: a
+separately-bundled agent surface would carry its own copy of the state
+registry and describe an empty app. One runtime copy, always.
+
+`tosijs/core` is opt-in rather than automatic because blueprints hydrate
+from _markup_, so no import statement protects them — shaking the
+registration would fail silently. Slim core is present, so it can speak: in
+dev it warns if the page contains blueprint elements it cannot hydrate.
+
+<!-- as-of: 2026-08-08 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
+**The agent surface shakes away, but not back to 1.7.x:** when 1.8.0 shipped, an identical
+consumer app that never touched the agent surface measured **+2.9 kB gzipped
+(+13.7%) against 1.7.9**, because the contract seam, the path-segment guard
+and the binding bookkeeping sit on the ordinary path. That figure is a
+1.8.0-era measurement and has not been re-taken. If size matters more to you
+than the features, `tosijs/core` is the smaller door.
+
+## Scaffolding
+
+```
+bunx tosijs create app my-app              # a runnable app (bun index.html)
+bunx tosijs create component my-widget     # a component — blueprint form (default)
+bunx tosijs create component my-widget --bare  # …plain class form
+bunx tosijs create blueprint my-widget     # a publishable blueprint package
+```
+
+Everything scaffolded is **agent-ready**: components are born with a
+`contract` (description, value schema, parts map, and a declared test), so
+they self-describe on the agent surface and pass `exerciseComponent()` from
+their first minute. The blueprint form is the default because blueprints
+are consumable **directly from markup** — no build step on the consumer's
+side:
+
+```
+<tosi-blueprint tag="my-widget" src="https://cdn.jsdelivr.net/npm/my-widget/dist/index.js"></tosi-blueprint>
+<my-widget></my-widget>
+```
 
 ## An ecosystem with `tosijs` at its heart
 

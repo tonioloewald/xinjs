@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>tosi, xin, and xinProxy — tosijs</title>
   <meta name="description" content="Background on the tosijs observer proxies: how tosi() and xinProxy() relate to xin and boxed, plus tosiUnique() for per-instance state." />
   <link rel="canonical" href="https://tosijs.net/xin-proxy/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="tosi, xin, and xinProxy — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="tosi, xin, and xinProxy — tosijs" />
@@ -43,9 +30,9 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>tosi, xin, and xinProxy</h1>
+<h1 id="tosi-xin-and-xinproxy">tosi, xin, and xinProxy</h1>
 <blockquote>
 <p>This documentation is mainly here for explanatory purposes. Just use <code>tosi()</code>
 as described in the parent doc.</p>
@@ -55,7 +42,7 @@ as described in the parent doc.</p>
 <p>If you assign a value to a proxy, things that are bound to that proxy will be updated. E.g.</p>
 <pre><code>import { elements, tosi } from &#39;tosijs&#39;
 
-consy myProxy = tosi({
+const { myProxy } = tosi({
   myProxy: {
     foo: &#39;bar&#39;
   }
@@ -70,7 +57,7 @@ myProxy.foo = &#39;now it is updated&#39;
 myDiv.textContent === &#39;now it is updated&#39;
 </code></pre>
 <p>It&#39;s not magic. It&#39;s proxies. And the updates are surgical. The rest of the DOM isn&#39;t touched.</p>
-<h2><code>xinProxy()</code> and <code>tosi()</code></h2>
+<h2 id="xinproxy-and-tosi"><code>xinProxy()</code> and <code>tosi()</code></h2>
 <blockquote>
 <p><code>tosi()</code> was formerly called <code>boxedProxy()</code>.</p>
 </blockquote>
@@ -97,9 +84,10 @@ bind to it directly. So instead of typing (or mis-typing):</p>
 <p>And after working with that for a while, the question became, what if we could
 leverage autocomplete even for non-object properties?</p>
 <p>This gets us to:</p>
-<pre><code>const { myThing } = boxedProxy({ myThing: ... })
+<pre><code>const { myThing } = tosi({ myThing: ... })
 </code></pre>
-<p>…(and also <code>boxed</code>).</p>
+<p>…(and also <code>boxed</code>). <code>boxedProxy()</code> is the old name for <code>tosi()</code>; it still
+works and warns.</p>
 <p><code>boxed</code> and <code>boxedProxy</code> deliver a proxy wrapped around an object wrapped around
 the original <code>string</code>, <code>boolean</code>, or <code>number</code>. This gets you autocomplete and
 strong typing in general, at the cost of slight annoyances (e.g. having to write
@@ -112,9 +100,9 @@ returns <code>xin</code>, and <code>xin</code> is created with <code>boxScalars:
 off an <code>xinProxy</code> result is the raw value: <code>foo.value</code>, <code>foo.path</code>,
 <code>foo.observe()</code> and <code>[TOSI_ACCESSOR]</code> are all absent.</p>
 <p>Prefer <code>tosi()</code> unless you specifically want unboxed scalars.</p>
-<pre><code>import { xinProxy } from &#39;tosijs&#39;
+<pre><code>import { tosi } from &#39;tosijs&#39;
 
-const { foo, bar } = boxedProxy({
+const { foo, bar } = tosi({
   foo: &#39;bar&#39;,
   bar: {
     director: &#39;luhrmann&#39;
@@ -137,11 +125,11 @@ Object.assign(boxed, stuff)
 const { foo, bar } = boxed as TosiProxy&lt;typeof stuff&gt;
 </code></pre>
 <p>So, Typescript will know that <code>foo</code> is a <code>string</code> and <code>bar</code> is a <code>TosiProxy&lt;typeof stuff.bar&gt;</code>.</p>
-<p>Now, <code>boxedProxy</code> is the same except replace <code>TosiProxy</code> with <code>BoxedProxy</code> and
+<p>Now, <code>tosi()</code> is the same except replace <code>TosiProxy</code> with <code>BoxedProxy</code> and
 now Typescript will know that <code>foo</code> is a <code>BoxedProxy&lt;string&gt;</code>, <code>bar</code> is a <code>BoxedProxy&lt;typeof stuff.bar&gt;</code>
 and <code>bar.born</code> is a <code>BoxedProxy&lt;number&gt;</code>.</p>
 <p>This lets you write bindings that support autocomplete and lint. Yay!</p>
-<h2><code>tosiUnique()</code></h2>
+<h2 id="tosiunique"><code>tosiUnique()</code></h2>
 <p><code>tosiUnique()</code> creates a reactive proxy stored under a guaranteed unique key.
 This is useful for component instances or any situation where you need
 per-instance reactive state without worrying about key collisions.</p>
@@ -168,6 +156,7 @@ remove()
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -199,20 +188,13 @@ remove()
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -224,9 +206,16 @@ remove()
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -238,6 +227,6 @@ remove()
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

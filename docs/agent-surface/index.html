@@ -1,20 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- NB: the body is NOT hidden until hydration. It used to be (body opacity 0 +
-       a 4s safety-net timeout), because an undefined custom element is
-       display:inline, so the pre-rendered page stacked as bare text and hydration
-       reflowed the whole thing. The cost was a blank screen for as long as the
-       bundle took — ~4.5s on a cheap phone, for content already in the HTML. The
-       tosi-doc-system:not(:defined) rules in the stylesheet now lay the static page
-       out as though the chrome were there, so hydration only ADDS the chrome and
-       nothing moves. Paint immediately; don't hide readable content. -->
-  <!-- Theme, applied BEFORE first paint. Now that we paint the static page rather
-       than hiding it, a dark-mode reader would otherwise get a flash of the light
-       theme until the bundle lands and sets body.darkmode. CSS alone can't do this:
-       an explicit theme choice lives in localStorage. Mirrors applyThemePrefs()
-       (doc-system.ts) — keep the two in step. Fails safe: any error leaves the
-       light default, exactly as before. -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
     try {
       var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
@@ -24,14 +12,13 @@
       if (p.highContrast) document.documentElement.classList.add('high-contrast')
     } catch (e) {}
   </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=71efe2b7f37c" data-tosi-doc-system />
   <title>The Agent Surface — tosijs</title>
   <meta name="description" content="enableAgentInterface(): the protocol-neutral surface, push-and-drain observation, exposure tiers (schema-first), authoring-time declarations, and ComponentMap." />
   <link rel="canonical" href="https://tosijs.net/agent-surface/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="The Agent Surface — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="The Agent Surface — tosijs" />
@@ -43,15 +30,15 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;}}">
+  <tosi-doc-system docs="../docs.json?v=0e7bf52e03c9" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1>The Agent Surface</h1>
+<h1 id="the-agent-surface">The Agent Surface</h1>
 <!--{ "parent": "One User Interface", "order": 2, "description": "enableAgentInterface(): the protocol-neutral surface, push-and-drain observation, exposure tiers (schema-first), authoring-time declarations, and ComponentMap." }-->
 
 <p><em>Part of <a href="/one-user-interface/">One User Interface</a> — the design of the surface itself.</em></p>
 <p>One line enables the surface; everything else derives. Watch a WebMCP tool
 set write itself from an ordinary little app:</p>
-<h2>Proof: the tools write themselves (live)</h2>
+<h2 id="proof-the-tools-write-themselves-live">Proof: the tools write themselves (live)</h2>
 <p>Every existing WebMCP integration authors its tools by hand.
 <code>webmcpTools(agent)</code> <strong>generates</strong> them: the introspection pair
 (<code>tosi_describe</code>, <code>tosi_surface</code>), the read pair (<code>tosi_read</code>,
@@ -131,7 +118,7 @@ runnable: Angular&#39;s Signal-Forms-to-tools is the closest anyone else gets, a
 it covers forms. Here <em>every action and every affordance</em> is a tool candidate,
 because the framework already holds the wiring — tosijs can be the first
 framework where the WebMCP tools write themselves.</p>
-<h2>The design: a launch toggle, not a framework</h2>
+<h2 id="the-design-a-launch-toggle-not-a-framework">The design: a launch toggle, not a framework</h2>
 <p>Nothing is exposed by default. The programmer flips a switch at launch:</p>
 <pre><code>import { enableAgentInterface } from &#39;tosijs&#39;
 // `tosijs/agent` is the same file with narrower types — deliberately NOT a
@@ -209,19 +196,19 @@ contexts) is small and protocol-neutral:</p>
 already records — enumerate <code>BOUND_CLASS</code>, map each element through
 <code>getElementBindings</code>, walk the tree probing event wiring, list registry
 functions. A sketch of what an agent sees:</p>
-<pre><code class="language-json">{
-  &quot;roots&quot;: { &quot;app&quot;: &quot;object&quot; },
-  &quot;wiring&quot;: [
-    {
-      &quot;tag&quot;: &quot;input&quot;,
-      &quot;label&quot;: &quot;search products…&quot;,
-      &quot;value&quot;: &quot;milk ⟷ app.filter&quot;
-    },
-    { &quot;tag&quot;: &quot;ul&quot;, &quot;list&quot;: { &quot;path&quot;: &quot;app.items&quot;, &quot;idPath&quot;: &quot;id&quot; } },
-    { &quot;tag&quot;: &quot;button&quot;, &quot;text&quot;: &quot;Add&quot;, &quot;on&quot;: { &quot;click&quot;: &quot;app.addItem&quot; } }
-  ],
-  &quot;actions&quot;: [&quot;app.addItem&quot;]
-}
+<pre><code class="language-json" data-highlighted><span class="token punctuation">{</span>
+  <span class="token property">"roots"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"app"</span><span class="token operator">:</span> <span class="token string">"object"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"wiring"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token property">"tag"</span><span class="token operator">:</span> <span class="token string">"input"</span><span class="token punctuation">,</span>
+      <span class="token property">"label"</span><span class="token operator">:</span> <span class="token string">"search products…"</span><span class="token punctuation">,</span>
+      <span class="token property">"value"</span><span class="token operator">:</span> <span class="token string">"milk ⟷ app.filter"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token property">"tag"</span><span class="token operator">:</span> <span class="token string">"ul"</span><span class="token punctuation">,</span> <span class="token property">"list"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"path"</span><span class="token operator">:</span> <span class="token string">"app.items"</span><span class="token punctuation">,</span> <span class="token property">"idPath"</span><span class="token operator">:</span> <span class="token string">"id"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token property">"tag"</span><span class="token operator">:</span> <span class="token string">"button"</span><span class="token punctuation">,</span> <span class="token property">"text"</span><span class="token operator">:</span> <span class="token string">"Add"</span><span class="token punctuation">,</span> <span class="token property">"on"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token property">"click"</span><span class="token operator">:</span> <span class="token string">"app.addItem"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"actions"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"app.addItem"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
 </code></pre>
 <p>Records are deliberately <strong>flat and small</strong>: the semantically visible facts —
 tag, label, text, bound props, handlers — sit at the top level; anything
@@ -241,7 +228,7 @@ last one.)</p>
 doesn&#39;t need to forge events. It needs <code>write(&#39;app.filter&#39;, &#39;milk&#39;)</code> and
 <code>call(&#39;app.addItem&#39;, &#39;buy milk&#39;)</code> — and the human watching the screen sees the
 UI respond, because there is only one interface.</p>
-<h3>Observation: push and drain</h3>
+<h3 id="observation-push-and-drain">Observation: push and drain</h3>
 <p>The subscription channel is the delta nobody else can even feed (see
 <a href="/plan-and-prior-art/">Plan &amp; Prior Art</a>:
 WebMCP is tools-only, blind between calls; MCP has <code>resources/subscribe</code> but no
@@ -292,7 +279,7 @@ means observation is inherently auditable. (And <code>changes(since)</code> expo
 WebMCP tool</em> works today within the standard&#39;s tools-only constraints — while
 doubling as the existence proof that the standard needs a real notification
 channel.)</p>
-<h3>Exposure tiers (what &quot;or what the programmer explicitly tells it&quot; means)</h3>
+<h3 id="exposure-tiers-what-or-what-the-programmer-explicitly-tells-it-means">Exposure tiers (what &quot;or what the programmer explicitly tells it&quot; means)</h3>
 <blockquote>
 <p><strong><code>expose</code> scopes the MAP as well as the state</strong> (changed in 1.9.0 — it used
 to scope state only, and this callout used to say so). An element earns a
@@ -400,7 +387,7 @@ affordances is essentially MCP tool definitions generated from application
 code, and the same contract can be handed to an agent as a plain context
 preamble when no protocol is in play. The infrastructure is
 transport-agnostic.</p>
-<h3>What running both layers buys: adaptation and diagnosis</h3>
+<h3 id="what-running-both-layers-buys-adaptation-and-diagnosis">What running both layers buys: adaptation and diagnosis</h3>
 <p>Two operational advantages fall out of exposing the schema (the promise) and
 the auto-map (the actuality) side by side:</p>
 <ul>
@@ -420,7 +407,7 @@ against actuality. This turns the agent from a blind navigator into a
 structural debugger — a class of introspection that DOM-scraping automation
 cannot express, because it only ever sees the build.</li>
 </ul>
-<h3>The contract is a test (shipped: <code>exerciseContract</code>)</h3>
+<h3 id="the-contract-is-a-test-shipped-exercisecontract">The contract is a test (shipped: <code>exerciseContract</code>)</h3>
 <p>If a contract carries <strong>example values</strong>, the contract is executable — the
 equivalent of tjs-lang&#39;s signature tests, one layer up. <code>exerciseContract(agent)</code>
 reads the declared contract and exercises it <strong>through the real surface</strong>:</p>
@@ -440,7 +427,7 @@ visibly. Future: richer exercise steps as custom properties (<code>$exercise</co
 written in <strong>AJS</strong> — serializable like the schema, executable like a test,
 sandboxable like neither <code>Function</code> nor <code>eval</code> — making the contract file
 the entire conformance suite, shippable over the wire.</p>
-<h3>Inline contracts: declare where you build, curate at the top</h3>
+<h3 id="inline-contracts-declare-where-you-build-curate-at-the-top">Inline contracts: declare where you build, curate at the top</h3>
 <p>tosijs declares bindings at the moment of element creation, so contracts are
 declarable there too — a <code>contract</code> prop on any element (stored beside the
 binding metadata, never on the DOM):</p>
@@ -673,7 +660,7 @@ deliberate wins:</p>
 </tbody></table>
 <p>And manifest mode&#39;s <code>roots</code> filter which inline declarations are visible at
 all — you can declare generously and expose narrowly.</p>
-<h3>Why declaration wins: intent captured at authoring time</h3>
+<h3 id="why-declaration-wins-intent-captured-at-authoring-time">Why declaration wins: intent captured at authoring time</h3>
 <p>The deep reason schema-first works is <em>when</em> the declaration happens: at
 authoring time, while the purpose is still known. Everything expensive in
 software archaeology — comprehension, test-writing, drift detection — is
@@ -685,7 +672,7 @@ after, is the same trade tjs makes with types.</p>
 declaration isn&#39;t a comment — <strong>it&#39;s load-bearing</strong>. Comments rot because
 nothing breaks when they lie. A declaration that feeds the map, the tests, and
 the agent&#39;s context breaks visibly when it lies. That&#39;s what keeps it true.</p>
-<h3>ComponentMap: one declaration, four consumers</h3>
+<h3 id="componentmap-one-declaration-four-consumers">ComponentMap: one declaration, four consumers</h3>
 <p>The manifest idea has a component-level counterpart, and it unifies four
 things that are today separate (or absent): <strong>the contract</strong> (what <code>value</code>,
 attributes, and methods are legal), <strong>the description</strong> (what an agent — or a
@@ -782,6 +769,7 @@ a component <em>says so in a checkable form</em>.</p>
   <nav class="doc-nav" aria-label="Documentation">
   <ul>
     <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
     <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
     <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
@@ -813,20 +801,13 @@ a component <em>says so in a checkable form</em>.</p>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../agent/">agent (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
       <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
       <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../share/">share</a></li>
       <li><a class="doc-link" href="../sync/">sync</a></li>
       <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
       <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
       <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -838,9 +819,16 @@ a component <em>says so in a checkable form</em>.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
     </ul>
     </details></li>
-    <li><a class="doc-link" href="../Migration/">Migrating from xinjs to tosijs</a></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -852,6 +840,6 @@ a component <em>says so in a checkable form</em>.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js"></script>
+  <script src="../iife.js?v=28ab27374864"></script>
 </body>
 </html>

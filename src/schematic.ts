@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "EXPERIMENTAL schematic renderer: draw an agent-surface description as SVG — the app's affordance map at its true geometry, DOM-free." }*/
+/*{ "parent": "One User Interface", "description": "EXPERIMENTAL schematic renderer: draw an agent-surface description as SVG — the app's affordance map at its true geometry, DOM-free." }*/
 /*#
 # schematic (EXPERIMENTAL)
 

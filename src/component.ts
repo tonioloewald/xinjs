@@ -2,8 +2,11 @@
 /*#
 # Web-Components
 
-**tosijs** provides the abstract `Component` class to make defining custom-elements
-easier.
+**tosijs** provides the abstract `Component` class to make defining
+[custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) easier. Everything
+here is the platform's own machinery ([shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM),
+[slots](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot),
+[form-associated elements](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals)) with the boilerplate removed.
 
 - `Component` leverages the [elements](/elements/) proxy and [css](/css/) to make
 defining elements very efficient.
@@ -178,7 +181,7 @@ class MenuBar extends Component {
   content = ({slot}) => [slot(), slot({name: 'gadgets'})]
 }
 
-export menuBar = MenuBar.elementCreator()
+export const menuBar = MenuBar.elementCreator()
 ```
 
 One of the neat things about custom-elements is that you can give them *multiple*
@@ -278,7 +281,7 @@ It's also very useful to understand how CSS-Variables interact with the
 when other CSS rules are not. You can use css rules to modify css-variables
 which will then penetrate the `shadowDOM`.
 
-#### refs: {[key:string]: Element | undefined}
+#### parts: {[key:string]: Element | undefined}
 
     render() {
       super.render() // see note

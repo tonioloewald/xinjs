@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "tosijs/agent — the agent surface, the schematic renderer, the contract harnesses and the accessibility audit, in one opt-in subpath." }*/
+/*{ "parent": "One User Interface", "description": "tosijs/agent — the agent surface, the schematic renderer, the contract harnesses and the accessibility audit, in one opt-in subpath." }*/
 /*#
 # tosijs/agent
 
