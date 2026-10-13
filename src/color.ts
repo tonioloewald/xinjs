@@ -1,6 +1,6 @@
-/*{ "parent": "css", "description": "The Color class: parse CSS colors, do color math (brighten, saturate, blend, mix), convert between HSL and RGB, generate contrasting colors." }*/
+/*{"parent": "css", "description": "The Color class: parse CSS colors, do color math (brighten, saturate, blend, mix), convert between HSL and RGB, generate contrasting colors."}*/
 /*#
-# color
+# Color
 
 `tosijs` includes a lightweight, powerful `Color` class for manipulating colors.
 I hope at some point CSS will provide sufficiently capable native color calculations

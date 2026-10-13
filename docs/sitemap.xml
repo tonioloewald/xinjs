@@ -3,41 +3,43 @@
   <url><loc>https://tosijs.net/</loc></url>
   <url><loc>https://tosijs.net/start-here/</loc></url>
   <url><loc>https://tosijs.net/Building-Apps/</loc></url>
+  <url><loc>https://tosijs.net/elements/</loc></url>
   <url><loc>https://tosijs.net/derived-surface/</loc></url>
   <url><loc>https://tosijs.net/xin/</loc></url>
+  <url><loc>https://tosijs.net/index-core/</loc></url>
   <url><loc>https://tosijs.net/bind-vs-observe/</loc></url>
-  <url><loc>https://tosijs.net/elements/</loc></url>
-  <url><loc>https://tosijs.net/agent-surface/</loc></url>
   <url><loc>https://tosijs.net/css/</loc></url>
-  <url><loc>https://tosijs.net/trust-and-transports/</loc></url>
-  <url><loc>https://tosijs.net/headless-embodiment/</loc></url>
-  <url><loc>https://tosijs.net/tosi/</loc></url>
   <url><loc>https://tosijs.net/bind/</loc></url>
-  <url><loc>https://tosijs.net/plan-and-prior-art/</loc></url>
-  <url><loc>https://tosijs.net/component/</loc></url>
-  <url><loc>https://tosijs.net/utilities/</loc></url>
-  <url><loc>https://tosijs.net/agent/</loc></url>
-  <url><loc>https://tosijs.net/audit/</loc></url>
-  <url><loc>https://tosijs.net/list-binding/</loc></url>
+  <url><loc>https://tosijs.net/path-listener/</loc></url>
+  <url><loc>https://tosijs.net/agent-surface/</loc></url>
+  <url><loc>https://tosijs.net/index-state/</loc></url>
   <url><loc>https://tosijs.net/bindings/</loc></url>
+  <url><loc>https://tosijs.net/managing-state/</loc></url>
+  <url><loc>https://tosijs.net/metadata/</loc></url>
+  <url><loc>https://tosijs.net/trust-and-transports/</loc></url>
+  <url><loc>https://tosijs.net/component/</loc></url>
+  <url><loc>https://tosijs.net/list-binding/</loc></url>
+  <url><loc>https://tosijs.net/building-the-dom/</loc></url>
+  <url><loc>https://tosijs.net/headless-embodiment/</loc></url>
+  <url><loc>https://tosijs.net/hot-reload/</loc></url>
+  <url><loc>https://tosijs.net/binding-to-the-dom/</loc></url>
+  <url><loc>https://tosijs.net/share/</loc></url>
+  <url><loc>https://tosijs.net/plan-and-prior-art/</loc></url>
+  <url><loc>https://tosijs.net/sync/</loc></url>
+  <url><loc>https://tosijs.net/entry-points/</loc></url>
+  <url><loc>https://tosijs.net/utilities/</loc></url>
+  <url><loc>https://tosijs.net/audit/</loc></url>
+  <url><loc>https://tosijs.net/agent/</loc></url>
   <url><loc>https://tosijs.net/blueprint-loader/</loc></url>
   <url><loc>https://tosijs.net/color/</loc></url>
   <url><loc>https://tosijs.net/contract/</loc></url>
   <url><loc>https://tosijs.net/contract-check/</loc></url>
-  <url><loc>https://tosijs.net/hot-reload/</loc></url>
-  <url><loc>https://tosijs.net/make-component/</loc></url>
-  <url><loc>https://tosijs.net/metadata/</loc></url>
-  <url><loc>https://tosijs.net/more-math/</loc></url>
-  <url><loc>https://tosijs.net/path-listener/</loc></url>
-  <url><loc>https://tosijs.net/schematic/</loc></url>
-  <url><loc>https://tosijs.net/share/</loc></url>
-  <url><loc>https://tosijs.net/sync/</loc></url>
-  <url><loc>https://tosijs.net/throttle/</loc></url>
-  <url><loc>https://tosijs.net/xin-proxy/</loc></url>
-  <url><loc>https://tosijs.net/index-agent/</loc></url>
-  <url><loc>https://tosijs.net/index-core/</loc></url>
-  <url><loc>https://tosijs.net/index-state/</loc></url>
   <url><loc>https://tosijs.net/form-validation/</loc></url>
+  <url><loc>https://tosijs.net/make-component/</loc></url>
+  <url><loc>https://tosijs.net/more-math/</loc></url>
+  <url><loc>https://tosijs.net/schematic/</loc></url>
+  <url><loc>https://tosijs.net/throttle/</loc></url>
+  <url><loc>https://tosijs.net/index-agent/</loc></url>
   <url><loc>https://tosijs.net/webmcp/</loc></url>
   <url><loc>https://tosijs.net/React/</loc></url>
   <url><loc>https://tosijs.net/Angular/</loc></url>

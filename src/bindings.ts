@@ -1,6 +1,6 @@
-/*{ "parent": "binding", "description": "The built-in collection of common bindings: value (two-way), text, enabled, disabled, list — plus how to write your own." }*/
+/*{"parent": "binding-to-the-dom", "order": 3, "title": "Built-in Bindings", "description": "The built-in collection of common bindings: value (two-way), text, enabled, disabled, list — plus how to write your own."}*/
 /*#
-# bindings
+# Built-in Bindings (bindings)
 
 `bindings` is simply a collection of common bindings.
 
@@ -43,7 +43,7 @@ The `text` binding copies state from `xin` to the bound element's `textContent` 
 > plain prop with a proxy where you have one:
 >
 >     button({ disabled: proxy.flag })
->     button({ disabled: proxy.items.tosi.take(list => !list.length) })
+>     button({ disabled: proxy.items.tosi.as(list => !list.length) })
 
 The `enabled` and `disabled` bindings allow you to make a widget's enabled status
 be determined by the truthiness of something in `xin`, e.g.
@@ -68,7 +68,7 @@ document.body.append(
     elements.button(
         'Save Changes',
         {
-            disabled: myDoc.unsavedChanges.tosi.take(v => !v),
+            disabled: myDoc.unsavedChanges.tosi.as(v => !v),
             onClick() {
                 myDoc.unsavedChanges.value = false
             }
@@ -99,7 +99,7 @@ The `list` binding accepts as options:
 - `idPath: string`
 - `initInstance: (element, item: any) => void`
 - `updateInstance: (element, item: any) => void`
-- `virtual: {width?: number, height: number}`
+- `virtual: { height: number, … }` (see [virtualized lists](/list-binding/#virtualized-lists) for all of its options)
 - `nonVirtualReason: string` — why a long list deliberately renders every item
 - `hiddenProp: symbol | string`
 - `visibleProp: symbol | string`
@@ -127,10 +127,11 @@ silences this along with tosijs's other advice.
 
 ### Virtual List Binding
 
-If you want to bind large arrays with minimal performance impact, you can make a list
-binding `virtual` by passing the `height` (and optionally `width`) of an item.
-Only visible elements will be rendered. Just make sure the values passed represent
-the *minimum* dimensions of the individual rendered items if they can vary in size.
+To bind large arrays with minimal performance impact, make the list binding
+`virtual` by passing the `height` of an item, and give the bound element a
+height and `overflow: auto` so it can scroll. Only visible elements will be
+rendered. [Array Bindings](/list-binding/#virtualized-lists) has the options,
+grids, variable-height rows and window scrolling.
 
 ### Filtered Lists and Detail Views
 

@@ -1,4 +1,4 @@
-# more-math
+# More Math (more-math)
 
 Some simple functions egregiously missing from the Javascript `Math`
 object. They are exported from `tosijs` as the `MoreMath` object.

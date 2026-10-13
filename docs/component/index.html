@@ -14,36 +14,97 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=76dcd3794dc6" data-tosi-doc-system />
-  <title>Web-Components — tosijs</title>
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>Web Components — tosijs</title>
   <meta name="description" content="The Component base class for building custom elements with tosijs: light-DOM by default, automatic slot composition, form association. Declare attributes with withAttributes() so they are typed on this — since 1.10.0 Component has no index signature, so an undeclared this.foo is a type error. static initAttributes is not deprecated (withAttributes sets it, and it adds attributes to an existing class); see Migration." />
   <link rel="canonical" href="https://tosijs.net/component/" />
-  <link rel="alternate" type="text/markdown" href="index.md" title="Web-Components — tosijs (markdown)" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Web Components — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
-  <meta property="og:title" content="Web-Components — tosijs" />
+  <meta property="og:title" content="Web Components — tosijs" />
   <meta property="og:description" content="The Component base class for building custom elements with tosijs: light-DOM by default, automatic slot composition, form association. Declare attributes with withAttributes() so they are typed on this — since 1.10.0 Component has no index signature, so an undeclared this.foo is a type error. static initAttributes is not deprecated (withAttributes sets it, and it adds attributes to an existing class); see Migration." />
   <meta property="og:url" content="https://tosijs.net/component/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Web-Components","description":"The Component base class for building custom elements with tosijs: light-DOM by default, automatic slot composition, form association. Declare attributes with withAttributes() so they are typed on this — since 1.10.0 Component has no index signature, so an undeclared this.foo is a type error. static initAttributes is not deprecated (withAttributes sets it, and it adds attributes to an existing class); see Migration.","url":"https://tosijs.net/component/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Web Components","description":"The Component base class for building custom elements with tosijs: light-DOM by default, automatic slot composition, form association. Declare attributes with withAttributes() so they are typed on this — since 1.10.0 Component has no index signature, so an undeclared this.foo is a type error. static initAttributes is not deprecated (withAttributes sets it, and it adds attributes to an existing class); see Migration.","url":"https://tosijs.net/component/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=4c35b7b1876c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1 id="web-components">Web-Components</h1>
+<h1 id="web-components-component">Web Components (Component)</h1>
 <p><strong>tosijs</strong> provides the abstract <code>Component</code> class to make defining
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements">custom elements</a> easier. Everything
 here is the platform&#39;s own machinery (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM">shadow DOM</a>,
 <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot">slots</a>,
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals">form-associated elements</a>) with the boilerplate removed.</p>
+<pre data-example-options="{&quot;view&quot;:&quot;code&quot;}"><code class="language-js">import { withAttributes } from &#39;tosijs&#39;
+
+class NameTag extends withAttributes({ caption: &#39;Hello, my name is&#39; }) {
+  static preferredTagName = &#39;name-tag&#39;
+  static lightStyleSpec = {
+    &#39;:host&#39;: {
+      display: &#39;inline-flex&#39;,
+      flexDirection: &#39;column&#39;,
+      margin: &#39;4px&#39;,
+      border: &#39;2px solid #c00&#39;,
+      borderRadius: &#39;8px&#39;,
+      overflow: &#39;hidden&#39;,
+      textAlign: &#39;center&#39;,
+    },
+    &#39;:host [part=&quot;caption&quot;]&#39;: {
+      background: &#39;#c00&#39;,
+      color: &#39;white&#39;,
+      padding: &#39;4px 12px&#39;,
+      fontSize: &#39;80%&#39;,
+    },
+    &#39;:host tosi-slot&#39;: {
+      padding: &#39;8px 12px&#39;,
+      fontSize: &#39;150%&#39;,
+    },
+  }
+
+  // what goes inside every &lt;name-tag&gt;: a caption, then whatever it is given
+  content = ({ span, slot }) =&gt; [span({ part: &#39;caption&#39; }), slot()]
+
+  // runs when the element is first shown and whenever an attribute changes
+  render() {
+    super.render()
+    this.parts.caption.textContent = this.caption
+  }
+}
+
+const nameTag = NameTag.elementCreator()
+
+preview.append(
+  nameTag(&#39;Ada&#39;),
+  nameTag({ caption: &#39;Bonjour, je m’appelle&#39; }, &#39;Grace&#39;)
+)
+</code></pre>
+<pre><code class="language-test">test(&#39;a light-DOM component renders its attribute and its children&#39;, async () =&gt; {
+  const [ada, grace] = preview.querySelectorAll(&#39;name-tag&#39;)
+  await new Promise((resolve) =&gt; setTimeout(resolve, 100))
+  expect(ada.shadowRoot).toBe(null)
+  expect(ada.querySelector(&#39;[part=&quot;caption&quot;]&#39;).textContent).toBe(&#39;Hello, my name is&#39;)
+  expect(ada.querySelector(&#39;tosi-slot&#39;).textContent).toBe(&#39;Ada&#39;)
+  grace.caption = &#39;Hi, I am&#39;
+  await new Promise((resolve) =&gt; setTimeout(resolve, 100))
+  expect(grace.querySelector(&#39;[part=&quot;caption&quot;]&#39;).textContent).toBe(&#39;Hi, I am&#39;)
+  expect(grace.getAttribute(&#39;caption&#39;)).toBe(&#39;Hi, I am&#39;)
+  grace.caption = &#39;Bonjour, je m’appelle&#39;
+})
+</code></pre>
+<p>That is a complete custom element: <code>&lt;name-tag caption=&quot;…&quot;&gt;</code> works in HTML, and
+<code>nameTag()</code> creates one from JavaScript.</p>
 <ul>
+<li><strong>The example above has no shadow DOM, and that is the default.</strong> Its content
+is ordinary DOM that you style with ordinary CSS (<code>lightStyleSpec</code>), and
+<code>&lt;slot&gt;</code> still works, so components compose. What a shadow DOM adds is CSS
+isolation; a component only gets one if you give it a <code>shadowStyleSpec</code>.</li>
 <li><code>Component</code> leverages the <a href="/elements/">elements</a> proxy and <a href="/css/">css</a> to make
 defining elements very efficient.</li>
-<li><code>Component</code> makes it easy to create custom-elements with
-no shadowDOM but with slotting behavior so your elements are lighter weight and
-easier to style.</li>
+<li>Attributes are declared once, with their defaults, and become typed properties
+(<code>this.caption</code> above).</li>
 <li>It solves friction points like allowing element tagNames to be changed on-the-fly to avoid registry clashes.</li>
 <li>It allows you to deploy <code>Component</code> classes as zero dependency <a href="/blueprint-loader/">blueprints</a> functions.</li>
 </ul>
@@ -56,7 +117,7 @@ new component&#39;s element and produces instances of it as needed.</p>
 
 class ToolBar extends Component {
   static preferredTagName = &#39;tool-bar&#39;
-  static shadowStyleSpec = {
+  static lightStyleSpec = {
     &#39;:host&#39;: {
       display: &#39;flex&#39;,
       gap: &#39;10px&#39;,
@@ -80,16 +141,57 @@ If omitted, it is derived from the class name (e.g. <code>ToolBar</code> → <co
 but this does not survive minification. <code>elementCreator()</code> returns an
 <code>ElementCreator</code> function that creates instances of the element.</p>
 <p>See <a href="/elements/">elements</a> for more information on <code>ElementCreator</code> functions.</p>
-<h3 id="component-properties">Component properties</h3>
-<h4 id="content-element--element----element----element--null">content: Element | Element[] | () =&gt; Element | () =&gt; Element[] | null</h4>
+<h2 id="component-properties">Component properties</h2>
+<p>The properties of a component instance, most important first. Each has a section
+below, in the same order.</p>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>what it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>content</code></td>
+<td>The template for the inside of the element: elements, or a function that is handed element creators and returns them. Defaults to a single <code>&lt;slot&gt;</code>.</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>Optional. Give a component a <code>value</code> and it behaves like an <code>&lt;input&gt;</code>: setting it re-renders the component and emits <code>change</code>.</td>
+</tr>
+<tr>
+<td><code>parts</code></td>
+<td>Finds elements in your content by name: <code>this.parts.caption</code> is the element with <code>part=&quot;caption&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>hydrated</code>, <code>whenHydrated</code></td>
+<td>Whether the content has been built yet, and a promise that resolves once it has.</td>
+</tr>
+<tr>
+<td><code>internals</code></td>
+<td>The <code>ElementInternals</code> of a form-associated component.</td>
+</tr>
+<tr>
+<td><code>styleNode</code></td>
+<td>The <code>&lt;style&gt;</code> element placed in the shadow root, for a component that has one.</td>
+</tr>
+</tbody></table>
+<h3 id="content">content</h3>
+<pre><code>content: ((elements: ElementsProxy) =&gt; ContentType) | ContentType | null = slot()
+</code></pre>
+<p>A component&#39;s content <code>property</code> can either be static content (it defaults to being a <code>&lt;slot&gt;</code> element) or an arrow function
+that creates the basic content of the element on hydration. Static content will be deep-cloned.</p>
+<p>By using an arrow function the content created can refer to the custom-element&#39;s properties and attributes (and this occurs post-initialization). This also means you can bind event-handlers in the component (which should also be arrow functions unless they don&#39;t need to refer to the element)</p>
+<p>Because a <code>content</code> function is passed the <code>elements</code> proxy, you can easily destructure any element creators you need:</p>
+<pre><code>content = ({div}) =&gt; div(&#39;hello world&#39;)
+</code></pre>
 <p>Here&#39;s a simple example of a custom-element that simply produces a
 <code>&lt;label&gt;</code> wrapped around <code>&lt;span&gt;</code> and an <code>&lt;input&gt;</code>. Its value is synced
 to that of its <code>&lt;input&gt;</code> so the user doesn&#39;t need to care about how
 it works internally.</p>
-<pre><code class="language-js">import { Component, elements } from &#39;tosijs&#39;
+<pre><code class="language-js">import { withAttributes } from &#39;tosijs&#39;
 
-class LabeledInput extends Component {
-  static initAttributes = { caption: &#39;untitled&#39; }
+class LabeledInput extends withAttributes({ caption: &#39;untitled&#39; }) {
   value = &#39;&#39;
 
   content = ({label, span, input}) =&gt; label(span(), input())
@@ -126,9 +228,10 @@ of elements you can take customize elements based on the component&#39;s propert
 In particular, you can use <code>onXxxx</code> syntax sugar to bind events.</p>
 <p>(Note that <strong>data bindings do not operate inside a shadowDOM</strong> — binding dispatch
 cannot &quot;see&quot; elements there, and a component that tries now gets a console warning
-instead of silent failure. The semantically correct model: <strong>a component with a
-shadowDOM is bound like an <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code> — its <code>value</code> is the binding
-surface.</strong> Bind the component itself (e.g. <code>bindings.value</code>) from outside; setting
+instead of silent failure. The semantically correct model is the one for <strong>any</strong>
+stateful component, shadowDOM or not: <strong>it is bound like an <code>&lt;input&gt;</code> or
+<code>&lt;textarea&gt;</code> — its <code>value</code> is the binding surface.</strong> With a shadowDOM it is
+simply the only option. Bind the component itself (e.g. <code>bindings.value</code>) from outside; setting
 <code>value</code> automatically queues <code>render()</code> and emits <code>change</code>, so implement <code>render()</code>
 to reflect <code>value</code> into the shadow DOM and let <code>change</code> events carry edits back out.
 How the component represents its value internally is the implementer&#39;s business —
@@ -139,7 +242,7 @@ a lightDOM component. For non-value internal state, <code>observe()</code> + <co
 <code>unobserve()</code> on disconnect. <strong>Event sugar is the exception</strong>: <code>on()</code> handlers work
 inside open shadow roots — composed events cross the boundary and the dispatcher
 resolves the true origin via <code>composedPath()</code>.)</p>
-<h5 id="elementprops-in-content-arrays">ElementProps in content arrays</h5>
+<h4 id="elementprops-in-content-arrays">ElementProps in content arrays</h4>
 <p>When <code>content</code> returns an array, any plain objects (ElementProps) in the array are
 applied to the <strong>host element</strong> itself, just as they would be applied to the element
 being created by <code>div()</code>, <code>span()</code>, etc. This provides a clean way to set up styles,
@@ -198,7 +301,7 @@ component&#39;s <code>value</code> from outside and implement <code>render()</co
 </blockquote>
 <p>If you&#39;d like to see a more complex example along the same lines, look at
 <a href="https://ui.tosijs.net/form/">form and field</a>.</p>
-<h5 id="names-and-the-slot-attribute"><slot> names and the <code>slot</code> attribute</h5>
+<h4 id="names-and-the-slot-attribute"><slot> names and the <code>slot</code> attribute</h4>
 <pre><code>class MenuBar extends Component {
   static shadowStyleSpec = {
     &#39;:host, :host &gt; slot&#39;: {
@@ -282,21 +385,34 @@ terrible for composite views and excludes <code>tosijs</code>&#39;s data binding
 shadow DOM you manage state updates yourself with <code>observe()</code> + <code>parts</code>;
 <code>on()</code> event handlers do work there via <code>composedPath()</code>).</p>
 </blockquote>
-<h4 id="stylenode-htmlstyleelement">styleNode: HTMLStyleElement</h4>
-<p><code>styleNode</code> is the <code>&lt;style&gt;</code> element that will be inserted into the element&#39;s
-<code>shadowRoot</code>.</p>
-<p>If a <code>Component</code> subclass has no <code>styleNode</code>, no <code>shadowRoot</code> will be
-created. This reduces the memory and performance cost of the element.</p>
-<p>This is to avoid the performance/memory costs associated with the <code>shadowDOM</code>
-for custom-elements with no styling.</p>
-<h5 id="notes">Notes</h5>
-<p>Styling custom-elements can be tricky, and it&#39;s worth learning about
-how the <code>:host</code> and <code>:slotted()</code> selectors work.</p>
-<p>It&#39;s also very useful to understand how CSS-Variables interact with the
-<code>shadowDOM</code>. In particular, CSS-variables are passed into the <code>shadowDOM</code>
-when other CSS rules are not. You can use css rules to modify css-variables
-which will then penetrate the <code>shadowDOM</code>.</p>
-<h4 id="parts-keystring-element--undefined">parts: {[key:string]: Element | undefined}</h4>
+<h3 id="value">value</h3>
+<p><strong>If your component has a <code>value</code>, it should behave like an <code>&lt;input&gt;</code>.</strong>
+That is the model for every stateful component, with or without a shadow DOM:
+the app binds its <code>value</code>, the component reflects <code>value</code> into its own content in
+<code>render()</code>, and a user&#39;s edit sets <code>value</code>, which emits <code>change</code>. See
+<a href="/Building-Apps/#a-stateful-component-is-like-an-input">A stateful component is like an <code>&lt;input&gt;</code></a>.</p>
+<p>The <code>value</code> property is special in Component. It is NOT an attribute - it&#39;s a property
+that can be <em>initialized</em> from an attribute. Here&#39;s what you need to know:</p>
+<ol>
+<li><strong>Declare it with a default</strong>: Simply assign a non-undefined default (e.g., <code>value = &#39;&#39;</code>)</li>
+<li><strong>Initialization</strong>: If a <code>value</code> attribute is present, it initializes the property (as a string)</li>
+<li><strong>Setting value</strong>: You can set it to any type directly (e.g., objects, arrays)</li>
+<li><strong>Change events</strong>: When <code>value</code> changes, a <code>change</code> event is automatically dispatched</li>
+<li><strong>Auto-render</strong>: When <code>value</code> changes, <code>render()</code> is automatically called</li>
+<li><strong>Computed values</strong>: If your value is computed, call <code>queueRender(true)</code> to trigger change + render</li>
+</ol>
+<p><strong>Do NOT put <code>value</code> in <code>static initAttributes</code></strong> - it will be rejected with a warning.
+The Component class handles <code>value</code> specially to provide form-like behavior automatically.</p>
+<h3 id="parts">parts</h3>
+<pre><code>parts: {[key:string]: Element | undefined}
+</code></pre>
+<p><code>this.parts</code> returns a proxy that provides elements conveniently and efficiently. It
+is intended to facilitate access to static elements (it memoizes its values the
+first time they are computed).</p>
+<p><code>this.parts.foo</code> finds a content element by, in order: <code>part=&quot;foo&quot;</code> (the preferred
+form — it&#39;s also what <code>::part()</code> styling targets), and finally <code>foo</code> as a css
+selector — so <code>this.parts[&#39;.foo&#39;]</code> finds a content element with <code>class=&quot;foo&quot;</code>
+while <code>this.parts.h1</code> finds an <code>&lt;h1&gt;</code>.</p>
 <pre><code>render() {
   super.render() // see note
   const {span, input} = this.parts
@@ -314,13 +430,6 @@ automatically when the value changes. Always call <code>super.render()</code> if
 <code>super.render()</code> (for form-associated), and <code>super()</code> in the <code>constructor()</code>
 should you override them.</p>
 </blockquote>
-<p><code>this.parts</code> returns a proxy that provides elements conveniently and efficiently. It
-is intended to facilitate access to static elements (it memoizes its values the
-first time they are computed).</p>
-<p><code>this.parts.foo</code> finds a content element by, in order: <code>part=&quot;foo&quot;</code> (the preferred
-form — it&#39;s also what <code>::part()</code> styling targets), and finally <code>foo</code> as a css
-selector — so <code>this.parts[&#39;.foo&#39;]</code> finds a content element with <code>class=&quot;foo&quot;</code>
-while <code>this.parts.h1</code> finds an <code>&lt;h1&gt;</code>.</p>
 <p>A component&#39;s <code>[part]</code> elements are captured from its content when it hydrates, so
 <code>this.parts.foo</code> always resolves to <strong>your own</strong> part — never a matching <code>[part]</code>
 inside a nested component or slotted content.</p>
@@ -331,61 +440,79 @@ If a public getter needs a ref before the element is guaranteed inserted, gate i
 <code>this.hydrated</code> or <code>await this.whenHydrated</code> first. (Prior to this you could not ask
 whether an element was hydrated without probing <code>parts</code>, and that probe permanently
 bound the proxy to the light DOM.)</p>
-<h3 id="component-properties-1">Component properties</h3>
-<h4 id="content-elements-elementsproxy--contenttype--null--contenttype--slot">content: ((elements: ElementsProxy) =&gt; ContentType) | null | ContentType = slot()</h4>
-<p>A component&#39;s content <code>property</code> can either be static content (it defaults to being a <code>&lt;slot&gt;</code> element) or an arrow function
-that creates the basic content of the element on hydration. Static content will be deep-cloned.</p>
-<p>By using an arrow function the content created can refer to the custom-element&#39;s properties and attributes (and this occurs post-initialization). This also means you can bind event-handlers in the component (which should also be arrow functions unless they don&#39;t need to refer to the element)</p>
-<p>Because a <code>content</code> function is passed the <code>elements</code> proxy, you can easily destructure any element creators you need:</p>
-<pre><code>content = ({div}) =&gt; div(&#39;hello world&#39;)
+<h3 id="hydrated-whenhydrated">hydrated, whenHydrated</h3>
+<p>A component&#39;s content is built when the element is first connected to a document,
+not when it is constructed. <code>this.hydrated</code> is <code>true</code> once that has happened, and
+<code>await this.whenHydrated</code> waits for it (it resolves immediately if it already has).
+Use them before reading <code>parts</code> on an element that may not have been inserted yet.</p>
+<h3 id="internals">internals</h3>
+<p>Present when the class sets <code>static formAssociated = true</code>: the element&#39;s
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals"><code>ElementInternals</code></a>,
+used for form values, validation, ARIA and custom states. See
+<a href="#static-formassociated-boolean"><code>static formAssociated</code></a> below.</p>
+<h3 id="stylenode">styleNode</h3>
+<pre><code>styleNode: HTMLStyleElement
 </code></pre>
-<p><code>ContentType</code> can be an HTMLElement or an array of elements.</p>
-<blockquote>
-<p>Note that if a component does not use the shadowDOM, its <code>&lt;slot&gt;</code> elements will be replaced with <code>&lt;tosi-slot&gt;</code> elements.
-This allows composition to work as expected without requiring the shadow DOM.</p>
-</blockquote>
-<h3 id="component-static-properties">Component static properties</h3>
-<h4 id="static-contract-componentmap---in-flux">static contract: ComponentMap  🚧 IN FLUX</h4>
-<blockquote>
-<p><strong>🚧 THE CONTRACT API IS IN FLUX — expect it to change without a deprecation
-cycle.</strong> Not &quot;experimental&quot; in the shrug sense: the <em>idea</em> is settled and the
-feature works. What is unsettled is its shape, and we would rather get that
-right than freeze it early and carry a mistake. Changes will land in patch
-and minor releases, and the CHANGELOG will say so. <strong>Nothing else in
-<code>Component</code> is in flux</strong> — <code>initAttributes</code>, <code>content</code>, <code>parts</code>, form
-association and the rest are stable.</p>
-<p>Specifically open: how <code>contract.attributes</code> and <code>initAttributes</code> divide the
-work; whether an integrator&#39;s overlay may <em>embellish</em> a component&#39;s own
-declaration rather than replace it wholesale; and the precedence between the
-two (tosijs#29, #30). It settles when those close.</p>
-<p>If you need stability today, declare attributes with <code>initAttributes</code> — it is
-stable, it is terser, and since 1.8.1 it is described to agents identically.</p>
-</blockquote>
-<p>A component&#39;s self-declaration: what it is, what its attributes and value are
-allowed to be, which <code>part</code>s it exposes, and a test fixture — in one structure.
-It feeds the docs, the agent surface, and <code>exerciseComponent()</code>, so a
-declaration that lies breaks visibly.</p>
-<pre><code>class Stepper extends Component {
-  static preferredTagName = &#39;my-stepper&#39;
-  static initAttributes = { count: 0, mode: &#39;add&#39; }
-  static contract = {
-    description: &#39;increments a counter&#39;,
-    attributes: { mode: { enum: [&#39;add&#39;, &#39;subtract&#39;] } },
-  }
-}
-</code></pre>
-<p><strong><code>initAttributes</code> DECLARES; <code>contract.attributes</code> ENRICHES.</strong> They compose —
-declaring both is the intended shape, not an error. <code>initAttributes</code> gives a
-name, a default and an inferred type; the contract adds constraints the
-built-in checker enforces (<code>enum</code>, <code>const</code>) plus anything a registered schema
-engine understands. A contract entry may omit <code>default</code> when <code>initAttributes</code>
-already supplies one, so constraining one attribute costs one line rather than
-a rewrite. The contract wins per key.</p>
-<p>Both forms are described identically to an agent. (Before 1.8.1 they were not:
-attributes were read from the contract alone, so a component using
-<code>initAttributes</code> — nearly all of them — appeared in the map with no attribute
-description at all. tosijs#29.)</p>
-<h3 id="withattributes-attributes-that-are-typed-on-this">withAttributes: attributes that are typed on <code>this</code></h3>
+<p><code>styleNode</code> is the <code>&lt;style&gt;</code> element that will be inserted into the element&#39;s
+<code>shadowRoot</code>.</p>
+<p>If a <code>Component</code> subclass has no <code>styleNode</code>, no <code>shadowRoot</code> will be
+created. This reduces the memory and performance cost of the element.</p>
+<p>This is to avoid the performance/memory costs associated with the <code>shadowDOM</code>
+for custom-elements with no styling.</p>
+<h4 id="notes">Notes</h4>
+<p>Styling custom-elements can be tricky, and it&#39;s worth learning about
+how the <code>:host</code> and <code>:slotted()</code> selectors work.</p>
+<p>It&#39;s also very useful to understand how CSS-Variables interact with the
+<code>shadowDOM</code>. In particular, CSS-variables are passed into the <code>shadowDOM</code>
+when other CSS rules are not. You can use css rules to modify css-variables
+which will then penetrate the <code>shadowDOM</code>.</p>
+<h2 id="component-static-properties">Component static properties</h2>
+<p>What you declare on the class. Each has a section below, in the same order.</p>
+<table>
+<thead>
+<tr>
+<th>static property</th>
+<th>what it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>preferredTagName</code></td>
+<td>The tag name, e.g. <code>&#39;name-tag&#39;</code>.</td>
+</tr>
+<tr>
+<td><code>withAttributes()</code>, <code>initAttributes</code></td>
+<td>Declare the attributes that are kept in sync with typed properties.</td>
+</tr>
+<tr>
+<td><code>lightStyleSpec</code></td>
+<td>Styles for a component with no shadow DOM, added to the document once.</td>
+</tr>
+<tr>
+<td><code>shadowStyleSpec</code></td>
+<td>Styles placed inside a shadow root. Setting it is what gives the component a shadow DOM.</td>
+</tr>
+<tr>
+<td><code>formAssociated</code></td>
+<td>Set to <code>true</code> to take part in forms.</td>
+</tr>
+<tr>
+<td><code>extends</code></td>
+<td>For customized built-in elements.</td>
+</tr>
+<tr>
+<td><code>contract</code> 🚧</td>
+<td>The component&#39;s description of itself: constraints, parts and a test fixture. In flux.</td>
+</tr>
+<tr>
+<td><code>Component.elements</code></td>
+<td>The <a href="/elements/">elements</a> proxy, for convenience.</td>
+</tr>
+</tbody></table>
+<h3 id="static-preferredtagname-string"><code>static preferredTagName?: string</code></h3>
+<p>Sets the desired tag name for the custom element. If omitted, it is derived
+from the class name (e.g. <code>ToolBar</code> → <code>tool-bar</code>), but this does <strong>not</strong> survive
+minification. If the tag is already in use, a unique anonymous tag is generated.</p>
+<h3 id="withattributes-and-static-initattributes"><code>withAttributes()</code> and <code>static initAttributes</code></h3>
 <p><code>static initAttributes</code> installs <em>instance</em> properties at hydration, and
 TypeScript cannot derive an instance type from a static declared in the same
 class. Declare the map as a <strong>value</strong> instead and inference does the work:</p>
@@ -555,38 +682,25 @@ test(&#39;a computed attribute is set from markup, in a real browser&#39;, async
   static initAttributes = { caption: &#39;&#39;, count: 0 }
 }
 </code></pre>
-<h3 id="component-methods">Component methods</h3>
-<h4 id="queuerendertriggerchangeevent--false-void">queueRender(triggerChangeEvent = false): void</h4>
-<p>Uses <code>requestAnimationFrame</code> to queue a call to the component&#39;s <code>render</code> method. If
-called with <code>true</code> it will also trigger a <code>change</code> event.</p>
-<h4 id="private-initvalue-void">private initValue(): void</h4>
-<p><strong>Don&#39;t call this!</strong> Sets up expected behavior for an <code>HTMLElement</code> with
-a value (i.e. triggering a <code>change</code> events and <code>render</code> when the <code>value</code> changes).</p>
-<h4 id="private-hydrate-void">private hydrate(): void</h4>
-<p><strong>Don&#39;t call this</strong> Appends <code>content</code> to the element (or its <code>shadowRoot</code> if it has a <code>styleNode</code>)</p>
-<h4 id="connectedcallback-void">connectedCallback(): void</h4>
-<p>If the class has a <code>handleResize</code> handler then a ResizeObserver will trigger
-<code>resize</code> events on the element when its size changes and <code>handleResize</code> will be
-set up to respond to them. (The legacy name <code>onResize</code> still works but is
-deprecated — the <code>on&lt;Event&gt;</code> prefix is reserved for event-handler sugar in the
-<a href="/elements/">elements</a> factory, so component members must not use it.) Name by
-intent: <code>handle&lt;Event&gt;</code> for a handler function the component invokes (e.g.
-<code>handleResize</code>, <code>handleClick</code>), or <code>add&lt;Event&gt;Listener</code> for a method that
-registers listeners for a synthetic event the component dispatches (e.g.
-<code>addClickListener</code>).</p>
-<p>Also, if the subclass has defined <code>value</code>, calls <code>initValue()</code>.</p>
-<p><code>connectedCallback</code> is a great place to attach <strong>event-handlers</strong> to elements in your component.</p>
-<p>Be sure to call <code>super.connectedCallback()</code> if you implement <code>connectedCallback</code> in the subclass.</p>
-<h4 id="disconnectedcallback-void">disconnectedCallback(): void</h4>
-<p>Be sure to call <code>super.disconnectedCallback()</code> if you implement <code>disconnectedCallback</code> in the subclass.</p>
-<h4 id="render-void">render(): void</h4>
-<p>Be sure to call <code>super.render()</code> if you implement <code>render</code> in the subclass.</p>
-<h3 id="component-static-properties-1">Component static properties</h3>
-<h4 id="componentelements">Component.elements</h4>
-<pre><code>const {label, span, input} = Component.elements
+<h3 id="static-lightstylespec-tosistylesheet"><code>static lightStyleSpec?: TosiStyleSheet</code></h3>
+<p>Global styles appended to <code>document.head</code> when the first instance is inserted
+in the DOM. <code>:host</code> selectors are automatically rewritten to the tag name, e.g.:</p>
+<pre><code>class ToolBar extends Component {
+  static preferredTagName = &#39;tool-bar&#39;
+  static lightStyleSpec = {
+    &#39;:host&#39;: {
+      display: &#39;flex&#39;,
+      padding: &#39;var(--toolbar-padding, 0 8px)&#39;,
+      gap: &#39;4px&#39;
+    }
+  }
+}
 </code></pre>
-<p>This is simply provided as a convenient way to get to <a href="/elements/">elements</a></p>
-<h4 id="static-formassociated-boolean">static formAssociated: boolean</h4>
+<p>produces <code>tool-bar { display: flex; ... }</code> in a global <code>&lt;style&gt;</code> element.</p>
+<h3 id="static-shadowstylespec-tosistylesheet"><code>static shadowStyleSpec?: TosiStyleSheet</code></h3>
+<p>Styles injected into the component&#39;s shadow DOM as a <code>&lt;style&gt;</code> element.
+Setting this property causes the component to use shadow DOM.</p>
+<h3 id="static-formassociated-boolean">static formAssociated: boolean</h3>
 <p>Set <code>static formAssociated = true</code> in your subclass to enable form participation
 via <code>ElementInternals</code>. When true, the component will have <code>this.internals</code> available
 for form integration, validation, ARIA properties, and custom states.</p>
@@ -602,21 +716,86 @@ API documentation, including:</p>
 <li>Custom states via <code>this.internals.states</code></li>
 <li>Complete examples</li>
 </ul>
-<h4 id="value-property">value property</h4>
-<p><strong>If your component has a <code>value</code>, it should behave like an <code>&lt;input&gt;</code>.</strong></p>
-<p>The <code>value</code> property is special in Component. It is NOT an attribute - it&#39;s a property
-that can be <em>initialized</em> from an attribute. Here&#39;s what you need to know:</p>
-<ol>
-<li><strong>Declare it with a default</strong>: Simply assign a non-undefined default (e.g., <code>value = &#39;&#39;</code>)</li>
-<li><strong>Initialization</strong>: If a <code>value</code> attribute is present, it initializes the property (as a string)</li>
-<li><strong>Setting value</strong>: You can set it to any type directly (e.g., objects, arrays)</li>
-<li><strong>Change events</strong>: When <code>value</code> changes, a <code>change</code> event is automatically dispatched</li>
-<li><strong>Auto-render</strong>: When <code>value</code> changes, <code>render()</code> is automatically called</li>
-<li><strong>Computed values</strong>: If your value is computed, call <code>queueRender(true)</code> to trigger change + render</li>
-</ol>
-<p><strong>Do NOT put <code>value</code> in <code>static initAttributes</code></strong> - it will be rejected with a warning.
-The Component class handles <code>value</code> specially to provide form-like behavior automatically.</p>
-<h4 id="adoptedcallback">adoptedCallback</h4>
+<h3 id="static-extends-string"><code>static extends?: string</code></h3>
+<p>For customized built-in elements. Passed as <code>{ extends }</code> to <code>customElements.define()</code>.</p>
+<h3 id="static-contract-componentmap---in-flux">static contract: ComponentMap  🚧 IN FLUX</h3>
+<blockquote>
+<p><strong>🚧 THE CONTRACT API IS IN FLUX — expect it to change without a deprecation
+cycle.</strong> Not &quot;experimental&quot; in the shrug sense: the <em>idea</em> is settled and the
+feature works. What is unsettled is its shape, and we would rather get that
+right than freeze it early and carry a mistake. Changes will land in patch
+and minor releases, and the CHANGELOG will say so. <strong>Nothing else in
+<code>Component</code> is in flux</strong> — <code>initAttributes</code>, <code>content</code>, <code>parts</code>, form
+association and the rest are stable.</p>
+<p>Specifically open: how <code>contract.attributes</code> and <code>initAttributes</code> divide the
+work; whether an integrator&#39;s overlay may <em>embellish</em> a component&#39;s own
+declaration rather than replace it wholesale; and the precedence between the
+two (tosijs#29, #30). It settles when those close.</p>
+<p>If you need stability today, declare attributes with <code>initAttributes</code> — it is
+stable, it is terser, and since 1.8.1 it is described to agents identically.</p>
+</blockquote>
+<p>A component&#39;s self-declaration: what it is, what its attributes and value are
+allowed to be, which <code>part</code>s it exposes, and a test fixture — in one structure.
+It feeds the docs, the agent surface, and <code>exerciseComponent()</code>, so a
+declaration that lies breaks visibly.</p>
+<pre><code>class Stepper extends Component {
+  static preferredTagName = &#39;my-stepper&#39;
+  static initAttributes = { count: 0, mode: &#39;add&#39; }
+  static contract = {
+    description: &#39;increments a counter&#39;,
+    attributes: { mode: { enum: [&#39;add&#39;, &#39;subtract&#39;] } },
+  }
+}
+</code></pre>
+<p><strong><code>initAttributes</code> DECLARES; <code>contract.attributes</code> ENRICHES.</strong> They compose —
+declaring both is the intended shape, not an error. <code>initAttributes</code> gives a
+name, a default and an inferred type; the contract adds constraints the
+built-in checker enforces (<code>enum</code>, <code>const</code>) plus anything a registered schema
+engine understands. A contract entry may omit <code>default</code> when <code>initAttributes</code>
+already supplies one, so constraining one attribute costs one line rather than
+a rewrite. The contract wins per key.</p>
+<p>Both forms are described identically to an agent. (Before 1.8.1 they were not:
+attributes were read from the contract alone, so a component using
+<code>initAttributes</code> — nearly all of them — appeared in the map with no attribute
+description at all. tosijs#29.)</p>
+<h3 id="componentelements">Component.elements</h3>
+<pre><code>const {label, span, input} = Component.elements
+</code></pre>
+<p>This is simply provided as a convenient way to get to <a href="/elements/">elements</a></p>
+<h2 id="component-methods">Component methods</h2>
+<h3 id="queuerendertriggerchangeevent--false-void">queueRender(triggerChangeEvent = false): void</h3>
+<p>Uses <code>requestAnimationFrame</code> to queue a call to the component&#39;s <code>render</code> method. If
+called with <code>true</code> it will also trigger a <code>change</code> event.</p>
+<h3 id="private-initvalue-void">private initValue(): void</h3>
+<p><strong>Don&#39;t call this!</strong> Sets up expected behavior for an <code>HTMLElement</code> with
+a value (i.e. triggering a <code>change</code> events and <code>render</code> when the <code>value</code> changes).</p>
+<h3 id="private-hydrate-void">private hydrate(): void</h3>
+<p><strong>Don&#39;t call this</strong> Appends <code>content</code> to the element (or its <code>shadowRoot</code> if it has a <code>styleNode</code>)</p>
+<h3 id="connectedcallback-void">connectedCallback(): void</h3>
+<p>If the class has a <code>handleResize</code> handler then a ResizeObserver will trigger
+<code>resize</code> events on the element when its size changes and <code>handleResize</code> will be
+set up to respond to them. (The legacy name <code>onResize</code> still works but is
+deprecated — the <code>on&lt;Event&gt;</code> prefix is reserved for event-handler sugar in the
+<a href="/elements/">elements</a> factory, so component members must not use it.) Name by
+intent: <code>handle&lt;Event&gt;</code> for a handler function the component invokes (e.g.
+<code>handleResize</code>, <code>handleClick</code>), or <code>add&lt;Event&gt;Listener</code> for a method that
+registers listeners for a synthetic event the component dispatches (e.g.
+<code>addClickListener</code>).</p>
+<p>Also, if the subclass has defined <code>value</code>, calls <code>initValue()</code>.</p>
+<p><code>connectedCallback</code> is a great place to attach <strong>event-handlers</strong> to elements in your component.</p>
+<p>Be sure to call <code>super.connectedCallback()</code> if you implement <code>connectedCallback</code> in the subclass.</p>
+<h3 id="disconnectedcallback-void">disconnectedCallback(): void</h3>
+<p>Be sure to call <code>super.disconnectedCallback()</code> if you implement <code>disconnectedCallback</code> in the subclass.</p>
+<h3 id="render-void">render(): void</h3>
+<p>Called (on an animation frame) when the component is first shown and whenever
+an attribute or its <code>value</code> changes, or you call <code>queueRender()</code>. Use it to bring
+the DOM that <code>content</code> built up to date <strong>in place</strong>: set a <code>textContent</code>, toggle
+<code>hidden</code>, update a class. Do not rebuild the content here unless the component&#39;s
+structure has genuinely changed: replacing elements throws away focus, caret
+position and scroll state, and is slower. See
+<a href="/Building-Apps/#content-vs-render">Building Apps</a>.</p>
+<p>Be sure to call <code>super.render()</code> if you implement <code>render</code> in the subclass.</p>
+<h3 id="adoptedcallback">adoptedCallback</h3>
 <p>The <code>adoptedCallback</code> lifecycle method is called when a component is moved to a different
 document, such as into or out of an iframe. Subclasses can implement this directly.</p>
 <pre><code class="language-js">import { Component, elements } from &#39;tosijs&#39;
@@ -675,7 +854,36 @@ preview.append(widgetSlot, div(moveBtn, backBtn), frame)
   background: #fff;
 }
 </code></pre>
-<h3 id="the-contractviolation-event">The <code>contractviolation</code> event</h3>
+<h2 id="component-static-methods">Component static methods</h2>
+<h3 id="componentelementcreator-elementcreator">Component.elementCreator(): ElementCreator</h3>
+<pre><code>export const toolBar = ToolBar.elementCreator()
+</code></pre>
+<p>Returns a function that creates the custom-element. Registration uses
+<code>preferredTagName</code>, <code>lightStyleSpec</code>, <code>shadowStyleSpec</code>, and <code>extends</code>
+from the class&#39;s static properties.</p>
+<p><code>elementCreator</code> is memoized and only generated once.</p>
+<p><strong>Naming the creator&#39;s type: use <code>ElementCreator&lt;YourComponent&gt;</code>.</strong></p>
+<pre><code>import type { ElementCreator } from &#39;tosijs&#39;
+
+let toolBar: ElementCreator&lt;ToolBar&gt;
+toolBar = ToolBar.elementCreator()
+toolBar().someMethodOfYours()      // typed
+</code></pre>
+<p>The natural-looking alternative silently loses the type:</p>
+<pre><code>// DON&#39;T — resolves to unknown
+let toolBar: ReturnType&lt;typeof ToolBar.elementCreator&gt;
+toolBar().someMethodOfYours()      // TS18046: &#39;toolBar()&#39; is of type &#39;unknown&#39;
+</code></pre>
+<p><code>elementCreator</code> is declared <code>static elementCreator&lt;C = Component&gt;(this: new () =&gt; C)</code>, so the component type is inferred from <code>this</code>. <code>ReturnType&lt;&gt;</code> does not
+bind <code>this</code>, so <code>C</code> falls back and the result is <code>unknown</code> — with no error at
+the declaration, only later at every use. This accounted for 156 of the
+type errors in tosijs&#39;s own test suite before it was noticed.</p>
+<blockquote>
+<p><strong>Deprecated:</strong> Passing <code>{ tag, styleSpec, extends }</code> as options to
+<code>elementCreator()</code> still works but emits deprecation warnings.
+Use the static properties instead.</p>
+</blockquote>
+<h2 id="the-contractviolation-event">The <code>contractviolation</code> event</h2>
 <p>When a component declares <code>contract.value</code> and a <strong>binding</strong> writes a value
 that violates it, the write is applied and reported rather than thrown — state
 is authoritative on that path, and throwing inside the binding-dispatch loop
@@ -704,60 +912,6 @@ come back if the user re-breaks the field:</p>
 is the number you actually wanted.</p>
 <p>A <strong>direct</strong> write (<code>el.value = bad</code>) still throws instead — no event, because
 the caller is right there to catch it.</p>
-<h3 id="component-static-properties-2">Component static properties</h3>
-<h4 id="static-preferredtagname-string"><code>static preferredTagName?: string</code></h4>
-<p>Sets the desired tag name for the custom element. If omitted, it is derived
-from the class name (e.g. <code>ToolBar</code> → <code>tool-bar</code>), but this does <strong>not</strong> survive
-minification. If the tag is already in use, a unique anonymous tag is generated.</p>
-<h4 id="static-shadowstylespec-tosistylesheet"><code>static shadowStyleSpec?: TosiStyleSheet</code></h4>
-<p>Styles injected into the component&#39;s shadow DOM as a <code>&lt;style&gt;</code> element.
-Setting this property causes the component to use shadow DOM.</p>
-<h4 id="static-lightstylespec-tosistylesheet"><code>static lightStyleSpec?: TosiStyleSheet</code></h4>
-<p>Global styles appended to <code>document.head</code> when the first instance is inserted
-in the DOM. <code>:host</code> selectors are automatically rewritten to the tag name, e.g.:</p>
-<pre><code>class ToolBar extends Component {
-  static preferredTagName = &#39;tool-bar&#39;
-  static lightStyleSpec = {
-    &#39;:host&#39;: {
-      display: &#39;flex&#39;,
-      padding: &#39;var(--toolbar-padding, 0 8px)&#39;,
-      gap: &#39;4px&#39;
-    }
-  }
-}
-</code></pre>
-<p>produces <code>tool-bar { display: flex; ... }</code> in a global <code>&lt;style&gt;</code> element.</p>
-<h4 id="static-extends-string"><code>static extends?: string</code></h4>
-<p>For customized built-in elements. Passed as <code>{ extends }</code> to <code>customElements.define()</code>.</p>
-<h3 id="component-static-methods">Component static methods</h3>
-<h4 id="componentelementcreator-elementcreator">Component.elementCreator(): ElementCreator</h4>
-<pre><code>export const toolBar = ToolBar.elementCreator()
-</code></pre>
-<p>Returns a function that creates the custom-element. Registration uses
-<code>preferredTagName</code>, <code>lightStyleSpec</code>, <code>shadowStyleSpec</code>, and <code>extends</code>
-from the class&#39;s static properties.</p>
-<p><code>elementCreator</code> is memoized and only generated once.</p>
-<p><strong>Naming the creator&#39;s type: use <code>ElementCreator&lt;YourComponent&gt;</code>.</strong></p>
-<pre><code>import type { ElementCreator } from &#39;tosijs&#39;
-
-let toolBar: ElementCreator&lt;ToolBar&gt;
-toolBar = ToolBar.elementCreator()
-toolBar().someMethodOfYours()      // typed
-</code></pre>
-<p>The natural-looking alternative silently loses the type:</p>
-<pre><code>// DON&#39;T — resolves to unknown
-let toolBar: ReturnType&lt;typeof ToolBar.elementCreator&gt;
-toolBar().someMethodOfYours()      // TS18046: &#39;toolBar()&#39; is of type &#39;unknown&#39;
-</code></pre>
-<p><code>elementCreator</code> is declared <code>static elementCreator&lt;C = Component&gt;(this: new () =&gt; C)</code>, so the component type is inferred from <code>this</code>. <code>ReturnType&lt;&gt;</code> does not
-bind <code>this</code>, so <code>C</code> falls back and the result is <code>unknown</code> — with no error at
-the declaration, only later at every use. This accounted for 156 of the
-type errors in tosijs&#39;s own test suite before it was noticed.</p>
-<blockquote>
-<p><strong>Deprecated:</strong> Passing <code>{ tag, styleSpec, extends }</code> as options to
-<code>elementCreator()</code> still works but emits deprecation warnings.
-Use the static properties instead.</p>
-</blockquote>
 <h2 id="examples">Examples</h2>
 <p><a href="https://ui.tosijs.net">tosijs-ui</a> is a component library built using this <code>Component</code> class
 that provides the essential additions to standard HTML elements needed to build many
@@ -785,43 +939,51 @@ in your application using <a href="https://babylonjs.com/">babylonjs</a></li>
     <li><a class="doc-link" href="../">tosijs</a></li>
     <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
-    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
-    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
     <ul>
-      <li><a class="doc-link" href="../color/">color</a></li>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <li><details open><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
     <ul>
-      <li><a class="doc-link" href="../xin/">The tosi proxy</a></li>
-      <li><a class="doc-link" href="../metadata/">metadata</a></li>
-      <li><a class="doc-link" href="../path-listener/">path-listener</a></li>
-      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details open><summary><a class="doc-link current" href="../component/" aria-current="page">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
     <ul>
       <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
-      <li><a class="doc-link" href="../list-binding/">binding arrays</a></li>
-      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
     </ul>
     </details></li>
-    <li><details open><summary><a class="doc-link current" href="../component/" aria-current="page">Web-Components</a></summary>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
     <ul>
-      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
-      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
-      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
     </ul>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
-      <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../share/">share</a></li>
-      <li><a class="doc-link" href="../sync/">sync</a></li>
-      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
-      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -833,13 +995,13 @@ in your application using <a href="https://babylonjs.com/">babylonjs</a></li>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
-      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
       <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
@@ -854,6 +1016,6 @@ in your application using <a href="https://babylonjs.com/">babylonjs</a></li>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=76dcd3794dc6"></script>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
 </body>
 </html>

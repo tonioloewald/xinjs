@@ -1,4 +1,4 @@
-# hotReload
+# Hot Reload (hotReload)
 
 `hotReload()` persists any root-level paths in `xin` that its test function evaluates as true
 to [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). It restores them (by overlay) on the

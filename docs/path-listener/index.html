@@ -14,25 +14,25 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=76dcd3794dc6" data-tosi-doc-system />
-  <title>path-listener — tosijs</title>
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>Path Listener — tosijs</title>
   <meta name="description" content="The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system." />
   <link rel="canonical" href="https://tosijs.net/path-listener/" />
-  <link rel="alternate" type="text/markdown" href="index.md" title="path-listener — tosijs (markdown)" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Path Listener — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
-  <meta property="og:title" content="path-listener — tosijs" />
+  <meta property="og:title" content="Path Listener — tosijs" />
   <meta property="og:description" content="The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system." />
   <meta property="og:url" content="https://tosijs.net/path-listener/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"path-listener","description":"The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system.","url":"https://tosijs.net/path-listener/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Path Listener","description":"The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system.","url":"https://tosijs.net/path-listener/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=4c35b7b1876c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1 id="path-listener">path-listener</h1>
+<h1 id="path-listener-path-listener">Path Listener (path-listener)</h1>
 <p><code>path-listener</code> implements the <code>tosijs</code> observer model. Although these events
 are exported from <code>tosijs</code> they shouldn&#39;t need to be used very often. Mostly
 they&#39;re used to manage state.</p>
@@ -162,43 +162,51 @@ specific and stable enough to look like a real finding.</p>
     <li><a class="doc-link" href="../">tosijs</a></li>
     <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
-    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
-    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <li><details open><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
     <ul>
-      <li><a class="doc-link" href="../color/">color</a></li>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link current" href="../path-listener/" aria-current="page">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
     </ul>
     </details></li>
-    <li><details open><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
     <ul>
-      <li><a class="doc-link" href="../xin/">The tosi proxy</a></li>
-      <li><a class="doc-link" href="../metadata/">metadata</a></li>
-      <li><a class="doc-link current" href="../path-listener/" aria-current="page">path-listener</a></li>
-      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
     <ul>
       <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
-      <li><a class="doc-link" href="../list-binding/">binding arrays</a></li>
-      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../component/">Web-Components</a></summary>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
     <ul>
-      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
-      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
-      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
     </ul>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
-      <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../share/">share</a></li>
-      <li><a class="doc-link" href="../sync/">sync</a></li>
-      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
-      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -210,13 +218,13 @@ specific and stable enough to look like a real finding.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
-      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
       <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
@@ -231,6 +239,6 @@ specific and stable enough to look like a real finding.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=76dcd3794dc6"></script>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
 </body>
 </html>

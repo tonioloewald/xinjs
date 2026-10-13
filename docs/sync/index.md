@@ -1,4 +1,4 @@
-# sync
+# Network Sync (sync)
 
 `sync()` synchronizes state across the network in real-time. Pass it a
 transport, options, and boxed proxies from `tosi()` — local changes are

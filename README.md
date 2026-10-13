@@ -83,7 +83,9 @@ What the principles buy you:
 - **O(1) DOM updates, even for big lists.** A state change surgically updates exactly
   the bound nodes — no virtual DOM, no diffing, no re-render-the-world. And because
   virtual list bindings are built in, a 100,000-row list only ever renders (and
-  updates) the handful of rows actually on screen.
+  updates) the handful of rows actually on screen. (Give the list `virtual` and a
+  container that scrolls; an unvirtualized list of more than 10 items warns. See
+  [Array Bindings](https://tosijs.net/list-binding/).)
 - **No JSX, no transpilation, no build step required.** Pure JS/TS in, native DOM
   nodes out — works in plain JavaScript or TypeScript.
 - **No lock-in.** State is a plain observable object graph, not a framework you
@@ -127,7 +129,7 @@ const { h4, ul, label, input } = elements
 preview.append(
   h4('To Do List'),
   ul(
-    ...readmeTodoDemo.list.listBinding(
+    ...readmeTodoDemo.list.tosi.listBinding(
       ({ li, button }, item) =>
         li(
           item.reminder,
@@ -447,16 +449,16 @@ Proxied arrays have `listFind`, `listUpdate`, and `listRemove` methods
 for common list operations:
 
     // Find — returns proxied item (mutations trigger observers)
-    const item = app.items.listFind((item) => item.id, 'abc')
+    const item = app.items.tosi.listFind((item) => item.id, 'abc')
 
     // Find by DOM element (in click handlers)
-    const item = app.items.listFind(clickedElement)
+    const item = app.items.tosi.listFind(clickedElement)
 
     // Upsert — update in place or push if not found
-    app.items.listUpdate((item) => item.id, { id: 'abc', name: 'New' })
+    app.items.tosi.listUpdate((item) => item.id, { id: 'abc', name: 'New' })
 
     // Remove — returns true if found
-    app.items.listRemove((item) => item.id, 'abc')
+    app.items.tosi.listRemove((item) => item.id, 'abc')
 
 `listUpdate` preserves object identity — it mutates the existing object
 property by property, so only changed properties fire observers and DOM

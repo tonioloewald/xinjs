@@ -1,4 +1,4 @@
-# Creating Elements
+# Element Creators (elements)
 
 `tosijs` provides `elements` for easily and efficiently generating DOM elements
 without using `innerHTML` or other unsafe methods.

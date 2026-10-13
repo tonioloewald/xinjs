@@ -1,6 +1,6 @@
-/*{ "parent": "component", "description": "makeComponent() hydrates a blueprint function into a usable tosijs web-component class plus its elementCreator." }*/
+/*{"parent": "component", "title": "Make Component", "description": "makeComponent() hydrates a blueprint function into a usable tosijs web-component class plus its elementCreator."}*/
 /*#
-# makeComponent
+# Make Component (makeComponent)
 
 `makeComponent(tag: string, bluePrint: TosiBlueprint<T>): Promise<TosiComponentSpec<T>>`
 hydrates [blueprints](/blueprint-loader/) into usable [web-components](/component/).

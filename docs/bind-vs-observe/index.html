@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=76dcd3794dc6" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
   <title>Why bind, and when to use observe — tosijs</title>
   <meta name="description" content="Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." />
   <link rel="canonical" href="https://tosijs.net/bind-vs-observe/" />
@@ -30,10 +30,10 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=4c35b7b1876c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="why-bind-and-when-to-use-observe">Why <code>bind</code>, and when to use <code>observe</code></h1>
-<!--{ "parent": "bind", "order": 1, "description": "Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." }-->
+<!--{ "parent": "binding-to-the-dom", "order": 1, "description": "Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." }-->
 
 <p>There is one rule, and it decides almost every case:</p>
 <blockquote>
@@ -74,7 +74,7 @@ firing, writing into a node nobody can see, holding it in memory. Nothing warns
 you.</p>
 <p><strong>You forfeit the machinery.</strong> Surgical list updates via <code>idPath</code>,
 accumulate-don&#39;t-clobber when several bindings share an element,
-<code>take()</code> memoisation, shadow-boundary handling, per-element error isolation so
+<code>as()</code> memoisation, shadow-boundary handling, per-element error isolation so
 one failure cannot strand the rest of the page.</p>
 <h2 id="the-real-argument">The real argument</h2>
 <p>The list above is not the point, because a determined author can reimplement
@@ -116,7 +116,7 @@ observer.</p>
 </tr>
 <tr>
 <td><strong>derived state</strong></td>
-<td>compute <em>other state</em> — though <a href="/xin/#take--reactive-binding-transforms"><code>take</code></a> is usually better</td>
+<td>compute <em>other state</em> — though <a href="/xin/#proxytosiastransformation"><code>as</code></a> is usually better</td>
 </tr>
 </tbody></table>
 <pre><code>// legitimate: nothing here touches the DOM
@@ -182,43 +182,51 @@ trustworthy in a DOM shim.</em></p>
     <li><a class="doc-link" href="../">tosijs</a></li>
     <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
-    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
-    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
     <ul>
-      <li><a class="doc-link" href="../color/">color</a></li>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
     <ul>
-      <li><a class="doc-link" href="../xin/">The tosi proxy</a></li>
-      <li><a class="doc-link" href="../metadata/">metadata</a></li>
-      <li><a class="doc-link" href="../path-listener/">path-listener</a></li>
-      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
     </ul>
     </details></li>
-    <li><details open><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <li><details open><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
     <ul>
       <li><a class="doc-link current" href="../bind-vs-observe/" aria-current="page">Why bind, and when to use observe</a></li>
-      <li><a class="doc-link" href="../list-binding/">binding arrays</a></li>
-      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../component/">Web-Components</a></summary>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
     <ul>
-      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
-      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
-      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
     </ul>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
-      <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../share/">share</a></li>
-      <li><a class="doc-link" href="../sync/">sync</a></li>
-      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
-      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -230,13 +238,13 @@ trustworthy in a DOM shim.</em></p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
-      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
       <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
@@ -251,6 +259,6 @@ trustworthy in a DOM shim.</em></p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=76dcd3794dc6"></script>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
 </body>
 </html>

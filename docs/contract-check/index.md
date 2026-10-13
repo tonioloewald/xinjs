@@ -1,4 +1,4 @@
-# contract validation
+# Contract Validation
 
 Contracts (a component's `static contract`, an element's inline `contract`)
 are enforced by one gate, shared by every declaration site. The gate is two

@@ -35,9 +35,9 @@ type ProxyObserveFunc = (
 type ProxyBindFunc<T extends Element = Element> = (element: T, binding: TosiBinding<T>, options?: TosiObject) => VoidFunction
 
 /**
- * TakeDescriptor is returned by `.take()` — a reactive binding descriptor
+ * TakeDescriptor is returned by `.tosi.as()` — a binding descriptor
  * that carries paths to observe and a transform function.
- * The binding system uses this to wire up multi-path reactive transforms.
+ * The binding system uses this to wire up multi-path transforms.
  */
 export interface TakeDescriptor {
   [TAKE_DESCRIPTOR]: true
@@ -71,6 +71,8 @@ export interface TosiAccessor<T = any> {
   }
   listUpdate: (selector: (item: any) => any, newValue: any) => BoxedProxy
   listRemove: (selector: (item: any) => any, value: any) => boolean
+  as: (...args: [...sources: any[], transform: (...values: any[]) => any]) => TakeDescriptor
+  /** @deprecated renamed `as` */
   take: (...args: [...sources: any[], transform: (...values: any[]) => any]) => TakeDescriptor
 }
 
@@ -105,6 +107,8 @@ export interface TosiProps<T = any> {
   // recommend. It was declared on TosiAccessor and on NEITHER direct-property
   // surface, so `proxy.take(...)` did not typecheck. Found by the guard in
   // type-surface.test.ts the moment it was widened past TosiAccessor.
+  as: (...args: [...sources: any[], transform: (...values: any[]) => any]) => TakeDescriptor
+  /** @deprecated renamed `as` */
   take: (...args: [...sources: any[], transform: (...values: any[]) => any]) => TakeDescriptor
   valueOf: () => T
   toJSON: () => T
@@ -167,6 +171,8 @@ interface BoxedScalarAPI<T> {
   // served on scalars too (`app.count.take(v => v > 3)`), and was declared on
   // TosiAccessor only — so the direct spelling did not typecheck on either
   // proxy kind. Third surface of the same drift; the guard now covers all three.
+  as: (...args: [...sources: any[], transform: (...values: any[]) => any]) => TakeDescriptor
+  /** @deprecated renamed `as` */
   take: (...args: [...sources: any[], transform: (...values: any[]) => any]) => TakeDescriptor
   listBinding: (templateBuilder: ListTemplateBuilder<T>, options?: ListBindingOptions) => ListBinding
 
@@ -191,7 +197,7 @@ interface BoxedScalarAPI<T> {
 
 /**
  * BoxedScalar represents a boxed primitive value (string, number, boolean, null, undefined).
- * It provides the reactive API (value, path, observe, etc.) plus all methods from the
+ * It provides the observer API (value, path, observe, etc.) plus all methods from the
  * underlying primitive's prototype (e.g. toLocaleLowerCase for strings, toFixed for numbers).
  *
  * Note: Direct assignment like `proxy.x = 3` is a TypeScript type error due to
@@ -352,7 +358,7 @@ export interface ElementProps<T = Element> {
   /** the low-level list-binding prop; `.tosi.listBinding()` is sugar over it */
   bindList?: TosiBindingShortcut
   /** Enabled binding (inverted `disabled`). With a proxy,
-   * `{ disabled: proxy.tosi.take(v => !v) }` is the plain-prop equivalent;
+   * `{ disabled: proxy.tosi.as(v => !v) }` is the plain-prop equivalent;
    * with a PATH STRING this is the only form that works — `disabled: 'path'`
    * assigns a non-empty, therefore always truthy, string and permanently
    * DISABLES the control. Not deprecated in either form. */

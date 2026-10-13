@@ -8,6 +8,48 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+### Changed
+
+- **`.take()` is renamed `.as()`**: `proxy.tosi.as(transformation)` transforms a
+  proxied value in a binding. `take` named nothing about what it does. The old
+  name still works and warns once; it goes away in 2.0. `TakeDescriptor` and
+  `TAKE_DESCRIPTOR` keep their names.
+- One runtime warning in `Component` said "reactive accessor restored"; it now
+  says "attribute accessor restored". Nothing in tosijs is reactive.
+
+### Documented
+
+- **The docs are organised by purpose.** Three overview pages (Managing State,
+  Building the DOM, Binding to the DOM) and an Entry Points page sit at the
+  top level, each short and linking to the detail pages beneath it. The
+  "tosi, xin, and xinProxy" page is merged into the proxy page. `/tosi/` is now
+  `/managing-state/` and `/xin-proxy/` is gone.
+- **Page titles** are title case with the code name in the heading, and the
+  sidebar shows the plain title.
+- **Web Components** opens with a live light-DOM component, and has one table
+  of instance properties and one of static properties, each followed by a
+  section per property in the same order.
+- **A stateful component is like an `<input>`**, stated once in Building Apps
+  for every component, with or without a shadow DOM: the app binds its
+  `value`, `render()` reflects it in place, a user's edit sets it and emits
+  `change`. `render()` guidance now says what the anti-pattern is (rebuilding
+  the interior), and that setting `textContent` there is fine.
+- **Light DOM versus shadow DOM** is described as what it is, a difference in
+  CSS isolation; binding into a light-DOM component's content is for
+  high-level components such as an app layout.
+- **Lists**: which of `deleteListItem`, `listRemove` and `splice` to use, and
+  what removing a row costs (one row removed, none moved, every remaining
+  rendered row's bindings applied again); that a virtual list needs a
+  container that scrolls; the more-than-10-items warning in README and
+  Building Apps. `deleteListItem` without an `idPath` logs and returns
+  `false`; the docs said it throws.
+- "Reactive" no longer describes anything in tosijs.
+
+### Fixed (docs site only)
+
+- `HALTIJA=0 bun start` runs the dev server without the haltija dev channel,
+  which replaces `alert()` with a silent recorder.
+
 ## [1.10.8] - 2026-10-13
 
 A documentation release. No library behaviour changes; the five main bundles

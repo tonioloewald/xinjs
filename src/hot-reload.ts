@@ -1,6 +1,6 @@
-/*{ "parent": "utilities", "description": "hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads." }*/
+/*{"parent": "managing-state", "order": 4, "title": "Hot Reload", "description": "hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads."}*/
 /*#
-# hotReload
+# Hot Reload (hotReload)
 
 `hotReload()` persists any root-level paths in `xin` that its test function evaluates as true
 to [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). It restores them (by overlay) on the

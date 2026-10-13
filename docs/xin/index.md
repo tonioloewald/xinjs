@@ -1,4 +1,4 @@
-# The tosi proxy
+# The Observer Proxy (tosi)
 
 `tosi()` assigns an object passed to it to a global state object,
 and returns an observer proxy (`BoxedProxy`, a JavaScript
@@ -507,7 +507,7 @@ Always use `.value`, `tosiValue()`, or `valueOf()` when comparing:
 
 ## The `.tosi` accessor
 
-Every boxed proxy has a `.tosi` property that provides the full reactive API
+Every boxed proxy has a `.tosi` property that provides the full observer API
 without risk of name collisions. If your data has properties named `value`,
 `path`, `observe`, etc., those will shadow the proxy's direct API — but `.tosi`
 is always available.
@@ -558,7 +558,7 @@ called `value`, `path`, `observe` and so on, that property wins, and `.tosi.*`
 - `.bind(element, binding, options?)` binds the value to a DOM element
 - `.on(element, eventType)` binds an event handler
 - `.binding(binding)` returns an inline binding spec for use with elements
-- `.listBinding(templateBuilder, options?)` returns a list binding spec
+- `.tosi.listBinding(templateBuilder, options?)` returns a list binding spec
 - `.valueOf()` / `.toJSON()` for type coercion (scalars also have `.toString()`)
 
 Boxed scalars also expose all methods from the underlying primitive's prototype
@@ -588,10 +588,10 @@ returns `true`. This is a language-level behavior, not a tosijs limitation
     if (proxy.flag.valueOf()) ...
 
 Arrays also have:
-- `.listFind(selector, value)` finds an item by field and returns it proxied
-- `.listFind(element)` finds the array item bound to a DOM element
-- `.listUpdate(selector, newValue)` updates an existing item in place or pushes if not found
-- `.listRemove(selector, value)` removes an item by field match
+- `.tosi.listFind(selector, value)` finds an item by field and returns it proxied
+- `.tosi.listFind(element)` finds the array item bound to a DOM element
+- `.tosi.listUpdate(selector, newValue)` updates an existing item in place or pushes if not found
+- `.tosi.listRemove(selector, value)` removes an item by field match
 
 > Note: the `xinValue` / `xinPath` / `xinObserve` / `xinBind` / `xinOn`
 > **properties** on a boxed proxy still work but are deprecated — use
@@ -602,67 +602,83 @@ Arrays also have:
 > accept a non-proxy — which `.tosi.value` cannot. Migrating off them onto
 > `.tosi.*` loses that.
 
-## `.take()` — Reactive Binding Transforms
+## `<proxy>.tosi.as(<transformation>)`
 
-`.take()` creates a reactive binding descriptor that transforms values before
-they reach the DOM. It eliminates most custom bindings.
+`.tosi.as()` lets you transform a proxied value in a binding. Use it when an
+element should show something computed from the state and not the state itself:
+a formatted price, a button that is disabled while a list is empty, a full name
+made from a first and a last name.
 
-### Single-path transform
+    span({ textContent: cart.total.tosi.as((n) => `$${n.toFixed(2)}`) })
+    button('Delete', { disabled: cart.items.tosi.as((list) => list.length === 0) })
+
+You can pass the result anywhere you would pass the proxy itself. The element is
+bound to the same path as usual, and the transformation is applied to the value
+on its way to the element. This eliminates the need for most
+[custom bindings](/binding-to-the-dom/#custom-binding).
+
+Two things to know:
+
+- It goes **one way**, from state to the element. There is nothing to write back.
+- The transformation runs **only when its inputs have changed** (compared by
+  identity). If something touches the path but the value is the same, it is
+  skipped.
+
+> `.tosi.as()` was called `.take()` before 1.10.9. The old name still works and
+> warns once.
+
+### One value
 
 ```js
 import { tosi, elements } from 'tosijs'
 
-const { takeDemo } = tosi({ takeDemo: { count: 3, items: ['a', 'b', 'c'] } })
+const { asDemo } = tosi({ asDemo: { count: 3, items: ['a', 'b', 'c'] } })
 
 const { span, button } = elements
 
 preview.append(
-  span({ textContent: takeDemo.count.tosi.take(n => `Count: ${n}`) }),
+  span({ textContent: asDemo.count.tosi.as(n => `Count: ${n}`) }),
   button('Delete', {
-    disabled: takeDemo.items.tosi.take(list => list.length === 0),
+    disabled: asDemo.items.tosi.as(list => list.length === 0),
   })
 )
 ```
 
-### Multi-path transform
+### Several values
 
-Pass additional proxies before the transform function. The transform receives
-all current values when any of the watched paths change.
+To compute from more than one path, pass the other proxies before the function.
+It is called with all of the current values whenever any of them changes.
 
 ```js
 import { tosi, elements } from 'tosijs'
 
-const { takeMultiDemo } = tosi({
-  takeMultiDemo: { firstName: 'Alice', lastName: 'Smith' }
+const { asMultiDemo } = tosi({
+  asMultiDemo: { firstName: 'Alice', lastName: 'Smith' }
 })
 
 const { span, input, label } = elements
 
 preview.append(
-  span({ textContent: takeMultiDemo.firstName.tosi.take(
-    takeMultiDemo.lastName,
+  span({ textContent: asMultiDemo.firstName.tosi.as(
+    asMultiDemo.lastName,
     (first, last) => `${first} ${last}`
   ) }),
-  label('First', input({ bindValue: takeMultiDemo.firstName })),
-  label('Last', input({ bindValue: takeMultiDemo.lastName })),
+  label('First', input({ bindValue: asMultiDemo.firstName })),
+  label('Last', input({ bindValue: asMultiDemo.lastName })),
 )
 ```
 
-`.take()` is efficient: the transform only runs when the input values actually
-change (compared by identity). If an observer fires but the value is the same,
-the transform is skipped entirely.
+### In a filtered list
 
-### Filtered list with `.take()`
-
-`.take()` works with list bindings to create reactive filtered views. The filter
-re-evaluates when any of the watched paths change, but the list binding still
-does surgical DOM updates.
+A list binding's `needle` can use `.tosi.as()` as well, so the filter can depend on a
+computed value (here, the search text in lower case). The filter runs again when
+any of the paths involved changes, and the list still updates row by row.
 
 ```js
 import { elements, tosi, touch } from 'tosijs'
 
-const { takeFilterDemo } = tosi({
-  takeFilterDemo: {
+const { asFilterDemo } = tosi({
+  asFilterDemo: {
     search: '',
     items: [
       { id: 1, name: 'Alice', role: 'engineer' },
@@ -681,11 +697,11 @@ preview.append(
     { style: { display: 'flex', flexDirection: 'column', gap: 10, padding: 10 } },
     label('Filter', input({
       placeholder: 'type to filter...',
-      bindValue: takeFilterDemo.search,
+      bindValue: asFilterDemo.search,
     })),
     div({
-      textContent: takeFilterDemo.items.tosi.take(
-        takeFilterDemo.search,
+      textContent: asFilterDemo.items.tosi.as(
+        asFilterDemo.search,
         (items, search) => {
           const s = search.toLowerCase()
           const count = s ? items.filter(i => i.name.toLowerCase().includes(s) || i.role.includes(s)).length : items.length
@@ -695,7 +711,7 @@ preview.append(
       style: { fontStyle: 'italic', opacity: 0.7 },
     }),
     ul(
-      ...takeFilterDemo.items.tosi.listBinding(
+      ...asFilterDemo.items.tosi.listBinding(
         ({li, span}, item) => li(
           span({ textContent: item.name, style: { fontWeight: 'bold' } }),
           ' — ',
@@ -706,7 +722,7 @@ preview.append(
           filter: (items, needle) => needle
             ? items.filter(i => i.name.toLowerCase().includes(needle) || i.role.includes(needle))
             : items,
-          needle: takeFilterDemo.search.tosi.take(s => s.toLowerCase()),
+          needle: asFilterDemo.search.tosi.as(s => s.toLowerCase()),
         }
       )
     )
@@ -734,7 +750,7 @@ The callback receives a placeholder proxy (the same `^` proxy trick used by
 
 Find an item and return it as a proxied object (so mutations trigger observers):
 
-    const item = app.items.listFind((item) => item.id, 'abc')
+    const item = app.items.tosi.listFind((item) => item.id, 'abc')
     if (item) {
       item.name.value = 'Updated'  // triggers observers + DOM updates
     }
@@ -743,7 +759,7 @@ You can also pass a DOM element to find the array item bound to it — useful
 in click handlers on list-bound elements:
 
     container.addEventListener('click', (e) => {
-      const item = app.items.listFind(e.target)
+      const item = app.items.tosi.listFind(e.target)
       if (item) console.log('Clicked:', item.name.value)
     })
 
@@ -755,12 +771,12 @@ the `itemToElement` WeakMap still maps to the same DOM element, so no
 teardown/recreation occurs:
 
     // Update existing — only changed properties fire observers
-    app.items.listUpdate((item) => item.id, {
+    app.items.tosi.listUpdate((item) => item.id, {
       id: 'abc', name: 'New Name', score: 100
     })
 
     // Item not found — pushes as new
-    app.items.listUpdate((item) => item.id, {
+    app.items.tosi.listUpdate((item) => item.id, {
       id: 'xyz', name: 'Brand New'
     })
 
@@ -770,7 +786,7 @@ Returns the proxied item (existing or newly pushed).
 
 Remove an item by field match. Returns `true` if removed, `false` if not found:
 
-    app.items.listRemove((item) => item.id, 'abc')  // true if found
+    app.items.tosi.listRemove((item) => item.id, 'abc')  // true if found
 
 ### To Do List Example
 
@@ -818,9 +834,123 @@ preview.append(
       }
     }),
     button('Add', {
-      disabled: todos.newItem.tosi.take(text => !text),
+      disabled: todos.newItem.tosi.as(text => !text),
       onClick: addItem
     })
   )
 )
 ```
+
+## `tosi()`, `xinProxy()`, `xin` and `boxed`
+
+> `tosi()` was formerly called `boxedProxy()`.
+
+After coding with `xin` for a while, it became apparent that a common pattern
+was something like this:
+
+    import myThing as _myThing from 'path/to/my-thing'
+    import { xin } from 'tosijs'
+
+    xin.myThing = _myThing
+    export const myThing = xin.myThing as typeof _myThing
+
+Now we can use the new `myThing` in a pretty intuitive way, leverage autocomplete
+most of the time, and it's all pretty nice.
+
+And because `myThing.path.to.something` is actually a `TosiProxy` we can actually
+bind to it directly. So instead of typing (or mis-typing):
+
+    customElement({bindValue: 'mything.path.to.something'}))
+
+We can type the following and even use autocomplete:
+
+    customElement({bindValue: mything.path.to.something}))
+
+This gets you:
+
+    const { myThing } = xinProxy({ myThing: ... })
+
+And after working with that for a while, the question became, what if we could
+leverage autocomplete even for non-object properties?
+
+This gets us to:
+
+    const { myThing } = tosi({ myThing: ... })
+
+…(and also `boxed`). `boxedProxy()` is the old name for `tosi()`; it still
+works and warns.
+
+`boxed` and `boxedProxy` deliver a proxy wrapped around an object wrapped around
+the original `string`, `boolean`, or `number`. This gets you autocomplete and
+strong typing in general, at the cost of slight annoyances (e.g. having to write
+`myThing.path.to.string.valueOf() === 'some value'`). That's the tradeoff. In
+practice it's really very nice.
+
+`xinProxy(foo)` takes an object of type T and returns a **`TosiProxy<T>`** — the
+raw `xin` proxy, NOT a boxed one. **It is not an alias for `tosi()`.** `tosi()`
+assigns into `boxed` and returns `boxed`; `xinProxy()` assigns into `xin` and
+returns `xin`, and `xin` is created with `boxScalars: false`. So a scalar read
+off an `xinProxy` result is the raw value: `foo.value`, `foo.path`,
+`foo.observe()` and `[TOSI_ACCESSOR]` are all absent.
+
+Prefer `tosi()` unless you specifically want unboxed scalars.
+
+    import { tosi } from 'tosijs'
+
+    const { foo, bar } = tosi({
+      foo: 'bar',
+      bar: {
+        director: 'luhrmann'
+      }
+    })
+
+This is syntax sugar for:
+
+    import { boxed } from 'tosijs'
+
+    const stuff = {
+      foo: 'bar',
+      bar: {
+        director: 'luhrmann',
+        born: 1962
+      }
+    }
+
+    Object.assign(boxed, stuff)
+
+    const { foo, bar } = boxed as TosiProxy<typeof stuff>
+
+So, Typescript will know that `foo` is a `string` and `bar` is a `TosiProxy<typeof stuff.bar>`.
+
+Now, `tosi()` is the same except replace `TosiProxy` with `BoxedProxy` and
+now Typescript will know that `foo` is a `BoxedProxy<string>`, `bar` is a `BoxedProxy<typeof stuff.bar>`
+and `bar.born` is a `BoxedProxy<number>`.
+
+This lets you write bindings that support autocomplete and lint. Yay!
+
+## `tosiUnique()`
+
+`tosiUnique()` creates an observer proxy stored under a guaranteed unique key.
+This is useful for component instances or any situation where you need
+per-instance state without worrying about key collisions.
+
+It returns a tuple of `[proxy, removeFunc]`:
+
+- `proxy` is a `BoxedProxy<T>` — the observer proxy for your object
+- `removeFunc` is a cleanup function that removes the state from the registry
+
+If you pass an `owner` object (e.g. `this` in a component), the state will
+be automatically cleaned up when the owner is garbage collected — no need
+to call the remove function manually.
+
+Typical usage in a component:
+
+    class MyComponent extends Component {
+      proxy = tosiUnique({ count: 0, name: '' }, this)[0]
+    }
+
+Or if you want explicit cleanup control:
+
+    const [proxy, remove] = tosiUnique({ count: 0, name: '' })
+    // ... later ...
+    remove()

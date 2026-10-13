@@ -208,7 +208,7 @@ is so little code: once the wiring is declared, there is nothing left to write.
 
 ## Where next
 
-**Next: lists.** Almost every app has one, and [binding arrays](/list-binding/) is where
+**Next: lists.** Almost every app has one, and [array bindings](/list-binding/) are where
 `tosijs` differs most from what you may be used to: a list is bound once, and rows are
 added, removed and updated individually, including in lists of 100,000 rows.
 
@@ -216,8 +216,6 @@ Then:
 
 - [Building Apps](/Building-Apps/) is the full guide: how to think about state, lists,
   components and styling, and the patterns that keep an app small.
-- [The tosi proxy](/xin/) covers the proxy in depth: paths, arrays, and observing changes
-  from code that is not a DOM element.
-- [Creating Elements](/elements/) covers everything a creator accepts.
-- [Binding](/bind/) covers what `bindValue` was shorthand for.
-- [Web-Components](/component/) is for when a piece of your page deserves its own tag.
+- [Managing State](/managing-state/) starts from the observer proxy.
+- [Building the DOM](/building-the-dom/) starts from element creators.
+- [Binding to the DOM](/binding-to-the-dom/) covers what `bindValue` was shorthand for.

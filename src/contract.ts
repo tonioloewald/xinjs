@@ -1,6 +1,6 @@
-/*{ "parent": "One User Interface", "description": "EXPERIMENTAL contract harness: exercise an agent surface's declared contract — schema examples must be accepted, counterexamples refused — through the real surface." }*/
+/*{"parent": "One User Interface", "title": "Contract Harness", "description": "EXPERIMENTAL contract harness: exercise an agent surface's declared contract — schema examples must be accepted, counterexamples refused — through the real surface."}*/
 /*#
-# contract harness (EXPERIMENTAL)
+# Contract Harness (EXPERIMENTAL)
 
 If a contract carries **example values**, the contract is a test. This is the
 contract equivalent of tjs-lang's signature tests: the declaration proves

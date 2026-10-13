@@ -1,4 +1,4 @@
-# color
+# Color
 
 `tosijs` includes a lightweight, powerful `Color` class for manipulating colors.
 I hope at some point CSS will provide sufficiently capable native color calculations

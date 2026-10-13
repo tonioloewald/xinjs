@@ -1,16 +1,11 @@
 # Utilities
-<!--{ "order": 7, "description": "Lightweight helper libraries used internally by tosijs and exposed for general use: more-math, throttle, debounce, hotReload, share, and sync." }-->
+<!--{ "order": 7, "description": "Lightweight helper libraries used internally by tosijs and exposed for general use: more-math, throttle and debounce." }-->
 
-Small, general-purpose helpers. `tosijs` uses them internally, so you might as well have access to them. This section also holds the pages for the slimmer entry points, `tosijs/core` and `tosijs/state`.
+Small, general-purpose helpers. `tosijs` uses them internally, so you might as well have access to them.
 
-The agent surface (`agent`, `audit`, `webmcp`, the contract harness) is under [One User Interface](/one-user-interface/).
+`hotReload`, `share` and `sync` are under [Managing State](/managing-state/), the slimmer imports are under [Entry points](/entry-points/), and the agent surface (`agent`, `audit`, `webmcp`, the contract harness) is under [One User Interface](/one-user-interface/).
 
 <!-- toc -->
-- [hotReload](/hot-reload/)
-- [more-math](/more-math/)
-- [share](/share/)
-- [sync](/sync/)
-- [throttle & debounce](/throttle/)
-- [tosijs/core (slim entry)](/index-core/)
-- [tosijs/state (DOM-free)](/index-state/)
+- [More Math](/more-math/)
+- [Throttle & Debounce](/throttle/)
 <!-- /toc -->

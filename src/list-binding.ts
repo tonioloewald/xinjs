@@ -1,6 +1,6 @@
-/*{ "parent": "binding", "description": "Reactive list bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." }*/
+/*{"parent": "binding-to-the-dom", "order": 4, "title": "Array Bindings", "description": "List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids."}*/
 /*#
-# binding arrays
+# Array Bindings and Virtual Lists
 
 The most likely source of complexity and performance issues in applications is
 displaying large lists or grids of objects. `tosijs` provides robust support
@@ -8,7 +8,7 @@ for handling this efficiently.
 
 ## `.tosi.listBinding()`
 
-The simplest way to bind an array is with `.tosi.listBinding()` (or `.listBinding()`
+The simplest way to bind an array is with `.tosi.listBinding()` (or `.tosi.listBinding()`
 directly on a BoxedProxy). It takes a template builder function that receives
 the `elements` proxy and a placeholder item for bindings:
 
@@ -82,7 +82,7 @@ sibling and options, the other is two-way), so both stay.
       )
     )
 
-You rarely need this form — `.listBinding()` is more concise and type-safe.
+You rarely need this form — `.tosi.listBinding()` is more concise and type-safe.
 
 Even better, `templateBuilder()` is passed the `elements` proxy and a placeholder `BoxedProxy` of
 the array's type, supporting autocompletion of property names within the template.
@@ -240,6 +240,16 @@ it logs one warning naming the list, its size and both fixes. See
       },
     })
 
+**A virtual list needs somewhere to scroll.** The bound element is the scroll
+container, so give it a height and `overflow: auto` (the example below uses
+`height: calc(100% - 36px); overflow: auto`). An element that simply grows to
+fit its content has nothing to virtualize against. To scroll with the page
+instead, see **Window Scroll Container** below.
+
+The full set of `virtual` options is `height`, `width`, `minHeight`,
+`rowChunkSize`, `visibleColumns`, `itemsPerRow` and `scrollContainer`; each is
+covered in its section on this page.
+
 Simply add a `virtual` property to the list-binding specifying the row `height`
 and the list will be `virtualized` (meaning that only visible elements will be rendered,
 missing elements being replaced by a single padding element above and below the list).
@@ -269,7 +279,7 @@ const emojiTable = div(
   {
     class: 'emoji-table'
   },
-  ...emojiListExample.array.listBinding(({div, span}, item) =>
+  ...emojiListExample.array.tosi.listBinding(({div, span}, item) =>
     div(
       {
         class: 'emoji-row',
@@ -385,7 +395,7 @@ const grid = div(
   {
     class: 'virtual-grid-example',
   },
-  ...bigBindTest.listBinding(
+  ...bigBindTest.tosi.listBinding(
     ({div}, item) => div({
       class: 'cell',
       textContent: item.id,
@@ -564,7 +574,7 @@ const grid = div(
     }, col.label)
   ),
   // Data cells — itemsPerRow stamps one cell per column per array item
-  ...gridDemo.listBinding(
+  ...gridDemo.tosi.listBinding(
     ({ span }, item, columnIndex) => {
       const col = columns[columnIndex]
       return span({
@@ -677,7 +687,7 @@ const list = div(
   {
     class: 'var-height-list',
   },
-  ...varHeightExample.items.listBinding(
+  ...varHeightExample.items.tosi.listBinding(
     ({div, span}, item) => div(
       {
         class: 'var-height-item',
@@ -779,7 +789,7 @@ your data, e.g. for round-tripping to a database.)
         return emojis.filter(emoji => `${emoji.name} ${emoji.category} ${emoji.subcategory}`.toLocaleLowerCase().includes(needle))
       },
       needle: filterListExample.needle
-    }
+    })
 
 If the list binding's options provide a `filter` function and a `needle` (proxy or path) then
 the list will be filtered using the function via throttled updates.
@@ -850,7 +860,7 @@ preview.append(
       class: 'emoji-table',
       style: 'height: calc(100% - 60px)',
     },
-    ...filterListExample.array.listBinding(
+    ...filterListExample.array.tosi.listBinding(
       ({div, span}, item) => div(
         {
           class: 'emoji-row',
@@ -929,8 +939,26 @@ If the element is part of a list instance bound to an array, this splices bound 
 If you call this on an `<li>` or something inside it, this will splice the bound
 array item out of the array and then triggers an update the bound list.
 
-> `deleteListItem()` requires that the list binding specifies
-> a valid `idPath`, or it will throw an error (and fail).
+> `deleteListItem()` requires that the list binding specifies a valid `idPath`.
+> Without one it logs an error and returns `false`; it does not throw.
+
+### Removing a row: which function, and what it costs
+
+There are three ways to remove a row, and they all do the same thing underneath:
+splice the item out of the array through the proxy.
+
+| you have | use |
+| --- | --- |
+| a DOM element in the row (a click handler's `event.target`) | `deleteListItem(element)` |
+| the item's id, or another field value | `array.tosi.listRemove((item) => item.id, id)` |
+| the index | `array.splice(index, 1)` |
+
+**What it costs in the DOM**, measured on a 200-row list with an `idPath`:
+one row element is removed, no other row is created or moved, and each of the
+199 rows still rendered has its bindings applied again. (Changing one field of
+one item, by contrast, touches one element.) So removal is proportional to the
+number of rows that *exist*, which is the practical reason to make a long list
+`virtual`: only the rows on screen exist, however long the array is.
 
 ### `scrollListItemIntoView(element: Element, item: any, options?): boolean`
 
@@ -963,16 +991,16 @@ as `listBinding`. These are documented in detail under [tosi](/xin/), but
 here's a quick summary:
 
     // Find an item — returns a proxied item (mutations trigger observers)
-    const item = app.items.listFind((item) => item.id, 'abc')
+    const item = app.items.tosi.listFind((item) => item.id, 'abc')
 
     // Find by DOM element (e.g. in a click handler)
-    const item = app.items.listFind(clickedElement)
+    const item = app.items.tosi.listFind(clickedElement)
 
     // Upsert — update in place (preserving object identity) or push
-    app.items.listUpdate((item) => item.id, { id: 'abc', name: 'New Name' })
+    app.items.tosi.listUpdate((item) => item.id, { id: 'abc', name: 'New Name' })
 
     // Remove by field match
-    app.items.listRemove((item) => item.id, 'abc')
+    app.items.tosi.listRemove((item) => item.id, 'abc')
 
 `listUpdate` is designed to work hand-in-hand with list bindings: it mutates
 the existing object property by property through the proxy, so the

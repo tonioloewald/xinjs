@@ -1,4 +1,4 @@
-# metadata
+# Metadata
 
 ## `tosiAccessor(x: any): TosiAccessor | undefined`
 

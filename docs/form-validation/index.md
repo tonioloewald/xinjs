@@ -1,4 +1,4 @@
-# Validation
+# Form Validation
 
 Form validation for custom elements using `ElementInternals`.
 

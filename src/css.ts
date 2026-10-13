@@ -1,4 +1,4 @@
-/*{ "order": 3, "description": "Utilities for writing CSS as JS objects, generating stylesheets, and working with CSS variables and themes via css(), vars, and varDefault()." }*/
+/*{"parent": "building-the-dom", "order": 2, "description": "Utilities for writing CSS as JS objects, generating stylesheets, and working with CSS variables and themes via css(), vars, and varDefault()."}*/
 /*#
 # CSS
 

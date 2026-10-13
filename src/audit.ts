@@ -1,6 +1,6 @@
-/*{ "parent": "One User Interface", "description": "EXPERIMENTAL accessibility audit over the agent surface's own map — anonymous affordances, unnameable actions, missing roles, WCAG contrast, target size." }*/
+/*{"parent": "One User Interface", "title": "Accessibility Audit", "description": "EXPERIMENTAL accessibility audit over the agent surface's own map — anonymous affordances, unnameable actions, missing roles, WCAG contrast, target size."}*/
 /*#
-# audit (EXPERIMENTAL)
+# Accessibility Audit (EXPERIMENTAL)
 
 `auditAccessibility(agent.describe({ styles: true }))` turns the affordance
 map into findings. It is the lint the map made obvious: **every element with

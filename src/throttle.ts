@@ -1,6 +1,6 @@
-/*{ "parent": "utilities", "description": "Rate-limiting helpers: throttle() runs at most once per interval; debounce() delays calls until activity stops." }*/
+/*{"parent": "utilities", "description": "Rate-limiting helpers: throttle() runs at most once per interval; debounce() delays calls until activity stops."}*/
 /*#
-# throttle & debounce
+# Throttle & Debounce
 
 Usage:
 

@@ -1,4 +1,4 @@
-# contract harness (EXPERIMENTAL)
+# Contract Harness (EXPERIMENTAL)
 
 If a contract carries **example values**, the contract is a test. This is the
 contract equivalent of tjs-lang's signature tests: the declaration proves

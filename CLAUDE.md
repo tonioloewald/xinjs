@@ -450,7 +450,7 @@ rounds of narrowing, because every probe reproduces it. Verified 2026-09-01.
 - **`content`** can be a function `({div, span}) => div(...)` or a static node/array. The function form receives a destructurable `elements` proxy.
 - **`parts`** is a proxy — `this.parts.foo` finds the element with `part="foo"`.
 - **`static formAssociated = true`** enables form integration via `ElementInternals`.
-- Components default to shadow DOM. Set `role` in `initAttributes` to use light DOM instead.
+- Components default to **light** DOM: a shadow root is attached only when the class has a `shadowStyleSpec` (verified in `hydrate()`, 2026-10-13; this line used to say the opposite).
 - In light DOM, `<slot>` elements are automatically converted to `<tosi-slot>` for composition.
 - **`elementCreator()`** takes no arguments — all configuration is via static properties. Passing `{ tag, styleSpec }` options still works but emits deprecation warnings.
 

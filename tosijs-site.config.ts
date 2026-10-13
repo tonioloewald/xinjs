@@ -110,7 +110,11 @@ export default defineSiteConfig({
   // Inject the haltija dev-channel so a coding agent can drive the live dev
   // page via `hj` (dev-only, serve-time inject, never in built output) —
   // e.g. `hj map` with source tosi-agent against the agent-surface pages
-  haltijaDev: true,
+  //
+  // haltija replaces window.alert/confirm/prompt so a dialog cannot block an
+  // agent: alert() then shows nothing, which makes the Start Here tutorial's
+  // button look broken to a person. `HALTIJA=0 bun start` leaves dialogs alone.
+  haltijaDev: process.env.HALTIJA !== '0',
 
   host: 'github-pages',
   // honor PORT so the Playwright e2e lane can run its own dev server on a

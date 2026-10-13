@@ -1,6 +1,6 @@
-/*{ "parent": "utilities", "description": "Math utilities missing from the standard Math object: clamp, lerp, and the radians/degrees conversion constants." }*/
+/*{"parent": "utilities", "title": "More Math", "description": "Math utilities missing from the standard Math object: clamp, lerp, and the radians/degrees conversion constants."}*/
 /*#
-# more-math
+# More Math (more-math)
 
 Some simple functions egregiously missing from the Javascript `Math`
 object. They are exported from `tosijs` as the `MoreMath` object.

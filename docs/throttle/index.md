@@ -1,4 +1,4 @@
-# throttle & debounce
+# Throttle & Debounce
 
 Usage:
 

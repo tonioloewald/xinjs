@@ -30,47 +30,59 @@ use it to inspect STATE; a painted-output check needs a real test lane.
 
 ## Pages
 
-- https://tosijs.net/agent/ — Agent API reference (EXPERIMENTAL)
+- https://tosijs.net/audit/ — Accessibility Audit
+  EXPERIMENTAL accessibility audit over the agent surface's own map — anonymous affordances, unnameable actions, missing roles, WCAG contrast, target size.
+- https://tosijs.net/agent/ — Agent API Reference
   EXPERIMENTAL agent interface: expose a tosijs app's state, wiring, and actions to AI agents (and test harnesses) as a described, observable, path-addressed surface.
 - https://tosijs.net/Angular/ — Angular and tosijs
   Use tosijs state in Angular with tosiSignal — a real, writable Angular signal bound to a path, zoneless-first, no NgRx/RxJS boilerplate — and treat Angular as an off-ramp.
-- https://tosijs.net/audit/ — audit (EXPERIMENTAL)
-  EXPERIMENTAL accessibility audit over the agent surface's own map — anonymous affordances, unnameable actions, missing roles, WCAG contrast, target size.
-- https://tosijs.net/bind/ — Binding
-  bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates.
-- https://tosijs.net/list-binding/ — binding arrays
-  Reactive list bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids.
-- https://tosijs.net/bindings/ — bindings
-  The built-in collection of common bindings: value (two-way), text, enabled, disabled, list — plus how to write your own.
-- https://tosijs.net/blueprint-loader/ — blueprints
+- https://tosijs.net/list-binding/ — Array Bindings
+  List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids.
+- https://tosijs.net/binding-to-the-dom/ — Binding to the DOM
+  How tosijs keeps the page in step with state: implicit bindings (a proxy as a property or child), explicit bindings (bindValue and friends), array bindings, and custom bindings. An overview with links to the detail.
+- https://tosijs.net/blueprint-loader/ — Blueprints
   Dynamically load tosijs components as zero-dependency blueprints from CDN URLs, letting consumers choose tag names and avoid name collisions.
 - https://tosijs.net/Building-Apps/ — Building Apps
   How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first.
-- https://tosijs.net/color/ — color
+- https://tosijs.net/building-the-dom/ — Building the DOM
+  How tosijs builds user interfaces: element creators that return real DOM elements, CSS written as objects, and web components for the pieces worth naming. An overview with links to the detail.
+- https://tosijs.net/bindings/ — Built-in Bindings
+  The built-in collection of common bindings: value (two-way), text, enabled, disabled, list — plus how to write your own.
+- https://tosijs.net/color/ — Color
   The Color class: parse CSS colors, do color math (brighten, saturate, blend, mix), convert between HSL and RGB, generate contrasting colors.
-- https://tosijs.net/contract/ — contract harness (EXPERIMENTAL)
+- https://tosijs.net/contract/ — Contract Harness
   EXPERIMENTAL contract harness: exercise an agent surface's declared contract — schema examples must be accepted, counterexamples refused — through the real surface.
-- https://tosijs.net/contract-check/ — contract validation
+- https://tosijs.net/contract-check/ — Contract Validation
   shared zero-dependency contract validation: the structural JSON-Schema subset (type/enum/const) plus the pluggable full-schema validator, used by component value contracts and inline element contracts alike.
-- https://tosijs.net/elements/ — Creating Elements
-  The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required.
+- https://tosijs.net/share/ — Cross-Tab State
+  share() synchronizes tosijs state across browser tabs and windows using BroadcastChannel and IndexedDB.
 - https://tosijs.net/css/ — CSS
   Utilities for writing CSS as JS objects, generating stylesheets, and working with CSS variables and themes via css(), vars, and varDefault().
+- https://tosijs.net/bind/ — Custom Bindings and Events
+  bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates.
+- https://tosijs.net/elements/ — Element Creators
+  The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required.
+- https://tosijs.net/entry-points/ — Entry Points
+  Which tosijs import to use: the full library, the slim tosijs/core, the DOM-free tosijs/state, the agent surface, or a script tag. An overview with links to the detail.
+- https://tosijs.net/form-validation/ — Form Validation
+  Form validation for tosijs form-associated custom elements via ElementInternals: validity, validation messages, and constraint helpers.
 - https://tosijs.net/headless-embodiment/ — Headless Embodiment
   The inversion: server-side rendering of an MCP — a tosijs app running as its abstract self, vending UI on demand (elementsSSR, live).
-- https://tosijs.net/hot-reload/ — hotReload
+- https://tosijs.net/hot-reload/ — Hot Reload
   hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads.
-- https://tosijs.net/make-component/ — makeComponent
+- https://tosijs.net/make-component/ — Make Component
   makeComponent() hydrates a blueprint function into a usable tosijs web-component class plus its elementCreator.
-- https://tosijs.net/tosi/ — Managing State
-  The tosi observer proxy: wraps your application state and surgically updates bound DOM elements when you change properties through it.
-- https://tosijs.net/metadata/ — metadata
+- https://tosijs.net/managing-state/ — Managing State
+  How tosijs handles application state: plain objects registered with tosi(), addressed by path through the observer proxy, with observers for everything that is not a DOM element. An overview with links to the detail.
+- https://tosijs.net/metadata/ — Metadata
   Proxy accessor helpers: tosiAccessor(), the TOSI_ACCESSOR symbol, and tosiPath()/tosiValue() for inspecting boxed proxies safely.
-- https://tosijs.net/more-math/ — more-math
+- https://tosijs.net/more-math/ — More Math
   Math utilities missing from the standard Math object: clamp, lerp, and the radians/degrees conversion constants.
+- https://tosijs.net/sync/ — Network Sync
+  sync() synchronizes tosijs state across the network in real-time via a pluggable transport (websocket, fetch, or your own).
 - https://tosijs.net/one-user-interface/ — One User Interface
   One source of truth for state, UI — and AI. tosijs apps expose a described, observable, path-addressed surface to agents and test harnesses: the same interface humans use, minus the pixels.
-- https://tosijs.net/path-listener/ — path-listener
+- https://tosijs.net/path-listener/ — Path Listener
   The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system.
 - https://tosijs.net/plan-and-prior-art/ — Plan & Prior Art
   Phases 0–5, open questions, and the prior-art survey: WebMCP, the window, and the unclaimed tosijs delta.
@@ -78,22 +90,16 @@ use it to inspect STATE; a painted-output check needs a real test lane.
   Use tosijs state in React with the useTosi hook (useState-shaped, works outside React), render web components via reactWebComponents, and treat React as an off-ramp.
 - https://tosijs.net/schematic/ — schematic (EXPERIMENTAL)
   EXPERIMENTAL schematic renderer: draw an agent-surface description as SVG — the app's affordance map at its true geometry, DOM-free.
-- https://tosijs.net/share/ — share
-  share() synchronizes tosijs state across browser tabs and windows using BroadcastChannel and IndexedDB.
 - https://tosijs.net/start-here/ — Start Here
   A ten-minute tutorial on the two foundations of tosijs: the observer proxy that tosi() returns, and the element creators in elements. One small example, then what each line of it does.
-- https://tosijs.net/sync/ — sync
-  sync() synchronizes tosijs state across the network in real-time via a pluggable transport (websocket, fetch, or your own).
 - https://tosijs.net/agent-surface/ — The Agent Surface
   enableAgentInterface(): the protocol-neutral surface, push-and-drain observation, exposure tiers (schema-first), authoring-time declarations, and ComponentMap.
 - https://tosijs.net/derived-surface/ — The Derived Surface
   The wiring diagram tosijs already records, the metadata harvest from element sugar, and describe() assembling the affordance graph — live.
-- https://tosijs.net/xin/ — The tosi proxy
+- https://tosijs.net/xin/ — The Observer Proxy
   How the tosi observer proxy works: an object wrapped in a proxy that surgically updates bound DOM elements when its properties change.
-- https://tosijs.net/throttle/ — throttle & debounce
+- https://tosijs.net/throttle/ — Throttle & Debounce
   Rate-limiting helpers: throttle() runs at most once per interval; debounce() delays calls until activity stops.
-- https://tosijs.net/xin-proxy/ — tosi, xin, and xinProxy
-  Background on the tosijs observer proxies: how tosi() and xinProxy() relate to xin and boxed, plus tosiUnique() for per-instance state.
 - https://tosijs.net/ — tosijs
   tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic.
 - https://tosijs.net/history/ — tosijs history
@@ -109,12 +115,10 @@ use it to inspect STATE; a painted-output check needs a real test lane.
 - https://tosijs.net/Migration/ — Upgrading and Migration
   Upgrading tosijs: the 1.10.2 agent-surface disclosure fix (rotate link tokens), the 1.10.0 typed-attributes change (Component lost its index signature: declare attributes with withAttributes()), the 1.9.0 agent-surface default change, the 1.8.0 removals and behaviour changes, the 1.7.0 correctness release, and the original xinjs to tosijs rename.
 - https://tosijs.net/utilities/ — Utilities
-  Lightweight helper libraries used internally by tosijs and exposed for general use: more-math, throttle, debounce, hotReload, share, and sync.
-- https://tosijs.net/form-validation/ — Validation
-  Form validation for tosijs form-associated custom elements via ElementInternals: validity, validation messages, and constraint helpers.
-- https://tosijs.net/component/ — Web-Components
+  Lightweight helper libraries used internally by tosijs and exposed for general use: more-math, throttle and debounce.
+- https://tosijs.net/component/ — Web Components
   The Component base class for building custom elements with tosijs: light-DOM by default, automatic slot composition, form association. Declare attributes with withAttributes() so they are typed on this — since 1.10.0 Component has no index signature, so an undeclared this.foo is a type error. static initAttributes is not deprecated (withAttributes sets it, and it adds attributes to an existing class); see Migration.
-- https://tosijs.net/webmcp/ — webmcp (EXPERIMENTAL)
+- https://tosijs.net/webmcp/ — WebMCP
   EXPERIMENTAL WebMCP adapter: generate the browser-agent tool set from the agent surface — the tools write themselves from wiring the app already records.
 - https://tosijs.net/bind-vs-observe/ — Why bind, and when to use observe
   Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else.

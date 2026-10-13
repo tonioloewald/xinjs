@@ -15,7 +15,7 @@ declare const isValidPath: (path: string) => boolean;
  * number of releases. `src/type-surface.test.ts` now fails if a name here is
  * absent from the declared accessor type.
  */
-export declare const ACCESSOR_PROP_NAMES: readonly ["path", "value", "touch", "observe", "bind", "on", "binding", "listBinding", "listFind", "listUpdate", "listRemove", "take"];
+export declare const ACCESSOR_PROP_NAMES: readonly ["path", "value", "touch", "observe", "bind", "on", "binding", "listBinding", "listFind", "listUpdate", "listRemove", "as", "take"];
 declare const observe: (test: string | RegExp | PathTestFunction, callback: string | ObserverCallbackFunction) => Listener;
 declare const xin: {
     [x: string]: any;

@@ -14,30 +14,30 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=76dcd3794dc6" data-tosi-doc-system />
-  <title>binding arrays — tosijs</title>
-  <meta name="description" content="Reactive list bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>Array Bindings — tosijs</title>
+  <meta name="description" content="List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
   <link rel="canonical" href="https://tosijs.net/list-binding/" />
-  <link rel="alternate" type="text/markdown" href="index.md" title="binding arrays — tosijs (markdown)" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Array Bindings — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
-  <meta property="og:title" content="binding arrays — tosijs" />
-  <meta property="og:description" content="Reactive list bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
+  <meta property="og:title" content="Array Bindings — tosijs" />
+  <meta property="og:description" content="List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
   <meta property="og:url" content="https://tosijs.net/list-binding/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"binding arrays","description":"Reactive list bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids.","url":"https://tosijs.net/list-binding/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Array Bindings","description":"List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids.","url":"https://tosijs.net/list-binding/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=4c35b7b1876c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1 id="binding-arrays">binding arrays</h1>
+<h1 id="array-bindings-and-virtual-lists">Array Bindings and Virtual Lists</h1>
 <p>The most likely source of complexity and performance issues in applications is
 displaying large lists or grids of objects. <code>tosijs</code> provides robust support
 for handling this efficiently.</p>
 <h2 id="tosilistbinding"><code>.tosi.listBinding()</code></h2>
-<p>The simplest way to bind an array is with <code>.tosi.listBinding()</code> (or <code>.listBinding()</code>
+<p>The simplest way to bind an array is with <code>.tosi.listBinding()</code> (or <code>.tosi.listBinding()</code>
 directly on a BoxedProxy). It takes a template builder function that receives
 the <code>elements</code> proxy and a placeholder item for bindings:</p>
 <pre><code class="language-js">import { elements, tosi } from &#39;tosijs&#39;
@@ -101,7 +101,7 @@ sibling and options, the other is two-way), so both stay.</p>
   )
 )
 </code></pre>
-<p>You rarely need this form — <code>.listBinding()</code> is more concise and type-safe.</p>
+<p>You rarely need this form — <code>.tosi.listBinding()</code> is more concise and type-safe.</p>
 <p>Even better, <code>templateBuilder()</code> is passed the <code>elements</code> proxy and a placeholder <code>BoxedProxy</code> of
 the array&#39;s type, supporting autocompletion of property names within the template.</p>
 <h3 id="id-paths">id-paths</h3>
@@ -239,6 +239,14 @@ it logs one warning naming the list, its size and both fixes. See
   },
 })
 </code></pre>
+<p><strong>A virtual list needs somewhere to scroll.</strong> The bound element is the scroll
+container, so give it a height and <code>overflow: auto</code> (the example below uses
+<code>height: calc(100% - 36px); overflow: auto</code>). An element that simply grows to
+fit its content has nothing to virtualize against. To scroll with the page
+instead, see <strong>Window Scroll Container</strong> below.</p>
+<p>The full set of <code>virtual</code> options is <code>height</code>, <code>width</code>, <code>minHeight</code>,
+<code>rowChunkSize</code>, <code>visibleColumns</code>, <code>itemsPerRow</code> and <code>scrollContainer</code>; each is
+covered in its section on this page.</p>
 <p>Simply add a <code>virtual</code> property to the list-binding specifying the row <code>height</code>
 and the list will be <code>virtualized</code> (meaning that only visible elements will be rendered,
 missing elements being replaced by a single padding element above and below the list).
@@ -264,7 +272,7 @@ const emojiTable = div(
   {
     class: &#39;emoji-table&#39;
   },
-  ...emojiListExample.array.listBinding(({div, span}, item) =&gt;
+  ...emojiListExample.array.tosi.listBinding(({div, span}, item) =&gt;
     div(
       {
         class: &#39;emoji-row&#39;,
@@ -374,7 +382,7 @@ const grid = div(
   {
     class: &#39;virtual-grid-example&#39;,
   },
-  ...bigBindTest.listBinding(
+  ...bigBindTest.tosi.listBinding(
     ({div}, item) =&gt; div({
       class: &#39;cell&#39;,
       textContent: item.id,
@@ -546,7 +554,7 @@ const grid = div(
     }, col.label)
   ),
   // Data cells — itemsPerRow stamps one cell per column per array item
-  ...gridDemo.listBinding(
+  ...gridDemo.tosi.listBinding(
     ({ span }, item, columnIndex) =&gt; {
       const col = columns[columnIndex]
       return span({
@@ -653,7 +661,7 @@ const list = div(
   {
     class: &#39;var-height-list&#39;,
   },
-  ...varHeightExample.items.listBinding(
+  ...varHeightExample.items.tosi.listBinding(
     ({div, span}, item) =&gt; div(
       {
         class: &#39;var-height-item&#39;,
@@ -748,7 +756,7 @@ your data, e.g. for round-tripping to a database.)</p>
     return emojis.filter(emoji =&gt; `${emoji.name} ${emoji.category} ${emoji.subcategory}`.toLocaleLowerCase().includes(needle))
   },
   needle: filterListExample.needle
-}
+})
 </code></pre>
 <p>If the list binding&#39;s options provide a <code>filter</code> function and a <code>needle</code> (proxy or path) then
 the list will be filtered using the function via throttled updates.</p>
@@ -815,7 +823,7 @@ preview.append(
       class: &#39;emoji-table&#39;,
       style: &#39;height: calc(100% - 60px)&#39;,
     },
-    ...filterListExample.array.listBinding(
+    ...filterListExample.array.tosi.listBinding(
       ({div, span}, item) =&gt; div(
         {
           class: &#39;emoji-row&#39;,
@@ -881,9 +889,38 @@ the array item bound to the <code>&lt;li&gt;</code>.</p>
 <p>If you call this on an <code>&lt;li&gt;</code> or something inside it, this will splice the bound
 array item out of the array and then triggers an update the bound list.</p>
 <blockquote>
-<p><code>deleteListItem()</code> requires that the list binding specifies
-a valid <code>idPath</code>, or it will throw an error (and fail).</p>
+<p><code>deleteListItem()</code> requires that the list binding specifies a valid <code>idPath</code>.
+Without one it logs an error and returns <code>false</code>; it does not throw.</p>
 </blockquote>
+<h3 id="removing-a-row-which-function-and-what-it-costs">Removing a row: which function, and what it costs</h3>
+<p>There are three ways to remove a row, and they all do the same thing underneath:
+splice the item out of the array through the proxy.</p>
+<table>
+<thead>
+<tr>
+<th>you have</th>
+<th>use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>a DOM element in the row (a click handler&#39;s <code>event.target</code>)</td>
+<td><code>deleteListItem(element)</code></td>
+</tr>
+<tr>
+<td>the item&#39;s id, or another field value</td>
+<td><code>array.tosi.listRemove((item) =&gt; item.id, id)</code></td>
+</tr>
+<tr>
+<td>the index</td>
+<td><code>array.splice(index, 1)</code></td>
+</tr>
+</tbody></table>
+<p><strong>What it costs in the DOM</strong>, measured on a 200-row list with an <code>idPath</code>:
+one row element is removed, no other row is created or moved, and each of the
+199 rows still rendered has its bindings applied again. (Changing one field of
+one item, by contrast, touches one element.) So removal is proportional to the
+number of rows that <em>exist</em>, which is the practical reason to make a long list
+<code>virtual</code>: only the rows on screen exist, however long the array is.</p>
 <h3 id="scrolllistitemintoviewelement-element-item-any-options-boolean"><code>scrollListItemIntoView(element: Element, item: any, options?): boolean</code></h3>
 <p>Scrolls a bound array item into view within its list container. This is
 especially useful for virtualized lists where the item&#39;s DOM element may
@@ -911,16 +948,16 @@ callers when the scroll completes and the target item is rendered.</p>
 as <code>listBinding</code>. These are documented in detail under <a href="/xin/">tosi</a>, but
 here&#39;s a quick summary:</p>
 <pre><code>// Find an item — returns a proxied item (mutations trigger observers)
-const item = app.items.listFind((item) =&gt; item.id, &#39;abc&#39;)
+const item = app.items.tosi.listFind((item) =&gt; item.id, &#39;abc&#39;)
 
 // Find by DOM element (e.g. in a click handler)
-const item = app.items.listFind(clickedElement)
+const item = app.items.tosi.listFind(clickedElement)
 
 // Upsert — update in place (preserving object identity) or push
-app.items.listUpdate((item) =&gt; item.id, { id: &#39;abc&#39;, name: &#39;New Name&#39; })
+app.items.tosi.listUpdate((item) =&gt; item.id, { id: &#39;abc&#39;, name: &#39;New Name&#39; })
 
 // Remove by field match
-app.items.listRemove((item) =&gt; item.id, &#39;abc&#39;)
+app.items.tosi.listRemove((item) =&gt; item.id, &#39;abc&#39;)
 </code></pre>
 <p><code>listUpdate</code> is designed to work hand-in-hand with list bindings: it mutates
 the existing object property by property through the proxy, so the
@@ -981,43 +1018,51 @@ in a list instance.</p>
     <li><a class="doc-link" href="../">tosijs</a></li>
     <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
-    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
-    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
     <ul>
-      <li><a class="doc-link" href="../color/">color</a></li>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
     <ul>
-      <li><a class="doc-link" href="../xin/">The tosi proxy</a></li>
-      <li><a class="doc-link" href="../metadata/">metadata</a></li>
-      <li><a class="doc-link" href="../path-listener/">path-listener</a></li>
-      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
     </ul>
     </details></li>
-    <li><details open><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <li><details open><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
     <ul>
       <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
-      <li><a class="doc-link current" href="../list-binding/" aria-current="page">binding arrays</a></li>
-      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link current" href="../list-binding/" aria-current="page">Array Bindings</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../component/">Web-Components</a></summary>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
     <ul>
-      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
-      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
-      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
     </ul>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
-      <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../share/">share</a></li>
-      <li><a class="doc-link" href="../sync/">sync</a></li>
-      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
-      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -1029,13 +1074,13 @@ in a list instance.</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
-      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
       <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
@@ -1050,6 +1095,6 @@ in a list instance.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=76dcd3794dc6"></script>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
 </body>
 </html>

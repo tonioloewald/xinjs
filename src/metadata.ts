@@ -1,6 +1,6 @@
-/*{ "parent": "tosi", "description": "Proxy accessor helpers: tosiAccessor(), the TOSI_ACCESSOR symbol, and tosiPath()/tosiValue() for inspecting boxed proxies safely." }*/
+/*{"parent": "managing-state", "order": 3, "description": "Proxy accessor helpers: tosiAccessor(), the TOSI_ACCESSOR symbol, and tosiPath()/tosiValue() for inspecting boxed proxies safely."}*/
 /*#
-# metadata
+# Metadata
 
 ## `tosiAccessor(x: any): TosiAccessor | undefined`
 

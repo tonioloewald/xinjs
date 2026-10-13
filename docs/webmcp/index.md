@@ -1,4 +1,4 @@
-# webmcp (EXPERIMENTAL)
+# WebMCP (EXPERIMENTAL)
 
 The [WebMCP](https://github.com/webmachinelearning/webmcp) standard (`document.modelContext` — `navigator.modelContext` is
 deprecated as of Chrome 150, and this adapter still probes it) lets a

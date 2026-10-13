@@ -1,4 +1,4 @@
-# share
+# Cross-Tab State (share)
 
 `share()` synchronizes state across browser tabs and windows. Pass it
 boxed proxies from `tosi()` and those paths will be kept in sync via

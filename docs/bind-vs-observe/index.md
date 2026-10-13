@@ -1,5 +1,5 @@
 # Why `bind`, and when to use `observe`
-<!--{ "parent": "bind", "order": 1, "description": "Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." }-->
+<!--{ "parent": "binding-to-the-dom", "order": 1, "description": "Why bind — and when observe is the right tool. The rule: observe for reactions that touch no DOM; bind for everything else." }-->
 
 There is one rule, and it decides almost every case:
 
@@ -51,7 +51,7 @@ you.
 
 **You forfeit the machinery.** Surgical list updates via `idPath`,
 accumulate-don't-clobber when several bindings share an element,
-`take()` memoisation, shadow-boundary handling, per-element error isolation so
+`as()` memoisation, shadow-boundary handling, per-element error isolation so
 one failure cannot strand the rest of the page.
 
 ## The real argument
@@ -79,7 +79,7 @@ When the reaction touches no DOM at all:
 | **sync** | replicate to another realm — another tab, the network, the URL |
 | **telemetry** | analytics, logging, an audit trail |
 | **process** | start or stop something — a timer, a worker, a poll |
-| **derived state** | compute *other state* — though [`take`](/xin/#take--reactive-binding-transforms) is usually better |
+| **derived state** | compute *other state* — though [`as`](/xin/#proxytosiastransformation) is usually better |
 
 ```
 // legitimate: nothing here touches the DOM

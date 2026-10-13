@@ -1,6 +1,6 @@
-/*{ "order": 5, "description": "bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates." }*/
+/*{"parent": "binding-to-the-dom", "order": 2, "title": "Custom Bindings and Events", "description": "bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates."}*/
 /*#
-# Binding
+# Custom Bindings and Events (bind, on)
 
 `bind()` lets you synchronize data / application state to the user-interface reliably,
 efficiently, and with a minimum of code.
@@ -221,8 +221,8 @@ shadow boundaries, and the dispatcher resolves the true origin via
 `composedPath()` (retargeting would otherwise hide it) and continues delegation
 up through shadow hosts to light-DOM ancestors. Closed shadow roots stay
 closed. (Note that *data* bindings deliberately do not operate inside shadow
-DOM — a shadow-DOM component is bound like an `<input>`, via its `value`; see
-the Component docs.)
+DOM — a component, with or without a shadow DOM, is bound like an `<input>`,
+via its `value`; see the Component docs.)
 
 This behavior needs a real browser to observe (a composed event is only
 *retargeted* to its shadow host outside jsdom/happy-dom), so it is verified
@@ -717,7 +717,7 @@ export function bind<T extends Element = Element>(
   }
   warnIfShadowed(element, 'bind()')
 
-  // TakeDescriptor — multi-path reactive transform
+  // TakeDescriptor — multi-path transform
   if (
     what != null &&
     typeof what === 'object' &&

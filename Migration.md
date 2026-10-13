@@ -382,8 +382,9 @@ reads typed controls natively, and `handleChange` coerces on the way back).
 
 A component's `change` event (fired when its `value` changes) now bubbles and
 crosses shadow boundaries — matching how native `<input>` `change` events behave.
-This makes a shadow-DOM component bindable **like an `<input>`** (bind its
-`value`; see the [Building Apps](/Building-Apps/) shadow-DOM section).
+This makes a shadow-DOM component bindable **like an `<input>`**, as every
+stateful component should be (bind its `value`; see
+[Building Apps](/Building-Apps/#a-stateful-component-is-like-an-input)).
 
 **If you have a `change` listener on an ancestor** of a tosijs component, it will
 now fire for the component's changes where before it did not. If that causes
@@ -392,7 +393,7 @@ delegation.
 
 ## Other fixes worth a glance (not breaks, but visible)
 
-- Reactive `class` bindings now **replace** instead of accumulating.
+- Bound `class` values now **replace** instead of accumulating.
 - `on()` handlers now fire inside **open shadow roots**.
 - Named CSS colors (`Color.fromCss('red')`) now parse **without a DOM**.
 - Component data-binding sugar placed **inside shadow DOM** now **warns** (it

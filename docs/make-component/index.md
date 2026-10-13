@@ -1,4 +1,4 @@
-# makeComponent
+# Make Component (makeComponent)
 
 `makeComponent(tag: string, bluePrint: TosiBlueprint<T>): Promise<TosiComponentSpec<T>>`
 hydrates [blueprints](/blueprint-loader/) into usable [web-components](/component/).

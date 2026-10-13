@@ -1,4 +1,4 @@
-# Agent API reference (EXPERIMENTAL)
+# Agent API Reference (EXPERIMENTAL)
 
 `enableAgentInterface()` turns a tosijs app's existing records — the state
 registry, the binding wiring, the event handlers — into a described,

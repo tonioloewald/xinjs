@@ -1,6 +1,6 @@
-/*{ "parent": "tosi", "description": "The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system." }*/
+/*{"parent": "managing-state", "order": 2, "title": "Path Listener", "description": "The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system."}*/
 /*#
-# path-listener
+# Path Listener (path-listener)
 
 `path-listener` implements the `tosijs` observer model. Although these events
 are exported from `tosijs` they shouldn't need to be used very often. Mostly

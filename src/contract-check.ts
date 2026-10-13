@@ -1,6 +1,6 @@
-/*{ "parent": "One User Interface", "description": "shared zero-dependency contract validation: the structural JSON-Schema subset (type/enum/const) plus the pluggable full-schema validator, used by component value contracts and inline element contracts alike." }*/
+/*{"parent": "One User Interface", "description": "shared zero-dependency contract validation: the structural JSON-Schema subset (type/enum/const) plus the pluggable full-schema validator, used by component value contracts and inline element contracts alike."}*/
 /*#
-# contract validation
+# Contract Validation
 
 Contracts (a component's `static contract`, an element's inline `contract`)
 are enforced by one gate, shared by every declaration site. The gate is two

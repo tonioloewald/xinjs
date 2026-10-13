@@ -1,6 +1,6 @@
-/*{ "order": 2, "description": "The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required." }*/
+/*{"parent": "building-the-dom", "order": 1, "title": "Element Creators", "description": "The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required."}*/
 /*#
-# Creating Elements
+# Element Creators (elements)
 
 `tosijs` provides `elements` for easily and efficiently generating DOM elements
 without using `innerHTML` or other unsafe methods.
@@ -466,7 +466,7 @@ const elementStyleBinding = (prop: string): TosiBinding => {
 }
 
 // per-element record of the classes the `class` prop binding last applied,
-// so a reactive class binding can replace (not accumulate) on each update
+// so a bound class value can replace (not accumulate) on each update
 const appliedClasses = new WeakMap<Element, Set<string>>()
 
 const elementProp = (elt: HTMLElement, key: string, value: any) => {
@@ -564,7 +564,7 @@ const elementProp = (elt: HTMLElement, key: string, value: any) => {
         // 'foo bar baz' (and null/undefined/false/'' -> no class)
         for (const c of splitClasses(value)) on.add(c)
       }
-      // Diff against what THIS binding applied last time, so a reactive
+      // Diff against what THIS binding applied last time, so a bound
       // `class` binding REPLACES rather than accumulates (a change from
       // 'red' to 'blue' must not leave 'red bl ue'). Only classes this
       // binding previously added are candidates for removal — classes from

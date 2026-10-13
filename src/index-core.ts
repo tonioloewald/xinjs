@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "tosijs/core — the slim entry: everything except the blueprint loader and the multi-window leaves, for consumers who choose minimalism." }*/
+/*{"parent": "entry-points", "order": 1, "description": "tosijs/core — the slim entry: everything except the blueprint loader and the multi-window leaves, for consumers who choose minimalism."}*/
 /*#
 # tosijs/core (slim entry)
 

@@ -1,4 +1,4 @@
-/*{ "parent": "utilities", "description": "tosijs/state — the DOM-free state layer: observable path-addressed state importable anywhere, including plain Node." }*/
+/*{"parent": "entry-points", "order": 2, "description": "tosijs/state — the DOM-free state layer: observable path-addressed state importable anywhere, including plain Node."}*/
 /*#
 # tosijs/state (DOM-free)
 

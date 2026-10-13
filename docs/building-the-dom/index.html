@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    try {
+      var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
+      var t = p.theme || 'system'
+      if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.classList.add('darkmode')
+      if (p.highContrast) document.documentElement.classList.add('high-contrast')
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>Building the DOM — tosijs</title>
+  <meta name="description" content="How tosijs builds user interfaces: element creators that return real DOM elements, CSS written as objects, and web components for the pieces worth naming. An overview with links to the detail." />
+  <link rel="canonical" href="https://tosijs.net/building-the-dom/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Building the DOM — tosijs (markdown)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs" />
+  <meta property="og:title" content="Building the DOM — tosijs" />
+  <meta property="og:description" content="How tosijs builds user interfaces: element creators that return real DOM elements, CSS written as objects, and web components for the pieces worth naming. An overview with links to the detail." />
+  <meta property="og:url" content="https://tosijs.net/building-the-dom/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Building the DOM","description":"How tosijs builds user interfaces: element creators that return real DOM elements, CSS written as objects, and web components for the pieces worth naming. An overview with links to the detail.","url":"https://tosijs.net/building-the-dom/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <link rel="icon" href="../favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <article class="doc-content">
+<h1 id="building-the-dom">Building the DOM</h1>
+<!--{ "order": 4, "description": "How tosijs builds user interfaces: element creators that return real DOM elements, CSS written as objects, and web components for the pieces worth naming. An overview with links to the detail." }-->
+
+<p>Elements are the user interface. <code>tosijs</code> creates real DOM elements, directly,
+with ordinary function calls. There is no template language, no JSX and nothing
+to compile, and what you get back is what the browser gives you: an
+<code>HTMLElement</code> you can append, query and inspect.</p>
+<p>This page is the overview. Each part links to the page with the detail.</p>
+<h2 id="element-creators">Element creators</h2>
+<pre><code>import { elements } from &#39;tosijs&#39;
+
+const { div, h1, input, button } = elements
+
+document.body.append(
+  div(
+    { class: &#39;card&#39; },
+    h1(&#39;Hello&#39;),
+    input({ placeholder: &#39;your name&#39; }),
+    button(&#39;OK&#39;, { onClick: () =&gt; console.log(&#39;clicked&#39;) })
+  )
+)
+</code></pre>
+<p><code>elements</code> has a creator for every tag. A creator takes its arguments in any
+order: strings and elements become children, a plain object sets attributes,
+properties, styles and event handlers. <a href="/elements/">Element creators</a> covers
+everything they accept, including SVG and MathML, and <code>bindParts()</code> for wiring
+up HTML that already exists.</p>
+<h2 id="styling">Styling</h2>
+<p>Use CSS. <code>tosijs</code> adds a way to write it as JavaScript objects, CSS variables
+with defaults, and color math: see <a href="/css/">CSS</a>.</p>
+<h2 id="web-components">Web components</h2>
+<p>When a piece of the page deserves its own tag, make it a custom element with
+<a href="/component/"><code>Component</code></a>. Components have no shadow DOM by default, compose
+with <code>&lt;slot&gt;</code>, and are bound like an <code>&lt;input&gt;</code>, through their <code>value</code>.
+<a href="/blueprint-loader/">Blueprints</a> load components straight from markup.</p>
+<h2 id="making-it-live">Making it live</h2>
+<p>Everything above builds a static page. To have it follow your state, see
+<a href="/binding-to-the-dom/">Binding to the DOM</a>.</p>
+<!-- toc -->
+<ul>
+<li><a href="/elements/">Element Creators</a></li>
+<li><a href="/css/">CSS</a></li>
+<li><a href="/component/">Web Components</a></li>
+</ul>
+<!-- /toc -->
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
+    <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
+    </ul>
+    </details></li>
+    <li><details open><summary><a class="doc-link current" href="../building-the-dom/" aria-current="page">Building the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../React/">React and tosijs</a></li>
+    <li><a class="doc-link" href="../Angular/">Angular and tosijs</a></li>
+    <li><details><summary><a class="doc-link" href="../one-user-interface/">One User Interface</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../derived-surface/">The Derived Surface</a></li>
+      <li><a class="doc-link" href="../agent-surface/">The Agent Surface</a></li>
+      <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
+      <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
+      <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../history/">tosijs history</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://discord.com/invite/ramJ9rgky5" data-icon="discord">discord</a></li>
+    <li><a href="https://loewald.com" data-icon="blog">blog</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
+</body>
+</html>

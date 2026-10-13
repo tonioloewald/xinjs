@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=76dcd3794dc6" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
   <title>Building Apps — tosijs</title>
   <meta name="description" content="How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." />
   <link rel="canonical" href="https://tosijs.net/Building-Apps/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=4c35b7b1876c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="building-apps">Building Apps</h1>
 <!--{ "pin": "top", "order": 2, "description": "How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." }-->
@@ -171,7 +171,7 @@ app.showFeature.observe(() =&gt; {
 an element, you put it in the DOM, bindings activate. That&#39;s it.</p>
 <h3 id="3-use-list-bindings-for-collections">3. Use list bindings for collections</h3>
 <pre><code>ul(
-  ...app.messages.listBinding(
+  ...app.messages.tosi.listBinding(
     ({li, span}, msg) =&gt; li(
       span({ textContent: msg.sender }),
       span({ textContent: msg.body })
@@ -191,6 +191,17 @@ familiar mapping syntax is a Trojan horse for live list rendering.</p>
 messages renders the same number of DOM nodes as a list of twenty.
 Scrolling is O(1) — the same virtual slice calculation runs regardless
 of list size.</p>
+<p>Two things to know before your first long list:</p>
+<ul>
+<li><strong>A virtual list needs somewhere to scroll.</strong> Give the bound element (the
+<code>ul</code> above) a height and <code>overflow: auto</code>. If it just grows to fit its
+content there is nothing to virtualize against.</li>
+<li><strong>A list of more than 10 items that is not virtual logs a warning</strong>, once,
+naming the list. Either add <code>virtual</code>, or say the choice is deliberate with
+<code>{ nonVirtualReason: &#39;fixed list of 12 months&#39; }</code>.</li>
+</ul>
+<p><a href="/list-binding/">Array Bindings</a> has the detail, including what removing a row
+costs.</p>
 <p><strong>Always specify <code>idPath</code> for arrays of objects.</strong> This enables surgical
 updates — changing one property on one item updates one DOM element.
 Without it, the list falls back to index-based paths that break on reorder.</p>
@@ -204,19 +215,19 @@ never hit this.</p>
 <p>Proxied arrays have <code>listFind</code>, <code>listUpdate</code>, and <code>listRemove</code> methods
 that use the same selector pattern as <code>listBinding</code>:</p>
 <pre><code>// Find an item — returns proxied, so mutations trigger updates
-const item = app.items.listFind((item) =&gt; item.id, &#39;abc&#39;)
+const item = app.items.tosi.listFind((item) =&gt; item.id, &#39;abc&#39;)
 if (item) item.name.value = &#39;Updated&#39;
 
 // Find by DOM element (in a click handler)
-const item = app.items.listFind(e.target)
+const item = app.items.tosi.listFind(e.target)
 
 // Update in place — preserves object identity and DOM elements
-app.items.listUpdate((item) =&gt; item.id, {
+app.items.tosi.listUpdate((item) =&gt; item.id, {
   id: &#39;abc&#39;, name: &#39;New Name&#39;, score: 100
 })
 
 // Remove
-app.items.listRemove((item) =&gt; item.id, &#39;abc&#39;)
+app.items.tosi.listRemove((item) =&gt; item.id, &#39;abc&#39;)
 </code></pre>
 <p><code>listUpdate</code> is the key one: it mutates the existing object property by
 property through the proxy, so only changed properties fire observers and
@@ -332,61 +343,112 @@ That&#39;s what <code>observe()</code> is for.</p>
 to know:</p>
 <h3 id="content-vs-render"><code>content()</code> vs <code>render()</code></h3>
 <ul>
-<li><p><strong><code>content()</code> runs once.</strong> It builds the DOM during hydration and never
-re-runs. Set up bindings here — they handle all data-driven updates
-automatically.</p>
+<li><p><strong><code>content()</code> runs once.</strong> It builds the component&#39;s DOM during hydration and
+never re-runs.</p>
 </li>
-<li><p><strong><code>render()</code> runs on attribute changes.</strong> It&#39;s for <em>structural</em> changes
-driven by attributes — showing/hiding sections, swapping an <code>&lt;input&gt;</code>
-from <code>type=&quot;text&quot;</code> to <code>type=&quot;password&quot;</code>, reconfiguring layout. It is
-<strong>not</strong> for updating text, values, or display state.</p>
+<li><p><strong><code>render()</code> runs whenever the component&#39;s own state changes</strong>: an attribute,
+its <code>value</code>, or a call to <code>queueRender()</code>. Its job is to bring the DOM that
+<code>content()</code> built up to date, <strong>in place</strong>: set a <code>textContent</code>, toggle
+<code>hidden</code>, change an <code>&lt;input&gt;</code>&#39;s <code>type</code>, update a class.</p>
 </li>
 </ul>
-<p>The separation: <strong>attributes drive structure, bindings drive content.</strong></p>
-<pre><code>class MessageBubble extends Component {
-  static initAttributes = { expanded: false }
+<p><strong>The anti-pattern is rebuilding.</strong> The naive web-component (most template-based
+examples you will find, MDN&#39;s included) replaces its interior whenever you
+breathe on it. That is more work, it is slower, and it destroys UI state: the
+caret position in a textarea, which element had focus, a scroll offset, a
+half-typed value. <code>render()</code> should only replace elements when the component&#39;s
+structure has genuinely changed.</p>
+<pre><code>class NameTag extends withAttributes({ caption: &#39;Hello, my name is&#39; }) {
+  content = ({ span, slot }) =&gt; [span({ part: &#39;caption&#39; }), slot()]
 
-  content = ({div, span}) =&gt; [
-    span({ textContent: msg.sender }),
-    div({
-      class: &#39;body&#39;,
-      bind: {
-        // structure: show/hide based on attribute
-        value: this.expanded,
-        binding: (el, expanded) =&gt; { el.hidden = !expanded }
-      }
-    },
-      span({ textContent: msg.body })  // content: flows through binding
-    )
-  ]
+  render() {
+    super.render()
+    // update what content() built; do not rebuild it
+    this.parts.caption.textContent = this.caption
+  }
 }
 </code></pre>
-<p><strong>The anti-pattern</strong> is writing an <code>updateDisplay()</code> method that manually
-sets <code>textContent</code>, toggles classes, and shows/hides elements — then
-calling it from event handlers. This recreates React&#39;s &quot;render on every
-change&quot; model inside what should be a binding-driven system. If you find
-yourself writing a method that walks the DOM and sets properties, those
-should be bindings set up in <code>content()</code>.</p>
-<p>When state lives in the <code>tosi()</code> proxy rather than in component instance
-variables, bindings can reach it directly. A component that stores
-<code>this.isExpanded = true</code> and manually propagates that to the DOM is
-doing extra work — store it in the proxy and let bindings handle it.</p>
+<p><strong>A component maintains its own interior directly.</strong> Its attributes and <code>value</code>
+are its state, <code>render()</code> reflects them into its DOM, and its event handlers
+update them. As a rule it does not use bindings for that.</p>
+<p><strong>Bindings are for application state.</strong> The larger point, here and everywhere:
+do not do with hand-written code what <code>bind</code> does for you. If you find yourself
+writing an <code>updateDisplay()</code> that copies values from your app&#39;s state into
+elements, and calling it from event handlers, that is a binding you have
+written by hand, and there will be a case it misses. Bind the element (or the
+component&#39;s <code>value</code>) to the path and delete the method. See
+<a href="/bind-vs-observe/">bind or observe?</a>.</p>
+<p>So the division is: <strong>the app binds state to components and elements; a
+component looks after its own insides.</strong></p>
+<h3 id="a-stateful-component-is-like-an-input">A stateful component is like an <code>&lt;input&gt;</code></h3>
+<p>If a component holds state, model it on <code>&lt;input&gt;</code>. This is the one idea to carry
+into every component you write, light DOM or shadow DOM:</p>
+<ul>
+<li><strong>It has a <code>value</code></strong>, and that is what the rest of the app sees. The app binds
+it exactly as it would bind an input: <code>myWidget({ bindValue: app.some.path })</code>.</li>
+<li><strong>When its <code>value</code> is set, it updates its own interior.</strong> Setting <code>value</code>
+queues <code>render()</code>; <code>render()</code> reflects the value into the DOM that <code>content()</code>
+built.</li>
+<li><strong>When the user changes something, it sets its <code>value</code></strong>, which emits a
+<code>change</code> event, and that is how the edit reaches the app. A component that
+reports changes continuously (a slider being dragged) can dispatch <code>input</code>
+events as well, as <code>&lt;input&gt;</code> does.</li>
+<li><strong>It can have other properties derived from the same value</strong>, the way a
+checkbox has <code>checked</code>: an ordinary <code>get</code>/<code>set</code> on the class, or a
+<a href="/component/#computed-attributes">computed attribute</a> if markup should be
+able to set it.</li>
+</ul>
+<p>How the component represents its value internally is its own business. Nothing
+outside reaches in, and nothing inside needs to know what the value is bound to.</p>
+<pre><code>class StarRating extends Component {
+  value = 0
+
+  content = ({ button }) =&gt;
+    [1, 2, 3, 4, 5].map((n) =&gt;
+      button(&#39;★&#39;, { part: `star${n}`, onClick: () =&gt; (this.value = n) })
+    )
+
+  render() {
+    super.render()
+    for (let n = 1; n &lt;= 5; n++) {
+      this.parts[`star${n}`].classList.toggle(&#39;on&#39;, n &lt;= this.value)
+    }
+  }
+
+  // a derivative of value, like an input&#39;s `checked`
+  get rated() {
+    return this.value &gt; 0
+  }
+}
+
+const starRating = StarRating.elementCreator()
+starRating({ bindValue: app.review.stars })
+</code></pre>
+<p>The <a href="/component/#value">value property</a> has the details.</p>
 <h3 id="light-dom-is-where-the-action-is">Light DOM is where the action is</h3>
 <p>From reading most web component documentation, you&#39;d think shadow DOM was
 the only option. It isn&#39;t. tosijs components use <strong>light DOM by default</strong>,
 and this is a deliberate choice, not a limitation.</p>
-<p>Shadow DOM gives you style encapsulation — great for word-processor-style
-isolated widgets, but a memory and performance hit for everything else.
-It also creates an encapsulation boundary that blocks path bindings,
-external styling, and the usual DOM query APIs.</p>
+<p><strong>The key difference between the two is CSS isolation.</strong> A shadow root keeps
+the page&#39;s styles out and the component&#39;s styles in. That is worth having for
+a widget that must look the same wherever it lands, or one that displays
+content it does not control. Everywhere else it is a memory and performance
+cost, and it puts the component&#39;s content out of reach of ordinary styling and
+the usual DOM query APIs.</p>
 <p>tosijs takes the one really valuable feature of shadow DOM components —
 <code>&lt;slot&gt;</code> composition — and makes it work in the light DOM. You get:</p>
 <ul>
-<li><strong>Path bindings work everywhere.</strong> No encapsulation boundary to cross.</li>
 <li><strong>CSS just works.</strong> Style your components the same way you style everything else.</li>
 <li><strong>Lighter weight.</strong> No shadow root overhead per instance.</li>
 <li><strong>Slot composition.</strong> tosijs rewrites <code>&lt;slot&gt;</code> elements in light DOM components.</li>
 </ul>
+<p><strong>What about binding into a light DOM component&#39;s content?</strong> You can: there is
+no boundary in the way. For most components it is not a great idea, because a
+component is <a href="#a-stateful-component-is-like-an-input">like an <code>&lt;input&gt;</code></a> and
+looks after its own insides. Where it does make sense is a <strong>high-level
+component</strong>: an app layout, or a user-preferences panel, written as a component.
+That is a piece of your application that happens to be a custom element, and
+binding its content straight to application state is the natural thing to do.</p>
 <h4 id="how-tosi-slot-works">How <code>&lt;tosi-slot&gt;</code> works</h4>
 <p>Native <code>&lt;slot&gt;</code> elements only work inside a shadow root. tosijs solves this
 by automatically replacing any <code>&lt;slot&gt;</code> in a light DOM component with an
@@ -434,9 +496,11 @@ passing <code>{ tag, styleSpec }</code> to <code>elementCreator()</code> — sti
 <p>Use light DOM unless you know <em>exactly</em> why you need shadow DOM.
 When you do, the mental model is:</p>
 <ul>
-<li><strong>Light DOM</strong> (default): bindings flow through naturally.</li>
-<li><strong>Shadow DOM</strong>: the component is a <em>custom input</em>. Think of it exactly like
-an <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code>: <strong>its <code>value</code> is the binding surface</strong>. Bind
+<li><strong>Light DOM</strong> (default): no CSS isolation. The input model above is the right
+design; binding into the content is possible, and best kept for high-level
+components (see above).</li>
+<li><strong>Shadow DOM</strong>: CSS isolation, and the input model is the only one there is. Think of it exactly
+like an <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code>: <strong>its <code>value</code> is the binding surface</strong>. Bind
 the component itself (e.g. <code>bindings.value</code>) from outside; setting <code>value</code>
 automatically queues <code>render()</code> and emits <code>change</code>, so implement <code>render()</code>
 to reflect <code>value</code> into the shadow DOM, and let <code>change</code> events carry edits
@@ -655,43 +719,51 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
     <li><a class="doc-link" href="../">tosijs</a></li>
     <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link current" href="../Building-Apps/" aria-current="page">Building Apps</a></li>
-    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
-    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
     <ul>
-      <li><a class="doc-link" href="../color/">color</a></li>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
     <ul>
-      <li><a class="doc-link" href="../xin/">The tosi proxy</a></li>
-      <li><a class="doc-link" href="../metadata/">metadata</a></li>
-      <li><a class="doc-link" href="../path-listener/">path-listener</a></li>
-      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
     <ul>
       <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
-      <li><a class="doc-link" href="../list-binding/">binding arrays</a></li>
-      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../component/">Web-Components</a></summary>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
     <ul>
-      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
-      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
-      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
     </ul>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
-      <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../share/">share</a></li>
-      <li><a class="doc-link" href="../sync/">sync</a></li>
-      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
-      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -703,13 +775,13 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
-      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
       <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
@@ -724,6 +796,6 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=76dcd3794dc6"></script>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
 </body>
 </html>

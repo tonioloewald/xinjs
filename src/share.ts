@@ -1,6 +1,6 @@
-/*{ "parent": "utilities", "description": "share() synchronizes tosijs state across browser tabs and windows using BroadcastChannel and IndexedDB." }*/
+/*{"parent": "managing-state", "order": 5, "title": "Cross-Tab State", "description": "share() synchronizes tosijs state across browser tabs and windows using BroadcastChannel and IndexedDB."}*/
 /*#
-# share
+# Cross-Tab State (share)
 
 `share()` synchronizes state across browser tabs and windows. Pass it
 boxed proxies from `tosi()` and those paths will be kept in sync via

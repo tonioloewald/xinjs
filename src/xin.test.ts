@@ -1553,14 +1553,14 @@ test('observer callback touches are not lost', (done) => {
   }, 50)
 })
 
-// .take() tests
+// .as() tests
 
 test('take returns a TakeDescriptor with correct shape', () => {
   const { takeShapeTest } = tosi({
     takeShapeTest: { count: 5, label: 'hello' },
   })
 
-  const desc = takeShapeTest.count.tosi.take((v: number) => v * 2)
+  const desc = takeShapeTest.count.tosi.as((v: number) => v * 2)
   expect(desc[TAKE_DESCRIPTOR]).toBe(true)
   expect(desc.paths).toEqual(['takeShapeTest.count'])
   expect(typeof desc.transform).toBe('function')
@@ -1572,7 +1572,7 @@ test('take multi-path returns descriptor with all paths', () => {
     takeMultiTest: { items: [1, 2, 3], filter: 'odd' },
   })
 
-  const desc = takeMultiTest.items.tosi.take(
+  const desc = takeMultiTest.items.tosi.as(
     takeMultiTest.filter,
     (items: number[], filter: string) =>
       filter === 'odd' ? items.filter((n) => n % 2) : items
@@ -1588,7 +1588,7 @@ test('take with bindText updates DOM on state change', async () => {
   })
 
   const span = elements.span({
-    bindText: takeBindTest.count.tosi.take((n: number) => `Count: ${n}`),
+    bindText: takeBindTest.count.tosi.as((n: number) => `Count: ${n}`),
   })
   document.body.append(span)
   await updates()
@@ -1608,7 +1608,7 @@ test('take with bindEnabled inverts boolean', async () => {
   })
 
   const btn = elements.button('Delete', {
-    bindEnabled: takeEnabledTest.items.tosi.take(
+    bindEnabled: takeEnabledTest.items.tosi.as(
       (list: string[]) => list.length > 0
     ),
   })
@@ -1631,7 +1631,7 @@ test('take multi-path binding reacts to any path change', async () => {
   })
 
   const span = elements.span({
-    bindText: takeMultiBindTest.firstName.tosi.take(
+    bindText: takeMultiBindTest.firstName.tosi.as(
       takeMultiBindTest.lastName,
       (first: string, last: string) => `${first} ${last}`
     ),
@@ -1660,7 +1660,7 @@ test('take deduplicates — transform skipped when inputs unchanged', async () =
 
   let transformCallCount = 0
   const span = elements.span({
-    bindText: takeDedupTest.value.tosi.take((v: string) => {
+    bindText: takeDedupTest.value.tosi.as((v: string) => {
       transformCallCount++
       return v.toUpperCase()
     }),
@@ -1734,9 +1734,7 @@ test('take descriptor works as bare property binding', async () => {
   })
 
   const btn = elements.button('Delete', {
-    disabled: bareTakeTest.items.tosi.take(
-      (list: string[]) => list.length === 0
-    ),
+    disabled: bareTakeTest.items.tosi.as((list: string[]) => list.length === 0),
   })
   document.body.append(btn)
   await updates()
@@ -2174,4 +2172,24 @@ describe('a boxed proxy is a live view of its PATH, not a snapshot (tosijs#35)',
     expect(JSON.stringify(arr)).toBe('[1,2,3]')
     expect([...(arr as any)].map((v: any) => v.valueOf())).toEqual([1, 2, 3])
   })
+})
+
+test('.take() is the deprecated name of .as(): same descriptor, one warning', async () => {
+  const { takeAlias } = tosi({ takeAlias: { n: 2 } })
+  await updates()
+  const warn = console.warn
+  const warnings: string[] = []
+  console.warn = (...args: any[]) => warnings.push(String(args[0]))
+  try {
+    const viaTake = (takeAlias.n.tosi as any).take((n: number) => n * 2)
+    ;(takeAlias.n.tosi as any).take((n: number) => n * 3)
+    const viaAs = takeAlias.n.tosi.as((n: number) => n * 2)
+    expect(viaTake.paths).toEqual(viaAs.paths)
+    expect(viaTake.transform(4)).toBe(8)
+    expect(
+      warnings.filter((w) => w.includes('.take() is deprecated')).length
+    ).toBe(1)
+  } finally {
+    console.warn = warn
+  }
 })

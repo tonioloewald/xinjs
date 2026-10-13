@@ -14,25 +14,25 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=76dcd3794dc6" data-tosi-doc-system />
-  <title>The tosi proxy — tosijs</title>
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>The Observer Proxy — tosijs</title>
   <meta name="description" content="How the tosi observer proxy works: an object wrapped in a proxy that surgically updates bound DOM elements when its properties change." />
   <link rel="canonical" href="https://tosijs.net/xin/" />
-  <link rel="alternate" type="text/markdown" href="index.md" title="The tosi proxy — tosijs (markdown)" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="The Observer Proxy — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
-  <meta property="og:title" content="The tosi proxy — tosijs" />
+  <meta property="og:title" content="The Observer Proxy — tosijs" />
   <meta property="og:description" content="How the tosi observer proxy works: an object wrapped in a proxy that surgically updates bound DOM elements when its properties change." />
   <meta property="og:url" content="https://tosijs.net/xin/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"The tosi proxy","description":"How the tosi observer proxy works: an object wrapped in a proxy that surgically updates bound DOM elements when its properties change.","url":"https://tosijs.net/xin/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"The Observer Proxy","description":"How the tosi observer proxy works: an object wrapped in a proxy that surgically updates bound DOM elements when its properties change.","url":"https://tosijs.net/xin/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=4c35b7b1876c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
-<h1 id="the-tosi-proxy">The tosi proxy</h1>
+<h1 id="the-observer-proxy-tosi">The Observer Proxy (tosi)</h1>
 <p><code>tosi()</code> assigns an object passed to it to a global state object,
 and returns an observer proxy (<code>BoxedProxy</code>, a JavaScript
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy"><code>Proxy</code></a>) wrapped around the global state object.</p>
@@ -444,7 +444,7 @@ This is critical for comparisons such as <code>===</code> and <code>!==</code>.
 Always use <code>.value</code>, <code>tosiValue()</code>, or <code>valueOf()</code> when comparing:
 <code>boxed.foo.bar.value === &#39;hello&#39;</code> or <code>tosiValue(boxed.foo.bar) === &#39;hello&#39;</code>.</p>
 <h2 id="the-tosi-accessor">The <code>.tosi</code> accessor</h2>
-<p>Every boxed proxy has a <code>.tosi</code> property that provides the full reactive API
+<p>Every boxed proxy has a <code>.tosi</code> property that provides the full observer API
 without risk of name collisions. If your data has properties named <code>value</code>,
 <code>path</code>, <code>observe</code>, etc., those will shadow the proxy&#39;s direct API — but <code>.tosi</code>
 is always available.</p>
@@ -487,7 +487,7 @@ called <code>value</code>, <code>path</code>, <code>observe</code> and so on, th
 <li><code>.bind(element, binding, options?)</code> binds the value to a DOM element</li>
 <li><code>.on(element, eventType)</code> binds an event handler</li>
 <li><code>.binding(binding)</code> returns an inline binding spec for use with elements</li>
-<li><code>.listBinding(templateBuilder, options?)</code> returns a list binding spec</li>
+<li><code>.tosi.listBinding(templateBuilder, options?)</code> returns a list binding spec</li>
 <li><code>.valueOf()</code> / <code>.toJSON()</code> for type coercion (scalars also have <code>.toString()</code>)</li>
 </ul>
 <p>Boxed scalars also expose all methods from the underlying primitive&#39;s prototype
@@ -514,10 +514,10 @@ if (proxy.flag.valueOf()) ...
 </code></pre>
 <p>Arrays also have:</p>
 <ul>
-<li><code>.listFind(selector, value)</code> finds an item by field and returns it proxied</li>
-<li><code>.listFind(element)</code> finds the array item bound to a DOM element</li>
-<li><code>.listUpdate(selector, newValue)</code> updates an existing item in place or pushes if not found</li>
-<li><code>.listRemove(selector, value)</code> removes an item by field match</li>
+<li><code>.tosi.listFind(selector, value)</code> finds an item by field and returns it proxied</li>
+<li><code>.tosi.listFind(element)</code> finds the array item bound to a DOM element</li>
+<li><code>.tosi.listUpdate(selector, newValue)</code> updates an existing item in place or pushes if not found</li>
+<li><code>.tosi.listRemove(selector, value)</code> removes an item by field match</li>
 </ul>
 <blockquote>
 <p>Note: the <code>xinValue</code> / <code>xinPath</code> / <code>xinObserve</code> / <code>xinBind</code> / <code>xinOn</code>
@@ -528,54 +528,71 @@ canonical, they are what this file uses internally (26 call sites), and they
 accept a non-proxy — which <code>.tosi.value</code> cannot. Migrating off them onto
 <code>.tosi.*</code> loses that.</p>
 </blockquote>
-<h2 id="take--reactive-binding-transforms"><code>.take()</code> — Reactive Binding Transforms</h2>
-<p><code>.take()</code> creates a reactive binding descriptor that transforms values before
-they reach the DOM. It eliminates most custom bindings.</p>
-<h3 id="single-path-transform">Single-path transform</h3>
+<h2 id="proxytosiastransformation"><code>&lt;proxy&gt;.tosi.as(&lt;transformation&gt;)</code></h2>
+<p><code>.tosi.as()</code> lets you transform a proxied value in a binding. Use it when an
+element should show something computed from the state and not the state itself:
+a formatted price, a button that is disabled while a list is empty, a full name
+made from a first and a last name.</p>
+<pre><code>span({ textContent: cart.total.tosi.as((n) =&gt; `$${n.toFixed(2)}`) })
+button(&#39;Delete&#39;, { disabled: cart.items.tosi.as((list) =&gt; list.length === 0) })
+</code></pre>
+<p>You can pass the result anywhere you would pass the proxy itself. The element is
+bound to the same path as usual, and the transformation is applied to the value
+on its way to the element. This eliminates the need for most
+<a href="/binding-to-the-dom/#custom-binding">custom bindings</a>.</p>
+<p>Two things to know:</p>
+<ul>
+<li>It goes <strong>one way</strong>, from state to the element. There is nothing to write back.</li>
+<li>The transformation runs <strong>only when its inputs have changed</strong> (compared by
+identity). If something touches the path but the value is the same, it is
+skipped.</li>
+</ul>
+<blockquote>
+<p><code>.tosi.as()</code> was called <code>.take()</code> before 1.10.9. The old name still works and
+warns once.</p>
+</blockquote>
+<h3 id="one-value">One value</h3>
 <pre><code class="language-js">import { tosi, elements } from &#39;tosijs&#39;
 
-const { takeDemo } = tosi({ takeDemo: { count: 3, items: [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;] } })
+const { asDemo } = tosi({ asDemo: { count: 3, items: [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;] } })
 
 const { span, button } = elements
 
 preview.append(
-  span({ textContent: takeDemo.count.tosi.take(n =&gt; `Count: ${n}`) }),
+  span({ textContent: asDemo.count.tosi.as(n =&gt; `Count: ${n}`) }),
   button(&#39;Delete&#39;, {
-    disabled: takeDemo.items.tosi.take(list =&gt; list.length === 0),
+    disabled: asDemo.items.tosi.as(list =&gt; list.length === 0),
   })
 )
 </code></pre>
-<h3 id="multi-path-transform">Multi-path transform</h3>
-<p>Pass additional proxies before the transform function. The transform receives
-all current values when any of the watched paths change.</p>
+<h3 id="several-values">Several values</h3>
+<p>To compute from more than one path, pass the other proxies before the function.
+It is called with all of the current values whenever any of them changes.</p>
 <pre><code class="language-js">import { tosi, elements } from &#39;tosijs&#39;
 
-const { takeMultiDemo } = tosi({
-  takeMultiDemo: { firstName: &#39;Alice&#39;, lastName: &#39;Smith&#39; }
+const { asMultiDemo } = tosi({
+  asMultiDemo: { firstName: &#39;Alice&#39;, lastName: &#39;Smith&#39; }
 })
 
 const { span, input, label } = elements
 
 preview.append(
-  span({ textContent: takeMultiDemo.firstName.tosi.take(
-    takeMultiDemo.lastName,
+  span({ textContent: asMultiDemo.firstName.tosi.as(
+    asMultiDemo.lastName,
     (first, last) =&gt; `${first} ${last}`
   ) }),
-  label(&#39;First&#39;, input({ bindValue: takeMultiDemo.firstName })),
-  label(&#39;Last&#39;, input({ bindValue: takeMultiDemo.lastName })),
+  label(&#39;First&#39;, input({ bindValue: asMultiDemo.firstName })),
+  label(&#39;Last&#39;, input({ bindValue: asMultiDemo.lastName })),
 )
 </code></pre>
-<p><code>.take()</code> is efficient: the transform only runs when the input values actually
-change (compared by identity). If an observer fires but the value is the same,
-the transform is skipped entirely.</p>
-<h3 id="filtered-list-with-take">Filtered list with <code>.take()</code></h3>
-<p><code>.take()</code> works with list bindings to create reactive filtered views. The filter
-re-evaluates when any of the watched paths change, but the list binding still
-does surgical DOM updates.</p>
+<h3 id="in-a-filtered-list">In a filtered list</h3>
+<p>A list binding&#39;s <code>needle</code> can use <code>.tosi.as()</code> as well, so the filter can depend on a
+computed value (here, the search text in lower case). The filter runs again when
+any of the paths involved changes, and the list still updates row by row.</p>
 <pre><code class="language-js">import { elements, tosi, touch } from &#39;tosijs&#39;
 
-const { takeFilterDemo } = tosi({
-  takeFilterDemo: {
+const { asFilterDemo } = tosi({
+  asFilterDemo: {
     search: &#39;&#39;,
     items: [
       { id: 1, name: &#39;Alice&#39;, role: &#39;engineer&#39; },
@@ -594,11 +611,11 @@ preview.append(
     { style: { display: &#39;flex&#39;, flexDirection: &#39;column&#39;, gap: 10, padding: 10 } },
     label(&#39;Filter&#39;, input({
       placeholder: &#39;type to filter...&#39;,
-      bindValue: takeFilterDemo.search,
+      bindValue: asFilterDemo.search,
     })),
     div({
-      textContent: takeFilterDemo.items.tosi.take(
-        takeFilterDemo.search,
+      textContent: asFilterDemo.items.tosi.as(
+        asFilterDemo.search,
         (items, search) =&gt; {
           const s = search.toLowerCase()
           const count = s ? items.filter(i =&gt; i.name.toLowerCase().includes(s) || i.role.includes(s)).length : items.length
@@ -608,7 +625,7 @@ preview.append(
       style: { fontStyle: &#39;italic&#39;, opacity: 0.7 },
     }),
     ul(
-      ...takeFilterDemo.items.tosi.listBinding(
+      ...asFilterDemo.items.tosi.listBinding(
         ({li, span}, item) =&gt; li(
           span({ textContent: item.name, style: { fontWeight: &#39;bold&#39; } }),
           &#39; — &#39;,
@@ -619,7 +636,7 @@ preview.append(
           filter: (items, needle) =&gt; needle
             ? items.filter(i =&gt; i.name.toLowerCase().includes(needle) || i.role.includes(needle))
             : items,
-          needle: takeFilterDemo.search.tosi.take(s =&gt; s.toLowerCase()),
+          needle: asFilterDemo.search.tosi.as(s =&gt; s.toLowerCase()),
         }
       )
     )
@@ -640,7 +657,7 @@ The callback receives a placeholder proxy (the same <code>^</code> proxy trick u
 </code></pre>
 <h3 id="listfindselector-value--listfindelement"><code>listFind(selector, value)</code> / <code>listFind(element)</code></h3>
 <p>Find an item and return it as a proxied object (so mutations trigger observers):</p>
-<pre><code>const item = app.items.listFind((item) =&gt; item.id, &#39;abc&#39;)
+<pre><code>const item = app.items.tosi.listFind((item) =&gt; item.id, &#39;abc&#39;)
 if (item) {
   item.name.value = &#39;Updated&#39;  // triggers observers + DOM updates
 }
@@ -648,7 +665,7 @@ if (item) {
 <p>You can also pass a DOM element to find the array item bound to it — useful
 in click handlers on list-bound elements:</p>
 <pre><code>container.addEventListener(&#39;click&#39;, (e) =&gt; {
-  const item = app.items.listFind(e.target)
+  const item = app.items.tosi.listFind(e.target)
   if (item) console.log(&#39;Clicked:&#39;, item.name.value)
 })
 </code></pre>
@@ -658,19 +675,19 @@ recommended way to update list items because it preserves object identity —
 the <code>itemToElement</code> WeakMap still maps to the same DOM element, so no
 teardown/recreation occurs:</p>
 <pre><code>// Update existing — only changed properties fire observers
-app.items.listUpdate((item) =&gt; item.id, {
+app.items.tosi.listUpdate((item) =&gt; item.id, {
   id: &#39;abc&#39;, name: &#39;New Name&#39;, score: 100
 })
 
 // Item not found — pushes as new
-app.items.listUpdate((item) =&gt; item.id, {
+app.items.tosi.listUpdate((item) =&gt; item.id, {
   id: &#39;xyz&#39;, name: &#39;Brand New&#39;
 })
 </code></pre>
 <p>Returns the proxied item (existing or newly pushed).</p>
 <h3 id="listremoveselector-value"><code>listRemove(selector, value)</code></h3>
 <p>Remove an item by field match. Returns <code>true</code> if removed, <code>false</code> if not found:</p>
-<pre><code>app.items.listRemove((item) =&gt; item.id, &#39;abc&#39;)  // true if found
+<pre><code>app.items.tosi.listRemove((item) =&gt; item.id, &#39;abc&#39;)  // true if found
 </code></pre>
 <h3 id="to-do-list-example">To Do List Example</h3>
 <p>Each of the features described thus far, along with the features of the
@@ -714,11 +731,105 @@ preview.append(
       }
     }),
     button(&#39;Add&#39;, {
-      disabled: todos.newItem.tosi.take(text =&gt; !text),
+      disabled: todos.newItem.tosi.as(text =&gt; !text),
       onClick: addItem
     })
   )
 )
+</code></pre>
+<h2 id="tosi-xinproxy-xin-and-boxed"><code>tosi()</code>, <code>xinProxy()</code>, <code>xin</code> and <code>boxed</code></h2>
+<blockquote>
+<p><code>tosi()</code> was formerly called <code>boxedProxy()</code>.</p>
+</blockquote>
+<p>After coding with <code>xin</code> for a while, it became apparent that a common pattern
+was something like this:</p>
+<pre><code>import myThing as _myThing from &#39;path/to/my-thing&#39;
+import { xin } from &#39;tosijs&#39;
+
+xin.myThing = _myThing
+export const myThing = xin.myThing as typeof _myThing
+</code></pre>
+<p>Now we can use the new <code>myThing</code> in a pretty intuitive way, leverage autocomplete
+most of the time, and it&#39;s all pretty nice.</p>
+<p>And because <code>myThing.path.to.something</code> is actually a <code>TosiProxy</code> we can actually
+bind to it directly. So instead of typing (or mis-typing):</p>
+<pre><code>customElement({bindValue: &#39;mything.path.to.something&#39;}))
+</code></pre>
+<p>We can type the following and even use autocomplete:</p>
+<pre><code>customElement({bindValue: mything.path.to.something}))
+</code></pre>
+<p>This gets you:</p>
+<pre><code>const { myThing } = xinProxy({ myThing: ... })
+</code></pre>
+<p>And after working with that for a while, the question became, what if we could
+leverage autocomplete even for non-object properties?</p>
+<p>This gets us to:</p>
+<pre><code>const { myThing } = tosi({ myThing: ... })
+</code></pre>
+<p>…(and also <code>boxed</code>). <code>boxedProxy()</code> is the old name for <code>tosi()</code>; it still
+works and warns.</p>
+<p><code>boxed</code> and <code>boxedProxy</code> deliver a proxy wrapped around an object wrapped around
+the original <code>string</code>, <code>boolean</code>, or <code>number</code>. This gets you autocomplete and
+strong typing in general, at the cost of slight annoyances (e.g. having to write
+<code>myThing.path.to.string.valueOf() === &#39;some value&#39;</code>). That&#39;s the tradeoff. In
+practice it&#39;s really very nice.</p>
+<p><code>xinProxy(foo)</code> takes an object of type T and returns a <strong><code>TosiProxy&lt;T&gt;</code></strong> — the
+raw <code>xin</code> proxy, NOT a boxed one. <strong>It is not an alias for <code>tosi()</code>.</strong> <code>tosi()</code>
+assigns into <code>boxed</code> and returns <code>boxed</code>; <code>xinProxy()</code> assigns into <code>xin</code> and
+returns <code>xin</code>, and <code>xin</code> is created with <code>boxScalars: false</code>. So a scalar read
+off an <code>xinProxy</code> result is the raw value: <code>foo.value</code>, <code>foo.path</code>,
+<code>foo.observe()</code> and <code>[TOSI_ACCESSOR]</code> are all absent.</p>
+<p>Prefer <code>tosi()</code> unless you specifically want unboxed scalars.</p>
+<pre><code>import { tosi } from &#39;tosijs&#39;
+
+const { foo, bar } = tosi({
+  foo: &#39;bar&#39;,
+  bar: {
+    director: &#39;luhrmann&#39;
+  }
+})
+</code></pre>
+<p>This is syntax sugar for:</p>
+<pre><code>import { boxed } from &#39;tosijs&#39;
+
+const stuff = {
+  foo: &#39;bar&#39;,
+  bar: {
+    director: &#39;luhrmann&#39;,
+    born: 1962
+  }
+}
+
+Object.assign(boxed, stuff)
+
+const { foo, bar } = boxed as TosiProxy&lt;typeof stuff&gt;
+</code></pre>
+<p>So, Typescript will know that <code>foo</code> is a <code>string</code> and <code>bar</code> is a <code>TosiProxy&lt;typeof stuff.bar&gt;</code>.</p>
+<p>Now, <code>tosi()</code> is the same except replace <code>TosiProxy</code> with <code>BoxedProxy</code> and
+now Typescript will know that <code>foo</code> is a <code>BoxedProxy&lt;string&gt;</code>, <code>bar</code> is a <code>BoxedProxy&lt;typeof stuff.bar&gt;</code>
+and <code>bar.born</code> is a <code>BoxedProxy&lt;number&gt;</code>.</p>
+<p>This lets you write bindings that support autocomplete and lint. Yay!</p>
+<h2 id="tosiunique"><code>tosiUnique()</code></h2>
+<p><code>tosiUnique()</code> creates an observer proxy stored under a guaranteed unique key.
+This is useful for component instances or any situation where you need
+per-instance state without worrying about key collisions.</p>
+<p>It returns a tuple of <code>[proxy, removeFunc]</code>:</p>
+<ul>
+<li><code>proxy</code> is a <code>BoxedProxy&lt;T&gt;</code> — the observer proxy for your object</li>
+<li><code>removeFunc</code> is a cleanup function that removes the state from the registry</li>
+</ul>
+<p>If you pass an <code>owner</code> object (e.g. <code>this</code> in a component), the state will
+be automatically cleaned up when the owner is garbage collected — no need
+to call the remove function manually.</p>
+<p>Typical usage in a component:</p>
+<pre><code>class MyComponent extends Component {
+  proxy = tosiUnique({ count: 0, name: &#39;&#39; }, this)[0]
+}
+</code></pre>
+<p>Or if you want explicit cleanup control:</p>
+<pre><code>const [proxy, remove] = tosiUnique({ count: 0, name: &#39;&#39; })
+// ... later ...
+remove()
 </code></pre>
 
   </article>
@@ -727,43 +838,51 @@ preview.append(
     <li><a class="doc-link" href="../">tosijs</a></li>
     <li><a class="doc-link" href="../start-here/">Start Here</a></li>
     <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
-    <li><a class="doc-link" href="../elements/">Creating Elements</a></li>
-    <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+    <li><details open><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
     <ul>
-      <li><a class="doc-link" href="../color/">color</a></li>
+      <li><a class="doc-link current" href="../xin/" aria-current="page">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
     </ul>
     </details></li>
-    <li><details open><summary><a class="doc-link" href="../tosi/">Managing State</a></summary>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
     <ul>
-      <li><a class="doc-link current" href="../xin/" aria-current="page">The tosi proxy</a></li>
-      <li><a class="doc-link" href="../metadata/">metadata</a></li>
-      <li><a class="doc-link" href="../path-listener/">path-listener</a></li>
-      <li><a class="doc-link" href="../xin-proxy/">tosi, xin, and xinProxy</a></li>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../bind/">Binding</a></summary>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
     <ul>
       <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
-      <li><a class="doc-link" href="../list-binding/">binding arrays</a></li>
-      <li><a class="doc-link" href="../bindings/">bindings</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
     </ul>
     </details></li>
-    <li><details><summary><a class="doc-link" href="../component/">Web-Components</a></summary>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
     <ul>
-      <li><a class="doc-link" href="../blueprint-loader/">blueprints</a></li>
-      <li><a class="doc-link" href="../make-component/">makeComponent</a></li>
-      <li><a class="doc-link" href="../form-validation/">Validation</a></li>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
     </ul>
     </details></li>
     <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
     <ul>
-      <li><a class="doc-link" href="../hot-reload/">hotReload</a></li>
-      <li><a class="doc-link" href="../more-math/">more-math</a></li>
-      <li><a class="doc-link" href="../share/">share</a></li>
-      <li><a class="doc-link" href="../sync/">sync</a></li>
-      <li><a class="doc-link" href="../throttle/">throttle &amp; debounce</a></li>
-      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
-      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../React/">React and tosijs</a></li>
@@ -775,13 +894,13 @@ preview.append(
       <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
       <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
       <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
-      <li><a class="doc-link" href="../agent/">Agent API reference (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../audit/">audit (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract/">contract harness (EXPERIMENTAL)</a></li>
-      <li><a class="doc-link" href="../contract-check/">contract validation</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
       <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
       <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
-      <li><a class="doc-link" href="../webmcp/">webmcp (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
@@ -796,6 +915,6 @@ preview.append(
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=76dcd3794dc6"></script>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
 </body>
 </html>

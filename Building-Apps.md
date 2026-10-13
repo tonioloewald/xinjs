@@ -163,7 +163,7 @@ an element, you put it in the DOM, bindings activate. That's it.
 ### 3. Use list bindings for collections
 
     ul(
-      ...app.messages.listBinding(
+      ...app.messages.tosi.listBinding(
         ({li, span}, msg) => li(
           span({ textContent: msg.sender }),
           span({ textContent: msg.body })
@@ -185,6 +185,18 @@ messages renders the same number of DOM nodes as a list of twenty.
 Scrolling is O(1) — the same virtual slice calculation runs regardless
 of list size.
 
+Two things to know before your first long list:
+
+- **A virtual list needs somewhere to scroll.** Give the bound element (the
+  `ul` above) a height and `overflow: auto`. If it just grows to fit its
+  content there is nothing to virtualize against.
+- **A list of more than 10 items that is not virtual logs a warning**, once,
+  naming the list. Either add `virtual`, or say the choice is deliberate with
+  `{ nonVirtualReason: 'fixed list of 12 months' }`.
+
+[Array Bindings](/list-binding/) has the detail, including what removing a row
+costs.
+
 **Always specify `idPath` for arrays of objects.** This enables surgical
 updates — changing one property on one item updates one DOM element.
 Without it, the list falls back to index-based paths that break on reorder.
@@ -200,19 +212,19 @@ Proxied arrays have `listFind`, `listUpdate`, and `listRemove` methods
 that use the same selector pattern as `listBinding`:
 
     // Find an item — returns proxied, so mutations trigger updates
-    const item = app.items.listFind((item) => item.id, 'abc')
+    const item = app.items.tosi.listFind((item) => item.id, 'abc')
     if (item) item.name.value = 'Updated'
 
     // Find by DOM element (in a click handler)
-    const item = app.items.listFind(e.target)
+    const item = app.items.tosi.listFind(e.target)
 
     // Update in place — preserves object identity and DOM elements
-    app.items.listUpdate((item) => item.id, {
+    app.items.tosi.listUpdate((item) => item.id, {
       id: 'abc', name: 'New Name', score: 100
     })
 
     // Remove
-    app.items.listRemove((item) => item.id, 'abc')
+    app.items.tosi.listRemove((item) => item.id, 'abc')
 
 `listUpdate` is the key one: it mutates the existing object property by
 property through the proxy, so only changed properties fire observers and
@@ -355,46 +367,93 @@ to know:
 
 ### `content()` vs `render()`
 
-- **`content()` runs once.** It builds the DOM during hydration and never
-  re-runs. Set up bindings here — they handle all data-driven updates
-  automatically.
+- **`content()` runs once.** It builds the component's DOM during hydration and
+  never re-runs.
 
-- **`render()` runs on attribute changes.** It's for _structural_ changes
-  driven by attributes — showing/hiding sections, swapping an `<input>`
-  from `type="text"` to `type="password"`, reconfiguring layout. It is
-  **not** for updating text, values, or display state.
+- **`render()` runs whenever the component's own state changes**: an attribute,
+  its `value`, or a call to `queueRender()`. Its job is to bring the DOM that
+  `content()` built up to date, **in place**: set a `textContent`, toggle
+  `hidden`, change an `<input>`'s `type`, update a class.
 
-The separation: **attributes drive structure, bindings drive content.**
+**The anti-pattern is rebuilding.** The naive web-component (most template-based
+examples you will find, MDN's included) replaces its interior whenever you
+breathe on it. That is more work, it is slower, and it destroys UI state: the
+caret position in a textarea, which element had focus, a scroll offset, a
+half-typed value. `render()` should only replace elements when the component's
+structure has genuinely changed.
 
-    class MessageBubble extends Component {
-      static initAttributes = { expanded: false }
+    class NameTag extends withAttributes({ caption: 'Hello, my name is' }) {
+      content = ({ span, slot }) => [span({ part: 'caption' }), slot()]
 
-      content = ({div, span}) => [
-        span({ textContent: msg.sender }),
-        div({
-          class: 'body',
-          bind: {
-            // structure: show/hide based on attribute
-            value: this.expanded,
-            binding: (el, expanded) => { el.hidden = !expanded }
-          }
-        },
-          span({ textContent: msg.body })  // content: flows through binding
-        )
-      ]
+      render() {
+        super.render()
+        // update what content() built; do not rebuild it
+        this.parts.caption.textContent = this.caption
+      }
     }
 
-**The anti-pattern** is writing an `updateDisplay()` method that manually
-sets `textContent`, toggles classes, and shows/hides elements — then
-calling it from event handlers. This recreates React's "render on every
-change" model inside what should be a binding-driven system. If you find
-yourself writing a method that walks the DOM and sets properties, those
-should be bindings set up in `content()`.
+**A component maintains its own interior directly.** Its attributes and `value`
+are its state, `render()` reflects them into its DOM, and its event handlers
+update them. As a rule it does not use bindings for that.
 
-When state lives in the `tosi()` proxy rather than in component instance
-variables, bindings can reach it directly. A component that stores
-`this.isExpanded = true` and manually propagates that to the DOM is
-doing extra work — store it in the proxy and let bindings handle it.
+**Bindings are for application state.** The larger point, here and everywhere:
+do not do with hand-written code what `bind` does for you. If you find yourself
+writing an `updateDisplay()` that copies values from your app's state into
+elements, and calling it from event handlers, that is a binding you have
+written by hand, and there will be a case it misses. Bind the element (or the
+component's `value`) to the path and delete the method. See
+[bind or observe?](/bind-vs-observe/).
+
+So the division is: **the app binds state to components and elements; a
+component looks after its own insides.**
+
+### A stateful component is like an `<input>`
+
+If a component holds state, model it on `<input>`. This is the one idea to carry
+into every component you write, light DOM or shadow DOM:
+
+- **It has a `value`**, and that is what the rest of the app sees. The app binds
+  it exactly as it would bind an input: `myWidget({ bindValue: app.some.path })`.
+- **When its `value` is set, it updates its own interior.** Setting `value`
+  queues `render()`; `render()` reflects the value into the DOM that `content()`
+  built.
+- **When the user changes something, it sets its `value`**, which emits a
+  `change` event, and that is how the edit reaches the app. A component that
+  reports changes continuously (a slider being dragged) can dispatch `input`
+  events as well, as `<input>` does.
+- **It can have other properties derived from the same value**, the way a
+  checkbox has `checked`: an ordinary `get`/`set` on the class, or a
+  [computed attribute](/component/#computed-attributes) if markup should be
+  able to set it.
+
+How the component represents its value internally is its own business. Nothing
+outside reaches in, and nothing inside needs to know what the value is bound to.
+
+    class StarRating extends Component {
+      value = 0
+
+      content = ({ button }) =>
+        [1, 2, 3, 4, 5].map((n) =>
+          button('★', { part: `star${n}`, onClick: () => (this.value = n) })
+        )
+
+      render() {
+        super.render()
+        for (let n = 1; n <= 5; n++) {
+          this.parts[`star${n}`].classList.toggle('on', n <= this.value)
+        }
+      }
+
+      // a derivative of value, like an input's `checked`
+      get rated() {
+        return this.value > 0
+      }
+    }
+
+    const starRating = StarRating.elementCreator()
+    starRating({ bindValue: app.review.stars })
+
+The [value property](/component/#value) has the details.
 
 ### Light DOM is where the action is
 
@@ -402,18 +461,27 @@ From reading most web component documentation, you'd think shadow DOM was
 the only option. It isn't. tosijs components use **light DOM by default**,
 and this is a deliberate choice, not a limitation.
 
-Shadow DOM gives you style encapsulation — great for word-processor-style
-isolated widgets, but a memory and performance hit for everything else.
-It also creates an encapsulation boundary that blocks path bindings,
-external styling, and the usual DOM query APIs.
+**The key difference between the two is CSS isolation.** A shadow root keeps
+the page's styles out and the component's styles in. That is worth having for
+a widget that must look the same wherever it lands, or one that displays
+content it does not control. Everywhere else it is a memory and performance
+cost, and it puts the component's content out of reach of ordinary styling and
+the usual DOM query APIs.
 
 tosijs takes the one really valuable feature of shadow DOM components —
 `<slot>` composition — and makes it work in the light DOM. You get:
 
-- **Path bindings work everywhere.** No encapsulation boundary to cross.
 - **CSS just works.** Style your components the same way you style everything else.
 - **Lighter weight.** No shadow root overhead per instance.
 - **Slot composition.** tosijs rewrites `<slot>` elements in light DOM components.
+
+**What about binding into a light DOM component's content?** You can: there is
+no boundary in the way. For most components it is not a great idea, because a
+component is [like an `<input>`](#a-stateful-component-is-like-an-input) and
+looks after its own insides. Where it does make sense is a **high-level
+component**: an app layout, or a user-preferences panel, written as a component.
+That is a piece of your application that happens to be a custom element, and
+binding its content straight to application state is the natural thing to do.
 
 #### How `<tosi-slot>` works
 
@@ -466,9 +534,11 @@ Components declare their styles via static properties:
 Use light DOM unless you know _exactly_ why you need shadow DOM.
 When you do, the mental model is:
 
-- **Light DOM** (default): bindings flow through naturally.
-- **Shadow DOM**: the component is a _custom input_. Think of it exactly like
-  an `<input>` or `<textarea>`: **its `value` is the binding surface**. Bind
+- **Light DOM** (default): no CSS isolation. The input model above is the right
+  design; binding into the content is possible, and best kept for high-level
+  components (see above).
+- **Shadow DOM**: CSS isolation, and the input model is the only one there is. Think of it exactly
+  like an `<input>` or `<textarea>`: **its `value` is the binding surface**. Bind
   the component itself (e.g. `bindings.value`) from outside; setting `value`
   automatically queues `render()` and emits `change`, so implement `render()`
   to reflect `value` into the shadow DOM, and let `change` events carry edits

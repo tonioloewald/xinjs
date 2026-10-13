@@ -1,4 +1,4 @@
-# audit (EXPERIMENTAL)
+# Accessibility Audit (EXPERIMENTAL)
 
 `auditAccessibility(agent.describe({ styles: true }))` turns the affordance
 map into findings. It is the lint the map made obvious: **every element with

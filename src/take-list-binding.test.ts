@@ -27,7 +27,7 @@ describe('take() inside list templates', () => {
           li(
             button('x', {
               // delete only when done: the transform INVERTS the value
-              disabled: item.done.tosi.take((done: boolean) => !done),
+              disabled: item.done.tosi.as((done: boolean) => !done),
             })
           ),
         { idPath: 'id' }
@@ -59,7 +59,7 @@ describe('take() inside list templates', () => {
         ({ li, span }: any, item: any) =>
           li(
             span({
-              textContent: item.lit.tosi.take((lit: boolean) =>
+              textContent: item.lit.tosi.as((lit: boolean) =>
                 lit ? 'ON' : 'off'
               ),
             })
@@ -79,7 +79,7 @@ describe('take() inside list templates', () => {
   test('one descriptor reused across two elements stays independent', async () => {
     const { takeShared } = tosi({ takeShared: { n: 1 } })
     const { span } = elements
-    const descriptor = (takeShared.n as any).tosi.take((n: number) => n * 2)
+    const descriptor = (takeShared.n as any).tosi.as((n: number) => n * 2)
     const a = span({ textContent: descriptor })
     const b = span({ textContent: descriptor })
     document.body.append(a, b)
@@ -104,7 +104,7 @@ describe('take() inside list templates', () => {
         ({ li, button }: any) =>
           li(
             button('go', {
-              disabled: (takeAbs.muted as any).tosi.take((m: boolean) => m),
+              disabled: (takeAbs.muted as any).tosi.as((m: boolean) => m),
             })
           ),
         { idPath: 'id' }

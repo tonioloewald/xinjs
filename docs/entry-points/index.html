@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    try {
+      var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
+      var t = p.theme || 'system'
+      if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.classList.add('darkmode')
+      if (p.highContrast) document.documentElement.classList.add('high-contrast')
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>Entry Points — tosijs</title>
+  <meta name="description" content="Which tosijs import to use: the full library, the slim tosijs/core, the DOM-free tosijs/state, the agent surface, or a script tag. An overview with links to the detail." />
+  <link rel="canonical" href="https://tosijs.net/entry-points/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Entry Points — tosijs (markdown)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs" />
+  <meta property="og:title" content="Entry Points — tosijs" />
+  <meta property="og:description" content="Which tosijs import to use: the full library, the slim tosijs/core, the DOM-free tosijs/state, the agent surface, or a script tag. An overview with links to the detail." />
+  <meta property="og:url" content="https://tosijs.net/entry-points/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Entry Points","description":"Which tosijs import to use: the full library, the slim tosijs/core, the DOM-free tosijs/state, the agent surface, or a script tag. An overview with links to the detail.","url":"https://tosijs.net/entry-points/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <link rel="icon" href="../favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <article class="doc-content">
+<h1 id="entry-points">Entry Points</h1>
+<!--{ "order": 6.5, "description": "Which tosijs import to use: the full library, the slim tosijs/core, the DOM-free tosijs/state, the agent surface, or a script tag. An overview with links to the detail." }-->
+
+<p><code>tosijs</code> is one library with several doors. Most projects only need the first.</p>
+<table>
+<thead>
+<tr>
+<th>import</th>
+<th>use it when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tosijs</code></td>
+<td>Always, unless you have a reason. Bundlers remove what you do not import.</td>
+</tr>
+<tr>
+<td><a href="/index-core/"><code>tosijs/core</code></a></td>
+<td>You want the smallest bundle with the DOM features and do not use blueprints, <code>share</code>/<code>sync</code>, <code>hotReload</code> or the agent surface.</td>
+</tr>
+<tr>
+<td><a href="/index-state/"><code>tosijs/state</code></a></td>
+<td>You want only the state layer, with no DOM: Node, workers, server rendering, tests.</td>
+</tr>
+<tr>
+<td><a href="/index-agent/"><code>tosijs/agent</code></a></td>
+<td>You want the agent surface with a narrower set of types. It is the same file as <code>tosijs</code>.</td>
+</tr>
+<tr>
+<td><code>&lt;script src=…&gt;</code></td>
+<td>You want to load components from markup with <code>&lt;tosi-blueprint&gt;</code> and no build step. It sets no global.</td>
+</tr>
+</tbody></table>
+<p>The size of each, measured by the build, is in the
+<a href="/#entry-points">README&#39;s entry points table</a>, along with why <code>tosijs/agent</code>
+shares a file with <code>tosijs</code> and why <code>tosijs/core</code> is something you opt in to.</p>
+<p>To use the API in a page with no build step, import the module from a CDN:</p>
+<pre><code>&lt;script type=&quot;module&quot;&gt;
+  import { tosi, elements } from &#39;https://cdn.jsdelivr.net/npm/tosijs/dist/module.js&#39;
+&lt;/script&gt;
+</code></pre>
+<!-- toc -->
+<ul>
+<li><a href="/index-core/">tosijs/core (slim entry)</a></li>
+<li><a href="/index-state/">tosijs/state (DOM-free)</a></li>
+</ul>
+<!-- /toc -->
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
+    <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
+    </ul>
+    </details></li>
+    <li><details open><summary><a class="doc-link current" href="../entry-points/" aria-current="page">Entry Points</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../React/">React and tosijs</a></li>
+    <li><a class="doc-link" href="../Angular/">Angular and tosijs</a></li>
+    <li><details><summary><a class="doc-link" href="../one-user-interface/">One User Interface</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../derived-surface/">The Derived Surface</a></li>
+      <li><a class="doc-link" href="../agent-surface/">The Agent Surface</a></li>
+      <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
+      <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
+      <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../history/">tosijs history</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://discord.com/invite/ramJ9rgky5" data-icon="discord">discord</a></li>
+    <li><a href="https://loewald.com" data-icon="blog">blog</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
+</body>
+</html>

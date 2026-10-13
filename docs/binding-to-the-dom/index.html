@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    try {
+      var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
+      var t = p.theme || 'system'
+      if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.classList.add('darkmode')
+      if (p.highContrast) document.documentElement.classList.add('high-contrast')
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <title>Binding to the DOM — tosijs</title>
+  <meta name="description" content="How tosijs keeps the page in step with state: implicit bindings (a proxy as a property or child), explicit bindings (bindValue and friends), array bindings, and custom bindings. An overview with links to the detail." />
+  <link rel="canonical" href="https://tosijs.net/binding-to-the-dom/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Binding to the DOM — tosijs (markdown)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs" />
+  <meta property="og:title" content="Binding to the DOM — tosijs" />
+  <meta property="og:description" content="How tosijs keeps the page in step with state: implicit bindings (a proxy as a property or child), explicit bindings (bindValue and friends), array bindings, and custom bindings. An overview with links to the detail." />
+  <meta property="og:url" content="https://tosijs.net/binding-to-the-dom/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Binding to the DOM","description":"How tosijs keeps the page in step with state: implicit bindings (a proxy as a property or child), explicit bindings (bindValue and friends), array bindings, and custom bindings. An overview with links to the detail.","url":"https://tosijs.net/binding-to-the-dom/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <link rel="icon" href="../favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <article class="doc-content">
+<h1 id="binding-to-the-dom">Binding to the DOM</h1>
+<!--{ "order": 5, "description": "How tosijs keeps the page in step with state: implicit bindings (a proxy as a property or child), explicit bindings (bindValue and friends), array bindings, and custom bindings. An overview with links to the detail." }-->
+
+<p>A binding wires a piece of state to an element. When the state changes, the
+element is updated; for a two-way binding, when the user changes the element,
+the state is updated. Nothing is re-rendered and nothing is compared.</p>
+<p>The design goal is to eliminate the code that copies values between state and
+the page, because that code is where the bugs are. There are four kinds of
+binding, from the one you will use most to the one you will rarely need. This
+page is the overview; each part links to the page with the detail.</p>
+<h2 id="implicit-binding">Implicit binding</h2>
+<p>Pass a proxy where you would have passed a value, and it stays up to date:</p>
+<pre><code>const { foo } = tosi({
+  foo: { bar: { initialString: &#39;hello&#39;, type: &#39;search&#39; } },
+})
+
+input({ value: foo.bar.initialString, type: foo.bar.type })
+h1(&#39;Results for &#39;, foo.bar.initialString)
+</code></pre>
+<p>A proxy as a property keeps that property in step with the state. A proxy as a
+child becomes text that stays in step. This direction is <strong>state to element
+only</strong>: typing in that input does not change <code>foo.bar.initialString</code>.
+<a href="/elements/">Element creators</a> has the detail.</p>
+<h2 id="explicit-binding">Explicit binding</h2>
+<p>When the element should also write back, say so:</p>
+<pre><code>input({ bindValue: foo.bar.string })
+</code></pre>
+<p><code>bindValue</code> is two-way: the field shows the state and typing changes it. It works
+the same on checkboxes, selects, and any component with a <code>value</code>. The
+<code>bind&lt;Name&gt;</code> props use the <a href="/bindings/">built-in bindings</a> (<code>value</code>, <code>text</code>,
+<code>enabled</code>, <code>disabled</code>, <code>list</code>), and they also accept a path as a string, which a
+plain property cannot.</p>
+<h2 id="array-bindings">Array bindings</h2>
+<p>A list is bound once. Rows are created from a template, and are added, removed
+and updated individually as the array changes:</p>
+<pre><code>ul(
+  ...app.todos.tosi.listBinding(
+    ({ li }, item) =&gt; li(item.title),
+    { idPath: &#39;id&#39; }
+  )
+)
+</code></pre>
+<p>Long lists can be virtual, so only the rows on screen exist.
+<a href="/list-binding/">Array bindings</a> covers ids, virtual lists, filtering, and
+finding, updating and removing rows.</p>
+<h2 id="custom-binding">Custom binding</h2>
+<p>A binding is just a <code>toDOM</code> function and, optionally, a <code>fromDOM</code> function. When
+none of the above fits, write your own:</p>
+<pre><code>div({
+  bind: {
+    value: app.progress,
+    binding: {
+      toDOM(element, value) {
+        element.style.width = `${value * 100}%`
+      },
+    },
+  },
+})
+</code></pre>
+<p><a href="/bind/">bind()</a> covers custom bindings, <code>bind()</code> itself for elements you did not
+create, and <code>on()</code> for events.</p>
+<h2 id="what-not-to-do">What not to do</h2>
+<p>Do not write an observer that updates an element. That is a binding written by
+hand, and it will miss a case that <code>bind</code> already handles. See
+<a href="/bind-vs-observe/">Why <code>bind</code>, and when to use <code>observe</code></a>.</p>
+<!-- toc -->
+<ul>
+<li><a href="/bind-vs-observe/">Why bind, and when to use observe</a></li>
+<li><a href="/bind/">Custom Bindings and Events</a></li>
+<li><a href="/bindings/">Built-in Bindings</a></li>
+<li><a href="/list-binding/">Array Bindings</a></li>
+</ul>
+<!-- /toc -->
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
+    <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
+    </ul>
+    </details></li>
+    <li><details open><summary><a class="doc-link current" href="../binding-to-the-dom/" aria-current="page">Binding to the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../React/">React and tosijs</a></li>
+    <li><a class="doc-link" href="../Angular/">Angular and tosijs</a></li>
+    <li><details><summary><a class="doc-link" href="../one-user-interface/">One User Interface</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../derived-surface/">The Derived Surface</a></li>
+      <li><a class="doc-link" href="../agent-surface/">The Agent Surface</a></li>
+      <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
+      <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
+      <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../history/">tosijs history</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://discord.com/invite/ramJ9rgky5" data-icon="discord">discord</a></li>
+    <li><a href="https://loewald.com" data-icon="blog">blog</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="../iife.js?v=7265bc89e0f9"></script>
+</body>
+</html>
