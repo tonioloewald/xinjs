@@ -80,7 +80,7 @@ Less code to **write, read, run, debug, and maintain** — which, as a bonus in 
 age of AI assistants, also means **fewer tokens** to generate and reason about.
 What the principles buy you:
 
-- **O(1) DOM updates, even for big lists.** A state change surgically updates exactly
+- **O(~1) DOM updates, even for big lists.** A state change surgically updates exactly
   the bound nodes — no virtual DOM, no diffing, no re-render-the-world. And because
   virtual list bindings are built in, a 100,000-row list only ever renders (and
   updates) the handful of rows actually on screen. (Give the list `virtual` and a
@@ -246,7 +246,7 @@ and are natively supported by all modern browsers.
 | `tosijs`                | everything, agent surface included — bundlers shake what you don't import                                                | <!--gz:module.js-->~45 kB<!--/gz--> |
 | `tosijs/agent`          | the agent surface, schematic renderer, audit and contract harnesses (**same file**, narrower types) — **EXPERIMENTAL**   | —                                   |
 | `tosijs/core`           | no blueprint loader, no `share`/`sync`/`hotReload`, no agent surface                                                     | <!--gz:core.js-->~26 kB<!--/gz-->   |
-| `tosijs/state`          | the **DOM-free** state layer: `tosi`, `xin`, `observe`, paths                                                            | <!--gz:state.js-->~17 kB<!--/gz-->  |
+| `tosijs/state`          | the **DOM-free** state layer: `tosi`, `observe`, `touch`, paths                                                          | <!--gz:state.js-->~17 kB<!--/gz-->  |
 | `<script src=…>` (IIFE) | registers `<tosi-blueprint>` so components load **from markup**; it sets no global, so for the API in a page use a module script (above) | <!--gz:index.js-->~29 kB<!--/gz-->  |
 
 `tosijs/agent` resolves to the same file as `tosijs` **on purpose**: a
@@ -531,15 +531,9 @@ Only top-level properties in your state that pass the test will be persisted.
 
 To completely reset the app, run `localStorage.clear()` in the console.
 
-## Development Notes
+## Development
 
-You'll need to install [bun](https://bun.sh/) and then run `bun install`.
-
-    bun start                  # dev server with hot reload (https://localhost:8018)
-    bun test                   # run all tests
-    bun run build              # production build (runs tests, then bundles + docs)
-    bun run format             # lint and format (ESLint + Prettier)
-    bun pack                   # create local package tarball
+Working on `tosijs` itself? See [Development](https://tosijs.net/development/).
 
 ## License
 

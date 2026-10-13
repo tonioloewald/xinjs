@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Custom Bindings and Events — tosijs</title>
   <meta name="description" content="bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates." />
   <link rel="canonical" href="https://tosijs.net/bind/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="custom-bindings-and-events-bind-on">Custom Bindings and Events (bind, on)</h1>
 <p><code>bind()</code> lets you synchronize data / application state to the user-interface reliably,
@@ -103,7 +103,7 @@ bind(
 </code></pre>
 <p>The <code>bind</code> function is a simple way of tying an <code>HTMLElement</code>&#39;s properties to
 state via <code>path</code> using <a href="/bindings/">bindings</a></p>
-<pre><code>import {bind, bindings, xin, elements, updates} from &#39;tosijs&#39;
+<pre><code>import { bind, bindings, tosi, elements, updates } from &#39;tosijs&#39;
 const {div, input} = elements
 
 const divElt = div()
@@ -113,25 +113,26 @@ document.body.append(divElt)
 const inputElt = input()
 bind(inputElt, &#39;app.title&#39;, bindings.value)
 
-xin.app = {title: &#39;hello world&#39;}
+const { app } = tosi({ app: { title: &#39;hello world&#39; } })
 await updates()
 </code></pre>
 <p>What&#39;s happening is essentially the same as:</p>
-<pre><code>divElt.textContent = xin.app.title
-observe(&#39;app.title&#39;, () =&gt; divElt.textContent = xin.app.title)
+<pre><code>divElt.textContent = app.title.value
+observe(&#39;app.title&#39;, () =&gt; divElt.textContent = app.title.value)
 
-inputElt.value = xin.app.title
-observe(&#39;app.title&#39;, () =&gt; inputElt.value = xin.app.title)
-inputElt.addEventListener(&#39;change&#39;, () =&gt; { xin.app.title = inputElt.value })
+inputElt.value = app.title.value
+observe(&#39;app.title&#39;, () =&gt; inputElt.value = app.title.value)
+inputElt.addEventListener(&#39;change&#39;, () =&gt; { app.title.value = inputElt.value })
 </code></pre>
 <p>Except:</p>
 <ol>
 <li>this code is harder to write</li>
-<li>it will fail if xin.app hasn&#39;t been initialized (which it hasn&#39;t been!)</li>
+<li>it will fail if <code>app</code> hasn&#39;t been registered yet (and in the example above, the
+bindings were set up before it was!)</li>
 <li>inputElt will also trigger <em>debounced</em> updates on <code>input</code> events</li>
 </ol>
 <p>After this. <code>div.textContent</code> and <code>inputElt.value</code> are &#39;hello world&#39;.
-If the user edits the value of <code>inputElt</code> then <code>xin.app.title</code> will
+If the user edits the value of <code>inputElt</code> then <code>app.title</code> will
 be updated, and <code>app.title</code> will be listed as a changed path, and
 an update will be fired via <code>setTimout</code>. When that update fires,
 anything observer of the paths <code>app.text</code> and <code>app</code> will be fired.</p>
@@ -203,7 +204,7 @@ preview.append(
 </code></pre>
 <p><code>on()</code> binds event-handlers to DOM elements.</p>
 <p>More than syntax sugar for <code>addEventListener</code>, <code>on()</code> allows you to bind event
-handlers inside <code>xin</code> by path (e.g. allowing event-handling code to be loaded
+handlers that live in state, by path (e.g. allowing event-handling code to be loaded
 asynchronously or lazily, or simply allowing event-handlers to be switched dynamically
 without rebinding) and it uses event-bubbling to minimize the actual number of
 event handlers that need to be registered.</p>
@@ -357,6 +358,7 @@ test(&#39;an element bound while detached hydrates when it is inserted&#39;, asy
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -368,6 +370,6 @@ test(&#39;an element bound while detached hydrates when it is inserted&#39;, asy
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

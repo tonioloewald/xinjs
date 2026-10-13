@@ -48,7 +48,7 @@ preview.append(
 `elements` is a proxy whose properties are element factory functions,
 referred to throughout this documentation as `elementCreator`s, functions
 of type `ElementCreator`. So `elements.div` is a function that returns a `<div>`
-element, `elements.foo` creates <foo> elements, and elements.fooBar creates
+element, `elements.foo` creates `<foo>` elements, and `elements.fooBar` creates
 `<foo-bar>` elements.
 
 ### What a positional argument means
@@ -75,10 +75,9 @@ booleans could never be shown. `null` is the intentional version of the same
 idea, and it reads as intent at the call site.
 
 **Nothing is silently dropped.** An argument that cannot be used says so, once,
-with the value attached — because the previous behaviour was to treat every
-unrecognised argument as a props bag, which meant `div(new Date())` rendered an
-empty `<div>` and `div(items.map(…))` with the spread forgotten turned array
-indices into attributes. Both were silent.
+with the value attached. So `div(new Date())` renders the date as text, and
+`div(items.map(…))` with the spread forgotten warns instead of quietly doing
+the wrong thing.
 
 E.g.
 
@@ -144,7 +143,7 @@ element's `style` attribute, eliminating previous changes).
 …produces `<span style="font-size: 15px"></span>`, which is probably
 not what was wanted.
 
-    span({style: {border: '1px solid red'}, {style: {fontSize: '15px'}}})
+    span({style: {border: '1px solid red'}}, {style: {fontSize: '15px'}})
 
 …produces `<span style="border: 1px solid red; font-size: 15px"></span>`
 which is probably what was wanted.
@@ -174,28 +173,34 @@ Extra whitespace is tolerated. Falsy values — `''`, `null`, `undefined`, and
 class, so conditional class expressions work without special-casing. Array
 entries are treated the same way (falsy entries are skipped).
 
-## event handlers
-
-Properties starting with `on` (followed by an uppercase letter)
-will be converted into event-handlers, so `onMouseup` will be
-turned into a `mouseup` listener.
-
 ## binding
 
-You can [bind](/bind/) an element to state using [bindings](/bindings/)
-using convenient properties, e.g.
+There are two ways to bind an element to state from a creator.
+[Binding to the DOM](/binding-to-the-dom/) is the overview; in short:
 
-    import { elements } from 'tosijs'
-    const {div} = elements
-    div({ bindValue: 'app.title' })
+**Pass a proxy as a property, or as a child.** The property or text then
+follows the state. This is one-way, state to element:
 
-…is syntax sugar for:
+    const { app } = tosi({ app: { title: 'hello', busy: false } })
+
+    h1(app.title)                           // live text
+    button('Save', { disabled: app.busy })  // live property
+    input({ value: app.title })             // shows the title; typing does NOT change it
+
+**Use a `bind<Name>` property** when the element should also write back, or when
+you have a path string instead of a proxy:
+
+    input({ bindValue: app.title })         // two-way
+    input({ bindValue: 'app.title' })       // the same, by path
+
+`bindValue` is syntax sugar for:
 
     import { elements, bind, bindings } from 'tosijs'
-    const { div } = elements
-    bind( div(), 'app.title', bindings.value )
+    const { input } = elements
+    bind(input(), 'app.title', bindings.value)
 
-If you want to use your own bindings, you can use `apply`:
+The `bind<Name>` properties use the [built-in bindings](/bindings/). To use a
+binding of your own, pass it inline with `bind`:
 
     const visibleBinding = {
       toDOM(element, value) {
@@ -203,14 +208,13 @@ If you want to use your own bindings, you can use `apply`:
       }
     }
 
-    div({ apply(elt){
-      bind(elt, 'app.prefs.isVisible', visibleBinding})
-    } })
+    div({ bind: { value: app.prefs.isVisible, binding: visibleBinding } })
 
-## event-handlers
+## event handlers
 
-You can attach event handlers to elements using `on<EventType>`
-as syntax sugar, e.g.
+Properties starting with `on` followed by an uppercase letter become event
+handlers, so `onMouseup` attaches a `mouseup` listener. This works for any event
+name, including custom ones.
 
     import { elements } from 'tosijs'
     const { button } = elements
@@ -228,6 +232,7 @@ as syntax sugar, e.g.
     on(aButton, 'click', () => {
       alert('clicked!')
     })
+    document.body.append(aButton)
 
 A handler can also be a **proxy** (or a path string) for a function in state:
 
@@ -237,9 +242,6 @@ A handler can also be a **proxy** (or a path string) for a function in state:
 The element is given the *path* `app.save`, not the function, and the handler is
 looked up when the event fires. Replace `app.save` later and the button runs the
 new function.
-    document.body.append(
-      aButton
-    )
 
 There are some subtle but important differences between `on()` and
 `addEventListener` which are discussed in detail in the section on
@@ -258,7 +260,7 @@ on the element.
 
 ## fragment
 
-`elements.fragment` is produces `DocumentFragment`s, but is otherwise
+`elements.fragment` produces `DocumentFragment`s, but is otherwise
 just like other element factory functions.
 
 ## svgElements
@@ -267,7 +269,7 @@ just like other element factory functions.
 the appropriate namespace.
 
 ```js
-import { svgElements, tosi, xin } from 'tosijs'
+import { svgElements, tosi } from 'tosijs'
 
 const { svg, g, path, circle, polygon } = svgElements
 
@@ -357,13 +359,13 @@ function tick(arr) {
   return kept
 }
 setInterval(() => {
-  const f = tick(xin.friendlies)
+  const f = tick(friendlies.value)
   if (Math.random() < 0.06) f.push(spawnFriendly())
-  xin.friendlies = f
+  friendlies.value = f
 
-  const h = tick(xin.hostiles)
+  const h = tick(hostiles.value)
   if (Math.random() < 0.04) h.push(spawnHostile())
-  xin.hostiles = h
+  hostiles.value = h
 }, 50)
 ```
 

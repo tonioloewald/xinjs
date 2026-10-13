@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Building Apps — tosijs</title>
   <meta name="description" content="How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." />
   <link rel="canonical" href="https://tosijs.net/Building-Apps/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="building-apps">Building Apps</h1>
 <!--{ "pin": "top", "order": 2, "description": "How to think about building applications with tosijs: state in a proxy, UI built with live bindings, list bindings for collections. The full guide; new readers should take the ten-minute Start Here tutorial first." }-->
@@ -105,7 +105,7 @@ assignments, or passing to external APIs.</p>
 
 const view = div(
   h1(app.user.name),
-  input({ value: app.user.name }),
+  input({ bindValue: app.user.name }),
   div({ class: &#39;status&#39;, hidden: app.loggedIn })
 )
 </code></pre>
@@ -118,6 +118,11 @@ and it becomes a text-bound <code>&lt;span&gt;</code> — <code>h1(app.user.name
 if that bothers you). Pass a proxy as any property or attribute and tosijs
 detects it and binds it — <code>hidden: app.loggedIn</code> stays in sync with state.
 This eliminates the need for most custom bindings.</p>
+<p><strong>A proxy as a plain property is one-way: state to element.</strong> With
+<code>input({ value: app.user.name })</code> the field shows the name and follows it, but
+typing in the field does <strong>not</strong> change the state. When the user&#39;s edits should
+flow back, say so with <code>bindValue</code>, as above: it is two-way.
+<a href="/binding-to-the-dom/">Binding to the DOM</a> lays out the four kinds of binding.</p>
 <p><code>textContent</code> and <code>bindValue</code> bind a <strong>proxy</strong>; <code>bindValue</code> also handles <code>fromDOM</code>.
 For a path <strong>string</strong> rather than a proxy, use the inline form —
 <code>bind: { value: &#39;app.user.name&#39;, binding: &#39;text&#39; }</code> — because <code>textContent: &#39;app.user.name&#39;</code>
@@ -189,8 +194,8 @@ property changes on <code>app.messages</code> automatically update the DOM. The
 familiar mapping syntax is a Trojan horse for live list rendering.</p>
 <p>Virtual list bindings only render what&#39;s visible. A list of a million
 messages renders the same number of DOM nodes as a list of twenty.
-Scrolling is O(1) — the same virtual slice calculation runs regardless
-of list size.</p>
+Scrolling is O(~1): the same virtual slice calculation runs regardless
+of list size, give or take the overheads any large dataset brings.</p>
 <p>Two things to know before your first long list:</p>
 <ul>
 <li><strong>A virtual list needs somewhere to scroll.</strong> Give the bound element (the
@@ -575,7 +580,7 @@ preview.append(
   )
 )
 </code></pre>
-<pre><code class="language-test">const { Component, elements, bindings, tosi, xin, updates } = tosijs
+<pre><code class="language-test">const { Component, elements, bindings, tosi, boxed, updates } = tosijs
 
 test(&#39;a shadow value-widget round-trips through its value like an input&#39;, async () =&gt; {
   class Knob extends Component {
@@ -611,7 +616,7 @@ test(&#39;a shadow value-widget round-trips through its value like an input&#39;
   widget.shadowRoot.querySelector(&#39;[part=inc]&#39;).click()
   await waitFor(&#39;[aria-valuenow=&quot;3&quot;]&#39;, 3000)
   expect(Number(widget.value)).toBe(3)
-  expect(xin[&#39;knobDemo.level&#39;]).toBe(3)
+  expect(boxed.knobDemo.level.value).toBe(3)
 })
 </code></pre>
 <h2 id="gotchas">Gotchas</h2>
@@ -785,6 +790,7 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -796,6 +802,6 @@ React is O(tree size). tosijs is O(bindings on the changed path).</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

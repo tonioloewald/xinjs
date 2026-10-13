@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>tosijs/state (DOM-free)</title>
   <meta name="description" content="tosijs/state — the DOM-free state layer: observable path-addressed state importable anywhere, including plain Node." />
   <link rel="canonical" href="https://tosijs.net/index-state/" />
@@ -30,17 +30,17 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="tosijsstate-dom-free">tosijs/state (DOM-free)</h1>
 <p>State that belongs to no framework — and no <em>environment</em>. <code>tosijs/state</code>
 is the observable-state layer with <strong>no DOM globals touched at import</strong>, so
 it loads in plain Node, a worker, an SSR pipeline, or a migration script
 with no <code>happy-dom</code> shim in sight:</p>
-<pre><code>import { tosi, observe, xin } from &#39;tosijs/state&#39;
+<pre><code>import { tosi, observe, boxed } from &#39;tosijs/state&#39;
 
 const { app } = tosi({ app: { count: 0 } })
-observe(&#39;app.count&#39;, (path) =&gt; console.log(&#39;changed:&#39;, path, xin[path]))
+observe(&#39;app.count&#39;, (path) =&gt; console.log(&#39;changed:&#39;, path, boxed[path].value))
 app.count = 1
 </code></pre>
 <p>Everything here is identical to the same export from <code>tosijs</code> — this is a
@@ -126,6 +126,7 @@ DOM-free API).</p>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -137,6 +138,6 @@ DOM-free API).</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

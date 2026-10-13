@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Path Listener — tosijs</title>
   <meta name="description" content="The path-based observer engine behind tosijs: touch(), observe(), unobserve(), and updates() for direct interaction with the observer system." />
   <link rel="canonical" href="https://tosijs.net/path-listener/" />
@@ -30,16 +30,16 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="path-listener-path-listener">Path Listener (path-listener)</h1>
 <p><code>path-listener</code> implements the <code>tosijs</code> observer model. Although these events
 are exported from <code>tosijs</code> they shouldn&#39;t need to be used very often. Mostly
 they&#39;re used to manage state.</p>
 <h2 id="touchpath-string-and-touch"><code>touch(path: string)</code> and <code>.touch()</code></h2>
-<p>This is used to inform <code>xin</code> that a value at a path has changed. Remember that
-xin simply wraps an object, and if you change the object directly, <code>xin</code> won&#39;t
-necessarily know about it.</p>
+<p>This is used to say that a value at a path has changed. Remember that the
+observer proxy simply wraps an object, and if you change the object directly,
+the proxy won&#39;t know about it.</p>
 <p>The two most common uses for <code>touch()</code> are:</p>
 <ol>
 <li>You want to make lots of changes to a large data structure, possibly
@@ -151,8 +151,8 @@ observe(&#39;app.a&#39;, (path) =&gt; console.log(path))
 app.a.value = 1
 await updates()                                 // logs &#39;app.a&#39;, and only that
 </code></pre>
-<p>Writes are surgical: every form (<code>app.a.value = 1</code>, <code>app.a = 1</code>,
-<code>xin.app.a = 1</code>, <code>xin[&#39;app.a&#39;] = 1</code>) touches exactly <code>app.a</code>. If a probe
+<p>Writes are surgical: every form (<code>app.a.value = 1</code>, <code>app.a = 1</code>, and the
+string-path form <code>boxed[&#39;app.a&#39;] = 1</code>) touches exactly <code>app.a</code>. If a probe
 suggests otherwise, check for an undrained registration first — the symptom is
 specific and stable enough to look like a real finding.</p>
 
@@ -228,6 +228,7 @@ specific and stable enough to look like a real finding.</p>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -239,6 +240,6 @@ specific and stable enough to look like a real finding.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

@@ -32,7 +32,7 @@ bindValue: app.done })` binds a boolean.
 
 ## text
 
-The `text` binding copies state from `xin` to the bound element's `textContent` property.
+The `text` binding copies state to the bound element's `textContent` property.
 
 ## enabled & disabled
 
@@ -46,7 +46,7 @@ The `text` binding copies state from `xin` to the bound element's `textContent` 
 >     button({ disabled: proxy.items.tosi.as(list => !list.length) })
 
 The `enabled` and `disabled` bindings allow you to make a widget's enabled status
-be determined by the truthiness of something in `xin`, e.g.
+be determined by the truthiness of something in state, e.g.
 
 ```
 import { tosi, elements } from 'tosijs'
@@ -161,11 +161,14 @@ If you list-bind a custom-element with `bindValue` implemented and providing an
 `idPath` then the list-binding will bind the array items to the value of the
 custom-element.
 
-### xin-empty-list class
+### The `-tosi-empty-list` class
 
-The `list` binding will automatically add the class `-xin-empty-list` to a
+The `list` binding automatically adds the class `-tosi-empty-list` to a
 container bound to an empty array, making it easier to conditionally render
 instructions or explanations when a list is empty.
+
+> The class was called `-xin-empty-list` before 1.10.9. Both are set for now;
+> the old name is deprecated and goes away in 2.0.
 */
 import { TosiObject, TosiBinding, ValueElement } from './xin-types'
 import { getListBinding } from './list-binding'

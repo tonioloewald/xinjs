@@ -60,6 +60,8 @@ use it to inspect STATE; a painted-output check needs a real test lane.
   Utilities for writing CSS as JS objects, generating stylesheets, and working with CSS variables and themes via css(), vars, and varDefault().
 - https://tosijs.net/bind/ — Custom Bindings and Events
   bind() syncs application state to DOM elements via path-based observers. Plus on() for event handlers and touchElement() for forced updates.
+- https://tosijs.net/development/ — Development
+  Working on tosijs itself: installing, the dev server, tests, the build, and where tasks and conventions live.
 - https://tosijs.net/elements/ — Element Creators
   The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required.
 - https://tosijs.net/entry-points/ — Entry Points

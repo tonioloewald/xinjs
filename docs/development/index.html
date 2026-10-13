@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    try {
+      var p = JSON.parse(localStorage.getItem('tosi-doc-system-prefs') || '{}')
+      var t = p.theme || 'system'
+      if (t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+        document.documentElement.classList.add('darkmode')
+      if (p.highContrast) document.documentElement.classList.add('high-contrast')
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
+  <title>Development — tosijs</title>
+  <meta name="description" content="Working on tosijs itself: installing, the dev server, tests, the build, and where tasks and conventions live." />
+  <link rel="canonical" href="https://tosijs.net/development/" />
+  <link rel="alternate" type="text/markdown" href="index.md" title="Development — tosijs (markdown)" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="tosijs" />
+  <meta property="og:title" content="Development — tosijs" />
+  <meta property="og:description" content="Working on tosijs itself: installing, the dev server, tests, the build, and where tasks and conventions live." />
+  <meta property="og:url" content="https://tosijs.net/development/" />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Development","description":"Working on tosijs itself: installing, the dev server, tests, the build, and where tasks and conventions live.","url":"https://tosijs.net/development/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <link rel="icon" href="../favicon.svg" />
+<script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
+</head>
+<body>
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <article class="doc-content">
+<h1 id="development">Development</h1>
+<!--{ "pin": "bottom", "order": 890, "description": "Working on tosijs itself: installing, the dev server, tests, the build, and where tasks and conventions live." }-->
+
+<p>This page is for working on <code>tosijs</code> itself. To <em>use</em> it, start at
+<a href="/start-here/">Start Here</a>.</p>
+<p>You&#39;ll need <a href="https://bun.sh/">bun</a> (the version in <code>.bun-version</code>), then <code>bun install</code>.</p>
+<pre><code>bun start                  # dev server with hot reload (https://localhost:8018)
+bun test                   # run the unit tests
+bun run test:browser       # run the real-browser tests (Chromium and Firefox)
+bun run build              # production build (runs tests, then bundles + docs)
+bun run format             # lint and format (ESLint + Prettier)
+bun pack                   # create a local package tarball
+</code></pre>
+<p>The dev server uses HTTPS and needs local certificates: run <code>bun run tls</code> once.</p>
+<p>Two switches for the dev server:</p>
+<ul>
+<li><code>HALTIJA=0 bun start</code> runs without the agent dev channel, which otherwise
+replaces <code>alert()</code>, <code>confirm()</code> and <code>prompt()</code> with silent recorders.</li>
+<li><code>TOSI_EDIT=1 bun start</code> lets the site&#39;s &quot;edit page source&quot; read and write the
+files in your checkout.</li>
+</ul>
+<p>The documentation you are reading is built from this repository: the markdown
+files at the top level and in <code>src/docs/</code>, and the <code>/*# … */</code> comment blocks in
+the source files. Code fences tagged <code>js</code>, <code>html</code>, <code>css</code> or <code>test</code> in those are
+live examples and run in the page.</p>
+<ul>
+<li>Tasks are tracked on the <a href="https://virta.tosijs.net/host/#?virta.scope=tosijs">virta board</a>.</li>
+<li>Conventions shared across the tosijs projects are in
+<a href="https://github.com/tonioloewald/tosijs-coding-practices">tosijs-coding-practices</a>.</li>
+<li><a href="https://github.com/tonioloewald/tosijs/blob/main/CHANGELOG.md"><code>CHANGELOG.md</code></a> records every release.</li>
+</ul>
+
+  </article>
+  <nav class="doc-nav" aria-label="Documentation">
+  <ul>
+    <li><a class="doc-link" href="../">tosijs</a></li>
+    <li><a class="doc-link" href="../start-here/">Start Here</a></li>
+    <li><a class="doc-link" href="../Building-Apps/">Building Apps</a></li>
+    <li><details><summary><a class="doc-link" href="../managing-state/">Managing State</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../xin/">The Observer Proxy</a></li>
+      <li><a class="doc-link" href="../path-listener/">Path Listener</a></li>
+      <li><a class="doc-link" href="../metadata/">Metadata</a></li>
+      <li><a class="doc-link" href="../hot-reload/">Hot Reload</a></li>
+      <li><a class="doc-link" href="../share/">Cross-Tab State</a></li>
+      <li><a class="doc-link" href="../sync/">Network Sync</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../building-the-dom/">Building the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../elements/">Element Creators</a></li>
+      <li><details><summary><a class="doc-link" href="../css/">CSS</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../color/">Color</a></li>
+      </ul>
+      </details></li>
+      <li><details><summary><a class="doc-link" href="../component/">Web Components</a></summary>
+      <ul>
+        <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
+        <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
+        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
+      </ul>
+      </details></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../binding-to-the-dom/">Binding to the DOM</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../bind-vs-observe/">Why bind, and when to use observe</a></li>
+      <li><a class="doc-link" href="../bind/">Custom Bindings and Events</a></li>
+      <li><a class="doc-link" href="../bindings/">Built-in Bindings</a></li>
+      <li><a class="doc-link" href="../list-binding/">Array Bindings</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../entry-points/">Entry Points</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../index-core/">tosijs/core (slim entry)</a></li>
+      <li><a class="doc-link" href="../index-state/">tosijs/state (DOM-free)</a></li>
+    </ul>
+    </details></li>
+    <li><details><summary><a class="doc-link" href="../utilities/">Utilities</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../more-math/">More Math</a></li>
+      <li><a class="doc-link" href="../throttle/">Throttle &amp; Debounce</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../React/">React and tosijs</a></li>
+    <li><a class="doc-link" href="../Angular/">Angular and tosijs</a></li>
+    <li><details><summary><a class="doc-link" href="../one-user-interface/">One User Interface</a></summary>
+    <ul>
+      <li><a class="doc-link" href="../derived-surface/">The Derived Surface</a></li>
+      <li><a class="doc-link" href="../agent-surface/">The Agent Surface</a></li>
+      <li><a class="doc-link" href="../trust-and-transports/">Trust &amp; Transports</a></li>
+      <li><a class="doc-link" href="../headless-embodiment/">Headless Embodiment</a></li>
+      <li><a class="doc-link" href="../plan-and-prior-art/">Plan &amp; Prior Art</a></li>
+      <li><a class="doc-link" href="../audit/">Accessibility Audit</a></li>
+      <li><a class="doc-link" href="../agent/">Agent API Reference</a></li>
+      <li><a class="doc-link" href="../contract/">Contract Harness</a></li>
+      <li><a class="doc-link" href="../contract-check/">Contract Validation</a></li>
+      <li><a class="doc-link" href="../schematic/">schematic (EXPERIMENTAL)</a></li>
+      <li><a class="doc-link" href="../index-agent/">tosijs/agent</a></li>
+      <li><a class="doc-link" href="../webmcp/">WebMCP</a></li>
+    </ul>
+    </details></li>
+    <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link current" href="../development/" aria-current="page">Development</a></li>
+    <li><a class="doc-link" href="../history/">tosijs history</a></li>
+  </ul>
+  </nav>
+  <ul class="doc-navbar">
+    <li><a href="https://ui.tosijs.net" data-icon="tosi">tosijs-ui</a></li>
+    <li><a href="https://discord.com/invite/ramJ9rgky5" data-icon="discord">discord</a></li>
+    <li><a href="https://loewald.com" data-icon="blog">blog</a></li>
+    <li><a href="https://github.com/tonioloewald/tosijs" data-icon="github">github</a></li>
+    <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
+  </ul>
+  </tosi-doc-system>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
+</body>
+</html>

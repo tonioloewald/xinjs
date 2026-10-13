@@ -5,7 +5,7 @@ State is why an app exists. In `tosijs` it lives in plain JavaScript objects; yo
 register them once, and from then on you read and write them through the
 **observer proxy**, which tells everything that cares when something changes.
 
-> The goal is to make updating the user interface essentially an O(1) operation,
+> The goal is to make updating the user interface essentially an O(~1) operation,
 > and to reframe keeping state in sync with the UI as a matter of *wiring* data
 > *paths* to interested *elements* (and, where needed, *observers*). This is how
 > the Mac and NeXT UIs worked, rather than the "reactive" idea of UI = f(State).

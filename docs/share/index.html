@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Cross-Tab State — tosijs</title>
   <meta name="description" content="share() synchronizes tosijs state across browser tabs and windows using BroadcastChannel and IndexedDB." />
   <link rel="canonical" href="https://tosijs.net/share/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="cross-tab-state-share">Cross-Tab State (share)</h1>
 <p><code>share()</code> synchronizes state across browser tabs and windows. Pass it
@@ -119,7 +119,7 @@ copy. Drag in either window and watch the other update in real-time.</p>
   right: 8px;
 }
 </code></pre>
-<pre><code class="language-js">import { tosi, share, xin } from &#39;tosijs&#39;
+<pre><code class="language-js">import { tosi, share } from &#39;tosijs&#39;
 import { trackDrag } from &#39;tosijs-ui&#39;
 
 const { squares } = tosi({
@@ -137,8 +137,8 @@ const draggables = [...preview.querySelectorAll(&#39;.draggable&#39;)]
 function render() {
   for (const el of draggables) {
     const key = el.dataset.key
-    el.style.left = xin.squares[key].x + &#39;px&#39;
-    el.style.top = xin.squares[key].y + &#39;px&#39;
+    el.style.left = squares[key].x.value + &#39;px&#39;
+    el.style.top = squares[key].y.value + &#39;px&#39;
   }
 }
 
@@ -149,9 +149,9 @@ function dragItem(event) {
   const el = event.target.closest(&#39;.draggable&#39;)
   if (!el) return
   const key = el.dataset.key
-  const start = { ...xin.squares[key] }
+  const start = { ...squares[key].value }
   trackDrag(event, (dx, dy, event) =&gt; {
-    xin.squares[key] = { x: start.x + dx, y: start.y + dy }
+    squares[key] = { x: start.x + dx, y: start.y + dy }
     render()
     return event.type === &#39;mouseup&#39;
   })
@@ -237,6 +237,7 @@ preview.querySelector(&#39;.spawn&#39;).addEventListener(&#39;click&#39;, () =&g
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -248,6 +249,6 @@ preview.querySelector(&#39;.spawn&#39;).addEventListener(&#39;click&#39;, () =&g
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

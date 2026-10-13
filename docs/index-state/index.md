@@ -5,10 +5,10 @@ is the observable-state layer with **no DOM globals touched at import**, so
 it loads in plain Node, a worker, an SSR pipeline, or a migration script
 with no `happy-dom` shim in sight:
 
-    import { tosi, observe, xin } from 'tosijs/state'
+    import { tosi, observe, boxed } from 'tosijs/state'
 
     const { app } = tosi({ app: { count: 0 } })
-    observe('app.count', (path) => console.log('changed:', path, xin[path]))
+    observe('app.count', (path) => console.log('changed:', path, boxed[path].value))
     app.count = 1
 
 Everything here is identical to the same export from `tosijs` — this is a

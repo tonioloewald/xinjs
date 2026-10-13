@@ -8,8 +8,7 @@ for handling this efficiently.
 
 ## `.tosi.listBinding()`
 
-The simplest way to bind an array is with `.tosi.listBinding()` (or `.tosi.listBinding()`
-directly on a BoxedProxy). It takes a template builder function that receives
+The simplest way to bind an array is with `.tosi.listBinding()`. It takes a template builder function that receives
 the `elements` proxy and a placeholder item for bindings:
 
 ```js
@@ -30,236 +29,9 @@ preview.append(
 )
 ```
 
-### listBinding(templateBuilder, options?) => [ElementProps, HTMLTemplateElement]
-
-    type ListTemplateBuilder<U = any> = (elements: ElementsProxy, item: U) => HTMLElement
-
-The template builder receives two arguments: the `elements` proxy (destructure
-the tags you need) and a placeholder proxy for the array item. Property access
-on the placeholder creates relative bindings (`^.name`, `^.score`, etc.)
-automatically.
-
-Spread the result into a container element — it returns an `[ElementProps, HTMLTemplateElement]`
-tuple. The props (containing `bindList`) are applied to the container and the
-`<template>` becomes a child; the `ListBinding` constructor then finds and removes
-the `<template>`, extracting its children as stamp templates. **The `<template>`
-element never appears in the live DOM** — it's consumed during initialization.
-
-### Options
-
-Pass options as the second argument:
-
-    ...items.tosi.listBinding(({div}, item) => div(item.name), {
-      idPath: 'id',           // unique id field for surgical updates
-      virtual: { height: 30 } // virtualize for large lists
-    })
-
-### `bindList` + `template` — the low-level form
-
-`.tosi.listBinding()` is **sugar over `bindList`**, and **no `bind*` shortcut is
-deprecated** — 1.9.0 deprecated some and 1.9.1 reversed it, because the shortcut
-is the only form that takes a path STRING (`disabled: 'app.busy'` sets an
-always-truthy string and permanently disables the control). Neither
-`bindList` nor `bindValue` has a plain-prop equivalent either (one needs a `<template>`
-sibling and options, the other is two-way), so both stay.
-
-    div( // container element
-      {
-        bindList: {
-          value: boxed.path.to.array, // OR 'path.to.array'
-          idPath: 'id' // (optional) path to unique id of array items
-        }
-      },
-      template( // template for the repeated item
-        div( // repeated item should have a single root element
-          ... // whatever you want
-          span({
-            bind: { value: '^.foo.bar', binding: 'text' }
-              // binds a given array member's `foo.bar`
-              // '^' refers to the array item itself
-          })
-        )
-      )
-    )
-
-You rarely need this form — `.tosi.listBinding()` is more concise and type-safe.
-
-Even better, `templateBuilder()` is passed the `elements` proxy and a placeholder `BoxedProxy` of
-the array's type, supporting autocompletion of property names within the template.
-
-### id-paths
-
-**id-paths** are a wrinkle in `xin`'s paths specifically there to make list-binding more efficient.
-This is because in many cases you will encounter large arrays of objects, each with a unique id somewhere, e.g. it might be `id` or `uid`
-or even buried deeper…
-
-    xin.message = [
-      {
-        id: '1234abcd',
-        title: 'hello',
-        body: 'hello there!'
-      },
-      …
-    ]
-
-Instead of referring to the first item in `messages` as `messages[0]` it can be referred to
-as `messages[id=1234abcd]`, and this will retrieve the item regardless of its position in messages.
-
-Specifying an `idPath` in a list-binding will allow the list to be more efficiently updated.
-It's the equivalent of a `key` in React, the difference being that it's optional and
-specifically intended to leverage pre-existing keys where available.
-
-### When to use idPath
-
-**Always use `idPath` for arrays of objects** unless you have a very simple case.
-
-Without `idPath`:
-- Bindings use index-based paths like `list[0].name`
-- If items are reordered (sort, splice, etc.), bindings point to wrong items
-- Fine-grained property updates may not reach the correct DOM elements
-- The list binding will work, but inefficiently - often recreating elements
-
-Skipping `idPath` is fine when:
-- The array is simple scalars (`['apple', 'banana', 'cherry']`)
-- The list is static and never reorders
-- You always replace items wholesale, never updating properties
-
-> **Id values must not contain `]` characters.** Id-paths are encoded as
-> `list[id=value]` in path strings, so a `]` in the value will break the
-> path parser. Characters like `[`, `=`, and `.` are fine. If your ids
-> could contain `]`, use a sanitized field or a separate numeric id.
-
-### Surgical Updates with id-paths
-
-When you specify an `idPath`, something remarkable happens: changes to individual
-item properties trigger surgical DOM updates without re-rendering the entire list.
-
-Here's how it works:
-
-1. When a list binding is created with an `idPath`, tosijs registers that array path
-2. When you modify an item property (e.g., `list[0].color = 'red'`), tosijs detects
-   this is inside an array item
-3. It automatically synthesizes an equivalent id-path touch (e.g., `list[id=123].color`)
-4. Bindings registered with id-path notation receive the update
-
-This means you can update one property on one item in a list of millions, and only
-that single DOM element updates. No diffing, no virtual DOM, no reconciliation -
-just direct, surgical updates.
-
-**To see this in action:** Open your browser's DevTools, enable "Paint flashing"
-(in Chrome: DevTools → More tools → Rendering → Paint flashing), and watch the
-virtualized grid example below. Only the cells whose values actually change will flash.
-
-## Nested lists
-
-A list binding can live inside another list's item template — the inner list's
-relative path (`^.subs`) resolves against each outer item. This depends on
-cloning a `<template>` that itself contains a `<template>`, which only behaves
-correctly in a real browser (jsdom/happy-dom put cloned children in the wrong
-place), so it is verified in-browser here:
-
-```test
-import { tosi, elements, xin, updates } from 'tosijs'
-const { div, span, template } = elements
-
-test('a nested list binding renders each inner item', async () => {
-  tosi({
-    nestedListDoc: {
-      groups: [
-        { gid: 'g1', subs: [{ sid: 's1', label: 'one' }, { sid: 's2', label: 'two' }] },
-        { gid: 'g2', subs: [{ sid: 's3', label: 'three' }] },
-      ],
-    },
-  })
-  const container = div(
-    template(
-      div(
-        div(
-          {
-            class: 'subs',
-            bind: { value: '^.subs', binding: 'list', options: { idPath: 'sid' } },
-          },
-          template(span({ bind: { value: '^.label', binding: 'text' } }))
-        )
-      )
-    ),
-    {
-      bind: {
-        value: xin['nestedListDoc.groups'],
-        binding: 'list',
-        options: { idPath: 'gid' },
-      },
-    }
-  )
-  preview.append(container)
-  await updates()
-  const labels = [...container.querySelectorAll('span')].map((s) => s.textContent)
-  expect(labels).toEqual(['one', 'two', 'three'])
-})
-```
-
-## Iterating and Searching Arrays
-
-Proxied arrays have specific semantics around which iteration patterns
-yield proxied vs. raw items — `for...of` and `find()` give you proxies
-(mutations are observed), while `forEach()`/`map()`/`filter()` pass raw
-items to callbacks (mutations are silent). See [iterating proxied
-arrays](/xin/) under tosi for the full breakdown.
-
-The relevant pattern for list bindings: when you want to update many
-items at once, the most efficient idiom is to mutate the raw array
-directly and then `touch()` the array path once — a single observer
-wave instead of one per item:
-
-    // Mutate behind the proxy's back…
-    list.forEach(item => {
-      item.score = computeScore(item)
-    })
-    // …then tell the proxy you're done.
-    touch('path.to.list')
-
-This trivial example would work fine via `for...of` too, but for thousands
-of mutations the batched-touch form is dramatically cheaper. The path
-string is used here deliberately: you've already bypassed the proxy, so
-you notify the registry by path rather than reaching for a proxy reference.
-
-## Virtualized Lists
-
-The real power of list bindings comes from their support for virtualizing lists.
-
-**A list of more than 10 items must virtualize or say why.** Without `virtual`
-or a `nonVirtualReason` (e.g. `{ nonVirtualReason: 'fixed list of 12 months' }`)
-it logs one warning naming the list, its size and both fixes. See
-[bindings](/bindings/) for the details.
-
-    ...emojiListExample.array.tosi.listBinding(({ div }, item) => div(item.name), {
-      idPath: 'name',
-      virtual: {
-        height: 30,
-        rowChunkSize: 3,
-      },
-    })
-
-**A virtual list needs somewhere to scroll.** The bound element is the scroll
-container, so give it a height and `overflow: auto` (the example below uses
-`height: calc(100% - 36px); overflow: auto`). An element that simply grows to
-fit its content has nothing to virtualize against. To scroll with the page
-instead, see **Window Scroll Container** below.
-
-The full set of `virtual` options is `height`, `width`, `minHeight`,
-`rowChunkSize`, `visibleColumns`, `itemsPerRow` and `scrollContainer`; each is
-covered in its section on this page.
-
-Simply add a `virtual` property to the list-binding specifying the row `height`
-and the list will be `virtualized` (meaning that only visible elements will be rendered,
-missing elements being replaced by a single padding element above and below the list).
-For variable-height items, add `minHeight` — see **Variable-Height Items** below.
-
-You can (optionally) specify `rowChunkSize` to virtualize the list in chunks of rows to allow
-consistent `:nth-child()` styling.
-
-Now you can trivially bind an array of a million objects to the DOM and have it scroll at
-120fps.
+And here is the same thing at scale: a few thousand emoji, in a **virtual** list,
+so only the rows on screen exist. [Virtualized Lists](#virtualized-lists) below
+explains the options.
 
 ```js
 import { elements, tosi, scrollListItemIntoView } from 'tosijs'
@@ -352,6 +124,240 @@ preview.append(
   text-overflow: ellipsis;
 }
 ```
+
+### listBinding(templateBuilder, options?) => [ElementProps, HTMLTemplateElement]
+
+    type ListTemplateBuilder<U = any> = (elements: ElementsProxy, item: U) => HTMLElement
+
+The template builder receives two arguments: the `elements` proxy (destructure
+the tags you need) and a placeholder proxy for the array item. Property access
+on the placeholder creates relative bindings (`^.name`, `^.score`, etc.)
+automatically.
+
+Spread the result into a container element — it returns an `[ElementProps, HTMLTemplateElement]`
+tuple. The props (containing `bindList`) are applied to the container and the
+`<template>` becomes a child; the `ListBinding` constructor then finds and removes
+the `<template>`, extracting its children as stamp templates. **The `<template>`
+element never appears in the live DOM** — it's consumed during initialization.
+
+### Options
+
+Pass options as the second argument:
+
+    ...items.tosi.listBinding(({div}, item) => div(item.name), {
+      idPath: 'id',           // unique id field for surgical updates
+      virtual: { height: 30 } // virtualize for large lists
+    })
+
+### `bindList` + `template` — the low-level form
+
+`.tosi.listBinding()` is **sugar over `bindList`**, and **no `bind*` shortcut is
+deprecated** — 1.9.0 deprecated some and 1.9.1 reversed it, because the shortcut
+is the only form that takes a path STRING (`disabled: 'app.busy'` sets an
+always-truthy string and permanently disables the control). Neither
+`bindList` nor `bindValue` has a plain-prop equivalent either (one needs a `<template>`
+sibling and options, the other is two-way), so both stay.
+
+    div( // container element
+      {
+        bindList: {
+          value: boxed.path.to.array, // OR 'path.to.array'
+          idPath: 'id' // (optional) path to unique id of array items
+        }
+      },
+      template( // template for the repeated item
+        div( // repeated item should have a single root element
+          ... // whatever you want
+          span({
+            bind: { value: '^.foo.bar', binding: 'text' }
+              // binds a given array member's `foo.bar`
+              // '^' refers to the array item itself
+          })
+        )
+      )
+    )
+
+You rarely need this form — `.tosi.listBinding()` is more concise and type-safe.
+
+Even better, `templateBuilder()` is passed the `elements` proxy and a placeholder `BoxedProxy` of
+the array's type, supporting autocompletion of property names within the template.
+
+### id-paths
+
+**id-paths** are a wrinkle in `tosijs` paths specifically there to make list-binding more efficient.
+This is because in many cases you will encounter large arrays of objects, each with a unique id somewhere, e.g. it might be `id` or `uid`
+or even buried deeper…
+
+    const { messages } = tosi({ messages: [
+      {
+        id: '1234abcd',
+        title: 'hello',
+        body: 'hello there!'
+      },
+      …
+    ] })
+
+Instead of referring to the first item in `messages` as `messages[0]` it can be referred to
+as `messages[id=1234abcd]`, and this will retrieve the item regardless of its position in messages.
+
+Specifying an `idPath` in a list-binding will allow the list to be more efficiently updated.
+It's the equivalent of a `key` in React, the difference being that it's optional and
+specifically intended to leverage pre-existing keys where available.
+
+### When to use idPath
+
+**Always use `idPath` for arrays of objects** unless you have a very simple case.
+
+Without `idPath`:
+- Bindings use index-based paths like `list[0].name`
+- If items are reordered (sort, splice, etc.), bindings point to wrong items
+- Fine-grained property updates may not reach the correct DOM elements
+- The list binding will work, but inefficiently - often recreating elements
+
+Skipping `idPath` is fine when:
+- The array is simple scalars (`['apple', 'banana', 'cherry']`)
+- The list is static and never reorders
+- You always replace items wholesale, never updating properties
+
+> **Id values must not contain `]` characters.** Id-paths are encoded as
+> `list[id=value]` in path strings, so a `]` in the value will break the
+> path parser. Characters like `[`, `=`, and `.` are fine. If your ids
+> could contain `]`, use a sanitized field or a separate numeric id.
+
+### Surgical Updates with id-paths
+
+When you specify an `idPath`, something remarkable happens: changes to individual
+item properties trigger surgical DOM updates without re-rendering the entire list.
+
+Here's how it works:
+
+1. When a list binding is created with an `idPath`, tosijs registers that array path
+2. When you modify an item property (e.g., `list[0].color = 'red'`), tosijs detects
+   this is inside an array item
+3. It automatically synthesizes an equivalent id-path touch (e.g., `list[id=123].color`)
+4. Bindings registered with id-path notation receive the update
+
+This means you can update one property on one item in a list of millions, and only
+that single DOM element updates. No diffing, no virtual DOM, no reconciliation -
+just direct, surgical updates.
+
+**To see this in action:** Open your browser's DevTools, enable "Paint flashing"
+(in Chrome: DevTools → More tools → Rendering → Paint flashing), and watch the
+virtualized grid example below. Only the cells whose values actually change will flash.
+
+## Nested lists
+
+A list binding can live inside another list's item template — the inner list's
+relative path (`^.subs`) resolves against each outer item. This depends on
+cloning a `<template>` that itself contains a `<template>`, which only behaves
+correctly in a real browser (jsdom/happy-dom put cloned children in the wrong
+place), so it is verified in-browser here:
+
+```test
+import { tosi, elements, boxed, updates } from 'tosijs'
+const { div, span, template } = elements
+
+test('a nested list binding renders each inner item', async () => {
+  tosi({
+    nestedListDoc: {
+      groups: [
+        { gid: 'g1', subs: [{ sid: 's1', label: 'one' }, { sid: 's2', label: 'two' }] },
+        { gid: 'g2', subs: [{ sid: 's3', label: 'three' }] },
+      ],
+    },
+  })
+  const container = div(
+    template(
+      div(
+        div(
+          {
+            class: 'subs',
+            bind: { value: '^.subs', binding: 'list', options: { idPath: 'sid' } },
+          },
+          template(span({ bind: { value: '^.label', binding: 'text' } }))
+        )
+      )
+    ),
+    {
+      bind: {
+        value: boxed.nestedListDoc.groups,
+        binding: 'list',
+        options: { idPath: 'gid' },
+      },
+    }
+  )
+  preview.append(container)
+  await updates()
+  const labels = [...container.querySelectorAll('span')].map((s) => s.textContent)
+  expect(labels).toEqual(['one', 'two', 'three'])
+})
+```
+
+## Iterating and Searching Arrays
+
+Proxied arrays have specific semantics around which iteration patterns
+yield proxied vs. raw items — `for...of` and `find()` give you proxies
+(mutations are observed), while `forEach()`/`map()`/`filter()` pass raw
+items to callbacks (mutations are silent). See [iterating proxied
+arrays](/xin/) under tosi for the full breakdown.
+
+The relevant pattern for list bindings: when you want to update many
+items at once, the most efficient idiom is to mutate the raw array
+directly and then `touch()` the array path once — a single observer
+wave instead of one per item:
+
+    // Mutate behind the proxy's back…
+    list.forEach(item => {
+      item.score = computeScore(item)
+    })
+    // …then tell the proxy you're done.
+    touch('path.to.list')
+
+This trivial example would work fine via `for...of` too, but for thousands
+of mutations the batched-touch form is dramatically cheaper. The path
+string is used here deliberately: you've already bypassed the proxy, so
+you notify the registry by path rather than reaching for a proxy reference.
+
+## Virtualized Lists
+
+The real power of list bindings comes from their support for virtualizing lists.
+
+**A list of more than 10 items must virtualize or say why.** Without `virtual`
+or a `nonVirtualReason` (e.g. `{ nonVirtualReason: 'fixed list of 12 months' }`)
+it logs one warning naming the list, its size and both fixes. See
+[bindings](/bindings/) for the details.
+
+    ...emojiListExample.array.tosi.listBinding(({ div }, item) => div(item.name), {
+      idPath: 'name',
+      virtual: {
+        height: 30,
+        rowChunkSize: 3,
+      },
+    })
+
+**A virtual list needs somewhere to scroll.** The bound element is the scroll
+container, so give it a height and `overflow: auto` (the example below uses
+`height: calc(100% - 36px); overflow: auto`). An element that simply grows to
+fit its content has nothing to virtualize against. To scroll with the page
+instead, see **Window Scroll Container** below.
+
+The full set of `virtual` options is `height`, `width`, `minHeight`,
+`rowChunkSize`, `visibleColumns`, `itemsPerRow` and `scrollContainer`; each is
+covered in its section on this page.
+
+Simply add a `virtual` property to the list-binding specifying the row `height`
+and the list will be `virtualized` (meaning that only visible elements will be rendered,
+missing elements being replaced by a single padding element above and below the list).
+For variable-height items, add `minHeight` — see **Variable-Height Items** below.
+
+You can (optionally) specify `rowChunkSize` to virtualize the list in chunks of rows to allow
+consistent `:nth-child()` styling.
+
+Now you can trivially bind an array of a million objects to the DOM and have it scroll at
+120fps.
+
+The emoji table near the top of this page is exactly this: `virtual: { height: 30,
+rowChunkSize: 3 }` on a container with a fixed height and `overflow: auto`.
 
 ### Virtualized Grids
 
@@ -1476,10 +1482,10 @@ export class ListBinding {
     const arrayPath: string = tosiPath(array) as string
 
     const slice = this.visibleSlice()
-    this.boundElement.classList.toggle(
-      '-xin-empty-list',
-      slice.items.length === 0
-    )
+    const isEmpty = slice.items.length === 0
+    this.boundElement.classList.toggle('-tosi-empty-list', isEmpty)
+    // the pre-1.10.9 name, kept until 2.0 so existing stylesheets keep working
+    this.boundElement.classList.toggle('-xin-empty-list', isEmpty)
     // Announce total item count to assistive tech for virtual lists
     if (this.options.virtual != null) {
       this.boundElement.setAttribute(

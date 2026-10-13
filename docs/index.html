@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>tosijs</title>
   <meta name="description" content="tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." />
   <link rel="canonical" href="https://tosijs.net/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="tosijs">tosijs</h1>
 <!--{ "pin": "top", "order": 1, "description": "tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." }-->
@@ -99,7 +99,7 @@ re-learn at every major version.</p>
 age of AI assistants, also means <strong>fewer tokens</strong> to generate and reason about.
 What the principles buy you:</p>
 <ul>
-<li><strong>O(1) DOM updates, even for big lists.</strong> A state change surgically updates exactly
+<li><strong>O(~1) DOM updates, even for big lists.</strong> A state change surgically updates exactly
 the bound nodes — no virtual DOM, no diffing, no re-render-the-world. And because
 virtual list bindings are built in, a 100,000-row list only ever renders (and
 updates) the handful of rows actually on screen. (Give the list <code>virtual</code> and a
@@ -268,7 +268,7 @@ and are natively supported by all modern browsers.</p>
 </tr>
 <tr>
 <td><code>tosijs/state</code></td>
-<td>the <strong>DOM-free</strong> state layer: <code>tosi</code>, <code>xin</code>, <code>observe</code>, paths</td>
+<td>the <strong>DOM-free</strong> state layer: <code>tosi</code>, <code>observe</code>, <code>touch</code>, paths</td>
 <td><!--gz:state.js-->~17 kB<!--/gz--></td>
 </tr>
 <tr>
@@ -544,14 +544,8 @@ simply call <code>hotReload</code> after initializing your app state and you&#39
 <p><code>hotReload</code> accepts a test function (path =&gt; boolean) as a parameter.
 Only top-level properties in your state that pass the test will be persisted.</p>
 <p>To completely reset the app, run <code>localStorage.clear()</code> in the console.</p>
-<h2 id="development-notes">Development Notes</h2>
-<p>You&#39;ll need to install <a href="https://bun.sh/">bun</a> and then run <code>bun install</code>.</p>
-<pre><code>bun start                  # dev server with hot reload (https://localhost:8018)
-bun test                   # run all tests
-bun run build              # production build (runs tests, then bundles + docs)
-bun run format             # lint and format (ESLint + Prettier)
-bun pack                   # create local package tarball
-</code></pre>
+<h2 id="development">Development</h2>
+<p>Working on <code>tosijs</code> itself? See <a href="https://tosijs.net/development/">Development</a>.</p>
 <h2 id="license">License</h2>
 <p><a href="./LICENSE">Apache-2.0</a> as of 1.8.0 (BSD-3-Clause through 1.7.x) — the
 change adds an explicit patent grant and a patent-retaliation clause. If you
@@ -637,6 +631,7 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
     </ul>
     </details></li>
     <li><a class="doc-link" href="Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="development/">Development</a></li>
     <li><a class="doc-link" href="history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -648,6 +643,6 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="iife.js?v=7265bc89e0f9"></script>
+  <script src="iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

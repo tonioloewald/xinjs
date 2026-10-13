@@ -85,7 +85,7 @@ assignments, or passing to external APIs.
 
     const view = div(
       h1(app.user.name),
-      input({ value: app.user.name }),
+      input({ bindValue: app.user.name }),
       div({ class: 'status', hidden: app.loggedIn })
     )
 
@@ -99,6 +99,12 @@ and it becomes a text-bound `<span>` — `h1(app.user.name)` just works
 if that bothers you). Pass a proxy as any property or attribute and tosijs
 detects it and binds it — `hidden: app.loggedIn` stays in sync with state.
 This eliminates the need for most custom bindings.
+
+**A proxy as a plain property is one-way: state to element.** With
+`input({ value: app.user.name })` the field shows the name and follows it, but
+typing in the field does **not** change the state. When the user's edits should
+flow back, say so with `bindValue`, as above: it is two-way.
+[Binding to the DOM](/binding-to-the-dom/) lays out the four kinds of binding.
 
 `textContent` and `bindValue` bind a **proxy**; `bindValue` also handles `fromDOM`.
 For a path **string** rather than a proxy, use the inline form —
@@ -182,8 +188,8 @@ familiar mapping syntax is a Trojan horse for live list rendering.
 
 Virtual list bindings only render what's visible. A list of a million
 messages renders the same number of DOM nodes as a list of twenty.
-Scrolling is O(1) — the same virtual slice calculation runs regardless
-of list size.
+Scrolling is O(~1): the same virtual slice calculation runs regardless
+of list size, give or take the overheads any large dataset brings.
 
 Two things to know before your first long list:
 
@@ -620,7 +626,7 @@ preview.append(
 ```
 
 ```test
-const { Component, elements, bindings, tosi, xin, updates } = tosijs
+const { Component, elements, bindings, tosi, boxed, updates } = tosijs
 
 test('a shadow value-widget round-trips through its value like an input', async () => {
   class Knob extends Component {
@@ -656,7 +662,7 @@ test('a shadow value-widget round-trips through its value like an input', async 
   widget.shadowRoot.querySelector('[part=inc]').click()
   await waitFor('[aria-valuenow="3"]', 3000)
   expect(Number(widget.value)).toBe(3)
-  expect(xin['knobDemo.level']).toBe(3)
+  expect(boxed.knobDemo.level.value).toBe(3)
 })
 ```
 

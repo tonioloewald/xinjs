@@ -17,12 +17,12 @@ const state = {}
 const boxed = new Proxy(state, ...)
 tosi = (obj<T>): BoxedProxy<T> => {
   Object.assign(state, obj)
-  return state
+  return boxed
 }
 ```
 
 This allows the following pattern, which gives Typescript a lot of useful
-information for free, allowing autocomplete, etc. with a minimumn of
+information for free, allowing autocomplete, etc. with a minimum of
 boilerplate.
 
 ```
@@ -66,7 +66,7 @@ bind(document.body, prefs.theme, {
   toDOM(element, value) {
     element.classList.toggle('dark-mode', value === 'dark')
   }
-}
+})
 
 const { select, option } = elements
 
@@ -85,10 +85,10 @@ appropriately, and modifying `prefs.theme` will update the
 bound element automatically.
 
 ```
-proxy.theme.value = 'dark'
+prefs.theme.value = 'dark'
 ```
 
-> In javascript you can just write `proxy.theme = 'dark'` (TypeScript
+> In javascript you can just write `prefs.theme = 'dark'` (TypeScript
 > doesn't allow this due to asymmetric get/set type limitations).
 
 This, in a nutshell, explains exactly what `tosijs` is designed to do.
@@ -99,7 +99,7 @@ logic and presentation.
 
 The [`elements` proxy](/elements/) lets you build HTML elements with
 data and event bindings more compactly and efficiently than you can using
-JSX/TSX, and it deals in regular `HTMLElement`—no virtual DOM, tranpilation
+JSX/TSX, and it deals in regular `HTMLElement`—no virtual DOM, transpilation
 magic, spooky action at a distance, or any similar nonsense.
 
 If you need to do complex bindings, the `bind` method lets you directly
@@ -119,54 +119,41 @@ easily until similar functionality is added to CSS.
 > Note that the interactive examples on the tosijs.net website allow TypeScript
 > but the Typescript is simply stripped to javascript using [sucrase](https://sucrase.io/).
 
-## xin
-
-`xin` is a path-based implementation of the **observer** or **pub/sub**
-pattern designed to be very simple and straightforward to use, leverage
-Typescript type-checking and autocompletion, and let you get more done with
-less code and no weird build magic (such as special decorators or "execution zones").
 
 ## In a nutshell
 
-`xin` is a single object wrapped with an **observer** proxy.
+`tosi()` registers your object as state and hands back an **observer proxy** for it.
 
-- when you assign an object (or array) to `xin` as a property, you're
-  just assigning a property to the object. When you pull it out, you
-  get a **proxy** of the underlying value, but the original value is
-  still there, untouched.
+- The object you registered is still your object, untouched. What you get back
+  is a **proxy** of it:
   ```
   const foo = { bar: 'baz' }
-  xin.foo = foo
-  xin.foo.bar === foo.bar
-  xin.foo.bar === 'baz'
-  xin.foo !== foo            // xin.foo is a proxy
-  xin.foo.value === foo   // foo is still there!
+  const { foo: fooProxy } = tosi({ foo })
+  fooProxy.bar.value === 'baz'
+  fooProxy !== foo             // it is a proxy
+  fooProxy.value === foo       // and foo is still there
   ```
-- if you change a property of something already in `xin` then this
-  change will be `observed` and anything *listening* for changes to
-  the value at that **path** will be notified.
-- tosijs's `bind` method leverages the proxy to keep the UI synced
-  with application state.
+- If you change a property through the proxy, the change is **observed**, and
+  anything listening for changes to the value at that **path** is notified.
+- `bind` uses this to keep the page in step with the state.
 
-In the following example there's a `<div>` and an `<input>`. The
-textContent of the former and the value of the latter are bound to
-the **path** `xinExample.string`.
+In the following example there's a `<div>` and an `<input>`. The text of the
+former and the value of the latter are bound to the **path**
+`tosiExample.string`.
 
-`xin` is exposed as a global in the console, so you can go into
-console and look at `xin.xinExample` and (for example) directly
-change it via the console.
-
-You can also turn on Chrome's rendering tools to see how
-efficiently the DOM is updated. And also note that typing into
-the input field doesn't lose any state (so your text selection
-and insertion point are stable.
+Open the example's **Console** tab and try `tosiExample.string = 'changed'`.
+You can also turn on your browser's rendering tools to see how little of the
+DOM is updated. And note that typing into the input field doesn't lose any
+state: your text selection and insertion point are stable.
 
 ```js
-import { xin, elements } from 'tosijs'
+import { tosi, elements } from 'tosijs'
 
-xin.xinExample = {
-  string: 'hello, xin'
-}
+const { tosiExample } = tosi({
+  tosiExample: {
+    string: 'hello, tosi'
+  }
+})
 
 const { label, input, div, span } = elements
 
@@ -180,29 +167,28 @@ preview.append(
         padding: 10
       }
     },
-    div({bind: {value: 'xinExample.string', binding: 'text'}}),
+    div(tosiExample.string),
     label(
       span('Edit this'),
-      input({ bindValue: 'xinExample.string'})
+      input({ bindValue: tosiExample.string })
     )
   )
 )
 ```
 
-- a **data-path** typically resembles the way you'd reference a value inside
-  a javascript object…
-- `xin` also supports **id-paths** which allow you to create stable references
-  to elements in arrays using a (hopefully unique) identifier. E.g. instead
-  of referring to an item in an array as `xin.foo.array[3]`, assuming it had
-  an `id` of `abcd1234` you could write `xin.foo.array[id=abcd1234]`. This makes
-  handling large arrays much more efficient.
-- when you pull an object-value out of `xin` it comes wrapped in the xin
-  observer proxy, so it continues to support id-paths and so on.
+- a **path** typically resembles the way you'd reference a value inside
+  a javascript object: `tosiExample.string`.
+- **id-paths** give you stable references to items in arrays, using a
+  (hopefully unique) identifier. Instead of referring to an item as
+  `foo.array[3]`, if it has an `id` of `abcd1234` its path can be
+  `foo.array[id=abcd1234]`. This makes handling large arrays much more efficient.
+- when you pull an object out of the proxy it comes wrapped in a proxy too,
+  so it continues to know its path.
 
 ### A Calculator
 
 ```js
-import { xin, elements, touch } from 'tosijs'
+import { tosi, elements, touch } from 'tosijs'
 
 // here's a vanilla javascript calculator
 const calculator = {
@@ -217,7 +203,7 @@ const calculator = {
 
 calculator.evaluate()
 
-xin.calculatorExample = calculator
+const { calculatorExample } = tosi({ calculatorExample: calculator })
 
 // now we'll give it a user interface…
 const { input, select, option, div, span } = elements
@@ -227,53 +213,40 @@ preview.append(
     {
       onChange() {
         calculator.evaluate()
-        touch('calculatorExample.result')
+        touch(calculatorExample.result)
       }
     },
-    input({bindValue: 'calculatorExample.x', placeholder: 'x'}),
+    input({ bindValue: calculatorExample.x, placeholder: 'x' }),
     select(
       {
-        bindValue: 'calculatorExample.op'
+        bindValue: calculatorExample.op
       },
       option('+'),
       option('-'),
       option({value: '*'}, '×'),
       option({value: '/'}, '÷'),
     ),
-    input({bindValue: 'calculatorExample.y', placeholder: 'y'}),
+    input({ bindValue: calculatorExample.y, placeholder: 'y' }),
     span('='),
-    span({bind: {value: 'calculatorExample.result', binding: 'text'}})
+    span(calculatorExample.result)
   )
 )
 ```
 
 Important points:
 
-- `xin` points at a single object. It's a [Singleton](https://en.wikipedia.org/wiki/Singleton_pattern).
-- `boxed` points to the **same** object
-- `xin` and `boxed` are observers. They watch the object they point to and
-  track changes made by accessing the underlying data through them.
-- because `calculator.evaluate()` changes `calculator.result`
-  directly, `touch()` is needed to tell `xin` that the change occurred.
-  See [path-listener](/path-listener/) for more documentation on `touch()`.
-- `xin` is more than just an object!
-    - `xin['foo.bar']` gets you the same thing `xin.foo.bar` gets you.
-    - `xin.foo.bar = 17` tells `xin` that `foo.bar` changed, which triggers DOM updates.
+- All registered state lives in a single object. It's a
+  [Singleton](https://en.wikipedia.org/wiki/Singleton_pattern), and every proxy
+  `tosi()` returns is a view of it.
+- The proxy is an observer. It tracks changes made **through it**.
+- Because `calculator.evaluate()` changes `calculator.result` directly, on the
+  plain object, `touch()` is needed to say that the change occurred.
+  See [Path Listener](/path-listener/) for more on `touch()`.
 
-> If you're reading this on tosijs.net then this the demo app you're looking
-> works a bit like this and `xin` (and `boxed`) are exposed as globals so
-> you can play with them in the **debug console**.
->
-> Try going into the console and typing `xin.app.title` to see what you get,
-> and then try `xin.app.title = 'foobar' and see what happens to the heading.
->
-> Also try `xin.prefs.theme` and try `app.prefs.theme = 'dark'` etc.
-
-Once an object is assigned to  `xin`, changing it within `xin` is simple.
-Try this in the console:
+Changing state through the proxy is simple. Try this in the example's console:
 
 ```
-xin.calculatorExample.x = 17
+calculatorExample.x = 17
 ```
 
 This will update the `x` field in the calculator, but not the result.
@@ -285,15 +258,15 @@ internal state, you could instead write:
 ```
 observe('calculatorExample', () => {
   calculator.evaluate()
-  touch('calculatorExample.result')
+  touch(calculatorExample.result)
 })
 ```
 
 Now the `onChange` handler isn't necessary at all. `observe`
-is documented in [path-listener](/path-listener/).
+is documented in [Path Listener](/path-listener/).
 
 ```js
-import { observe, xin, elements } from 'tosijs'
+import { observe, boxed, elements } from 'tosijs'
 
 const { h3, div } = elements
 
@@ -305,64 +278,62 @@ preview.append(
 )
 
 observe(/calculatorExample\./, path => {
-  const value = xin[path]
+  // an observer is told the path; `boxed` looks any registered path up
+  const value = boxed[path].value
   history.insertBefore(div(`${path} = ${value}`), history.firstChild)
 })
 ```
 
-Now, if you sneakily make changes behind `xin`'s back, e.g. by modifying the values
-directly, e.g.
+Now, if you make changes behind the proxy's back, by modifying the plain
+object directly:
 
 ```
-const emails = await getEmails()
-xin.emails = emails
+const rawEmails = await getEmails()
+const { emails } = tosi({ emails: rawEmails })
 
-// notes that xin.emails is really JUST emails
-emails.push(...)
-emails.splice(...)
-emails[17].from = '...'
+// the proxy cannot see any of these
+rawEmails.push(...)
+rawEmails.splice(...)
+rawEmails[17].from = '...'
 ```
 
-Then `xin` won't know and observers won't fire. So you can simply `touch` the path
-impacted:
+Then nothing is notified and observers won't fire. So you `touch` the path
+that changed:
 
 ```
 import { touch } from 'tosijs'
-touch('emails')
+touch(emails)        // or touch('emails')
 ```
 
 In the calculator example, the vanilla `calculator` code calls `evaluate` behind
-`xin`'s back and uses `touch('calculatorExample.result')` to let `xin` know that
-`calculatorExample.result` has changed. This causes `xin` to update the
-DOM.
+the proxy's back and uses `touch(calculatorExample.result)` to say that the
+result has changed, which updates the DOM.
 
 ## How it works
 
-`xin` is a `Proxy` wrapped around a bare object: effectively a map of strings to values.
+The state is a bare object: effectively a map of names to values. The observer
+proxy is a `Proxy` wrapped around it.
 
-When you access the properties of an object assigned to `xin` it wraps the values in
-similar proxies, and tracks the **path** that got you there:
+When you access the properties of an object in the state, the proxy wraps the
+values in similar proxies, and tracks the **path** that got you there:
 
 ```
-xin.foo = {
-  bar: 'baz',
-  luhrman: {
-    job: 'director'
+const { foo } = tosi({
+  foo: {
+    bar: 'baz',
+    luhrman: {
+      job: 'director'
+    }
   }
-}
-```
+})
 
-Now if you pull objects back out of `xin`:
-
-```
-let foo = xin.foo
-let luhrman = foo.luhrman
+const luhrman = foo.luhrman
 ```
 
 `foo` is a `Proxy` wrapped around the original *untouched* object, and it knows it came from 'foo'.
 Similarly `luhrman` is a `Proxy` that knows it came from 'foo.luhrman'.
 
-If you **change** a value in a wrapped object, e.g.
+If you **change** a value through a proxy, e.g.
 
 ```
 foo.bar = 'bob'
@@ -370,77 +341,64 @@ luhrman.job = 'writer'
 ```
 
 Then it will trigger any observers looking for relevant changes. And each change will fire the observer
-and tell it the `path` that was changed. E.g. an observer watching `lurman` will be fired if `lurman`
-or one of `lurman`'s properties is changed.
+and tell it the `path` that was changed. E.g. an observer watching `luhrman` will be fired if `luhrman`
+or one of `luhrman`'s properties is changed.
 
-## The `boxed` proxy
+## Scalars are boxed
 
-`boxed` is a sister to `xin` that wraps "scalar" values (`boolean`, `number`, `string`) in
-lightweight proxies. These proxies know their path and provide convenient access to the
-underlying value. E.g. if you write something like:
-
-```
-xin.test = { answer: 42 }
-boxed.box = { pie: 'apple' }
-```
-
-Then:
+Strings, numbers and booleans cannot carry a path, so the proxy **boxes** them:
+it wraps each one in a lightweight proxy that knows its path and gives you the
+underlying value on request.
 
 ```
-xin.test.answer === 42
-xin.box.pie === 'apple'
-// boxed scalars have .value and .path
-boxed.test.answer.value === 42
-boxed.box.pie.value === 'apple'
-boxed.test.answer.path === 'test.answer'
-boxed.box.pie.path === 'box.pie'
+const { test, box } = tosi({
+  test: { answer: 42 },
+  box: { pie: 'apple' },
+})
+
+test.answer.value === 42
+box.pie.value === 'apple'
+test.answer.path === 'test.answer'
+box.pie.path === 'box.pie'
 // valueOf() works for coercion
-boxed.test.answer.valueOf() === 42
-String(boxed.box.pie) === 'apple'
+test.answer.valueOf() === 42
+String(box.pie) === 'apple'
 ```
 
 Boxed scalars also delegate to the underlying value's prototype methods,
 so you can call string, number, and boolean methods directly:
 
 ```
-boxed.box.pie.toUpperCase() === 'APPLE'
-boxed.box.pie.startsWith('app') === true
-boxed.box.pie.length === 5
-boxed.test.answer.toFixed(2) === '42.00'
+box.pie.toUpperCase() === 'APPLE'
+box.pie.startsWith('app') === true
+box.pie.length === 5
+test.answer.toFixed(2) === '42.00'
 ```
 
-Aside from always "boxing" scalar values, `boxed` works just like `xin`.
-
-In the console, you can also access `boxed` and look at what happens if you
-access `boxed.xinExample.string`. Note that this changes the value you get,
-the underlying value is still what it was. If you set it to a new `string`
-value that's what will be stored. `xin` doesn't monkey with the values you
-assign.
+Boxing changes what you *get*, not what is stored. If you set `box.pie` to a
+new string, a string is what is stored; your values are never altered.
 
 ### Why?!
 
-As far as Typescript is concerned, `xinProxy` just passes back what you put into it,
-which means that you can now write bindings with type-checking and autocomplete and
-never use string literals. So something like this *just works*:
+Because a boxed value knows its path, you can write bindings with type-checking
+and autocomplete and never use string literals. So something like this *just works*:
 
 ```
-const div = elements.div({textContent: boxed.box.pie})
+const div = elements.div({ textContent: box.pie })
 ```
 
-…because `boxed.box.pie` carries its `.tosi.path`, which is what is actually used for
-binding, whereas `xin.box.pie` is just a scalar value.
+…because `box.pie` carries its path, which is what is actually used for binding.
+A bare `'apple'` could not.
 
 Note the distinction: `textContent` binds a **proxy**. Given a path **string** it
 would set literal text, so the string form needs the inline binding —
 `bind: { value: 'box.pie', binding: 'text' }` — and you get no lint support or
-autocomplete either way. (Also, in
-some cases, you might even mangle the names of an object during minification and
-`boxed` will know the mangled name).
+autocomplete that way. (Also, in some cases, you might even mangle the names of
+an object during minification, and the proxy will know the mangled name.)
 
 ### If you need the thing itself or the path to the thing…
 
-`proxy`s returned by `xin` are typically indistinguishable from the original object, but
-in a pinch `.tosi.path` gives you the path (`string`) of a proxy and `.tosi.value` (or
+`.tosi.path` gives you the path (`string`) of a proxy and `.tosi.value` (or
 just `.value`) gives its "bare" value. The `tosiPath()` and `tosiValue()` functions do the
 same and also work on non-proxies — `tosiPath(x)` returns `undefined` for a regular object,
 so it doubles as a proxy test.
@@ -449,63 +407,24 @@ E.g.
 
 ```
 tosiPath(luhrman) === 'foo.luhrman'     // true
-const bareLurhman = tosiValue(luhrman)  // not wrapped
+const bareLuhrman = tosiValue(luhrman)  // not wrapped
 ```
 
 You may want the thing itself to, for example, perform a large number of changes to an
-object without firing observers. You can let `xin` know you've made changes behind its back using
-`touch`, e.g.
+object without firing observers. Then say that you have, using `touch`:
 
 ```
 doTerribleThings(tosiValue(luhrman))
-// eslint-disable-next-line
 touch(luhrman)
 ```
 
-This is **useful** because `boxed.foo.bar` always knows where it came from, while
-`xin.foo.bar` only knows where it came from if it's an object value.
+### Comparing
 
-This means you can write:
-
-```js
-import { boxed, elements } from 'tosijs'
-
-boxed.boxedExample = {
-  string: 'hello, boxed'
-}
-
-const { boxedExample } = boxed
-
-const { label, input, div, span } = elements
-
-preview.append(
-  div(
-    {
-      style: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-        padding: 10
-      }
-    },
-    div({textContent: boxedExample.string}),
-    label(
-      span('Edit this'),
-      input({ bindValue: boxedExample.string})
-    )
-  )
-)
-```
-
-And the difference here is you can bind direct to the reference itself rather
-than a string. This leverages autocomplete, linting, and so on in a way that
-using string paths doesn't.
-
-It does have a downside! `boxedExample.string !== 'hello, boxed'` and
-`boxedExample.string !== boxedExample.string` because they're proxies, not primitives.
+There is a downside to boxing! `box.pie !== 'apple'` and even
+`box.pie !== box.pie`, because they're proxies, not primitives.
 This is critical for comparisons such as `===` and `!==`.
 Always use `.value`, `tosiValue()`, or `valueOf()` when comparing:
-`boxed.foo.bar.value === 'hello'` or `tosiValue(boxed.foo.bar) === 'hello'`.
+`box.pie.value === 'apple'` or `tosiValue(box.pie) === 'apple'`.
 
 ## The `.tosi` accessor
 
@@ -844,7 +763,25 @@ preview.append(
 )
 ```
 
-## `tosi()`, `xinProxy()`, `xin` and `boxed`
+## Under the hood: `xin`, `boxed` and `xinProxy()`
+
+> You do not need any of this to use `tosijs`. Use `tosi()`. This section
+> explains the implementation, and the older names you may meet in existing code.
+
+There are two proxies over the same single state object, and both are exported:
+
+- **`boxed`** is the one `tosi()` returns. It boxes scalars, as described above.
+- **`xin`** is the older, raw proxy. It does **not** box scalars:
+  `xin.box.pie === 'apple'`, a plain string with no `.value`, no `.path` and
+  nothing to bind by reference.
+
+Both accept a path as a string: `boxed['box.pie']` and `xin['box.pie']` look up
+the same value, which is occasionally useful when all you have is a path (in an
+observer callback, for instance).
+
+`xin` is where the library began. It is a path-based implementation of the
+**observer** or **pub/sub** pattern, designed to be simple to use, to work with
+TypeScript's type-checking and autocompletion, and to need no build magic.
 
 > `tosi()` was formerly called `boxedProxy()`.
 

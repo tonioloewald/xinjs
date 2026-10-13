@@ -8,9 +8,9 @@ they're used to manage state.
 
 ## `touch(path: string)` and `.touch()`
 
-This is used to inform `xin` that a value at a path has changed. Remember that
-xin simply wraps an object, and if you change the object directly, `xin` won't
-necessarily know about it.
+This is used to say that a value at a path has changed. Remember that the
+observer proxy simply wraps an object, and if you change the object directly,
+the proxy won't know about it.
 
 The two most common uses for `touch()` are:
 
@@ -152,8 +152,8 @@ app.a.value = 1
 await updates()                                 // logs 'app.a', and only that
 ```
 
-Writes are surgical: every form (`app.a.value = 1`, `app.a = 1`,
-`xin.app.a = 1`, `xin['app.a'] = 1`) touches exactly `app.a`. If a probe
+Writes are surgical: every form (`app.a.value = 1`, `app.a = 1`, and the
+string-path form `boxed['app.a'] = 1`) touches exactly `app.a`. If a probe
 suggests otherwise, check for an undrained registration first — the symptom is
 specific and stable enough to look like a real finding.
 */

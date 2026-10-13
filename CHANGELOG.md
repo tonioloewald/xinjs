@@ -14,6 +14,8 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
   proxied value in a binding. `take` named nothing about what it does. The old
   name still works and warns once; it goes away in 2.0. `TakeDescriptor` and
   `TAKE_DESCRIPTOR` keep their names.
+- **Empty lists get the class `-tosi-empty-list`.** The old `-xin-empty-list` is
+  still set alongside it, is deprecated, and goes away in 2.0.
 - One runtime warning in `Component` said "reactive accessor restored"; it now
   says "attribute accessor restored". Nothing in tosijs is reactive.
 
@@ -43,6 +45,16 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
   container that scrolls; the more-than-10-items warning in README and
   Building Apps. `deleteListItem` without an `idPath` logs and returns
   `false`; the docs said it throws.
+- **The docs teach `tosi()`, not `xin`.** The proxy page is rewritten around
+  `tosi()`, examples on the other pages no longer import `xin`, and `xin`,
+  `boxed` and `xinProxy()` are explained in one "under the hood" section.
+- **The `.tosi` accessors** are a table, and now include `as`.
+- **Element Creators**: one section on event handlers (there were two), the
+  binding section says which forms are one-way and which two-way, and two
+  snippets with mismatched braces are fixed. Building Apps says the same about
+  `value: proxy` versus `bindValue`.
+- **Development** notes moved from the README to their own page.
+- "O(1)" is now "O(~1)": large datasets have overheads.
 - "Reactive" no longer describes anything in tosijs.
 
 ### Fixed (docs site only)

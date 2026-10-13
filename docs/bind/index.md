@@ -83,7 +83,7 @@ The `bind` function is a simple way of tying an `HTMLElement`'s properties to
 state via `path` using [bindings](/bindings/)
 
 ```
-import {bind, bindings, xin, elements, updates} from 'tosijs'
+import { bind, bindings, tosi, elements, updates } from 'tosijs'
 const {div, input} = elements
 
 const divElt = div()
@@ -93,29 +93,30 @@ document.body.append(divElt)
 const inputElt = input()
 bind(inputElt, 'app.title', bindings.value)
 
-xin.app = {title: 'hello world'}
+const { app } = tosi({ app: { title: 'hello world' } })
 await updates()
 ```
 
 What's happening is essentially the same as:
 
 ```
-divElt.textContent = xin.app.title
-observe('app.title', () => divElt.textContent = xin.app.title)
+divElt.textContent = app.title.value
+observe('app.title', () => divElt.textContent = app.title.value)
 
-inputElt.value = xin.app.title
-observe('app.title', () => inputElt.value = xin.app.title)
-inputElt.addEventListener('change', () => { xin.app.title = inputElt.value })
+inputElt.value = app.title.value
+observe('app.title', () => inputElt.value = app.title.value)
+inputElt.addEventListener('change', () => { app.title.value = inputElt.value })
 ```
 
 Except:
 
 1. this code is harder to write
-2. it will fail if xin.app hasn't been initialized (which it hasn't been!)
+2. it will fail if `app` hasn't been registered yet (and in the example above, the
+   bindings were set up before it was!)
 3. inputElt will also trigger *debounced* updates on `input` events
 
 After this. `div.textContent` and `inputElt.value` are 'hello world'.
-If the user edits the value of `inputElt` then `xin.app.title` will
+If the user edits the value of `inputElt` then `app.title` will
 be updated, and `app.title` will be listed as a changed path, and
 an update will be fired via `setTimout`. When that update fires,
 anything observer of the paths `app.text` and `app` will be fired.
@@ -201,7 +202,7 @@ preview.append(
 `on()` binds event-handlers to DOM elements.
 
 More than syntax sugar for `addEventListener`, `on()` allows you to bind event
-handlers inside `xin` by path (e.g. allowing event-handling code to be loaded
+handlers that live in state, by path (e.g. allowing event-handling code to be loaded
 asynchronously or lazily, or simply allowing event-handlers to be switched dynamically
 without rebinding) and it uses event-bubbling to minimize the actual number of
 event handlers that need to be registered.

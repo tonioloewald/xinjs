@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Element Creators — tosijs</title>
   <meta name="description" content="The elements proxy: build DOM elements with live bindings and event handlers in plain JS, no JSX or transpilation required." />
   <link rel="canonical" href="https://tosijs.net/elements/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="element-creators-elements">Element Creators (elements)</h1>
 <p><code>tosijs</code> provides <code>elements</code> for easily and efficiently generating DOM elements
@@ -78,7 +78,7 @@ preview.append(
 <p><code>elements</code> is a proxy whose properties are element factory functions,
 referred to throughout this documentation as <code>elementCreator</code>s, functions
 of type <code>ElementCreator</code>. So <code>elements.div</code> is a function that returns a <code>&lt;div&gt;</code>
-element, <code>elements.foo</code> creates <foo> elements, and elements.fooBar creates
+element, <code>elements.foo</code> creates <code>&lt;foo&gt;</code> elements, and <code>elements.fooBar</code> creates
 <code>&lt;foo-bar&gt;</code> elements.</p>
 <h3 id="what-a-positional-argument-means">What a positional argument means</h3>
 <p>Every argument is classified by what it <em>is</em>, and there is exactly one rule per
@@ -127,10 +127,9 @@ short-circuit evaluation producing a falsy value, and importing it would mean
 booleans could never be shown. <code>null</code> is the intentional version of the same
 idea, and it reads as intent at the call site.</p>
 <p><strong>Nothing is silently dropped.</strong> An argument that cannot be used says so, once,
-with the value attached — because the previous behaviour was to treat every
-unrecognised argument as a props bag, which meant <code>div(new Date())</code> rendered an
-empty <code>&lt;div&gt;</code> and <code>div(items.map(…))</code> with the spread forgotten turned array
-indices into attributes. Both were silent.</p>
+with the value attached. So <code>div(new Date())</code> renders the date as text, and
+<code>div(items.map(…))</code> with the spread forgotten warns instead of quietly doing
+the wrong thing.</p>
 <p>E.g.</p>
 <pre><code class="language-js">import { elements, tosi } from &#39;tosijs&#39;
 
@@ -187,7 +186,7 @@ element&#39;s <code>style</code> attribute, eliminating previous changes).</p>
 </code></pre>
 <p>…produces <code>&lt;span style=&quot;font-size: 15px&quot;&gt;&lt;/span&gt;</code>, which is probably
 not what was wanted.</p>
-<pre><code>span({style: {border: &#39;1px solid red&#39;}, {style: {fontSize: &#39;15px&#39;}}})
+<pre><code>span({style: {border: &#39;1px solid red&#39;}}, {style: {fontSize: &#39;15px&#39;}})
 </code></pre>
 <p>…produces <code>&lt;span style=&quot;border: 1px solid red; font-size: 15px&quot;&gt;&lt;/span&gt;</code>
 which is probably what was wanted.</p>
@@ -214,36 +213,41 @@ can add and remove classes conditionally in one place:</p>
 <code>false</code> (e.g. from <code>cond ? &#39;active&#39; : undefined</code> or <code>cond &amp;&amp; &#39;active&#39;</code>) — add no
 class, so conditional class expressions work without special-casing. Array
 entries are treated the same way (falsy entries are skipped).</p>
-<h2 id="event-handlers">event handlers</h2>
-<p>Properties starting with <code>on</code> (followed by an uppercase letter)
-will be converted into event-handlers, so <code>onMouseup</code> will be
-turned into a <code>mouseup</code> listener.</p>
 <h2 id="binding">binding</h2>
-<p>You can <a href="/bind/">bind</a> an element to state using <a href="/bindings/">bindings</a>
-using convenient properties, e.g.</p>
-<pre><code>import { elements } from &#39;tosijs&#39;
-const {div} = elements
-div({ bindValue: &#39;app.title&#39; })
+<p>There are two ways to bind an element to state from a creator.
+<a href="/binding-to-the-dom/">Binding to the DOM</a> is the overview; in short:</p>
+<p><strong>Pass a proxy as a property, or as a child.</strong> The property or text then
+follows the state. This is one-way, state to element:</p>
+<pre><code>const { app } = tosi({ app: { title: &#39;hello&#39;, busy: false } })
+
+h1(app.title)                           // live text
+button(&#39;Save&#39;, { disabled: app.busy })  // live property
+input({ value: app.title })             // shows the title; typing does NOT change it
 </code></pre>
-<p>…is syntax sugar for:</p>
+<p><strong>Use a <code>bind&lt;Name&gt;</code> property</strong> when the element should also write back, or when
+you have a path string instead of a proxy:</p>
+<pre><code>input({ bindValue: app.title })         // two-way
+input({ bindValue: &#39;app.title&#39; })       // the same, by path
+</code></pre>
+<p><code>bindValue</code> is syntax sugar for:</p>
 <pre><code>import { elements, bind, bindings } from &#39;tosijs&#39;
-const { div } = elements
-bind( div(), &#39;app.title&#39;, bindings.value )
+const { input } = elements
+bind(input(), &#39;app.title&#39;, bindings.value)
 </code></pre>
-<p>If you want to use your own bindings, you can use <code>apply</code>:</p>
+<p>The <code>bind&lt;Name&gt;</code> properties use the <a href="/bindings/">built-in bindings</a>. To use a
+binding of your own, pass it inline with <code>bind</code>:</p>
 <pre><code>const visibleBinding = {
   toDOM(element, value) {
     element.classList.toggle(&#39;hidden&#39;, !value)
   }
 }
 
-div({ apply(elt){
-  bind(elt, &#39;app.prefs.isVisible&#39;, visibleBinding})
-} })
+div({ bind: { value: app.prefs.isVisible, binding: visibleBinding } })
 </code></pre>
-<h2 id="event-handlers-1">event-handlers</h2>
-<p>You can attach event handlers to elements using <code>on&lt;EventType&gt;</code>
-as syntax sugar, e.g.</p>
+<h2 id="event-handlers">event handlers</h2>
+<p>Properties starting with <code>on</code> followed by an uppercase letter become event
+handlers, so <code>onMouseup</code> attaches a <code>mouseup</code> listener. This works for any event
+name, including custom ones.</p>
 <pre><code>import { elements } from &#39;tosijs&#39;
 const { button } = elements
 document.body.append(
@@ -259,6 +263,7 @@ const aButton = button(&#39;click me&#39;)
 on(aButton, &#39;click&#39;, () =&gt; {
   alert(&#39;clicked!&#39;)
 })
+document.body.append(aButton)
 </code></pre>
 <p>A handler can also be a <strong>proxy</strong> (or a path string) for a function in state:</p>
 <pre><code>const { app } = tosi({ app: { save() { … } } })
@@ -266,10 +271,7 @@ button(&#39;Save&#39;, { onClick: app.save })
 </code></pre>
 <p>The element is given the <em>path</em> <code>app.save</code>, not the function, and the handler is
 looked up when the event fires. Replace <code>app.save</code> later and the button runs the
-new function.
-    document.body.append(
-      aButton
-    )</p>
+new function.</p>
 <p>There are some subtle but important differences between <code>on()</code> and
 <code>addEventListener</code> which are discussed in detail in the section on
 <a href="/bind/">bind</a>.</p>
@@ -282,12 +284,12 @@ on the element.</p>
 </code></pre>
 <p>…produces <code>&lt;span&gt;foobar&lt;/span&gt;</code>.</p>
 <h2 id="fragment">fragment</h2>
-<p><code>elements.fragment</code> is produces <code>DocumentFragment</code>s, but is otherwise
+<p><code>elements.fragment</code> produces <code>DocumentFragment</code>s, but is otherwise
 just like other element factory functions.</p>
 <h2 id="svgelements">svgElements</h2>
 <p><code>svgElements</code> is a proxy just like <code>elements</code> but it produces <strong>SVG</strong> elements in
 the appropriate namespace.</p>
-<pre><code class="language-js">import { svgElements, tosi, xin } from &#39;tosijs&#39;
+<pre><code class="language-js">import { svgElements, tosi } from &#39;tosijs&#39;
 
 const { svg, g, path, circle, polygon } = svgElements
 
@@ -377,13 +379,13 @@ function tick(arr) {
   return kept
 }
 setInterval(() =&gt; {
-  const f = tick(xin.friendlies)
+  const f = tick(friendlies.value)
   if (Math.random() &lt; 0.06) f.push(spawnFriendly())
-  xin.friendlies = f
+  friendlies.value = f
 
-  const h = tick(xin.hostiles)
+  const h = tick(hostiles.value)
   if (Math.random() &lt; 0.04) h.push(spawnHostile())
-  xin.hostiles = h
+  hostiles.value = h
 }, 50)
 </code></pre>
 <h2 id="mathml">mathML</h2>
@@ -508,6 +510,7 @@ root is safe — already-bound elements are skipped.</p>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -519,6 +522,6 @@ root is safe — already-bound elements are skipped.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>

@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7265bc89e0f9" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Built-in Bindings — tosijs</title>
   <meta name="description" content="The built-in collection of common bindings: value (two-way), text, enabled, disabled, list — plus how to write your own." />
   <link rel="canonical" href="https://tosijs.net/bindings/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="built-in-bindings-bindings">Built-in Bindings (bindings)</h1>
 <p><code>bindings</code> is simply a collection of common bindings.</p>
@@ -52,7 +52,7 @@ and components that implement <code>value</code>.</p>
 <code>value</code>: a <strong>checkbox</strong> is bound through <code>checked</code> (a boolean), and a <strong>radio</strong> group
 through whichever radio is checked (its <code>value</code>). So <code>input({ type: &#39;checkbox&#39;, bindValue: app.done })</code> binds a boolean.</p>
 <h2 id="text">text</h2>
-<p>The <code>text</code> binding copies state from <code>xin</code> to the bound element&#39;s <code>textContent</code> property.</p>
+<p>The <code>text</code> binding copies state to the bound element&#39;s <code>textContent</code> property.</p>
 <h2 id="enabled--disabled">enabled &amp; disabled</h2>
 <blockquote>
 <p><strong>Note:</strong> <code>bindEnabled</code> and <code>bindDisabled</code> are NOT deprecated (1.9.0
@@ -65,7 +65,7 @@ button({ disabled: proxy.items.tosi.as(list =&gt; !list.length) })
 </code></pre>
 </blockquote>
 <p>The <code>enabled</code> and <code>disabled</code> bindings allow you to make a widget&#39;s enabled status
-be determined by the truthiness of something in <code>xin</code>, e.g.</p>
+be determined by the truthiness of something in state, e.g.</p>
 <pre><code>import { tosi, elements } from &#39;tosijs&#39;
 
 const { myDoc } = tosi({
@@ -159,10 +159,14 @@ it <code>item[visibleProp] === true</code> and <code>item[hiddenProp] !== true</
 <p>If you list-bind a custom-element with <code>bindValue</code> implemented and providing an
 <code>idPath</code> then the list-binding will bind the array items to the value of the
 custom-element.</p>
-<h3 id="xin-empty-list-class">xin-empty-list class</h3>
-<p>The <code>list</code> binding will automatically add the class <code>-xin-empty-list</code> to a
+<h3 id="the--tosi-empty-list-class">The <code>-tosi-empty-list</code> class</h3>
+<p>The <code>list</code> binding automatically adds the class <code>-tosi-empty-list</code> to a
 container bound to an empty array, making it easier to conditionally render
 instructions or explanations when a list is empty.</p>
+<blockquote>
+<p>The class was called <code>-xin-empty-list</code> before 1.10.9. Both are set for now;
+the old name is deprecated and goes away in 2.0.</p>
+</blockquote>
 
   </article>
   <nav class="doc-nav" aria-label="Documentation">
@@ -236,6 +240,7 @@ instructions or explanations when a list is empty.</p>
     </ul>
     </details></li>
     <li><a class="doc-link" href="../Migration/">Upgrading and Migration</a></li>
+    <li><a class="doc-link" href="../development/">Development</a></li>
     <li><a class="doc-link" href="../history/">tosijs history</a></li>
   </ul>
   </nav>
@@ -247,6 +252,6 @@ instructions or explanations when a list is empty.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7265bc89e0f9"></script>
+  <script src="../iife.js?v=7e6a08feef2d"></script>
 </body>
 </html>
