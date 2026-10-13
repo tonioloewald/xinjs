@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b37246887aae" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=dcbed629364d" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="the-observer-proxy-tosi">The Observer Proxy (tosi)</h1>
 <p><code>tosi()</code> assigns an object passed to it to a global state object,
@@ -561,8 +561,13 @@ preview.append(
 )
 </code></pre>
 <h3 id="in-a-filtered-list">In a filtered list</h3>
-<p>A list binding&#39;s <code>needle</code> can use <code>.tosi.as()</code> as well, so the filter can depend on a
-computed value (here, the search text in lower case). The filter runs again when
+<p>To filter or sort a list, use the list binding&#39;s
+<a href="/list-binding/#filter-and-needle"><code>filter</code> and <code>needle</code></a> options, not <code>.tosi.as()</code>
+on the array: they were built for the job, keep each row bound to its item, and
+are throttled.</p>
+<p><code>.tosi.as()</code> still has two uses here. The <code>needle</code> can be one, so the filter can
+depend on a computed value (below, the search text in lower case), and it is the
+way to show something about the list, such as a count. The filter runs again when
 any of the paths involved changes, and the list still updates row by row.</p>
 <pre><code class="language-js">import { elements, tosi, touch } from &#39;tosijs&#39;
 

@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=b37246887aae" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=dcbed629364d" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="array-bindings-and-virtual-lists">Array Bindings and Virtual Lists</h1>
 <p>The most likely source of complexity and performance issues in applications is
@@ -763,6 +763,15 @@ your data, e.g. for round-tripping to a database.)</p>
 </code></pre>
 <p>If the list binding&#39;s options provide a <code>filter</code> function and a <code>needle</code> (proxy or path) then
 the list will be filtered using the function via throttled updates.</p>
+<p><strong>This is the way to filter or sort a bound list.</strong> The list stays bound to the
+array itself, so each row keeps its path: its bindings show the item, and edits
+in a row are written back to the item. The filter runs again when the array or
+the needle changes, at most ten times a second.</p>
+<p>Do not bind a list to <code>array.tosi.as(needle, fn)</code> instead. <a href="/xin/#proxytosiastransformation"><code>.tosi.as()</code></a>
+transforms one value on its way to one element. It hands the list a new array
+that has no path, so the rows cannot be bound to their items, and it is not
+throttled. Use <code>.tosi.as()</code> for what is shown <em>about</em> the list (a count, a
+disabled button) and for computing the <code>needle</code>.</p>
 <p><code>filter</code> is passed the whole array, and <code>needle</code> can be anything so, <code>filter</code> can
 sort the array or even synthesize it entirely.</p>
 <p>In this example the <code>needle</code> is an object containing both a <code>needle</code> string and <code>sort</code>

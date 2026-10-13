@@ -590,8 +590,14 @@ preview.append(
 
 ### In a filtered list
 
-A list binding's `needle` can use `.tosi.as()` as well, so the filter can depend on a
-computed value (here, the search text in lower case). The filter runs again when
+To filter or sort a list, use the list binding's
+[`filter` and `needle`](/list-binding/#filter-and-needle) options, not `.tosi.as()`
+on the array: they were built for the job, keep each row bound to its item, and
+are throttled.
+
+`.tosi.as()` still has two uses here. The `needle` can be one, so the filter can
+depend on a computed value (below, the search text in lower case), and it is the
+way to show something about the list, such as a count. The filter runs again when
 any of the paths involved changes, and the list still updates row by row.
 
 ```js

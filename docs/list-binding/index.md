@@ -798,6 +798,17 @@ your data, e.g. for round-tripping to a database.)
 If the list binding's options provide a `filter` function and a `needle` (proxy or path) then
 the list will be filtered using the function via throttled updates.
 
+**This is the way to filter or sort a bound list.** The list stays bound to the
+array itself, so each row keeps its path: its bindings show the item, and edits
+in a row are written back to the item. The filter runs again when the array or
+the needle changes, at most ten times a second.
+
+Do not bind a list to `array.tosi.as(needle, fn)` instead. [`.tosi.as()`](/xin/#proxytosiastransformation)
+transforms one value on its way to one element. It hands the list a new array
+that has no path, so the rows cannot be bound to their items, and it is not
+throttled. Use `.tosi.as()` for what is shown *about* the list (a count, a
+disabled button) and for computing the `needle`.
+
 `filter` is passed the whole array, and `needle` can be anything so, `filter` can
 sort the array or even synthesize it entirely.
 

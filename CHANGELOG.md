@@ -21,6 +21,10 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 
 ### Documented
 
+- **When to use `filter`/`needle` and when `.tosi.as()`.** Filtering or sorting a
+  bound list is `filter`/`needle`'s job: rows stay bound to their items and the
+  filter is throttled. A list bound to `array.tosi.as(…)` gets an array with no
+  path. Stated on the Array Bindings page and under `.tosi.as()`.
 - **The docs are organised by purpose.** Three overview pages (Managing State,
   Building the DOM, Binding to the DOM) and an Entry Points page sit at the
   top level, each short and linking to the detail pages beneath it. The
