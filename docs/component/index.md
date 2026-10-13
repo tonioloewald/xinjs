@@ -53,12 +53,19 @@ preview.append(
 ```test
 test('a light-DOM component renders its attribute and its children', async () => {
   const [ada, grace] = preview.querySelectorAll('name-tag')
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  // render() runs on an animation frame, which a background page can delay
+  const until = async (check) => {
+    for (let i = 0; i < 40 && !check(); i++) {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+  }
+  const captionOf = (el) => el.querySelector('[part="caption"]')?.textContent
+  await until(() => captionOf(ada) === 'Hello, my name is')
   expect(ada.shadowRoot).toBe(null)
   expect(ada.querySelector('[part="caption"]').textContent).toBe('Hello, my name is')
   expect(ada.querySelector('tosi-slot').textContent).toBe('Ada')
   grace.caption = 'Hi, I am'
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  await until(() => captionOf(grace) === 'Hi, I am')
   expect(grace.querySelector('[part="caption"]').textContent).toBe('Hi, I am')
   expect(grace.getAttribute('caption')).toBe('Hi, I am')
   grace.caption = 'Bonjour, je m’appelle'

@@ -514,20 +514,20 @@ without risk of name collisions. If your data has properties named `value`,
 `path`, `observe`, etc., those will shadow the proxy's direct API — but `.tosi`
 is always available.
 
-```
-proxy.foo.tosi.value        // get the underlying value
-proxy.foo.tosi.value = 17   // set it (triggers observers)
-proxy.foo.tosi.path         // 'foo'
-proxy.foo.tosi.observe(cb)  // watch for changes
-proxy.foo.tosi.touch()      // force update notification
-proxy.foo.tosi.bind(el, binding)
-proxy.foo.tosi.on(el, eventType)
-proxy.foo.tosi.binding(binding)
-proxy.foo.tosi.listBinding(templateBuilder, options)
-proxy.foo.tosi.listFind(selector, value)
-proxy.foo.tosi.listUpdate(selector, newValue)
-proxy.foo.tosi.listRemove(selector, value)
-```
+| accessor | what it does |
+| --- | --- |
+| `.tosi.value` | The underlying value. Assign to it to change the state, which notifies observers and updates bound elements. |
+| `.tosi.path` | The path as a string, e.g. `'app.user.name'`. |
+| `.tosi.observe(callback)` | Calls `callback(path)` when the value changes. Returns a function that stops observing. |
+| `.tosi.touch()` | Notifies observers and bound elements without changing the value, for a change the proxy could not see. |
+| `.tosi.as(transformation)` | Transforms the value in a binding: `{ textContent: price.tosi.as((n) => n.toFixed(2)) }`. See [below](#proxytosiastransformation). |
+| `.tosi.bind(element, binding, options?)` | Binds the value to an element you already have. |
+| `.tosi.on(element, eventType)` | When the value is a function, makes it the handler for that event on the element. |
+| `.tosi.binding(binding)` | Returns a `{ bind: … }` spec to pass to an element creator, for a custom binding. |
+| `.tosi.listBinding(templateBuilder, options?)` | Binds an array to a container: returns what you spread into the container's creator. See [Array Bindings](/list-binding/). |
+| `.tosi.listFind(selector, value)` | Finds an item of an array by a field's value (or by a DOM element in its row) and returns it proxied. |
+| `.tosi.listUpdate(selector, newValue)` | Updates the matching item in place, or adds it if there is none. |
+| `.tosi.listRemove(selector, value)` | Removes the matching item. Returns whether one was found. |
 
 Use it wherever your data might have a property with one of those names. The
 only reserved name is `tosi` itself — don't use it as a property name in your
@@ -560,7 +560,8 @@ called `value`, `path`, `observe` and so on, that property wins, and `.tosi.*`
 - `.bind(element, binding, options?)` binds the value to a DOM element
 - `.on(element, eventType)` binds an event handler
 - `.binding(binding)` returns an inline binding spec for use with elements
-- `.tosi.listBinding(templateBuilder, options?)` returns a list binding spec
+- `.listBinding(templateBuilder, options?)` returns a list binding spec
+- `.as(transformation)` transforms the value in a binding
 - `.valueOf()` / `.toJSON()` for type coercion (scalars also have `.toString()`)
 
 Boxed scalars also expose all methods from the underlying primitive's prototype

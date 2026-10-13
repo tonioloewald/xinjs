@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="the-observer-proxy-tosi">The Observer Proxy (tosi)</h1>
 <p><code>tosi()</code> assigns an object passed to it to a global state object,
@@ -448,19 +448,62 @@ Always use <code>.value</code>, <code>tosiValue()</code>, or <code>valueOf()</co
 without risk of name collisions. If your data has properties named <code>value</code>,
 <code>path</code>, <code>observe</code>, etc., those will shadow the proxy&#39;s direct API — but <code>.tosi</code>
 is always available.</p>
-<pre><code>proxy.foo.tosi.value        // get the underlying value
-proxy.foo.tosi.value = 17   // set it (triggers observers)
-proxy.foo.tosi.path         // &#39;foo&#39;
-proxy.foo.tosi.observe(cb)  // watch for changes
-proxy.foo.tosi.touch()      // force update notification
-proxy.foo.tosi.bind(el, binding)
-proxy.foo.tosi.on(el, eventType)
-proxy.foo.tosi.binding(binding)
-proxy.foo.tosi.listBinding(templateBuilder, options)
-proxy.foo.tosi.listFind(selector, value)
-proxy.foo.tosi.listUpdate(selector, newValue)
-proxy.foo.tosi.listRemove(selector, value)
-</code></pre>
+<table>
+<thead>
+<tr>
+<th>accessor</th>
+<th>what it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>.tosi.value</code></td>
+<td>The underlying value. Assign to it to change the state, which notifies observers and updates bound elements.</td>
+</tr>
+<tr>
+<td><code>.tosi.path</code></td>
+<td>The path as a string, e.g. <code>&#39;app.user.name&#39;</code>.</td>
+</tr>
+<tr>
+<td><code>.tosi.observe(callback)</code></td>
+<td>Calls <code>callback(path)</code> when the value changes. Returns a function that stops observing.</td>
+</tr>
+<tr>
+<td><code>.tosi.touch()</code></td>
+<td>Notifies observers and bound elements without changing the value, for a change the proxy could not see.</td>
+</tr>
+<tr>
+<td><code>.tosi.as(transformation)</code></td>
+<td>Transforms the value in a binding: <code>{ textContent: price.tosi.as((n) =&gt; n.toFixed(2)) }</code>. See <a href="#proxytosiastransformation">below</a>.</td>
+</tr>
+<tr>
+<td><code>.tosi.bind(element, binding, options?)</code></td>
+<td>Binds the value to an element you already have.</td>
+</tr>
+<tr>
+<td><code>.tosi.on(element, eventType)</code></td>
+<td>When the value is a function, makes it the handler for that event on the element.</td>
+</tr>
+<tr>
+<td><code>.tosi.binding(binding)</code></td>
+<td>Returns a <code>{ bind: … }</code> spec to pass to an element creator, for a custom binding.</td>
+</tr>
+<tr>
+<td><code>.tosi.listBinding(templateBuilder, options?)</code></td>
+<td>Binds an array to a container: returns what you spread into the container&#39;s creator. See <a href="/list-binding/">Array Bindings</a>.</td>
+</tr>
+<tr>
+<td><code>.tosi.listFind(selector, value)</code></td>
+<td>Finds an item of an array by a field&#39;s value (or by a DOM element in its row) and returns it proxied.</td>
+</tr>
+<tr>
+<td><code>.tosi.listUpdate(selector, newValue)</code></td>
+<td>Updates the matching item in place, or adds it if there is none.</td>
+</tr>
+<tr>
+<td><code>.tosi.listRemove(selector, value)</code></td>
+<td>Removes the matching item. Returns whether one was found.</td>
+</tr>
+</tbody></table>
 <p>Use it wherever your data might have a property with one of those names. The
 only reserved name is <code>tosi</code> itself — don&#39;t use it as a property name in your
 data.</p>
@@ -487,7 +530,8 @@ called <code>value</code>, <code>path</code>, <code>observe</code> and so on, th
 <li><code>.bind(element, binding, options?)</code> binds the value to a DOM element</li>
 <li><code>.on(element, eventType)</code> binds an event handler</li>
 <li><code>.binding(binding)</code> returns an inline binding spec for use with elements</li>
-<li><code>.tosi.listBinding(templateBuilder, options?)</code> returns a list binding spec</li>
+<li><code>.listBinding(templateBuilder, options?)</code> returns a list binding spec</li>
+<li><code>.as(transformation)</code> transforms the value in a binding</li>
 <li><code>.valueOf()</code> / <code>.toJSON()</code> for type coercion (scalars also have <code>.toString()</code>)</li>
 </ul>
 <p>Boxed scalars also expose all methods from the underlying primitive&#39;s prototype

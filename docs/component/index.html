@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=995f76a21e7c" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=8b0626b59965" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="web-components-component">Web Components (Component)</h1>
 <p><strong>tosijs</strong> provides the abstract <code>Component</code> class to make defining
@@ -83,12 +83,19 @@ preview.append(
 </code></pre>
 <pre><code class="language-test">test(&#39;a light-DOM component renders its attribute and its children&#39;, async () =&gt; {
   const [ada, grace] = preview.querySelectorAll(&#39;name-tag&#39;)
-  await new Promise((resolve) =&gt; setTimeout(resolve, 100))
+  // render() runs on an animation frame, which a background page can delay
+  const until = async (check) =&gt; {
+    for (let i = 0; i &lt; 40 &amp;&amp; !check(); i++) {
+      await new Promise((resolve) =&gt; setTimeout(resolve, 50))
+    }
+  }
+  const captionOf = (el) =&gt; el.querySelector(&#39;[part=&quot;caption&quot;]&#39;)?.textContent
+  await until(() =&gt; captionOf(ada) === &#39;Hello, my name is&#39;)
   expect(ada.shadowRoot).toBe(null)
   expect(ada.querySelector(&#39;[part=&quot;caption&quot;]&#39;).textContent).toBe(&#39;Hello, my name is&#39;)
   expect(ada.querySelector(&#39;tosi-slot&#39;).textContent).toBe(&#39;Ada&#39;)
   grace.caption = &#39;Hi, I am&#39;
-  await new Promise((resolve) =&gt; setTimeout(resolve, 100))
+  await until(() =&gt; captionOf(grace) === &#39;Hi, I am&#39;)
   expect(grace.querySelector(&#39;[part=&quot;caption&quot;]&#39;).textContent).toBe(&#39;Hi, I am&#39;)
   expect(grace.getAttribute(&#39;caption&#39;)).toBe(&#39;Hi, I am&#39;)
   grace.caption = &#39;Bonjour, je m’appelle&#39;
