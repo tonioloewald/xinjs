@@ -35,7 +35,7 @@ const preview = previewHost
 export default defineSiteConfig({
   name: PROJECT,
   description:
-    'Path-based state management for web apps — proxy-based observers, no JSX, no virtual DOM, zero dependencies. Sizes per entry point are in the README.',
+    'Create and update the DOM, and manage state, simply and expressively, using a path-observer model. No JSX, no virtual DOM, zero dependencies. Sizes per entry point are in the README.',
   baseUrl: 'https://tosijs.net',
 
   projectLinks: {

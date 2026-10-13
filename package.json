@@ -1,7 +1,7 @@
 {
   "name": "tosijs",
-  "version": "1.10.7",
-  "description": "path-based state management for web apps",
+  "version": "1.10.8",
+  "description": "create and update the DOM, and manage state, simply and expressively, using a path-observer model",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
   "exports": {
@@ -89,7 +89,7 @@
     "tosijs": "file:.",
     "tosijs-floorplan": "0.5.2",
     "tosijs-schema": "^1.6.0",
-    "tosijs-ui": "1.16.13",
+    "tosijs-ui": "1.16.15",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.65.0"
   },

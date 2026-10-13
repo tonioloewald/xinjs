@@ -1,6 +1,6 @@
 # tosijs
 
-<!--{ "pin": "top", "order": 1, "description": "tosijs is a path-based state-management library for web apps. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." }-->
+<!--{ "pin": "top", "order": 1, "description": "tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." }-->
 
 [tosijs.net](https://tosijs.net) | [tosijs-ui](https://ui.tosijs.net) | [github](https://github.com/tonioloewald/tosijs) | [npm](https://www.npmjs.com/package/tosijs) | [cdn](https://www.jsdelivr.com/package/npm/tosijs) | [react-tosijs](https://react.tosijs.net) | [discord](https://discord.gg/ramJ9rgky5)
 
@@ -256,7 +256,7 @@ from _markup_, so no import statement protects them — shaking the
 registration would fail silently. Slim core is present, so it can speak: in
 dev it warns if the page contains blueprint elements it cannot hydrate.
 
-<!-- as-of: 2026-08-08 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
+<!-- as-of: 2026-10-13 | the +13.7% consumer-app comparison against 1.7.9, which needs the two-app harness to re-measure -->
 **The agent surface shakes away, but not back to 1.7.x:** when 1.8.0 shipped, an identical
 consumer app that never touched the agent surface measured **+2.9 kB gzipped
 (+13.7%) against 1.7.9**, because the contract seam, the path-segment guard

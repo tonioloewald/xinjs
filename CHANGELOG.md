@@ -8,6 +8,17 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 
 ## [Unreleased]
 
+## [1.10.8] - 2026-10-13
+
+A documentation release. No library behaviour changes; the five main bundles
+are the same size as 1.10.7 to the byte count.
+
+### Changed
+
+- **The package description** is now "create and update the DOM, and manage
+  state, simply and expressively, using a path-observer model". The old one,
+  "path-based state management", named only half of what the library is for.
+
 ### Documented
 
 - **How virtual lists treat rows, and what that means for record keys.** Rows
@@ -45,12 +56,14 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 
 ### Fixed (docs site only; nothing published changes)
 
-- The site is built with tosijs-ui 1.16.13 (was 1.12.0): examples can open
+- The site is built with tosijs-ui 1.16.15 (was 1.12.0): examples can open
   with their code or a console beside the preview, headings have ids, and
   every page is also served as markdown at `/<page>/index.md`.
 - The docs bundle's cache stamp now comes from the bundle the pages load. It
   was taken from tosijs-ui's own bundle, so it changed only when tosijs-ui
   did and a returning visitor could run the previous release's library.
+  The build now also refuses a docs bundle that defines no doc system or
+  carries two copies of CodeMirror (tosijs-ui's `restampSite`, strict).
 
 ## [1.10.7] - 2026-10-03
 

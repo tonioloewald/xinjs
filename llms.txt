@@ -1,6 +1,6 @@
-# tosijs v1.10.7
+# tosijs v1.10.8
 
-Path-based state management for web apps — proxy-based observers, no JSX, no virtual DOM, zero dependencies. Sizes per entry point are in the README.
+Create and update the DOM, and manage state, simply and expressively, using a path-observer model. No JSX, no virtual DOM, zero dependencies. Sizes per entry point are in the README.
 
 - Docs: https://tosijs.net
 - Source: https://github.com/tonioloewald/tosijs
@@ -11,8 +11,8 @@ Path-based state management for web apps — proxy-based observers, no JSX, no v
 Full documentation, with live code examples, is at the links below.
 
 Pages below are also available as plain markdown: append `index.md` to the URL
-(for example `/carousel/index.md`). Prefer that if you only need the text. A page
-marked noindex has no markdown copy.
+(for example `/start-here/index.md`).
+Prefer that if you only need the text. A page marked noindex has no markdown copy.
 
 Live examples run inline on the shared page by default (not sandboxed):
 each has its own `preview` element, but they share one tosijs module, so
@@ -95,7 +95,7 @@ use it to inspect STATE; a painted-output check needs a real test lane.
 - https://tosijs.net/xin-proxy/ — tosi, xin, and xinProxy
   Background on the tosijs observer proxies: how tosi() and xinProxy() relate to xin and boxed, plus tosiUnique() for per-instance state.
 - https://tosijs.net/ — tosijs
-  tosijs is a path-based state-management library for web apps. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic.
+  tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic.
 - https://tosijs.net/history/ — tosijs history
   The lineage behind tosijs — b8rjs → xinjs → tosijs: what changed, why, and how to migrate.
 - https://tosijs.net/index-agent/ — tosijs/agent
