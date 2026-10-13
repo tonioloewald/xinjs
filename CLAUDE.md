@@ -140,7 +140,17 @@ security failure for a whole session — every verb refused, `exposure: 'closed'
 — because Chrome was running a cached pre-`e6f8eae` fence with a bare
 `enableAgentInterface()` against the current library. The refusal was correct
 and precisely worded; it just described a file that no longer existed. Safari
-ran the same URL correctly. **When a page's behaviour contradicts its source,
+ran the same URL correctly. **That episode was probably not the cache at all** (found 2026-10-13): the
+owner's Chrome profile holds `localStorage['tosi-example-edit:<page>#<n>']`, a
+saved edit of a live example, and a saved edit **replaces the page's source in
+that profile indefinitely** with nothing on screen to say so. The same fence,
+the same bare `enableAgentInterface()`, the same error, while the server sent
+`no-store` and fresh browsers passed. `bun start` opens the default browser and
+prints THAT browser's doc-test results, so the dev server can report failures
+no clean browser has. Check `Object.keys(localStorage)` for `tosi-example-edit:`
+before believing a dev-server test failure (tosijs-ui task on the board).
+
+**When a page's behaviour contradicts its source,
 check a second browser before you debug the library** — that is a ten-second
 test that ends the whole class.
 

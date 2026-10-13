@@ -1,33 +1,5 @@
-/*{"parent": "component", "title": "Make Component", "description": "makeComponent() hydrates a blueprint function into a usable tosijs web-component class plus its elementCreator."}*/
-/*#
-# Make Component (makeComponent)
-
-`makeComponent(tag: string, bluePrint: TosiBlueprint<T>): Promise<TosiComponentSpec<T>>`
-hydrates [blueprints](/blueprint-loader/) into usable [web-components](/component/).
-
-Here are the relevant interfaces:
-
-```
-export interface PartsMap<T = Element> {
-  [key: string]: T
-}
-
-export type TosiBlueprint<T = PartsMap> = (
-  tag: string,
-  module: TosiFactory
-) => TosiComponentSpec<T> | Promise<TosiComponentSpec<T>>
-
-export interface TosiComponentSpec<T = PartsMap> {
-  type: Component<T>
-  lightStyleSpec?: TosiStyleSheet
-  styleSpec?: TosiStyleSheet // deprecated, use lightStyleSpec
-}
-```
-
-Note that a crucial benefit of blueprints is that the **consumer** of the blueprint gets
-to choose the `tagName` of the custom-element.
-*/
-
+// makeComponent is documented on the blueprints page (blueprint-loader.ts):
+// it is what hydrates a blueprint, and is not meant to be called directly.
 import { Color } from './color'
 import { ownContract } from './contract-check'
 import { Component, withAttributes } from './component'

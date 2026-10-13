@@ -53,7 +53,8 @@ write an observer that updates the DOM, read
 
 ## Keeping state around, and sharing it
 
-- [hotReload](/hot-reload/) keeps state across page reloads.
+- [Hot Reload](/hot-reload/) lets chosen parts of state survive a page refresh. It is a
+  debugging aid, not intended for production.
 - [share](/share/) keeps it in sync across tabs and windows.
 - [sync](/sync/) keeps it in sync over a network.
 

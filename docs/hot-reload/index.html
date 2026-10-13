@@ -16,29 +16,87 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
   <title>Hot Reload — tosijs</title>
-  <meta name="description" content="hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads." />
+  <meta name="description" content="hotReload() picks parts of app state that survive a page refresh. A debugging aid; not tested or intended for production." />
   <link rel="canonical" href="https://tosijs.net/hot-reload/" />
   <link rel="alternate" type="text/markdown" href="index.md" title="Hot Reload — tosijs (markdown)" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="tosijs" />
   <meta property="og:title" content="Hot Reload — tosijs" />
-  <meta property="og:description" content="hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads." />
+  <meta property="og:description" content="hotReload() picks parts of app state that survive a page refresh. A debugging aid; not tested or intended for production." />
   <meta property="og:url" content="https://tosijs.net/hot-reload/" />
   <meta name="twitter:card" content="summary" />
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hot Reload","description":"hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads.","url":"https://tosijs.net/hot-reload/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Hot Reload","description":"hotReload() picks parts of app state that survive a page refresh. A debugging aid; not tested or intended for production.","url":"https://tosijs.net/hot-reload/","inLanguage":"en","isPartOf":{"@type":"WebSite","name":"tosijs","url":"https://tosijs.net"}}</script>
   <link rel="icon" href="../favicon.svg" />
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=b37246887aae" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="hot-reload-hotreload">Hot Reload (hotReload)</h1>
-<p><code>hotReload()</code> persists any root-level paths in state that its test function evaluates as true
-to <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"><code>localStorage</code></a>. It restores them (by overlay) on the
-next load, so call it after registering your initial state. Functions are not
-persisted. To reset, run <code>localStorage.clear()</code> in the console.</p>
+<p><code>hotReload()</code> lets you pick parts of your app&#39;s state that survive a page
+refresh.</p>
+<blockquote>
+<p><code>hotReload</code> was written as a debugging aid: reload the page while you work and
+keep your place. It may be useful more generally, but it has not been tested
+for production use and is not intended for it.</p>
+</blockquote>
 <pre><code>hotReload(test: PathTestFunction = () =&gt; true): void
 </code></pre>
+<p>Call it after registering your initial state. <code>test</code> is called with the name of
+each top-level piece of state and returns <code>true</code> for the ones to keep; with no
+argument, everything is kept.</p>
+<pre><code>import { tosi, hotReload } from &#39;tosijs&#39;
+
+const { app, prefs } = tosi({
+  app: { draft: &#39;&#39; },
+  prefs: { theme: &#39;system&#39; },
+})
+
+// keep prefs across reloads, start app fresh each time
+hotReload((name) =&gt; name === &#39;prefs&#39;)
+</code></pre>
+<p>The chosen state is saved to
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"><code>localStorage</code></a>
+when it changes, and on the next load the saved values replace the initial ones.
+To reset, run <code>localStorage.removeItem(&#39;xin-state&#39;)</code> in the console.</p>
+<h2 id="why-not-to-use-it-for-anything-serious">Why not to use it for anything serious</h2>
+<ul>
+<li><strong>It only keeps what survives <code>JSON.stringify</code>.</strong> <code>localStorage</code> stores
+strings, so plain data comes back and anything richer does not: an instance
+of a class returns as a bare object, and a <code>Date</code>, <code>Map</code> or <code>Set</code> does not
+return as itself.</li>
+<li><strong>You choose what is kept because not everything can be.</strong> A restore replaces
+each saved piece of state whole, with what came back from storage, so methods
+on it are gone (functions cannot be stored) and so is any field you have
+added to your code since the save. Use the test function to keep the pieces
+that are plain data (preferences, a draft, the current selection) and leave
+out the ones that carry behaviour. Reset after changing the shape of
+something you keep.</li>
+<li><strong>There is one save per origin</strong>, under the key <code>xin-state</code>. Two apps served
+from the same origin that both call <code>hotReload</code> will overwrite each other.</li>
+<li><strong><code>localStorage</code> is local, not secure, and has arbitrary limits.</strong> The data
+stays on that one browser, anything running on the page can read it, and
+browsers cap how much you can store.</li>
+</ul>
+<p>Saving is debounced, so it is at least not pathologically bad: a burst of
+changes produces one write.</p>
+<p>A production-ready version of this would:</p>
+<ul>
+<li>explicitly serialize and deserialize complex state where appropriate,</li>
+<li>use <a href="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API">IndexedDB</a>
+to avoid the arbitrary limits and to take the work off the main thread, and</li>
+<li>probably encrypt the data where appropriate, using a secret stored in the
+cloud.</li>
+</ul>
+<p>That is not a gap <code>hotReload</code> is waiting to fill. We have built exactly that for
+a production app, and every one of those choices (what to serialize and how,
+what to encrypt, where the secret lives) belonged to that app. It cannot be made
+one-size-fits-all, so <code>tosijs</code> does not try: build it for your app, on top of
+<a href="/path-listener/"><code>observe</code></a>.</p>
+<p>We could ship it with a pluggable storage backend and a pluggable
+transformation function, but that would leave you writing the two parts that
+matter and are easy to get wrong. Storing data securely is not something to do
+through a plug-in you did not need to understand.</p>
 
   </article>
   <nav class="doc-nav" aria-label="Documentation">
@@ -68,7 +126,6 @@ persisted. To reset, run <code>localStorage.clear()</code> in the console.</p>
       <ul>
         <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
         <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
-        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
       </ul>
       </details></li>
     </ul>

@@ -71,9 +71,7 @@ use it to inspect STATE; a painted-output check needs a real test lane.
 - https://tosijs.net/headless-embodiment/ — Headless Embodiment
   The inversion: server-side rendering of an MCP — a tosijs app running as its abstract self, vending UI on demand (elementsSSR, live).
 - https://tosijs.net/hot-reload/ — Hot Reload
-  hotReload() persists matching tosijs state paths to localStorage so application state survives page reloads.
-- https://tosijs.net/make-component/ — Make Component
-  makeComponent() hydrates a blueprint function into a usable tosijs web-component class plus its elementCreator.
+  hotReload() picks parts of app state that survive a page refresh. A debugging aid; not tested or intended for production.
 - https://tosijs.net/managing-state/ — Managing State
   How tosijs handles application state: plain objects registered with tosi(), addressed by path through the observer proxy, with observers for everything that is not a DOM element. An overview with links to the detail.
 - https://tosijs.net/metadata/ — Metadata

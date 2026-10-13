@@ -53,6 +53,11 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
   binding section says which forms are one-way and which two-way, and two
   snippets with mismatched braces are fixed. Building Apps says the same about
   `value: proxy` versus `bindValue`.
+- **Hot Reload** says what it is (a way to pick parts of state that survive a
+  refresh, written as a debugging aid), why not to use it for anything
+  serious, and why a production version is something you build for your own
+  app. `makeComponent` no longer has a page of its own; it is described on the
+  blueprints page, which is where it is used.
 - **Development** notes moved from the README to their own page.
 - "O(1)" is now "O(~1)": large datasets have overheads.
 - "Reactive" no longer describes anything in tosijs.

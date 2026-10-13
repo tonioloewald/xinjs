@@ -98,9 +98,32 @@ settings.blueprintSrcCheck = (src, el) =>
 
 ## `makeComponent(tag: string, blueprint: TosiBlueprint): Promise<TosiPackagedComponent>`
 
-`makeComponent` takes a `tag` of your choice and a `blueprint` and generates
+`makeComponent` is what hydrates a blueprint: `<tosi-blueprint>` and
+`<tosi-loader>` call it for you, and you will rarely need to call it yourself.
+It takes a `tag` of your choice and a `blueprint` and generates
 the custom-element's `class` and `elementCreator` as its `type` and `creator`
-properties.
+properties. A crucial benefit of blueprints is that the **consumer** of the
+blueprint gets to choose the `tagName` of the custom-element.
+
+The relevant interfaces:
+
+```
+export interface PartsMap<T = Element> {
+  [key: string]: T
+}
+
+export type TosiBlueprint<T = PartsMap> = (
+  tag: string,
+  module: TosiFactory
+) => TosiComponentSpec<T> | Promise<TosiComponentSpec<T>>
+
+export interface TosiComponentSpec<T = PartsMap> {
+  type: Component<T>
+  lightStyleSpec?: TosiStyleSheet
+  styleSpec?: TosiStyleSheet // deprecated, use lightStyleSpec
+}
+```
+
 
 So, instead of:
 

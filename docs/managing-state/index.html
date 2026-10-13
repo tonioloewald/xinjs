@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=b37246887aae" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="managing-state">Managing State</h1>
 <!--{ "order": 3, "description": "How tosijs handles application state: plain objects registered with tosi(), addressed by path through the observer proxy, with observers for everything that is not a DOM element. An overview with links to the detail." }-->
@@ -78,7 +78,8 @@ write an observer that updates the DOM, read
 <a href="/bind-vs-observe/">Why <code>bind</code>, and when to use <code>observe</code></a> first.</p>
 <h2 id="keeping-state-around-and-sharing-it">Keeping state around, and sharing it</h2>
 <ul>
-<li><a href="/hot-reload/">hotReload</a> keeps state across page reloads.</li>
+<li><a href="/hot-reload/">Hot Reload</a> lets chosen parts of state survive a page refresh. It is a
+debugging aid, not intended for production.</li>
 <li><a href="/share/">share</a> keeps it in sync across tabs and windows.</li>
 <li><a href="/sync/">sync</a> keeps it in sync over a network.</li>
 </ul>
@@ -124,7 +125,6 @@ is the same thing as its own entry point, for Node, workers and tests.</p>
       <ul>
         <li><a class="doc-link" href="../blueprint-loader/">Blueprints</a></li>
         <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
-        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
       </ul>
       </details></li>
     </ul>

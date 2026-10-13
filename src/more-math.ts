@@ -34,6 +34,11 @@ lerp(5, -5, 0.75)       // produces -2.5
 
 `RADIANS_TO_DEGREES` and `DEGREES_TO_RADIANS` are values to multiply
 an angle by to convert between degrees and radians.
+
+```
+180 * DEGREES_TO_RADIANS           // roughly Math.PI
+(Math.PI / 2) * RADIANS_TO_DEGREES // roughly 90
+```
 */
 
 export const RADIANS_TO_DEGREES = 180 / Math.PI

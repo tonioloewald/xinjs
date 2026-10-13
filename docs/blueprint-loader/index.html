@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=93f0edb0ba37" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=b37246887aae" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="blueprints">Blueprints</h1>
 <p>One issue with standard web-components built with tosijs is that building them
@@ -119,9 +119,28 @@ forward-compatible either way.</p>
 <li><code>allLoaded()</code> is called when all the blueprints have loaded.</li>
 </ul>
 <h2 id="makecomponenttag-string-blueprint-tosiblueprint-promisetosipackagedcomponent"><code>makeComponent(tag: string, blueprint: TosiBlueprint): Promise&lt;TosiPackagedComponent&gt;</code></h2>
-<p><code>makeComponent</code> takes a <code>tag</code> of your choice and a <code>blueprint</code> and generates
+<p><code>makeComponent</code> is what hydrates a blueprint: <code>&lt;tosi-blueprint&gt;</code> and
+<code>&lt;tosi-loader&gt;</code> call it for you, and you will rarely need to call it yourself.
+It takes a <code>tag</code> of your choice and a <code>blueprint</code> and generates
 the custom-element&#39;s <code>class</code> and <code>elementCreator</code> as its <code>type</code> and <code>creator</code>
-properties.</p>
+properties. A crucial benefit of blueprints is that the <strong>consumer</strong> of the
+blueprint gets to choose the <code>tagName</code> of the custom-element.</p>
+<p>The relevant interfaces:</p>
+<pre><code>export interface PartsMap&lt;T = Element&gt; {
+  [key: string]: T
+}
+
+export type TosiBlueprint&lt;T = PartsMap&gt; = (
+  tag: string,
+  module: TosiFactory
+) =&gt; TosiComponentSpec&lt;T&gt; | Promise&lt;TosiComponentSpec&lt;T&gt;&gt;
+
+export interface TosiComponentSpec&lt;T = PartsMap&gt; {
+  type: Component&lt;T&gt;
+  lightStyleSpec?: TosiStyleSheet
+  styleSpec?: TosiStyleSheet // deprecated, use lightStyleSpec
+}
+</code></pre>
 <p>So, instead of:</p>
 <pre><code>import {myThing} from &#39;./path/to/my-thing&#39;
 
@@ -299,7 +318,6 @@ E.g. you could maintain a list of all the instances of any version of the bluepr
       <ul>
         <li><a class="doc-link current" href="../blueprint-loader/" aria-current="page">Blueprints</a></li>
         <li><a class="doc-link" href="../form-validation/">Form Validation</a></li>
-        <li><a class="doc-link" href="../make-component/">Make Component</a></li>
       </ul>
       </details></li>
     </ul>
