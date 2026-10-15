@@ -19,6 +19,23 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 - One runtime warning in `Component` said "reactive accessor restored"; it now
   says "attribute accessor restored". Nothing in tosijs is reactive.
 
+### Fixed
+
+- **Variable-height virtual lists (`virtual: { minHeight }`) scroll smoothly**
+  (#3302, reported from virta on iOS). Content moved two to two-and-a-half times
+  as far as the scroll, jumped by up to a card's height whenever a row was
+  added or removed (worst near the bottom), and in Chromium could stop short of
+  the last item. Now the rows move exactly with the scroll, a row that stays
+  built keeps its place when others come and go, the scroll area is estimated
+  from the average measured row height instead of `minHeight`, and after a
+  jump the estimate's error is absorbed gradually so the first item still
+  lands flush at the top. Measured in WebKit, Chromium and Firefox: motion
+  1.00 and no step over 8px, against 2.0–2.6 and 75–128px before. The list
+  sets `overflow-anchor: none` on its container, and ignores rubber-band
+  overscroll. A row that changes height now pushes only the rows below it
+  (#3230). `scrollListItemIntoView` uses the measured position of a built row
+  and the same estimate otherwise.
+
 ### Documented
 
 - **When to use `filter`/`needle` and when `.tosi.as()`.** Filtering or sorting a

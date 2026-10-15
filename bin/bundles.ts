@@ -76,7 +76,11 @@ export const BUNDLES: BundleSpec[] = [
     // 30_000 -> 31_000 in 1.10.1. Not because it failed — because the new
     // minimum-headroom gate found it at 735 B, under the 1 kB this file
     // specifies, which is the state that breaks on the NEXT unrelated commit.
-    budget: 31_000,
+    // 31_000 -> 32_500, 2026-10-15: variable-height virtual lists rewritten to
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // every bundle that carries list binding. Owner approved the raise
+    // (2026-10-15: "a price worth paying"), after a trimming pass.
+    budget: 32_500,
     probe: 'load',
     stage: 'main',
   },
@@ -142,7 +146,11 @@ export const BUNDLES: BundleSpec[] = [
     // measures and gates exactly that); CJS cannot shake, so main.js carries
     // it. The headroom gate caught both under the 1 kB floor; owner approved
     // the raise (2026-10-01) on condition the no-agent figure is measured.
-    budget: 48_000,
+    // 48_000 -> 49_500, 2026-10-15: variable-height virtual lists rewritten to
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // every bundle that carries list binding. Owner approved the raise
+    // (2026-10-15: "a price worth paying"), after a trimming pass.
+    budget: 49_500,
     probe: 'import',
     stage: 'main',
   },
@@ -180,7 +188,11 @@ export const BUNDLES: BundleSpec[] = [
     // measures and gates exactly that); CJS cannot shake, so main.js carries
     // it. The headroom gate caught both under the 1 kB floor; owner approved
     // the raise (2026-10-01) on condition the no-agent figure is measured.
-    budget: 48_000,
+    // 48_000 -> 49_500, 2026-10-15: variable-height virtual lists rewritten to
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // every bundle that carries list binding. Owner approved the raise
+    // (2026-10-15: "a price worth paying"), after a trimming pass.
+    budget: 49_500,
     probe: 'require',
     stage: 'main',
   },
@@ -192,7 +204,11 @@ export const BUNDLES: BundleSpec[] = [
     entry: './src/index-core.ts',
     // 27_500 -> 28_500, same reason: 834 B of headroom, found by the gate
     // rather than by a failing build.
-    budget: 28_500,
+    // 28_500 -> 30_000, 2026-10-15: variable-height virtual lists rewritten to
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // every bundle that carries list binding. Owner approved the raise
+    // (2026-10-15: "a price worth paying"), after a trimming pass.
+    budget: 30_000,
     probe: 'import',
     stage: 'alt',
   },
@@ -201,7 +217,11 @@ export const BUNDLES: BundleSpec[] = [
     format: 'esm',
     entry: './src/index-state.ts',
     // 17_500 -> 18_500 — the third one the headroom gate surfaced (753 B).
-    budget: 18_500,
+    // 18_500 -> 20_000, 2026-10-15: variable-height virtual lists rewritten to
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // every bundle that carries list binding. Owner approved the raise
+    // (2026-10-15: "a price worth paying"), after a trimming pass.
+    budget: 20_000,
     probe: 'import',
     stage: 'alt',
   },
@@ -263,7 +283,10 @@ export const BUNDLES: BundleSpec[] = [
     // 63_500 -> 65_000, 2026-10-01: agent.settled() and record keys (~1 kB gz
     // in these whole-library builds) left module.debug.js with 764 B; restored
     // to the ~2 kB slack for these EXPERIMENTAL, inert bundles.
-    budget: 65_000,
+    // 65_000 -> 67_000, 2026-10-15: the variable-height list rewrite (#3302,
+    // ~1.3 kB gz here with __tjs metadata) left module.debug.js with 75 B;
+    // ~2 kB slack restored, as for the shipped bundles' raise.
+    budget: 67_000,
     probe: 'import',
     stage: 'tjs',
     // map excluded from `files` (1.64 MB for inert bundles) — so don't emit
@@ -279,7 +302,8 @@ export const BUNDLES: BundleSpec[] = [
     // regressions on two EXPERIMENTAL, inert bundles, so the slack is
     // deliberately generous.
     // 63_500 -> 65_000, 2026-10-01, same reason as module.debug.js above.
-    budget: 65_000,
+    // 65_000 -> 67_000, 2026-10-15, same reason as module.debug.js above.
+    budget: 67_000,
     probe: 'import',
     stage: 'tjs',
     // map excluded from `files` (1.64 MB for inert bundles) — so don't emit
@@ -299,7 +323,11 @@ export const NO_AGENT_CONSUMER = {
   // 31_000 when introduced (2026-10-01, with agent.settled() and record keys):
   // set from the first measurement plus the ~1.5 kB slack the shipped bundles
   // carry. See the budget ledger for the current figure.
-  budget: 31_000,
+  // 31_000 -> 32_500, 2026-10-15: variable-height virtual lists rewritten to
+  // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+  // every bundle that carries list binding. Owner approved the raise
+  // (2026-10-15: "a price worth paying"), after a trimming pass.
+  budget: 32_500,
 }
 
 /**

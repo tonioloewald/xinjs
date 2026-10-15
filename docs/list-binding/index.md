@@ -652,14 +652,24 @@ preview.append(grid)
 
 ## Variable-Height Items
 
-If your list items have varying heights, you can use `minHeight` instead of
-relying solely on `height`. When `minHeight` is specified, the list uses
-scroll-fraction interpolation: the total scroll area is estimated from
-`minHeight`, and the visible slice is determined by interpolating between
-the top and bottom of the list based on scroll position.
+If your list items have varying heights, add `minHeight` (the smallest an
+item will be) to `height` (a typical item). Items then render at their
+**natural height**.
 
-Items render at their **natural height** — no fixed-height constraint.
-The scrollbar position is approximate but smooth.
+- **Content moves exactly with the scroll**, and rows that come and go off
+  screen never move the rows you are looking at.
+- **The scroll area is an estimate** of the rows not built, using the average
+  height of the rows measured so far (`height` until there are some). So the
+  scrollbar thumb can change size a little as you scroll; the content does not
+  jump.
+- After a jump (dragging the thumb), rows are placed by that estimate, and
+  scrolling back up absorbs the difference gradually, so the first item still
+  arrives flush with the top.
+- `minHeight` decides how many rows to build, so a smaller value builds more.
+- An item that changes height (say, a row that expands) pushes the rows below
+  it down; the rows above stay put.
+- The list sets `overflow-anchor: none` on its container, because the
+  browser's own scroll anchoring would fight it.
 
     ...myArray.tosi.listBinding(({ div }, item) => div(item.name), {
       idPath: 'id',

@@ -16,6 +16,11 @@ export declare class ListBinding {
     private readonly _update?;
     private _previousSlice?;
     private _warnedNonVirtual;
+    private _layout?;
+    private _measuredSum;
+    private _measuredRows;
+    private _measuredWidth;
+    private _relayoutDepth;
     static filterBoundObservers: WeakMap<Element, Listener>;
     constructor(boundElement: Element, value: any[], options?: ListBindingOptions);
     filteredArray(): any[];
@@ -23,7 +28,19 @@ export declare class ListBinding {
     private needle?;
     filter: (...args: any[]) => void;
     update(array?: any[], isSlice?: boolean): void;
-    private _updateInterpolatedBuffers;
+    private _rowEstimate;
+    private _builtRows;
+    private _findAnchor;
+    private _layoutVariable;
+    /**
+     * Where a row starts, in the list's scroll coordinates, and its height:
+     * measured if it is built, estimated from the current layout if not.
+     * Variable-height mode only (scrollListItemIntoView).
+     */
+    _rowPosition(row: number): {
+        top: number;
+        height: number;
+    };
 }
 interface ListBoundElement extends Element {
     [LIST_BINDING_REF]?: ListBinding;

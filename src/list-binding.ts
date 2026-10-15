@@ -654,14 +654,24 @@ preview.append(grid)
 
 ## Variable-Height Items
 
-If your list items have varying heights, you can use `minHeight` instead of
-relying solely on `height`. When `minHeight` is specified, the list uses
-scroll-fraction interpolation: the total scroll area is estimated from
-`minHeight`, and the visible slice is determined by interpolating between
-the top and bottom of the list based on scroll position.
+If your list items have varying heights, add `minHeight` (the smallest an
+item will be) to `height` (a typical item). Items then render at their
+**natural height**.
 
-Items render at their **natural height** — no fixed-height constraint.
-The scrollbar position is approximate but smooth.
+- **Content moves exactly with the scroll**, and rows that come and go off
+  screen never move the rows you are looking at.
+- **The scroll area is an estimate** of the rows not built, using the average
+  height of the rows measured so far (`height` until there are some). So the
+  scrollbar thumb can change size a little as you scroll; the content does not
+  jump.
+- After a jump (dragging the thumb), rows are placed by that estimate, and
+  scrolling back up absorbs the difference gradually, so the first item still
+  arrives flush with the top.
+- `minHeight` decides how many rows to build, so a smaller value builds more.
+- An item that changes height (say, a row that expands) pushes the rows below
+  it down; the rows above stay put.
+- The list sets `overflow-anchor: none` on its container, because the
+  browser's own scroll anchoring would fight it.
 
     ...myArray.tosi.listBinding(({ div }, item) => div(item.name), {
       idPath: 'id',
@@ -1106,15 +1116,50 @@ interface VirtualListSlice {
   lastItem: number
   topBuffer: number
   bottomBuffer: number
-  // Variable-height mode: deferred buffer calculation after DOM measurement
+  // Variable-height mode: the spacers are set after the rows are measured
   interpolation?: {
-    t: number
-    position: number
     scrollTop: number
     viewportHeight: number
-    totalScrollHeight: number
-    rowHeight: number
+    totalRows: number
+    columns: number
+    // initial: no layout yet; scroll: overlaps the built rows; jump: does
+    // not (estimated from the last layout); bottom: a jump to the end
+    mode: 'initial' | 'scroll' | 'jump' | 'bottom'
   }
+}
+
+/*
+ * VARIABLE-HEIGHT LAYOUT (#3302, #3230).
+ *
+ * The built rows sit between two spacers. Between rebuilds the spacers do not
+ * change, so the rows move exactly with the scroll. When rows are added or
+ * removed, a row that stays built keeps its screen position (the top spacer
+ * absorbs the heights of the rows that came and went). Rows not built are
+ * estimated at the average measured row height.
+ *
+ * The top spacer is exact (the measured heights of the rows above) until a
+ * jump — a scroll that leaves the built rows behind, like dragging the thumb —
+ * places rows by estimate. After that, scrolling up spreads the error over the
+ * distance left to the top, so the first row arrives flush at scrollTop 0
+ * without a jump and without writing scrollTop (which kills momentum on iOS).
+ * The bottom needs no correction: its spacer is re-estimated on every
+ * rebuild, and is 0 once the last row is built. This keeps b8r's idea, pinned
+ * to the top at the top and to the bottom at the bottom, but corrects the
+ * previous layout instead of recomputing an absolute position each time.
+ */
+interface VariableLayout {
+  top: number // where row `first` starts, in the list's scroll coordinates
+  T: number // top spacer height
+  B: number // bottom spacer height
+  first: number // first built row
+  edges: number[] // built rows' tops relative to `top`, then their bottom
+  S: number // scrollTop at this layout
+  exact: boolean // T is the measured height of the rows above
+}
+
+interface LayoutAnchor {
+  el: HTMLElement
+  offset: number // its top relative to the built rows' top
 }
 
 function updateRelativeBindings(element: Element, path: string): void {
@@ -1203,6 +1248,12 @@ export class ListBinding {
   private readonly _update?: VoidFunction
   private _previousSlice?: VirtualListSlice
   private _warnedNonVirtual = false
+  // variable-height mode (see VARIABLE-HEIGHT LAYOUT)
+  private _layout?: VariableLayout
+  private _measuredSum = 0
+  private _measuredRows = 0
+  private _measuredWidth = -1
+  private _relayoutDepth = 0
   static filterBoundObservers = new WeakMap<Element, Listener>()
 
   constructor(
@@ -1306,6 +1357,18 @@ export class ListBinding {
       )
     }
     if (!this.isNamespaced && options.virtual != null) {
+      // A variable-height list keeps its own rows in place; the browser's
+      // scroll anchoring (Chromium, Firefox) would move scrollTop as well
+      // when the top spacer changes, and the two fight.
+      const style = (this.boundElement as HTMLElement).style
+      if (
+        options.virtual.minHeight != null &&
+        options.virtual.scrollContainer !== 'window' &&
+        style != null &&
+        !style.overflowAnchor
+      ) {
+        style.overflowAnchor = 'none'
+      }
       resizeObserver.observe(this.boundElement)
       this._update = throttle(() => {
         this.update(this.array, true)
@@ -1374,57 +1437,95 @@ export class ListBinding {
       const totalRows = Math.ceil(visibleArray.length / visibleColumns)
 
       if (virtual.minHeight != null) {
-        // Variable-height mode: scroll-fraction interpolation (b8r approach)
-        // Total scroll area is fixed at totalRows * minHeight.
-        // We interpolate which rows to show based on scroll fraction,
-        // then position them using an interpolated offset that smoothly
-        // transitions from top-pinned (t=0) to bottom-pinned (t=1).
-        const effectiveHeight = virtual.minHeight
-        const visibleRows =
-          Math.ceil(viewportHeight / effectiveHeight) +
-          (virtual.rowChunkSize || 1)
-        const visibleItems = visibleColumns * visibleRows
-        const totalScrollHeight = totalRows * effectiveHeight
-        const maxScrollTop = Math.max(0, totalScrollHeight - viewportHeight)
+        // Variable-height mode: see VARIABLE-HEIGHT LAYOUT. Row counts use
+        // minHeight (so enough rows are built); positions use the measured
+        // average.
+        const minHeight = virtual.minHeight
+        const chunk = virtual.rowChunkSize || 1
+        const estimate = this._rowEstimate()
+        // rubber-band overscroll (iOS) reports scrollTop beyond the content
+        const maxS =
+          (useWindowScroll
+            ? this.boundElement.offsetHeight
+            : this.boundElement.scrollHeight) - viewportHeight
+        const S = Math.max(0, maxS > 0 ? Math.min(scrollTop, maxS) : scrollTop)
+        const viewRows = Math.ceil(viewportHeight / minHeight) + chunk
+        const maxRow = totalRows - 1
+        const prev = this._layout
+        let first: number
+        let last: number
+        let mode: 'initial' | 'scroll' | 'jump' | 'bottom'
 
-        const t =
-          maxScrollTop > 0
-            ? Math.min(1, Math.max(0, scrollTop / maxScrollTop))
-            : 0
-
-        // position is the fractional row index at the scroll point
-        const maxPosition = Math.max(0, totalRows - visibleRows + 1)
-        const position = t * maxPosition
-        let topRow = Math.floor(position)
-        if (virtual.rowChunkSize) {
-          topRow -= topRow % virtual.rowChunkSize
+        if (prev == null || prev.first > maxRow) {
+          mode = 'initial'
+          first = S <= 0 ? 0 : Math.floor(S / estimate)
+          last = first + viewRows
+        } else {
+          const { top: blockTop, edges } = prev
+          const builtRows = edges.length - 1
+          const blockBottom = blockTop + edges[builtRows]
+          const lo = S - minHeight
+          const hi = S + viewportHeight + minHeight
+          if (
+            hi < blockTop - viewportHeight ||
+            lo > blockBottom + viewportHeight
+          ) {
+            // the built rows are nowhere near: place by estimate
+            if (S <= 0) {
+              mode = 'jump'
+              first = 0
+            } else if (maxS > 0 && S >= maxS - 1) {
+              mode = 'bottom'
+              first = Math.max(0, maxRow - viewRows)
+            } else {
+              mode = 'jump'
+              first = prev.first + Math.round((S - prev.top) / estimate)
+            }
+            last = first + viewRows
+          } else {
+            mode = 'scroll'
+            first = prev.first
+            if (blockTop > lo && first > 0) {
+              first = Math.max(
+                0,
+                first - Math.ceil((blockTop - lo) / minHeight)
+              )
+            } else {
+              let r = 0
+              while (r < builtRows - 1 && blockTop + edges[r + 1] <= lo) {
+                r++
+              }
+              first += r
+            }
+            const lastBuilt = prev.first + builtRows - 1
+            if (blockBottom < hi) {
+              last = lastBuilt + Math.ceil((hi - blockBottom) / minHeight)
+            } else {
+              let r = builtRows - 1
+              while (r > 0 && blockTop + edges[r] >= hi) r--
+              last = prev.first + r
+            }
+          }
         }
-
-        firstItem = topRow * visibleColumns
-        lastItem = firstItem + visibleItems - 1
-
-        // Defer buffer calculation to update() where we can measure
-        // actual rendered content height (b8r approach).
-        // Set provisional buffers for the early-exit comparison.
-        topBuffer = scrollTop
-        bottomBuffer = Math.max(
-          0,
-          totalScrollHeight - scrollTop - viewportHeight
-        )
+        first = Math.max(0, Math.min(first, maxRow))
+        if (chunk > 1) first -= first % chunk
+        last = Math.max(first, Math.min(last, maxRow))
+        if (chunk > 1)
+          last = Math.min(maxRow, last + chunk - 1 - (last % chunk))
 
         return {
           items: visibleArray,
-          firstItem,
-          lastItem,
-          topBuffer,
-          bottomBuffer,
+          firstItem: first * visibleColumns,
+          lastItem: totalRows === 0 ? -1 : (last + 1) * visibleColumns - 1,
+          // the spacers are set by _layoutVariable once rows are measured
+          topBuffer: prev?.T ?? 0,
+          bottomBuffer: prev?.B ?? 0,
           interpolation: {
-            t,
-            position,
-            scrollTop,
+            scrollTop: S,
             viewportHeight,
-            totalScrollHeight,
-            rowHeight: virtual.height,
+            totalRows,
+            columns: visibleColumns,
+            mode,
           },
         }
       } else {
@@ -1521,12 +1622,25 @@ export class ListBinding {
     ) {
       return
     }
-    // Variable-height mode: slice unchanged but buffers need updating
+    // Variable-height mode: same rows; only the drift correction can apply
     if (sliceUnchanged && slice.interpolation != null) {
-      this._updateInterpolatedBuffers(slice)
+      this._layoutVariable(slice, null, false)
       return
     }
     this._previousSlice = slice
+
+    // Variable-height mode: remember where a row that stays built is now
+    const anchor = slice.interpolation != null ? this._findAnchor(slice) : null
+    // ...and keep the content from getting shorter while rows are swapped:
+    // the browser clamps scrollTop the moment it does, before the top
+    // spacer grows to make up for the rows removed above (this stalled
+    // scrolling short of the end). _layoutVariable sets the real height.
+    if (anchor != null && this.listBottom != null && this._layout != null) {
+      const { B, edges } = this._layout
+      const V = slice.interpolation!.viewportHeight
+      this.listBottom.style.height =
+        String(B + edges[edges.length - 1] + V) + 'px'
+    }
 
     let removed = 0
     let moved = 0
@@ -1589,7 +1703,12 @@ export class ListBinding {
       }
     }
 
-    if (this.listTop != null && this.listBottom != null) {
+    // (variable-height spacers are set by _layoutVariable, after measuring)
+    if (
+      this.listTop != null &&
+      this.listBottom != null &&
+      slice.interpolation == null
+    ) {
       this.listTop.style.height = String(topBuffer) + 'px'
       this.listBottom.style.height = String(bottomBuffer) + 'px'
     }
@@ -1714,9 +1833,9 @@ export class ListBinding {
       insertionPoint = element
     }
 
-    // Variable-height mode: compute final buffer positions from measured heights
+    // Variable-height mode: set the spacers from the measured rows
     if (slice.interpolation != null) {
-      this._updateInterpolatedBuffers(slice)
+      this._layoutVariable(slice, anchor, true)
     }
 
     if (settings.perf) {
@@ -1724,36 +1843,173 @@ export class ListBinding {
     }
   }
 
-  private _updateInterpolatedBuffers(slice: VirtualListSlice): void {
+  // the average measured row height; virtual.height until a row is measured
+  private _rowEstimate(): number {
+    return this._measuredRows > 0
+      ? this._measuredSum / this._measuredRows
+      : this.options.virtual!.height
+  }
+
+  // the first element of each built row, in order
+  private _builtRows(columns: number): HTMLElement[] {
+    const perRow = columns * this.templates.length
+    const rows: HTMLElement[] = []
+    let n = 0
+    for (
+      let el = this.listTop!.nextElementSibling;
+      el != null && el !== this.listBottom;
+      el = el.nextElementSibling
+    ) {
+      if (n++ % perRow === 0) rows.push(el as HTMLElement)
+    }
+    return rows
+  }
+
+  // A row built now that the new slice keeps, and where it is. (After the
+  // array itself changed this may be a different item; whichever element
+  // it is, keeping it in place is right if it survives, and is checked.)
+  private _findAnchor(slice: VirtualListSlice): LayoutAnchor | null {
+    const prev = this._layout
+    if (prev == null) return null
+    const { columns } = slice.interpolation!
+    const first = Math.floor(slice.firstItem / columns)
+    const el =
+      this._builtRows(columns)[Math.max(first, prev.first) - prev.first]
+    return el == null
+      ? null
+      : {
+          el,
+          offset:
+            el.getBoundingClientRect().top -
+            this.listTop!.getBoundingClientRect().bottom,
+        }
+  }
+
+  private _layoutVariable(
+    slice: VirtualListSlice,
+    anchor: LayoutAnchor | null,
+    rebuilt: boolean
+  ): void {
+    const { listTop, listBottom, boundElement } = this
+    if (listTop == null || listBottom == null) return
     const {
-      t,
-      position,
-      scrollTop,
-      viewportHeight,
-      totalScrollHeight,
-      rowHeight,
+      scrollTop: S,
+      viewportHeight: V,
+      totalRows,
+      columns,
+      mode,
     } = slice.interpolation!
+    const prev = this._layout
 
-    // Measure actual rendered content height from DOM
-    let renderedHeight = 0
-    for (const child of Array.from(this.boundElement.children)) {
-      if (child === this.listTop || child === this.listBottom) continue
-      renderedHeight += (child as HTMLElement).offsetHeight || rowHeight
+    // heights depend on width: a new width invalidates what was learned
+    const width = (boundElement as HTMLElement).offsetWidth
+    if (width !== this._measuredWidth) {
+      this._measuredWidth = width
+      this._measuredSum = 0
+      this._measuredRows = 0
     }
 
-    // b8r formula: interpolate between pinning to top and bottom
-    const pinTop = scrollTop
-    const pinBottom = scrollTop + viewportHeight - renderedHeight
-    const offset = Math.max(
-      0,
-      t * pinBottom + (1 - t) * pinTop - (position % 1) * rowHeight
+    // measure the built rows: their tops, then the bottom of the last
+    const topRect = listTop.getBoundingClientRect()
+    const base = topRect.bottom
+    const edges = this._builtRows(columns).map(
+      (el) => el.getBoundingClientRect().top - base
     )
-
-    if (this.listTop != null && this.listBottom != null) {
-      this.listTop.style.height = String(offset) + 'px'
-      this.listBottom.style.height =
-        String(Math.max(0, totalScrollHeight - offset - renderedHeight)) + 'px'
+    const R = listBottom.getBoundingClientRect().top - base
+    edges.push(R)
+    const first = Math.floor(slice.firstItem / columns)
+    const lastRow = first + edges.length - 2
+    // where listTop starts in the list's scroll coordinates (headers above it)
+    const boundRect = boundElement.getBoundingClientRect()
+    let header = topRect.top - boundRect.top
+    if (this.options.virtual!.scrollContainer !== 'window') {
+      header += boundElement.scrollTop - boundElement.clientTop
     }
+
+    let estimate = this._rowEstimate()
+    let T = prev?.T ?? 0
+    let exact = prev?.exact ?? true
+    if (prev == null || mode === 'initial') {
+      T = first * estimate
+      exact = first === 0
+    } else if (!rebuilt) {
+      // same rows: the spacers stay, so the rows move with the scroll
+    } else if (anchor?.el.parentNode === boundElement) {
+      // the anchor row keeps its place: T absorbs the rows that came and went
+      T += anchor.offset - (anchor.el.getBoundingClientRect().top - base)
+    } else {
+      T =
+        mode === 'bottom'
+          ? S + V - R - header
+          : T + (first - prev.first) * estimate
+      exact = false
+    }
+
+    // spread an estimated top spacer's error over the distance left to the top
+    if (!exact && prev != null && S < prev.S && prev.S > 0) {
+      T -= ((T - first * estimate) * (prev.S - S)) / prev.S
+    }
+    if (first === 0 && (exact || S <= 0)) {
+      T = 0
+      exact = true
+    }
+    T = Math.max(0, T)
+
+    // learn the heights of rows that were not built at the last layout
+    for (let i = 0; i < edges.length - 1; i++) {
+      const row = first + i
+      const h = edges[i + 1] - edges[i]
+      if (
+        h > 0 &&
+        (prev == null ||
+          row < prev.first ||
+          row > prev.first + prev.edges.length - 2)
+      ) {
+        this._measuredSum += h
+        this._measuredRows++
+        estimate = this._rowEstimate()
+      }
+    }
+
+    const B = Math.max(0, (totalRows - 1 - lastRow) * estimate)
+    listTop.style.height = String(T) + 'px'
+    listBottom.style.height = String(B) + 'px'
+    const top = header + T
+    this._layout = { top, T, B, first, edges, S, exact }
+
+    // estimates can leave the viewport uncovered: build again from here
+    if (
+      R > 0 &&
+      this._relayoutDepth < 3 &&
+      ((first > 0 && top > S + 1) ||
+        (lastRow < totalRows - 1 && top + R < S + V - 1))
+    ) {
+      this._relayoutDepth++
+      this.update(this.array, true)
+      this._relayoutDepth--
+    }
+  }
+
+  /**
+   * Where a row starts, in the list's scroll coordinates, and its height:
+   * measured if it is built, estimated from the current layout if not.
+   * Variable-height mode only (scrollListItemIntoView).
+   */
+  _rowPosition(row: number): { top: number; height: number } {
+    const estimate = this._rowEstimate()
+    const L = this._layout
+    if (L == null) return { top: row * estimate, height: estimate }
+    const { edges } = L
+    const i = row - L.first
+    const built = edges.length - 1
+    return i >= 0 && i < built
+      ? { top: L.top + edges[i], height: edges[i + 1] - edges[i] }
+      : {
+          top:
+            L.top +
+            (i < 0 ? i * estimate : edges[built] + (i - built) * estimate),
+          height: estimate,
+        }
   }
 }
 
@@ -1865,8 +2121,6 @@ export const scrollListItemIntoView = (
         ? Math.max(1, Math.floor(element.offsetWidth / virtual.width))
         : virtual.visibleColumns ?? 1
     const itemRow = Math.floor(index / visibleColumns)
-    const effectiveHeight = virtual.minHeight ?? virtual.height
-    const totalRows = Math.ceil(filtered.length / visibleColumns)
 
     const useWindowScroll = virtual.scrollContainer === 'window'
     const viewportHeight = useWindowScroll
@@ -1876,50 +2130,31 @@ export const scrollListItemIntoView = (
     let scrollTarget: number
 
     if (virtual.minHeight != null) {
-      // Variable-height mode: convert row to scroll fraction
-      const visibleRows =
-        Math.ceil(viewportHeight / effectiveHeight) +
-        (virtual.rowChunkSize || 1)
-      const totalScrollHeight = totalRows * effectiveHeight
-      const maxScrollTop = Math.max(0, totalScrollHeight - viewportHeight)
-      const maxTopRow = Math.max(1, totalRows - visibleRows + 1)
-      const itemFraction = itemRow / maxTopRow
-
+      // Variable-height mode: the row's measured position if it is built,
+      // else an estimate from the current layout (exact once it is built)
+      const { top, height } = binding._rowPosition(itemRow)
       switch (position) {
         case 'start':
-          scrollTarget = itemFraction * maxScrollTop
+          scrollTarget = top
           break
         case 'end':
-          scrollTarget = Math.max(
-            0,
-            ((itemRow - visibleRows + 1) / maxTopRow) * maxScrollTop
-          )
+          scrollTarget = top + height - viewportHeight
           break
         case 'nearest': {
           const currentScroll = useWindowScroll
             ? Math.max(0, -element.getBoundingClientRect().top)
             : element.scrollTop
-          const currentFraction =
-            maxScrollTop > 0 ? currentScroll / maxScrollTop : 0
-          const currentTopRow = Math.floor(currentFraction * maxTopRow)
-          if (itemRow < currentTopRow) {
-            scrollTarget = itemFraction * maxScrollTop
-          } else if (itemRow >= currentTopRow + visibleRows) {
-            scrollTarget = Math.max(
-              0,
-              ((itemRow - visibleRows + 1) / maxTopRow) * maxScrollTop
-            )
+          if (top < currentScroll) {
+            scrollTarget = top
+          } else if (top + height > currentScroll + viewportHeight) {
+            scrollTarget = top + height - viewportHeight
           } else {
             return true // already visible
           }
           break
         }
-        default: {
-          // middle
-          const midRow = itemRow - Math.floor(visibleRows / 2)
-          const midFraction = Math.max(0, midRow) / maxTopRow
-          scrollTarget = midFraction * maxScrollTop
-        }
+        default: // middle
+          scrollTarget = top - (viewportHeight - height) / 2
       }
     } else {
       // Fixed-height mode: exact pixel calculation

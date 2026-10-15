@@ -32,6 +32,13 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    // iOS scrolls with WebKit: the variable-height virtual list specs (#3302)
+    // run there too. Its 200-card motion cases take about two minutes.
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+      testMatch: /virtual-list-.*\.pw\.ts/,
+    },
   ],
   webServer: {
     command: 'bun start',

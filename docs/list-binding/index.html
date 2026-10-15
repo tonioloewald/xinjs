@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=7e6a08feef2d" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=c604305bdc19" data-tosi-doc-system />
   <title>Array Bindings — tosijs</title>
   <meta name="description" content="List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
   <link rel="canonical" href="https://tosijs.net/list-binding/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=dcbed629364d" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=8b49e1bbe1b3" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="array-bindings-and-virtual-lists">Array Bindings and Virtual Lists</h1>
 <p>The most likely source of complexity and performance issues in applications is
@@ -628,21 +628,38 @@ preview.append(grid)
 .sg-edge-left  { border-left: 2px solid #ccc; }
 </code></pre>
 <h2 id="variable-height-items">Variable-Height Items</h2>
-<p>If your list items have varying heights, you can use <code>minHeight</code> instead of
-relying solely on <code>height</code>. When <code>minHeight</code> is specified, the list uses
-scroll-fraction interpolation: the total scroll area is estimated from
-<code>minHeight</code>, and the visible slice is determined by interpolating between
-the top and bottom of the list based on scroll position.</p>
-<p>Items render at their <strong>natural height</strong> — no fixed-height constraint.
-The scrollbar position is approximate but smooth.</p>
-<pre><code>...myArray.tosi.listBinding(({ div }, item) =&gt; div(item.name), {
-  idPath: &#39;id&#39;,
-  virtual: {
-    height: 40,
-    minHeight: 30,
-  },
-})
-</code></pre>
+<p>If your list items have varying heights, add <code>minHeight</code> (the smallest an
+item will be) to <code>height</code> (a typical item). Items then render at their
+<strong>natural height</strong>.</p>
+<ul>
+<li><p><strong>Content moves exactly with the scroll</strong>, and rows that come and go off
+screen never move the rows you are looking at.</p>
+</li>
+<li><p><strong>The scroll area is an estimate</strong> of the rows not built, using the average
+height of the rows measured so far (<code>height</code> until there are some). So the
+scrollbar thumb can change size a little as you scroll; the content does not
+jump.</p>
+</li>
+<li><p>After a jump (dragging the thumb), rows are placed by that estimate, and
+scrolling back up absorbs the difference gradually, so the first item still
+arrives flush with the top.</p>
+</li>
+<li><p><code>minHeight</code> decides how many rows to build, so a smaller value builds more.</p>
+</li>
+<li><p>An item that changes height (say, a row that expands) pushes the rows below
+it down; the rows above stay put.</p>
+</li>
+<li><p>The list sets <code>overflow-anchor: none</code> on its container, because the
+browser&#39;s own scroll anchoring would fight it.</p>
+<p>  ...myArray.tosi.listBinding(({ div }, item) =&gt; div(item.name), {
+idPath: &#39;id&#39;,
+virtual: {
+  height: 40,
+  minHeight: 30,
+},
+  })</p>
+</li>
+</ul>
 <pre><code class="language-js">import { elements, tosi, scrollListItemIntoView } from &#39;tosijs&#39;
 
 const items = Array.from({ length: 2000 }, (_, i) =&gt; ({
@@ -1107,6 +1124,6 @@ in a list instance.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=7e6a08feef2d"></script>
+  <script src="../iife.js?v=c604305bdc19"></script>
 </body>
 </html>
