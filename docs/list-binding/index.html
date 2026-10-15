@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="../doc-system.css?v=c604305bdc19" data-tosi-doc-system />
+  <link rel="stylesheet" href="../doc-system.css?v=41ea710aff9d" data-tosi-doc-system />
   <title>Array Bindings — tosijs</title>
   <meta name="description" content="List bindings: surgical updates via id-paths, virtualized rendering for million-row lists, sticky headers, filtering, and grids." />
   <link rel="canonical" href="https://tosijs.net/list-binding/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="../docs.json?v=8b49e1bbe1b3" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="../docs.json?v=e758b41d0e6d" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="array-bindings-and-virtual-lists">Array Bindings and Virtual Lists</h1>
 <p>The most likely source of complexity and performance issues in applications is
@@ -661,19 +661,24 @@ virtual: {
 </li>
 </ul>
 <pre><code class="language-js">import { elements, tosi, scrollListItemIntoView } from &#39;tosijs&#39;
+import { tosiSegmented } from &#39;tosijs-ui&#39;
 
-const items = Array.from({ length: 2000 }, (_, i) =&gt; ({
+// Heights vary a lot, and most items are well over minHeight: the hard case.
+// Scroll slowly and watch an item; it should move exactly with your finger.
+const sentence = &#39;Each item is as tall as its text, so heights vary a lot. &#39;
+const longList = Array.from({ length: 2000 }, (_, i) =&gt; ({
   id: i,
   label: `Item #${i}`,
-  // Vary description length to create different heights
-  description: i % 7 === 0
-    ? &#39;This item has a much longer description that will cause it to wrap onto multiple lines, demonstrating variable-height rendering in the virtualized list.&#39;
-    : i % 3 === 0
-      ? &#39;Medium-length description for this item.&#39;
-      : &#39;&#39;,
+  description: sentence.repeat((i * 37) % 9),
+}))
+// The other edge: barely more than fits, and one item taller than the view.
+const shortList = Array.from({ length: 6 }, (_, i) =&gt; ({
+  id: `short-${i}`,
+  label: `Short #${i}`,
+  description: sentence.repeat(i === 2 ? 60 : 1),
 }))
 
-const { varHeightExample } = tosi({ varHeightExample: { items } })
+const { varHeightExample } = tosi({ varHeightExample: { items: longList } })
 
 const { div, span, button } = elements
 
@@ -692,43 +697,69 @@ const list = div(
     {
       idPath: &#39;id&#39;,
       virtual: {
-        height: 40,
+        height: 80,
         minHeight: 30,
       },
     }
   )
 )
 
+// one button each for the first, middle and last item of the current list
+const lists = { long: longList, short: shortList }
+const positions = [0, 0.5, 1]
+const jumpButtons = positions.map((fraction) =&gt;
+  button({
+    onClick() {
+      const items = varHeightExample.items.value
+      const index = Math.round(fraction * (items.length - 1))
+      scrollListItemIntoView(list, items[index], {
+        position: fraction === 1 ? &#39;end&#39; : &#39;start&#39;,
+      })
+    },
+  })
+)
+const label = (items) =&gt; {
+  positions.forEach((fraction, i) =&gt; {
+    jumpButtons[i].textContent = `#${Math.round(fraction * (items.length - 1))}`
+  })
+}
+label(longList)
+
 preview.append(
-  list,
   div(
-    { class: &#39;scroll-buttons&#39; },
-    button(&#39;Scroll to #5&#39;, {
-      onClick() {
-        scrollListItemIntoView(list, items[5])
-      }
-    }),
-    button(&#39;Scroll to #1000&#39;, {
-      onClick() {
-        scrollListItemIntoView(list, items[1000])
-      }
-    }),
-    button(&#39;Scroll to #1995&#39;, {
-      onClick() {
-        scrollListItemIntoView(list, items[1995])
-      }
-    }),
+    { class: &#39;var-height-demo&#39; },
+    list,
+    div(
+      { class: &#39;scroll-buttons&#39; },
+      ...jumpButtons,
+      tosiSegmented({
+        choices: &#39;long=2000 items, short=6 items&#39;,
+        value: &#39;long&#39;,
+        onChange(event) {
+          const items = lists[event.target.value]
+          varHeightExample.items.value = items
+          label(items)
+        },
+      }),
+    ),
   ),
 )
 </code></pre>
-<pre><code class="language-css">.scroll-buttons {
+<pre><code class="language-css">.var-height-demo {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.var-height-demo .scroll-buttons {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 4px;
   padding: 4px;
 }
 .var-height-list {
-  height: calc(100% - 36px);
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
   overflow-y: auto;
 }
@@ -1124,6 +1155,6 @@ in a list instance.</p>
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="../iife.js?v=c604305bdc19"></script>
+  <script src="../iife.js?v=41ea710aff9d"></script>
 </body>
 </html>

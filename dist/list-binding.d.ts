@@ -40,6 +40,7 @@ export declare class ListBinding {
     _rowPosition(row: number): {
         top: number;
         height: number;
+        built: boolean;
     };
 }
 interface ListBoundElement extends Element {

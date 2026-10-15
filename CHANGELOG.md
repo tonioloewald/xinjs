@@ -33,8 +33,12 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
   1.00 and no step over 8px, against 2.0–2.6 and 75–128px before. The list
   sets `overflow-anchor: none` on its container, and ignores rubber-band
   overscroll. A row that changes height now pushes only the rows below it
-  (#3230). `scrollListItemIntoView` uses the measured position of a built row
-  and the same estimate otherwise.
+  (#3230). `scrollListItemIntoView` lands exactly, smooth or not: a row that is
+  not built is reached by estimate, built and measured, then scrolled to where
+  it really is (a smooth scroll to an estimate went stale on the way: #1999
+  landed on #1887). A list that measures nothing (hidden) no longer grows its
+  built rows on every update. The docs example is now the hard case, with a
+  switch between 2,000 items and six with one taller than the view.
 
 ### Documented
 

@@ -681,19 +681,24 @@ item will be) to `height` (a typical item). Items then render at their
 
 ```js
 import { elements, tosi, scrollListItemIntoView } from 'tosijs'
+import { tosiSegmented } from 'tosijs-ui'
 
-const items = Array.from({ length: 2000 }, (_, i) => ({
+// Heights vary a lot, and most items are well over minHeight: the hard case.
+// Scroll slowly and watch an item; it should move exactly with your finger.
+const sentence = 'Each item is as tall as its text, so heights vary a lot. '
+const longList = Array.from({ length: 2000 }, (_, i) => ({
   id: i,
   label: `Item #${i}`,
-  // Vary description length to create different heights
-  description: i % 7 === 0
-    ? 'This item has a much longer description that will cause it to wrap onto multiple lines, demonstrating variable-height rendering in the virtualized list.'
-    : i % 3 === 0
-      ? 'Medium-length description for this item.'
-      : '',
+  description: sentence.repeat((i * 37) % 9),
+}))
+// The other edge: barely more than fits, and one item taller than the view.
+const shortList = Array.from({ length: 6 }, (_, i) => ({
+  id: `short-${i}`,
+  label: `Short #${i}`,
+  description: sentence.repeat(i === 2 ? 60 : 1),
 }))
 
-const { varHeightExample } = tosi({ varHeightExample: { items } })
+const { varHeightExample } = tosi({ varHeightExample: { items: longList } })
 
 const { div, span, button } = elements
 
@@ -712,44 +717,70 @@ const list = div(
     {
       idPath: 'id',
       virtual: {
-        height: 40,
+        height: 80,
         minHeight: 30,
       },
     }
   )
 )
 
+// one button each for the first, middle and last item of the current list
+const lists = { long: longList, short: shortList }
+const positions = [0, 0.5, 1]
+const jumpButtons = positions.map((fraction) =>
+  button({
+    onClick() {
+      const items = varHeightExample.items.value
+      const index = Math.round(fraction * (items.length - 1))
+      scrollListItemIntoView(list, items[index], {
+        position: fraction === 1 ? 'end' : 'start',
+      })
+    },
+  })
+)
+const label = (items) => {
+  positions.forEach((fraction, i) => {
+    jumpButtons[i].textContent = `#${Math.round(fraction * (items.length - 1))}`
+  })
+}
+label(longList)
+
 preview.append(
-  list,
   div(
-    { class: 'scroll-buttons' },
-    button('Scroll to #5', {
-      onClick() {
-        scrollListItemIntoView(list, items[5])
-      }
-    }),
-    button('Scroll to #1000', {
-      onClick() {
-        scrollListItemIntoView(list, items[1000])
-      }
-    }),
-    button('Scroll to #1995', {
-      onClick() {
-        scrollListItemIntoView(list, items[1995])
-      }
-    }),
+    { class: 'var-height-demo' },
+    list,
+    div(
+      { class: 'scroll-buttons' },
+      ...jumpButtons,
+      tosiSegmented({
+        choices: 'long=2000 items, short=6 items',
+        value: 'long',
+        onChange(event) {
+          const items = lists[event.target.value]
+          varHeightExample.items.value = items
+          label(items)
+        },
+      }),
+    ),
   ),
 )
 ```
 ```css
-.scroll-buttons {
+.var-height-demo {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.var-height-demo .scroll-buttons {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 4px;
   padding: 4px;
 }
 .var-height-list {
-  height: calc(100% - 36px);
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
   overflow-y: auto;
 }

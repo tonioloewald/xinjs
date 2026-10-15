@@ -12,7 +12,9 @@ import { join } from 'path'
  *   error is spread over the distance left, so no step jumps and the first card
  *   arrives flush with the top;
  * - a jump into the middle, then scrolling down to the end;
- * - scrollListItemIntoView to a card that is not built.
+ * - scrollListItemIntoView (smooth) to a card that is not built;
+ * - switching between the long list and a short one (barely more than fits, one
+ *   card taller than the lane), from the middle of each.
  *
  * Same page as virtual-list-motion.pw.ts (cards 90-210px, height 120, 320x700).
  */
@@ -38,6 +40,10 @@ const html = `<!doctype html><meta charset="utf-8">
   const items = Array.from({ length: ${N} }, (_, i) => ({ id: 'c' + i, h: 90 + ((i * 37) % 121) }))
   const { vlistJumps } = tosi({ vlistJumps: { items } })
   window.items = vlistJumps.items
+  window.state = vlistJumps
+  window.longList = items
+  // barely more than fits, with one card taller than the lane
+  window.shortList = [100, 150, 1500, 120, 90, 110].map((h, i) => ({ id: 's' + i, h }))
   const { div, template } = elements
   window.lane = div(
     { class: 'cards', bindList: { value: 'vlistJumps.items', idPath: 'id',
@@ -148,9 +154,11 @@ test('jump into the middle, then scroll down to the end', async ({ page }) => {
   expect(Math.abs(report.lastBottom!)).toBeLessThanOrEqual(1)
 })
 
-test('scrollListItemIntoView reaches a card that is not built', async ({
+test('scrollListItemIntoView lands a card that is not built where asked', async ({
   page,
 }) => {
+  // the default smooth scroll rebuilds the list all the way there, so an
+  // estimated target would go stale before it arrived (#1999 landed on #1887)
   const report = await page.evaluate(async () => {
     const w = window as any
     const lane = w.lane as HTMLElement
@@ -159,19 +167,105 @@ test('scrollListItemIntoView reaches a card that is not built', async ({
     await frame()
     const target = 'c40'
     const built = lane.querySelector(`[data-id="${target}"]`) != null
-    w.tosijs.scrollListItemIntoView(lane, w.items[40], {
-      position: 'start',
-      behavior: 'instant',
-    })
-    for (let i = 0; i < 5; i++) await frame()
-    const el = lane.querySelector<HTMLElement>(`[data-id="${target}"]`)
-    const box = lane.getBoundingClientRect()
-    const r = el?.getBoundingClientRect()
-    return {
-      builtBefore: built,
-      visible: r != null && r.bottom > box.top && r.top < box.bottom,
+    w.tosijs.scrollListItemIntoView(lane, w.items[40], { position: 'start' })
+    let top: number | null = null
+    for (let i = 0; i < 60; i++) {
+      await frame()
+      const el = lane.querySelector<HTMLElement>(`[data-id="${target}"]`)
+      top =
+        el == null
+          ? null
+          : Math.round(
+              el.getBoundingClientRect().top - lane.getBoundingClientRect().top
+            )
+      if (top === 0) break
     }
+    return { builtBefore: built, top }
   })
   expect(report.builtBefore).toBe(false)
-  expect(report.visible, JSON.stringify(report)).toBe(true)
+  expect(report.top, JSON.stringify(report)).toBe(0)
+})
+
+test('switch between a long list and a short one with a giant card', async ({
+  page,
+}) => {
+  test.setTimeout(120_000)
+  const report = await page.evaluate(async () => {
+    const w = window as any
+    const lane = w.lane as HTMLElement
+    const frame = () =>
+      new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    const box = () => lane.getBoundingClientRect()
+    const top = (id: string) => {
+      const el = lane.querySelector<HTMLElement>(`[data-id="${id}"]`)
+      return el == null ? null : el.getBoundingClientRect().top - box().top
+    }
+    // scroll down in steps to the end; the worst jump on the way, and where
+    // the last card ends relative to the lane's bottom
+    const scrollDown = async (lastId: string) => {
+      let worst = 0
+      let stuck = 0
+      while (stuck < 6) {
+        const before = new Map<string, number>()
+        for (const c of lane.querySelectorAll<HTMLElement>('.card')) {
+          before.set(c.dataset.id!, top(c.dataset.id!)!)
+        }
+        const from = lane.scrollTop
+        lane.scrollTop = from + 16
+        await frame()
+        const dy = lane.scrollTop - from
+        stuck = dy <= 0 ? stuck + 1 : 0
+        for (const [id, y] of before) {
+          const now = top(id)
+          if (now == null) continue
+          worst = Math.max(worst, Math.abs(y - now - dy))
+          break
+        }
+      }
+      const last = lane.querySelector<HTMLElement>(`[data-id="${lastId}"]`)
+      return {
+        worst: Math.round(worst),
+        lastBottom:
+          last == null
+            ? null
+            : Math.round(last.getBoundingClientRect().bottom - box().bottom),
+      }
+    }
+    await frame()
+    lane.scrollTop = lane.scrollHeight / 2
+    await frame()
+    w.state.items.value = w.shortList
+    await frame()
+    await frame()
+    const shortFirstVisible = lane.querySelector('[data-id^="s"]') != null
+    lane.scrollTop = 0
+    await frame()
+    const shortTop = top('s0')
+    const short = await scrollDown('s5')
+    lane.scrollTop = lane.scrollHeight
+    await frame()
+    w.state.items.value = w.longList
+    await frame()
+    await frame()
+    const longVisible = [...lane.querySelectorAll<HTMLElement>('.card')].some(
+      (c) => {
+        const r = c.getBoundingClientRect()
+        return r.bottom > box().top && r.top < box().bottom
+      }
+    )
+    lane.scrollTop = 0
+    await frame()
+    const longTop = top('c0')
+    const long = await scrollDown('c59')
+    return { shortFirstVisible, shortTop, short, longVisible, longTop, long }
+  })
+  const r = JSON.stringify(report)
+  expect(report.shortFirstVisible, r).toBe(true)
+  expect(report.shortTop, r).toBe(0)
+  expect(report.short.worst, r).toBeLessThanOrEqual(8)
+  expect(Math.abs(report.short.lastBottom ?? 99), r).toBeLessThanOrEqual(1)
+  expect(report.longVisible, r).toBe(true)
+  expect(report.longTop, r).toBe(0)
+  expect(report.long.worst, r).toBeLessThanOrEqual(8)
+  expect(Math.abs(report.long.lastBottom ?? 99), r).toBeLessThanOrEqual(1)
 })

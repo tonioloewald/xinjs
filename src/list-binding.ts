@@ -683,19 +683,24 @@ item will be) to `height` (a typical item). Items then render at their
 
 ```js
 import { elements, tosi, scrollListItemIntoView } from 'tosijs'
+import { tosiSegmented } from 'tosijs-ui'
 
-const items = Array.from({ length: 2000 }, (_, i) => ({
+// Heights vary a lot, and most items are well over minHeight: the hard case.
+// Scroll slowly and watch an item; it should move exactly with your finger.
+const sentence = 'Each item is as tall as its text, so heights vary a lot. '
+const longList = Array.from({ length: 2000 }, (_, i) => ({
   id: i,
   label: `Item #${i}`,
-  // Vary description length to create different heights
-  description: i % 7 === 0
-    ? 'This item has a much longer description that will cause it to wrap onto multiple lines, demonstrating variable-height rendering in the virtualized list.'
-    : i % 3 === 0
-      ? 'Medium-length description for this item.'
-      : '',
+  description: sentence.repeat((i * 37) % 9),
+}))
+// The other edge: barely more than fits, and one item taller than the view.
+const shortList = Array.from({ length: 6 }, (_, i) => ({
+  id: `short-${i}`,
+  label: `Short #${i}`,
+  description: sentence.repeat(i === 2 ? 60 : 1),
 }))
 
-const { varHeightExample } = tosi({ varHeightExample: { items } })
+const { varHeightExample } = tosi({ varHeightExample: { items: longList } })
 
 const { div, span, button } = elements
 
@@ -714,44 +719,70 @@ const list = div(
     {
       idPath: 'id',
       virtual: {
-        height: 40,
+        height: 80,
         minHeight: 30,
       },
     }
   )
 )
 
+// one button each for the first, middle and last item of the current list
+const lists = { long: longList, short: shortList }
+const positions = [0, 0.5, 1]
+const jumpButtons = positions.map((fraction) =>
+  button({
+    onClick() {
+      const items = varHeightExample.items.value
+      const index = Math.round(fraction * (items.length - 1))
+      scrollListItemIntoView(list, items[index], {
+        position: fraction === 1 ? 'end' : 'start',
+      })
+    },
+  })
+)
+const label = (items) => {
+  positions.forEach((fraction, i) => {
+    jumpButtons[i].textContent = `#${Math.round(fraction * (items.length - 1))}`
+  })
+}
+label(longList)
+
 preview.append(
-  list,
   div(
-    { class: 'scroll-buttons' },
-    button('Scroll to #5', {
-      onClick() {
-        scrollListItemIntoView(list, items[5])
-      }
-    }),
-    button('Scroll to #1000', {
-      onClick() {
-        scrollListItemIntoView(list, items[1000])
-      }
-    }),
-    button('Scroll to #1995', {
-      onClick() {
-        scrollListItemIntoView(list, items[1995])
-      }
-    }),
+    { class: 'var-height-demo' },
+    list,
+    div(
+      { class: 'scroll-buttons' },
+      ...jumpButtons,
+      tosiSegmented({
+        choices: 'long=2000 items, short=6 items',
+        value: 'long',
+        onChange(event) {
+          const items = lists[event.target.value]
+          varHeightExample.items.value = items
+          label(items)
+        },
+      }),
+    ),
   ),
 )
 ```
 ```css
-.scroll-buttons {
+.var-height-demo {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.var-height-demo .scroll-buttons {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 4px;
   padding: 4px;
 }
 .var-height-list {
-  height: calc(100% - 36px);
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
   overflow-y: auto;
 }
@@ -1456,7 +1487,13 @@ export class ListBinding {
         let last: number
         let mode: 'initial' | 'scroll' | 'jump' | 'bottom'
 
-        if (prev == null || prev.first > maxRow) {
+        // nothing measurable (hidden, or no layout engine): don't extend
+        // the slice from geometry that isn't there; start over instead
+        if (
+          prev == null ||
+          prev.first > maxRow ||
+          prev.edges[prev.edges.length - 1] <= 0
+        ) {
           mode = 'initial'
           first = S <= 0 ? 0 : Math.floor(S / estimate)
           last = first + viewRows
@@ -1995,20 +2032,23 @@ export class ListBinding {
    * measured if it is built, estimated from the current layout if not.
    * Variable-height mode only (scrollListItemIntoView).
    */
-  _rowPosition(row: number): { top: number; height: number } {
+  _rowPosition(row: number): { top: number; height: number; built: boolean } {
     const estimate = this._rowEstimate()
     const L = this._layout
-    if (L == null) return { top: row * estimate, height: estimate }
+    if (L == null)
+      return { top: row * estimate, height: estimate, built: false }
     const { edges } = L
     const i = row - L.first
-    const built = edges.length - 1
-    return i >= 0 && i < built
-      ? { top: L.top + edges[i], height: edges[i + 1] - edges[i] }
+    const count = edges.length - 1
+    const built = i >= 0 && i < count
+    return built
+      ? { top: L.top + edges[i], height: edges[i + 1] - edges[i], built }
       : {
           top:
             L.top +
-            (i < 0 ? i * estimate : edges[built] + (i - built) * estimate),
+            (i < 0 ? i * estimate : edges[count] + (i - count) * estimate),
           height: estimate,
+          built,
         }
   }
 }
@@ -2127,75 +2167,58 @@ export const scrollListItemIntoView = (
       ? window.innerHeight
       : element.offsetHeight
 
-    let scrollTarget: number
-
-    if (virtual.minHeight != null) {
-      // Variable-height mode: the row's measured position if it is built,
-      // else an estimate from the current layout (exact once it is built)
-      const { top, height } = binding._rowPosition(itemRow)
+    // where the row is: exact for fixed heights; for variable heights,
+    // measured if it is built and estimated if not
+    const variable = virtual.minHeight != null
+    const place = () =>
+      variable
+        ? binding._rowPosition(itemRow)
+        : { top: itemRow * virtual.height, height: virtual.height, built: true }
+    // the scroll position that shows the row as asked; null if already shown
+    const target = (): number | null => {
+      const { top, height } = place()
       switch (position) {
         case 'start':
-          scrollTarget = top
-          break
+          return top
         case 'end':
-          scrollTarget = top + height - viewportHeight
-          break
+          return top + height - viewportHeight
         case 'nearest': {
           const currentScroll = useWindowScroll
             ? Math.max(0, -element.getBoundingClientRect().top)
             : element.scrollTop
-          if (top < currentScroll) {
-            scrollTarget = top
-          } else if (top + height > currentScroll + viewportHeight) {
-            scrollTarget = top + height - viewportHeight
-          } else {
-            return true // already visible
+          if (top < currentScroll) return top
+          if (top + height > currentScroll + viewportHeight) {
+            return top + height - viewportHeight
           }
-          break
+          return null
         }
         default: // middle
-          scrollTarget = top - (viewportHeight - height) / 2
+          return top - (viewportHeight - height) / 2
       }
-    } else {
-      // Fixed-height mode: exact pixel calculation
-      const itemTop = itemRow * virtual.height
-
-      switch (position) {
-        case 'start':
-          scrollTarget = itemTop
-          break
-        case 'end':
-          scrollTarget = itemTop - viewportHeight + virtual.height
-          break
-        case 'nearest': {
-          const currentScroll = useWindowScroll
-            ? Math.max(0, -element.getBoundingClientRect().top)
-            : element.scrollTop
-          if (itemTop < currentScroll) {
-            scrollTarget = itemTop
-          } else if (
-            itemTop + virtual.height >
-            currentScroll + viewportHeight
-          ) {
-            scrollTarget = itemTop - viewportHeight + virtual.height
-          } else {
-            return true // already visible
-          }
-          break
-        }
-        default: // middle
-          scrollTarget = itemTop - (viewportHeight - virtual.height) / 2
+    }
+    const scroll = (top: number, how: ScrollBehavior) => {
+      top = Math.max(0, top)
+      if (useWindowScroll) {
+        const elementTop = element.getBoundingClientRect().top + window.scrollY
+        window.scrollTo({ top: elementTop + top, behavior: how })
+      } else {
+        element.scrollTo({ top, behavior: how })
       }
     }
 
-    scrollTarget = Math.max(0, scrollTarget)
-
-    if (useWindowScroll) {
-      const elementTop = element.getBoundingClientRect().top + window.scrollY
-      window.scrollTo({ top: elementTop + scrollTarget, behavior })
-    } else {
-      element.scrollTo({ top: scrollTarget, behavior })
+    // A row that is not built is only an estimate, and a smooth scroll
+    // rebuilds the list all the way there, so the estimate goes stale before
+    // it arrives (#1999 landed on #1887). Go there instantly, let the list
+    // build and measure the row, then scroll to where it really is.
+    for (let i = 0; i < 3 && variable && !place().built; i++) {
+      const estimate = target()
+      if (estimate == null) break
+      scroll(estimate, 'instant')
+      binding.update(binding.array, true)
     }
+    const scrollTarget = target()
+    if (scrollTarget == null) return true // already visible
+    scroll(scrollTarget, behavior)
   } else {
     // Non-virtual: find the DOM element and use native scrollIntoView
     const domGroup = binding.itemToElement.get(rawItem)
