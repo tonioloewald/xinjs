@@ -4,6 +4,22 @@ Newest first. **Facts, not analysis** — 3–6 bullets, five minutes. The whys 
 asked periodically, by the Tier 3 quarterly audit reading these across projects
 (`practices/releasing.md` step 10). Do not root-cause here.
 
+## 1.10.9 — 2026-10-15
+
+- **Went well:** the variable-height list rewrite was owner-tested on an iPhone
+  through the tunnel's magic link before release, and the WebKit project caught
+  a `scrollTop` clamp that Chromium alone would have hidden.
+- **Went well:** the pre-release review's two majors (rows moving on an insert
+  above the view; the README contradicting the Hot Reload page) were both fixed
+  before tagging, the first with a spec case that was red beforehand.
+- **Didn't:** the first attestation failed — Firefox measured 11px against an
+  8px bound written for an unchanged list, under the attest lane's load.
+- **Surprised:** approval landed after the 60-minute window; the run ended
+  green with nothing verified, and a `verify_only` run supplied the verification.
+- **Friction:** the dev server rewrites `dist/` (stubs and loose files), so it
+  had to be stopped before every build, release-doctor and Playwright run.
+- **Cycle:** none.
+
 ## 1.10.7 — 2026-10-03
 
 - **Went well:** first release through the three-job publish workflow; the
