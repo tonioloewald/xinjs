@@ -1284,6 +1284,7 @@ export class ListBinding {
   private _measuredSum = 0
   private _measuredRows = 0
   private _measuredWidth = -1
+  private _measuredLength = -1 // items changed in number: rows above may have
   private _relayoutDepth = 0
   static filterBoundObservers = new WeakMap<Element, Listener>()
 
@@ -1906,20 +1907,29 @@ export class ListBinding {
   // array itself changed this may be a different item; whichever element
   // it is, keeping it in place is right if it survives, and is checked.)
   private _findAnchor(slice: VirtualListSlice): LayoutAnchor | null {
-    const prev = this._layout
-    if (prev == null) return null
-    const { columns } = slice.interpolation!
-    const first = Math.floor(slice.firstItem / columns)
-    const el =
-      this._builtRows(columns)[Math.max(first, prev.first) - prev.first]
-    return el == null
-      ? null
-      : {
+    if (this._layout == null) return null
+    // match by item, not by index: after a splice or unshift above, the row
+    // at the same index is a different item
+    const { idPath } = this.options
+    const key = (item: any) => (idPath != null ? String(item[idPath]) : item)
+    const keep = new Set<any>()
+    for (let i = slice.firstItem; i <= slice.lastItem; i++) {
+      const item = slice.items[i]
+      if (item === undefined) break
+      keep.add(key(tosiValue(item)))
+    }
+    for (const el of this._builtRows(slice.interpolation!.columns)) {
+      const item = (el as any)[LIST_INSTANCE_REF]
+      if (item != null && item !== true && keep.has(key(item))) {
+        return {
           el,
           offset:
             el.getBoundingClientRect().top -
             this.listTop!.getBoundingClientRect().bottom,
         }
+      }
+    }
+    return null
   }
 
   private _layoutVariable(
@@ -1929,14 +1939,14 @@ export class ListBinding {
   ): void {
     const { listTop, listBottom, boundElement } = this
     if (listTop == null || listBottom == null) return
-    const {
-      scrollTop: S,
-      viewportHeight: V,
-      totalRows,
-      columns,
-      mode,
-    } = slice.interpolation!
+    const { viewportHeight: V, totalRows, columns, mode } = slice.interpolation!
+    let S = slice.interpolation!.scrollTop
     const prev = this._layout
+    // items added or removed (above, perhaps): T is no longer the measured
+    // height of the rows above, so treat it as an estimate from here
+    const shifted =
+      this._measuredLength >= 0 && slice.items.length !== this._measuredLength
+    this._measuredLength = slice.items.length
 
     // heights depend on width: a new width invalidates what was learned
     const width = (boundElement as HTMLElement).offsetWidth
@@ -1974,6 +1984,7 @@ export class ListBinding {
     } else if (anchor?.el.parentNode === boundElement) {
       // the anchor row keeps its place: T absorbs the rows that came and went
       T += anchor.offset - (anchor.el.getBoundingClientRect().top - base)
+      if (shifted) exact = false
     } else {
       T =
         mode === 'bottom'
@@ -1990,7 +2001,18 @@ export class ListBinding {
       T = 0
       exact = true
     }
-    T = Math.max(0, T)
+    if (T < 0) {
+      // the rows above don't fit in the room the estimate left for them:
+      // make the room and scroll by as much, so nothing on screen moves.
+      // The only scrollTop write here, and it only follows a bad estimate.
+      if (this.options.virtual!.scrollContainer === 'window') {
+        window.scrollBy(0, -T)
+      } else {
+        boundElement.scrollTop -= T
+      }
+      S -= T
+      T = 0
+    }
 
     // learn the heights of rows that were not built at the last layout
     for (let i = 0; i < edges.length - 1; i++) {

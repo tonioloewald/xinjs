@@ -508,28 +508,10 @@ Use `invertLuminance()` to generate dark-mode equivalents of color values.
 
 ## Hot Reload
 
-One of the nice things about working with the React toolchain is hot reloading.
-`tosijs` supports hot reloading (and not just in development!) via the `hotReload()`
-function:
-
-    import { tosi, hotReload } from 'tosijs'
-
-    tosi({
-      app: {
-        // ...your initial state
-      }
-    })
-
-    hotReload()
-
-`hotReload` stores serializable state managed by `tosijs` in localStorage and restores
-it (by overlay) on reload. Because any functions (for example) won't be persisted,
-simply call `hotReload` after initializing your app state and you're good to go.
-
-`hotReload` accepts a test function (path => boolean) as a parameter.
-Only top-level properties in your state that pass the test will be persisted.
-
-To completely reset the app, run `localStorage.clear()` in the console.
+`hotReload()` lets you pick parts of your app's state that survive a page
+refresh. It was written as a debugging aid, and keeps what it saves in
+`localStorage`, so read [Hot Reload](https://tosijs.net/hot-reload/) for what it
+keeps, what it cannot, and why not to use it for anything serious.
 
 ## Development
 

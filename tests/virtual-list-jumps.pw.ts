@@ -269,3 +269,66 @@ test('switch between a long list and a short one with a giant card', async ({
   expect(report.long.worst, r).toBeLessThanOrEqual(8)
   expect(Math.abs(report.long.lastBottom ?? 99), r).toBeLessThanOrEqual(1)
 })
+
+test('cards added or removed above the view do not move what is on screen', async ({
+  page,
+}) => {
+  test.setTimeout(120_000)
+  const report = await page.evaluate(async () => {
+    const w = window as any
+    const lane = w.lane as HTMLElement
+    const frame = () =>
+      new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    const firstVisible = () => {
+      const box = lane.getBoundingClientRect()
+      for (const c of lane.querySelectorAll<HTMLElement>('.card')) {
+        const r = c.getBoundingClientRect()
+        if (r.bottom > box.top + 1)
+          return { id: c.dataset.id!, y: r.top - box.top }
+      }
+      return null
+    }
+    const yOf = (id: string) => {
+      const el = lane.querySelector<HTMLElement>(`[data-id="${id}"]`)
+      return el == null
+        ? null
+        : el.getBoundingClientRect().top - lane.getBoundingClientRect().top
+    }
+    await frame()
+    // scroll to the middle the way a reader does, in steps
+    while (lane.scrollTop < 3000) {
+      lane.scrollTop += 16
+      await frame()
+    }
+    const moves: number[] = []
+    for (const mutate of [
+      () => w.items.splice(2, 1),
+      () => w.items.unshift({ id: 'new', h: 300 }),
+    ]) {
+      const before = firstVisible()!
+      mutate()
+      await frame()
+      await frame()
+      moves.push(Math.round(Math.abs((yOf(before.id) ?? 9999) - before.y)))
+    }
+    // then scroll back up to the top: no step jumps, and the first card is flush
+    let worst = 0
+    while (lane.scrollTop > 0) {
+      const before = firstVisible()!
+      const from = lane.scrollTop
+      lane.scrollTop = from - 16
+      await frame()
+      // measured against the step asked for, not the change in scrollTop:
+      // the list may scroll by as much as it makes room above (see
+      // _layoutVariable), and that must not move anything on screen
+      const dy = Math.min(16, from)
+      const now = yOf(before.id)
+      if (now != null) worst = Math.max(worst, Math.abs(now - before.y - dy))
+    }
+    return { moves, worst: Math.round(worst), firstTop: yOf('new') }
+  })
+  const r = JSON.stringify(report)
+  expect(Math.max(...report.moves), r).toBeLessThanOrEqual(8)
+  expect(report.worst, r).toBeLessThanOrEqual(8)
+  expect(report.firstTop, r).toBe(0)
+})

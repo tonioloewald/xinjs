@@ -77,7 +77,7 @@ export const BUNDLES: BundleSpec[] = [
     // minimum-headroom gate found it at 735 B, under the 1 kB this file
     // specifies, which is the state that breaks on the NEXT unrelated commit.
     // 31_000 -> 32_500, 2026-10-15: variable-height virtual lists rewritten to
-    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost over a kilobyte gz in
     // every bundle that carries list binding. Owner approved the raise
     // (2026-10-15: "a price worth paying"), after a trimming pass.
     budget: 32_500,
@@ -147,7 +147,7 @@ export const BUNDLES: BundleSpec[] = [
     // it. The headroom gate caught both under the 1 kB floor; owner approved
     // the raise (2026-10-01) on condition the no-agent figure is measured.
     // 48_000 -> 49_500, 2026-10-15: variable-height virtual lists rewritten to
-    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost over a kilobyte gz in
     // every bundle that carries list binding. Owner approved the raise
     // (2026-10-15: "a price worth paying"), after a trimming pass.
     budget: 49_500,
@@ -189,7 +189,7 @@ export const BUNDLES: BundleSpec[] = [
     // it. The headroom gate caught both under the 1 kB floor; owner approved
     // the raise (2026-10-01) on condition the no-agent figure is measured.
     // 48_000 -> 49_500, 2026-10-15: variable-height virtual lists rewritten to
-    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost over a kilobyte gz in
     // every bundle that carries list binding. Owner approved the raise
     // (2026-10-15: "a price worth paying"), after a trimming pass.
     budget: 49_500,
@@ -205,7 +205,7 @@ export const BUNDLES: BundleSpec[] = [
     // 27_500 -> 28_500, same reason: 834 B of headroom, found by the gate
     // rather than by a failing build.
     // 28_500 -> 30_000, 2026-10-15: variable-height virtual lists rewritten to
-    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost over a kilobyte gz in
     // every bundle that carries list binding. Owner approved the raise
     // (2026-10-15: "a price worth paying"), after a trimming pass.
     budget: 30_000,
@@ -218,7 +218,7 @@ export const BUNDLES: BundleSpec[] = [
     entry: './src/index-state.ts',
     // 17_500 -> 18_500 — the third one the headroom gate surfaced (753 B).
     // 18_500 -> 20_000, 2026-10-15: variable-height virtual lists rewritten to
-    // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+    // anchor rows and track the scroll 1:1 (#3302, #3230) cost over a kilobyte gz in
     // every bundle that carries list binding. Owner approved the raise
     // (2026-10-15: "a price worth paying"), after a trimming pass.
     budget: 20_000,
@@ -324,7 +324,7 @@ export const NO_AGENT_CONSUMER = {
   // set from the first measurement plus the ~1.5 kB slack the shipped bundles
   // carry. See the budget ledger for the current figure.
   // 31_000 -> 32_500, 2026-10-15: variable-height virtual lists rewritten to
-  // anchor rows and track the scroll 1:1 (#3302, #3230) cost ~1.05 kB gz in
+  // anchor rows and track the scroll 1:1 (#3302, #3230) cost over a kilobyte gz in
   // every bundle that carries list binding. Owner approved the raise
   // (2026-10-15: "a price worth paying"), after a trimming pass.
   budget: 32_500,

@@ -14,7 +14,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="doc-system.css?v=698f51a28136" data-tosi-doc-system />
+  <link rel="stylesheet" href="doc-system.css?v=dea48b958a42" data-tosi-doc-system />
   <title>tosijs</title>
   <meta name="description" content="tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." />
   <link rel="canonical" href="https://tosijs.net/" />
@@ -30,7 +30,7 @@
 <script>globalThis.__TJS_LOCAL_BASE="/tjs/"</script>
 </head>
 <body>
-  <tosi-doc-system docs="docs.json?v=e758b41d0e6d" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
+  <tosi-doc-system docs="docs.json?v=d11645a0835a" config="{&quot;projectName&quot;:&quot;tosijs&quot;,&quot;projectLinks&quot;:{&quot;github&quot;:&quot;https://github.com/tonioloewald/tosijs&quot;},&quot;bookVolumes&quot;:&quot;/epub-volumes.json&quot;,&quot;ebooks&quot;:[{&quot;title&quot;:&quot;tosijs&quot;,&quot;url&quot;:&quot;/tosijs.epub&quot;}]}">
   <article class="doc-content">
 <h1 id="tosijs">tosijs</h1>
 <!--{ "pin": "top", "order": 1, "description": "tosijs lets you create and update the DOM, and manage state, simply and expressively, using a path-observer model. Small enough to read in an afternoon, with a DOM-free state layer. Proxy-based observers, no JSX, no virtual DOM, no build magic." }-->
@@ -525,25 +525,10 @@ const darkGrey = Color.fromHsl(0, 0, 0.2)
 making adjustments, blending colors, and so forth.</p>
 <p>Use <code>invertLuminance()</code> to generate dark-mode equivalents of color values.</p>
 <h2 id="hot-reload">Hot Reload</h2>
-<p>One of the nice things about working with the React toolchain is hot reloading.
-<code>tosijs</code> supports hot reloading (and not just in development!) via the <code>hotReload()</code>
-function:</p>
-<pre><code>import { tosi, hotReload } from &#39;tosijs&#39;
-
-tosi({
-  app: {
-    // ...your initial state
-  }
-})
-
-hotReload()
-</code></pre>
-<p><code>hotReload</code> stores serializable state managed by <code>tosijs</code> in localStorage and restores
-it (by overlay) on reload. Because any functions (for example) won&#39;t be persisted,
-simply call <code>hotReload</code> after initializing your app state and you&#39;re good to go.</p>
-<p><code>hotReload</code> accepts a test function (path =&gt; boolean) as a parameter.
-Only top-level properties in your state that pass the test will be persisted.</p>
-<p>To completely reset the app, run <code>localStorage.clear()</code> in the console.</p>
+<p><code>hotReload()</code> lets you pick parts of your app&#39;s state that survive a page
+refresh. It was written as a debugging aid, and keeps what it saves in
+<code>localStorage</code>, so read <a href="https://tosijs.net/hot-reload/">Hot Reload</a> for what it
+keeps, what it cannot, and why not to use it for anything serious.</p>
 <h2 id="development">Development</h2>
 <p>Working on <code>tosijs</code> itself? See <a href="https://tosijs.net/development/">Development</a>.</p>
 <h2 id="license">License</h2>
@@ -642,6 +627,6 @@ and relicenses to Apache-2.0. Developed with <a href="https://bun.sh/">bun</a>; 
     <li><a href="https://www.npmjs.com/package/tosijs" data-icon="npm">npmjs</a></li>
   </ul>
   </tosi-doc-system>
-  <script src="iife.js?v=698f51a28136"></script>
+  <script src="iife.js?v=dea48b958a42"></script>
 </body>
 </html>

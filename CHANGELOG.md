@@ -13,7 +13,10 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
 - **`.take()` is renamed `.as()`**: `proxy.tosi.as(transformation)` transforms a
   proxied value in a binding. `take` named nothing about what it does. The old
   name still works and warns once; it goes away in 2.0. `TakeDescriptor` and
-  `TAKE_DESCRIPTOR` keep their names.
+  `TAKE_DESCRIPTOR` keep their names. **`as` is therefore a reserved name on a
+  boxed proxy**, like `value` and `path`: until data named `as` exists,
+  `proxy.as` is the function, so read such data through `.tosi` or declare it
+  before you bind it.
 - **Empty lists get the class `-tosi-empty-list`.** The old `-xin-empty-list` is
   still set alongside it, is deprecated, and goes away in 2.0.
 - One runtime warning in `Component` said "reactive accessor restored"; it now
@@ -38,7 +41,22 @@ For releases before 1.6.0, see the git history (`git log`) and tags.
   it really is (a smooth scroll to an estimate went stale on the way: #1999
   landed on #1887). A list that measures nothing (hidden) no longer grows its
   built rows on every update. The docs example is now the hard case, with a
-  switch between 2,000 items and six with one taller than the view.
+  switch between 2,000 items and six with one taller than the view. Items
+  added or removed above the view (a `splice`, an `unshift`) leave what is on
+  screen where it was, and scrolling back up to the top stays smooth.
+
+### Size
+
+Measured by `bun run build` against v1.10.8 (gzipped bytes). Almost all of it
+is the variable-height list rewrite; budgets were raised in the same commit.
+
+| bundle | v1.10.8 | 1.10.9 | Δ |
+| --- | --- | --- | --- |
+| `index.js` | 29_662 | 31_008 | +1346 |
+| `module.js` | 46_499 | 47_858 | +1359 |
+| `main.js` | 46_773 | 48_151 | +1378 |
+| `core.js` | 27_048 | 28_387 | +1339 |
+| `state.js` | 17_151 | 18_532 | +1381 |
 
 ### Documented
 

@@ -20,6 +20,7 @@ export declare class ListBinding {
     private _measuredSum;
     private _measuredRows;
     private _measuredWidth;
+    private _measuredLength;
     private _relayoutDepth;
     static filterBoundObservers: WeakMap<Element, Listener>;
     constructor(boundElement: Element, value: any[], options?: ListBindingOptions);
