@@ -671,7 +671,8 @@ Authoritative: `../tosijs-coding-practices/practices/publishing-via-oidc.md`.
    browsers): read that one as expected, and the rest as real.
 7. **Attest**: `bun ../tosijs-coding-practices/tools/attest.ts` on the clean release commit
    (the sibling checkout, pulled). It runs `test` and `test:browser` (real Chromium +
-   Firefox, Playwright starting its own dev server) and writes `release-attestation.json`
+   Firefox, plus WebKit for the `virtual-list-*` specs since 1.10.9 because iOS
+   scrolls with it; Playwright starting its own dev server) and writes `release-attestation.json`
    with the sha256 of every shipped file. The dev server rewrites `docs/version.json` and
    the ePub; neither ships, so attest warns and carries on — `git checkout docs/` them.
    Commit **only** `release-attestation.json` (`attest: vX.Y.Z`), tag **that** commit
