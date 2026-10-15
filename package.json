@@ -1,6 +1,6 @@
 {
   "name": "tosijs",
-  "version": "1.10.8",
+  "version": "1.10.9",
   "description": "create and update the DOM, and manage state, simply and expressively, using a path-observer model",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",

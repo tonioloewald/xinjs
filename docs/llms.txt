@@ -1,4 +1,4 @@
-# tosijs v1.10.8
+# tosijs v1.10.9
 
 Create and update the DOM, and manage state, simply and expressively, using a path-observer model. No JSX, no virtual DOM, zero dependencies. Sizes per entry point are in the README.
 
