@@ -53,8 +53,9 @@ jobs:
             -subj "/CN=localhost" \
             -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 
+      # webkit: the virtual-list-* specs run in it too (playwright.config.ts)
       - name: Install Playwright browsers (+ system deps)
-        run: bunx playwright install --with-deps chromium firefox
+        run: bunx playwright install --with-deps chromium firefox webkit
 
       - name: Playwright doc-test lane
         run: bunx playwright test
