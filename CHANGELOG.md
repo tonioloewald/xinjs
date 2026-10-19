@@ -6,6 +6,43 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 For releases before 1.6.0, see the git history (`git log`) and tags.
 
+## [Unreleased]
+
+### Changed
+
+- **The vendored tosijs-floorplan (`schematic`, `schematicSVG`) is 0.6.0**, up
+  from 0.5.2 (#2804). It adds `introspected: true` on a description (a producer
+  that checked every record for affordances suppresses the "couldn't tell"
+  note) and `refStyle: 'pill'`, a high-contrast ref stamp. Out-of-range options
+  now mean their default: a negative `pad`, a zero or negative `fontSize`, a
+  `maxCaption` below 1, and NaN.
+- **A result's `note` is no longer only "the producer couldn't tell".** It is
+  also set when nothing was drawn because the `within` region is unusable or
+  the extent overflows. Those notes start with `nothing drawn:`; check the
+  prefix if you read `note != null` as blindness. On overflow the legend is
+  still complete.
+- **Verdict change, same input, different answer:** a `within` with a `null`
+  x or y, or an `Infinity` width or height, drew in 0.5.2. It now draws
+  nothing, with a note, so the records under it lose their legend entries,
+  `undersized` included. No other input changes an `undersized` answer.
+  `isInteractive` and `targetSizeFinding`, which `auditAccessibility()` uses,
+  are unchanged.
+
+### Size
+
+gz bytes against v1.10.9; the bundles that carry the agent surface grow by
+floorplan 0.6.0's additions.
+
+| bundle | v1.10.9 | this build | Δ |
+| --- | --- | --- | --- |
+| `index.js` | 31_008 | 31_008 | **+0** |
+| `module.js` | 47_858 | 48_164 | **+306** |
+| `main.js` | 48_151 | 48_466 | **+315** |
+| `core.js` | 28_387 | 28_387 | **+0** |
+| `state.js` | 18_532 | 18_532 | **+0** |
+| `module.debug.js` | 65_129 | 65_419 | **+290** |
+| `module.safe.js` | 64_984 | 65_277 | **+293** |
+
 ## [1.10.9] - 2026-10-15
 
 ### Changed

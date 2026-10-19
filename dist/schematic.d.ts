@@ -109,6 +109,13 @@ export interface SchematicRecord {
  * assigning without casts. */
 export interface SchematicDescription {
     wiring: SchematicRecord[];
+    /** the producer checked EVERY record for affordances (handlers,
+     * editability, its own `interactive`/`editable` assertions), so a record
+     * without evidence is known inert, not unknown. Only `true` is signal.
+     * Suppresses the "couldn't tell" note on a map with no evidence (#2586,
+     * proposed by haltija: a page with no controls is a finding, not a blind
+     * spot). */
+    introspected?: boolean;
     roots?: unknown;
     actions?: unknown;
     exposure?: unknown;
@@ -121,13 +128,17 @@ export interface SchematicBounds {
     height: number;
 }
 export interface SchematicOptions {
-    /** padding around the drawn region, px (default 8) */
+    /** padding around the drawn region, px (default 8; negative or
+     * non-finite means the default) */
     pad?: number;
-    /** boxes shorter than this get no caption (default 14) */
+    /** boxes shorter than this get no caption (default 14; Infinity sends
+     * every caption to the legend; NaN means the default) */
     minLabelHeight?: number;
-    /** caption length limit (default 36) */
+    /** caption length limit (default 36; Infinity never truncates; a number
+     * below 1, or NaN, means the default) */
     maxCaption?: number;
-    /** caption font size, px (default 11) */
+    /** caption font size, px (default 11; zero, negative or non-finite means
+     * the default; null keeps its 0.5.x meaning) */
     fontSize?: number;
     /**
      * Scope the map SPATIALLY: only records whose bounds intersect this
@@ -142,6 +153,14 @@ export interface SchematicOptions {
      * and looks the record up in `description.wiring[n]` — image as legend.
      */
     index?: boolean;
+    /**
+     * How the top-right ref/index stamp is drawn. `'stamp'` (default): grey
+     * monospace over a white backdrop, recessive. `'pill'`: white bold text
+     * on a dark pill, for producers whose ref is a handle an agent retypes
+     * (haltija's `hj click @ref`), where a misread is an error (#3376).
+     * Any other value means the default.
+     */
+    refStyle?: 'stamp' | 'pill';
     /**
      * Interactive elements (handlers or editable, toggles exempt as
      * user-agent-sized) smaller than this on either axis are flagged
@@ -202,11 +221,15 @@ export interface SchematicLegendEntry {
 export interface SchematicResult {
     svg: string;
     legend: SchematicLegendEntry[];
-    /** set when the map draws affordance-shaped boxes but NO record carries
-     * any affordance evidence: "nothing here is actionable" and "the
-     * producer couldn't tell" are different statements, and a consumer
-     * acting on the first when the truth is the second is the
-     * confident-wrong-answer case (issue #3). Also rides the svg's <desc>. */
+    /** what the drawing can't be trusted to say, in words. Set when the map
+     * draws affordance-shaped boxes but NO record carries any affordance
+     * evidence and the producer didn't assert `introspected` ("nothing here
+     * is actionable" and "the producer couldn't tell" are different
+     * statements; acting on the first when the truth is the second is the
+     * confident-wrong-answer case, issue #3). Also set when nothing could be
+     * drawn for a reason other than an empty region: an unusable `within`
+     * (#2744) or extents that overflow a finite number (#2746). Also rides
+     * the svg's <desc>. */
     note?: string;
 }
 /**

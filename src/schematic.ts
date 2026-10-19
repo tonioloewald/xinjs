@@ -26,7 +26,7 @@ linking it back to `description.wiring[i]` — the image as index).
 > **EXPERIMENTAL.** Ships alongside the agent surface; shapes may change.
 */
 
-// VENDORED from tosijs-floorplan@0.5.2 — the upstream package
+// VENDORED from tosijs-floorplan@0.6.0 — the upstream package
 // is the source of truth. DO NOT EDIT below this line: edit
 // tosijs-floorplan and rebuild (this section regenerates at build time).
 // tosijs stays ZERO runtime dependencies — the core is inlined, not imported.
@@ -129,6 +129,13 @@ export interface SchematicRecord {
  * assigning without casts. */
 export interface SchematicDescription {
   wiring: SchematicRecord[]
+  /** the producer checked EVERY record for affordances (handlers,
+   * editability, its own `interactive`/`editable` assertions), so a record
+   * without evidence is known inert, not unknown. Only `true` is signal.
+   * Suppresses the "couldn't tell" note on a map with no evidence (#2586,
+   * proposed by haltija: a page with no controls is a finding, not a blind
+   * spot). */
+  introspected?: boolean
   roots?: unknown
   actions?: unknown
   exposure?: unknown
@@ -144,13 +151,17 @@ export interface SchematicBounds {
 }
 
 export interface SchematicOptions {
-  /** padding around the drawn region, px (default 8) */
+  /** padding around the drawn region, px (default 8; negative or
+   * non-finite means the default) */
   pad?: number
-  /** boxes shorter than this get no caption (default 14) */
+  /** boxes shorter than this get no caption (default 14; Infinity sends
+   * every caption to the legend; NaN means the default) */
   minLabelHeight?: number
-  /** caption length limit (default 36) */
+  /** caption length limit (default 36; Infinity never truncates; a number
+   * below 1, or NaN, means the default) */
   maxCaption?: number
-  /** caption font size, px (default 11) */
+  /** caption font size, px (default 11; zero, negative or non-finite means
+   * the default; null keeps its 0.5.x meaning) */
   fontSize?: number
   /**
    * Scope the map SPATIALLY: only records whose bounds intersect this
@@ -165,6 +176,14 @@ export interface SchematicOptions {
    * and looks the record up in `description.wiring[n]` — image as legend.
    */
   index?: boolean
+  /**
+   * How the top-right ref/index stamp is drawn. `'stamp'` (default): grey
+   * monospace over a white backdrop, recessive. `'pill'`: white bold text
+   * on a dark pill, for producers whose ref is a handle an agent retypes
+   * (haltija's `hj click @ref`), where a misread is an error (#3376).
+   * Any other value means the default.
+   */
+  refStyle?: 'stamp' | 'pill'
   /**
    * Interactive elements (handlers or editable, toggles exempt as
    * user-agent-sized) smaller than this on either axis are flagged
@@ -223,11 +242,15 @@ export interface SchematicLegendEntry {
 export interface SchematicResult {
   svg: string
   legend: SchematicLegendEntry[]
-  /** set when the map draws affordance-shaped boxes but NO record carries
-   * any affordance evidence: "nothing here is actionable" and "the
-   * producer couldn't tell" are different statements, and a consumer
-   * acting on the first when the truth is the second is the
-   * confident-wrong-answer case (issue #3). Also rides the svg's <desc>. */
+  /** what the drawing can't be trusted to say, in words. Set when the map
+   * draws affordance-shaped boxes but NO record carries any affordance
+   * evidence and the producer didn't assert `introspected` ("nothing here
+   * is actionable" and "the producer couldn't tell" are different
+   * statements; acting on the first when the truth is the second is the
+   * confident-wrong-answer case, issue #3). Also set when nothing could be
+   * drawn for a reason other than an empty region: an unusable `within`
+   * (#2744) or extents that overflow a finite number (#2746). Also rides
+   * the svg's <desc>. */
   note?: string
 }
 
@@ -437,19 +460,17 @@ const sizeFinding = (
 // isn't a number's) must never reach one (#2739: a string x on a
 // viewportFixed record landed in x="…" verbatim — attribute injection).
 // RECORDS are untrusted producer data: bounds that aren't finite numbers
-// are not drawn. OPTIONS of the declared type behave exactly as in 0.5.0
-// (numbers of any value, null, absent — pinned byte-for-byte by
-// tools/byte-stability.ts); only the options that PRINT (pad, fontSize,
-// within) are guarded, and only against the wrong type. maxCaption,
-// minLabelHeight and targetSize feed comparisons and slice() alone.
+// are not drawn. OPTIONS that PRINT (pad, fontSize, within) take only a
+// number in their range, else the default (within: else nothing, with a
+// note); since 0.6.0 that range excludes the numbers that never drew
+// anything sensible (#2747). maxCaption, minLabelHeight and targetSize feed
+// comparisons and slice() alone and keep their meaningful domain.
+// tools/byte-stability.ts pins every other value against the release.
 const finiteBounds = (b: SchematicBounds): boolean =>
   Number.isFinite(b.x) &&
   Number.isFinite(b.y) &&
   Number.isFinite(b.width) &&
   Number.isFinite(b.height)
-
-const printable = (value: unknown): boolean =>
-  value == null || typeof value === 'number'
 
 const intersects = (a: SchematicBounds, b: SchematicBounds): boolean =>
   a.x < b.x + b.width &&
@@ -542,21 +563,43 @@ export const schematic = (
   options: SchematicOptions = {}
 ): SchematicResult => {
   const {
-    minLabelHeight = 14,
-    maxCaption = 36,
+    minLabelHeight: minLabelHeightIn = 14,
+    maxCaption: maxCaptionIn = 36,
     within: withinIn,
     index: showIndex = false,
     targetSize = TARGET_SIZE_DEFAULT,
     legendNote = true,
     decorate,
   } = options
-  // the options that print: the wrong type falls back to the default
+  // the options that print: the wrong type falls back to the default, and
+  // so does a number outside the option's range (#2747) — a negative pad
+  // clips the drawing, a zero font hides every caption. null keeps 0.5.x's
+  // meaning (its arithmetic reads it as 0).
   // each value READ ONCE (#2753): the value checked is the value printed,
   // so a getter or Proxy can't pass the check and inject on a second read
-  const padIn = options.pad
-  const pad = padIn === undefined || !printable(padIn) ? 8 : padIn
-  const fontSizeIn = options.fontSize
-  const fontSize = fontSizeIn === undefined || !printable(fontSizeIn) ? 11 : fontSizeIn
+  const padIn: unknown = options.pad
+  const pad = (
+    padIn === null ||
+    (typeof padIn === 'number' && Number.isFinite(padIn) && padIn >= 0)
+      ? padIn
+      : 8
+  ) as number
+  const fontSizeIn: unknown = options.fontSize
+  const fontSize = (
+    fontSizeIn === null ||
+    (typeof fontSizeIn === 'number' && Number.isFinite(fontSizeIn) && fontSizeIn > 0)
+      ? fontSizeIn
+      : 11
+  ) as number
+  // the options that never print keep their whole meaningful domain
+  // (Infinity: legend only / never truncate); only the meaningless numbers
+  // mean the default (#2747)
+  const minLabelHeight = Number.isNaN(minLabelHeightIn) ? 14 : minLabelHeightIn
+  const maxCaption =
+    typeof maxCaptionIn === 'number' && (Number.isNaN(maxCaptionIn) || maxCaptionIn < 1)
+      ? 36
+      : maxCaptionIn
+  const refStyle = options.refStyle === 'pill' ? 'pill' : 'stamp'
   const legend: SchematicLegendEntry[] = []
   const within: SchematicBounds | undefined =
     withinIn == null
@@ -567,14 +610,10 @@ export const schematic = (
           width: withinIn.width,
           height: withinIn.height,
         }
-  // a region of the wrong type draws nothing rather than silently
-  // widening the crop to the whole map
-  const withinOk =
-    within == null ||
-    (printable(within.x) &&
-      printable(within.y) &&
-      printable(within.width) &&
-      printable(within.height))
+  // a region that isn't one draws nothing (never the whole map): it must
+  // be four finite numbers. A NaN, Infinity, null or missing field says so
+  // in a note, so it can't pass for an empty region (#2744)
+  const withinOk = within == null || finiteBounds(within)
   // record geometry, snapshotted once into plain numbers: everything below
   // reads geometry.get(w), never w.bounds again
   // a record object listed twice reuses its first snapshot, so a getter
@@ -609,31 +648,65 @@ export const schematic = (
   // stretches the viewBox nor sits at a page position — it gets PINNED as an
   // overlay at the map's origin, which is where it lives on screen
   const flow = boxes.filter((w) => w.viewportFixed !== true)
-  if (boxes.length === 0) {
-    return {
-      svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0"></svg>',
-      legend,
-    }
+  // an empty map; with a note when the emptiness is NOT "nothing is here":
+  // a caller must be able to tell a bad region or an overflow from an
+  // empty one (#2744, #2746)
+  const emptyMap = (why?: string): SchematicResult =>
+    why == null
+      ? {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0"></svg>',
+          legend,
+        }
+      : {
+          svg:
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0">' +
+            `<desc>${esc(why)}</desc></svg>`,
+          legend,
+          note: why,
+        }
+  if (!withinOk) {
+    return emptyMap(
+      'nothing drawn: `within` is not a usable region (a field is not a ' +
+        'finite number) — this is not an empty region'
+    )
   }
+  if (boxes.length === 0) return emptyMap()
   // scoped: the viewBox IS the region; unscoped: fit the FLOW boxes (pinned
   // furniture must not stretch the map)
   const fitBoxes = flow.length > 0 ? flow : boxes
-  const minX =
+  const minXRaw =
     within != null
       ? within.x - pad
       : Math.min(...fitBoxes.map((w) => geometry.get(w)!.x)) - pad
-  const minY =
+  const minYRaw =
     within != null
       ? within.y - pad
       : Math.min(...fitBoxes.map((w) => geometry.get(w)!.y)) - pad
-  const maxX =
+  const maxXRaw =
     within != null
       ? within.x + within.width + pad
       : Math.max(...fitBoxes.map((w) => geometry.get(w)!.x + geometry.get(w)!.width)) + pad
-  const maxY =
+  const maxYRaw =
     within != null
       ? within.y + within.height + pad
       : Math.max(...fitBoxes.map((w) => geometry.get(w)!.y + geometry.get(w)!.height)) + pad
+  // finite inputs can still sum past Number.MAX_VALUE (a pad of 1e308, a
+  // box at 1.7e308): a viewBox of Infinity/NaN draws nothing anywhere, so
+  // the map says so instead of emitting it (#2746). The LEGEND doesn't
+  // depend on the extents, so it is still built: one far-off record must
+  // not erase every other record's verdicts (0.6.0 review). The drawing is
+  // laid out against a zero origin and discarded.
+  const overflow = ![
+    minXRaw,
+    minYRaw,
+    maxXRaw,
+    maxYRaw,
+    maxXRaw - minXRaw,
+    maxYRaw - minYRaw,
+  ].every(Number.isFinite)
+  const [minX, minY, maxX, maxY] = overflow
+    ? [0, 0, 0, 0]
+    : [minXRaw, minYRaw, maxXRaw, maxYRaw]
 
   // explicit width/height (not just viewBox): gives the svg an intrinsic
   // size as a document/img, and Firefox refuses to draw an svg image onto a
@@ -662,6 +735,7 @@ export const schematic = (
   // or provenance arrows anywhere demonstrably can see wiring — absence of
   // affordance is then a fact about the page, not the producer's eyes.
   const blind =
+    description.introspected !== true &&
     boxes.some((w) => !isGround(w)) &&
     !description.wiring.some(isInteractive) &&
     !description.wiring.some(hasCapabilityEvidence)
@@ -1028,16 +1102,29 @@ export const schematic = (
       // opaque white backdrop keeps it legible over ANY artwork.
       const shown = w.ref != null ? String(w.ref) : String(index)
       const indexX = toggle ? x - 3 : x + width - 2
-      parts.push(
-        `<rect x="${indexX - shown.length * 5 - 1}" y="${y + 1}" ` +
-          `width="${shown.length * 5 + 2}" height="8" fill="white" ` +
-          `opacity="0.85" data-index-backdrop="true"/>`,
-        `<text x="${indexX}" y="${y + 8}" font-size="8" ` +
-          `text-anchor="end" font-family="monospace" fill="black" ` +
-          `opacity="0.8">${esc(shown)}</text>`
-      )
+      if (refStyle === 'pill') {
+        // the handle an agent retypes: white bold on dark, opaque (#3376;
+        // haltija's design, which it drew over the stamp as a plugin)
+        parts.push(
+          `<rect x="${indexX - shown.length * 5 - 2}" y="${y + 1}" ` +
+            `width="${shown.length * 5 + 3}" height="9" rx="2" ` +
+            `fill="#0f172a" data-index-backdrop="true"/>`,
+          `<text x="${indexX - 1}" y="${y + 8}" font-size="8" ` +
+            `text-anchor="end" font-family="monospace" font-weight="bold" ` +
+            `fill="white">${esc(shown)}</text>`
+        )
+      } else {
+        parts.push(
+          `<rect x="${indexX - shown.length * 5 - 1}" y="${y + 1}" ` +
+            `width="${shown.length * 5 + 2}" height="8" fill="white" ` +
+            `opacity="0.85" data-index-backdrop="true"/>`,
+          `<text x="${indexX}" y="${y + 8}" font-size="8" ` +
+            `text-anchor="end" font-family="monospace" fill="black" ` +
+            `opacity="0.8">${esc(shown)}</text>`
+        )
+      }
     }
-    if (decorate != null) {
+    if (decorate != null && !overflow) {
       decorate({
         record: w,
         index,
@@ -1050,6 +1137,13 @@ export const schematic = (
       })
     }
     parts.push('</g>')
+  }
+  if (overflow) {
+    return emptyMap(
+      'nothing drawn: the map\'s extent overflows a finite number (a ' +
+        'coordinate, size or pad near Number.MAX_VALUE); the legend still ' +
+        'carries every record\'s facts'
+    )
   }
   // the image confesses what it couldn't carry: a machine-readable <desc>
   // plus a visible footer strip — the raster's pointer to its legend JSON
